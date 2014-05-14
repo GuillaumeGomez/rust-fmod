@@ -24,12 +24,17 @@ all: rfmod examples
 
 rfmod:
 	mkdir -p lib
-	rustc --out-dir=lib src/fmod.rs
+	rustc --out-dir=lib src/lib.rs
 
 examples: rfmod
-	rustc -o bin/simple_music_reader -L ./lib examples/simple_music_reader/main.rs
+	  rustc -o bin/simple_music_reader -L ./lib examples/simple_music_reader/main.rs
 
+
+doc:
+	rustdoc -o doc src/lib.rs
 
 clean:
 	rm -rf lib
 	rm -rf bin/simple_music_reader
+
+re: clean all

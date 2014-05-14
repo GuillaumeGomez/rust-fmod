@@ -3,6 +3,7 @@
 extern crate libc;
 extern crate rfmod;
 
+use rfmod::enums::FMOD_OK;
 use rfmod::*;
 use std::os;
 
