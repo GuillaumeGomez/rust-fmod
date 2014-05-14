@@ -44,7 +44,7 @@ fn main() {
    sound.release();
    fmod.release();
 }
-
+```
 
 ##License
 
