@@ -22,7 +22,7 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#![crate_id = "github.com/GuillaumeGomez/rust-fmod#rfmod:0.2#0.1"]
+#![crate_id = "github.com/GuillaumeGomez/rust-fmod#rfmod:0.1"]
 #![desc = "Rust binding for FMOD"]
 #![crate_type = "rlib"]
 #![crate_type = "dylib"]
