@@ -1,10 +1,40 @@
+/*
+* Rust-FMOD - Copyright (c) 2014 Gomez Guillaume.
+*
+* The Original software, FMOD library, is provided by FIRELIGHT TECHNOLOGIES.
+*
+* This software is provided 'as-is', without any express or implied warranty.
+* In no event will the authors be held liable for any damages arising from
+* the use of this software.
+*
+* Permission is granted to anyone to use this software for any purpose,
+* including commercial applications, and to alter it and redistribute it
+* freely, subject to the following restrictions:
+*
+* 1. The origin of this software must not be misrepresented; you must not claim
+*    that you wrote the original software. If you use this software in a product,
+*    an acknowledgment in the product documentation would be appreciated but is
+*    not required.
+*
+* 2. Altered source versions must be plainly marked as such, and must not be
+*    misrepresented as being the original software.
+*
+* 3. This notice may not be removed or altered from any source distribution.
+*/
+
+#![crate_id = "github.com/GuillaumeGomez/rust-fmod#rfmod:0.2#0.1"]
+#![desc = "Rust binding for FMOD"]
+#![crate_type = "rlib"]
+#![crate_type = "dylib"]
+
 #![allow(non_camel_case_types)]
 #![allow(unused_imports)]
 #![allow(dead_code)]
+#![allow(uppercase_variables)]
 
 extern crate libc;
 
-use libc::{c_void, c_uint, c_int, c_char};
+use libc::{c_void, c_uint, c_int, c_char, c_float};
 use std::io::timer::sleep;
 
 #[link(name = "fmodex64")] extern{}
@@ -18,6 +48,7 @@ pub type FMOD_BOOL = c_int;
 pub type FMOD_TIMEUNIT = c_uint;
 pub type FMOD_SOUNDGROUP = c_void;
 pub type FMOD_INITFLAGS = c_uint;
+pub type FMOD_DSP = c_void;
 
 pub type FMOD_FILE_OPENCALLBACK = ::std::option::Option<extern "C" fn(arg1: *c_char, arg2: int, arg3: *c_uint, arg4: **c_void, arg5: **c_void) -> FMOD_RESULT>;
 pub type FMOD_FILE_CLOSECALLBACK = ::std::option::Option<extern "C" fn(arg1: *c_void, arg2: *c_void) -> FMOD_RESULT>;
@@ -215,55 +246,113 @@ pub enum FMOD_CHANNELINDEX {
     FMOD_CHANNEL_REUSE = -2,      /* For a channel index, re-use the channel handle that was passed in. */
 }
 
+#[deriving(Eq, Ord, Show)]
+#[repr(C)]
+pub enum FMOD_DSP_FFT_WINDOW
+{
+    FMOD_DSP_FFT_WINDOW_RECT,            /* w[n] = 1.0                                                                                            */
+    FMOD_DSP_FFT_WINDOW_TRIANGLE,        /* w[n] = TRI(2n/N)                                                                                      */
+    FMOD_DSP_FFT_WINDOW_HAMMING,         /* w[n] = 0.54 - (0.46 * COS(n/N) )                                                                      */
+    FMOD_DSP_FFT_WINDOW_HANNING,         /* w[n] = 0.5 *  (1.0  - COS(n/N) )                                                                      */
+    FMOD_DSP_FFT_WINDOW_BLACKMAN,        /* w[n] = 0.42 - (0.5  * COS(n/N) ) + (0.08 * COS(2.0 * n/N) )                                           */
+    FMOD_DSP_FFT_WINDOW_BLACKMANHARRIS,  /* w[n] = 0.35875 - (0.48829 * COS(1.0 * n/N)) + (0.14128 * COS(2.0 * n/N)) - (0.01168 * COS(3.0 * n/N)) */
+    
+    FMOD_DSP_FFT_WINDOW_MAX,             /* Maximum number of FFT window types supported. */
+    FMOD_DSP_FFT_WINDOW_FORCEINT = 65536 /* Makes sure this enum is signed 32bit. */
+}
+
+#[deriving(Eq, Ord, Show)]
+#[repr(C)]
+pub enum FMOD_DELAYTYPE
+{
+    FMOD_DELAYTYPE_END_MS,              /* Delay at the end of the sound in milliseconds.  Use delayhi only.   Channel::isPlaying will remain true until this delay has passed even though the sound itself has stopped playing.*/
+    FMOD_DELAYTYPE_DSPCLOCK_START,      /* Time the sound started if Channel::getDelay is used, or if Channel::setDelay is used, the sound will delay playing until this exact tick. */
+    FMOD_DELAYTYPE_DSPCLOCK_END,        /* Time the sound should end. If this is non-zero, the channel will go silent at this exact tick. */
+    FMOD_DELAYTYPE_DSPCLOCK_PAUSE,      /* Time the sound should pause. If this is non-zero, the channel will pause at this exact tick. */
+
+    FMOD_DELAYTYPE_MAX,                 /* Maximum number of tag datatypes supported. */
+    FMOD_DELAYTYPE_FORCEINT = 65536     /* Makes sure this enum is signed 32bit. */
+}
+
+#[deriving(Eq, Ord, Show)]
+#[repr(C)]
+// I need to find a solution for this enum...
+pub enum FMOD_SPEAKER
+{
+    FMOD_SPEAKER_FRONT_LEFT,
+    FMOD_SPEAKER_FRONT_RIGHT,
+    FMOD_SPEAKER_FRONT_CENTER,
+    FMOD_SPEAKER_LOW_FREQUENCY,
+    FMOD_SPEAKER_BACK_LEFT,
+    FMOD_SPEAKER_BACK_RIGHT,
+    FMOD_SPEAKER_SIDE_LEFT,
+    FMOD_SPEAKER_SIDE_RIGHT,
+    
+    FMOD_SPEAKER_MAX,                                       /* Maximum number of speaker types supported. */
+    //FMOD_SPEAKER_MONO        = FMOD_SPEAKER_FRONT_LEFT,     /* For use with FMOD_SPEAKERMODE_MONO and Channel::SetSpeakerLevels.  Mapped to same value as FMOD_SPEAKER_FRONT_LEFT. */
+    FMOD_SPEAKER_NULL        = 65535,                       /* A non speaker.  Use this with ASIO mapping to ignore a speaker. */
+    //FMOD_SPEAKER_SBL         = FMOD_SPEAKER_SIDE_LEFT,      /* For use with FMOD_SPEAKERMODE_7POINT1 on PS3 where the extra speakers are surround back inside of side speakers. */
+    //FMOD_SPEAKER_SBR         = FMOD_SPEAKER_SIDE_RIGHT,     /* For use with FMOD_SPEAKERMODE_7POINT1 on PS3 where the extra speakers are surround back inside of side speakers. */
+    FMOD_SPEAKER_FORCEINT    = 65536                        /* Makes sure this enum is signed 32bit. */
+}
+
 pub struct FMOD_ASYNCREADINFO
 {
-	handle : *c_void, 		/* [r] The file handle that was filled out in the open callback. */
-	offset : c_uint, 		/* [r] Seek position, make sure you read from this file offset. */
-    sizebytes : c_uint, 	/* [r] how many bytes requested for read. */
-    priority : c_int,		/* [r] 0 = low importance.  100 = extremely important (ie 'must read now or stuttering may occur') */
+	handle 		: *c_void, 		/* [r] The file handle that was filled out in the open callback. */
+	offset 		: c_uint, 		/* [r] Seek position, make sure you read from this file offset. */
+    sizebytes 	: c_uint, 		/* [r] how many bytes requested for read. */
+    priority 	: c_int,		/* [r] 0 = low importance.  100 = extremely important (ie 'must read now or stuttering may occur') */
 
-    buffer : *c_void,		/* [w] Buffer to read file data into. */
-    bytesread : c_uint,		/* [w] Fill this in before setting result code to tell FMOD how many bytes were read. */
-    result : FMOD_RESULT,	/* [r/w] Result code, FMOD_OK tells the system it is ready to consume the data.  Set this last!  Default value = FMOD_ERR_NOTREADY. */
-    userdata : *c_void,		/* [r] User data pointer. */
+    buffer 		: *c_void,		/* [w] Buffer to read file data into. */
+    bytesread 	: c_uint,		/* [w] Fill this in before setting result code to tell FMOD how many bytes were read. */
+    result 		: FMOD_RESULT,	/* [r/w] Result code, FMOD_OK tells the system it is ready to consume the data.  Set this last!  Default value = FMOD_ERR_NOTREADY. */
+    userdata 	: *c_void,		/* [r] User data pointer. */
+}
+
+pub struct FMOD_REVERB_CHANNELPROPERTIES
+{                                      	/*       MIN    MAX  DEFAULT  DESCRIPTION */
+    Direct 			: c_int,           	/* [r/w] -10000 1000 0        Direct path level                                        (SUPPORTED:SFX) */
+    Room 			: c_int,           	/* [r/w] -10000 1000 0        Room effect level                                        (SUPPORTED:SFX) */
+    Flags 			: c_uint,          	/* [r/w] FMOD_REVERB_CHANNELFLAGS - modifies the behavior of properties                (SUPPORTED:SFX) */
+    ConnectionPoint : *FMOD_DSP      	/* [r/w] See remarks.         DSP network location to connect reverb for this channel. (SUPPORTED:SFX).*/
 }
 
 pub struct FMOD_CREATESOUNDEXINFO
 {
-	cbsize : c_int,             						/* [w] Size of this structure.  This is used so the structure can be expanded in the future and still work on older versions of FMOD Ex. */
-    length : c_uint,            						/* [w] Optional. Specify 0 to ignore. Size in bytes of file to load, or sound to create (in this case only if FMOD_OPENUSER is used).  Required if loading from memory.  If 0 is specified, then it will use the size of the file (unless loading from memory then an error will be returned). */
-    fileoffset : c_uint,        						/* [w] Optional. Specify 0 to ignore. Offset from start of the file to start loading from.  This is useful for loading files from inside big data files. */
-    numchannels : c_int,								/* [w] Optional. Specify 0 to ignore. Number of channels in a sound mandatory if FMOD_OPENUSER or FMOD_OPENRAW is used. */
-    defaultfrequency : c_int,							/* [w] Optional. Specify 0 to ignore. Default frequency of sound in a sound mandatory if FMOD_OPENUSER or FMOD_OPENRAW is used.  Other formats use the frequency determined by the file format. */
-    format : FMOD_SOUND_FORMAT,							/* [w] Optional. Specify 0 or FMOD_SOUND_FORMAT_NONE to ignore. Format of the sound mandatory if FMOD_OPENUSER or FMOD_OPENRAW is used.  Other formats use the format determined by the file format.   */
-    decodebuffersize : c_uint,							/* [w] Optional. Specify 0 to ignore. For streams.  This determines the size of the double buffer (in PCM samples) that a stream uses.  Use this for user created streams if you want to determine the size of the callback buffer passed to you.  Specify 0 to use FMOD's default size which is currently equivalent to 400ms of the sound format created/loaded. */
-   	initialsubsound : c_int, 							/* [w] Optional. Specify 0 to ignore. In a multi-sample file format such as .FSB/.DLS/.SF2, specify the initial subsound to seek to, only if FMOD_CREATESTREAM is used. */
-    numsubsounds : c_int,       						/* [w] Optional. Specify 0 to ignore or have no subsounds.  In a sound created with FMOD_OPENUSER, specify the number of subsounds that are accessable with Sound::getSubSound.  If not created with FMOD_OPENUSER, this will limit the number of subsounds loaded within a multi-subsound file.  If using FSB, then if FMOD_CREATESOUNDEXINFO::inclusionlist is used, this will shuffle subsounds down so that there are not any gaps.  It will mean that the indices of the sounds will be different. */
-    inclusionlist : *c_int,     						/* [w] Optional. Specify 0 to ignore. In a multi-sample format such as .FSB/.DLS/.SF2 it may be desirable to specify only a subset of sounds to be loaded out of the whole file.  This is an array of subsound indices to load into memory when created. */
-    inclusionlistnum : c_int,							/* [w] Optional. Specify 0 to ignore. This is the number of integers contained within the inclusionlist array. */
-    pcmreadcallback : FMOD_SOUND_PCMREADCALLBACK,    	/* [w] Optional. Specify 0 to ignore. Callback to 'piggyback' on FMOD's read functions and accept or even write PCM data while FMOD is opening the sound.  Used for user sounds created with FMOD_OPENUSER or for capturing decoded data as FMOD reads it. */
-    pcmsetposcallback : FMOD_SOUND_PCMSETPOSCALLBACK,	/* [w] Optional. Specify 0 to ignore. Callback for when the user calls a seeking function such as Channel::setTime or Channel::setPosition within a multi-sample sound, and for when it is opened.*/
-    nonblockcallback : FMOD_SOUND_NONBLOCKCALLBACK,   	/* [w] Optional. Specify 0 to ignore. Callback for successful completion, or error while loading a sound that used the FMOD_NONBLOCKING flag.  Also called duing seeking, when setPosition is called or a stream is restarted. */
-    dlsname : *c_char,            						/* [w] Optional. Specify 0 to ignore. Filename for a DLS or SF2 sample set when loading a MIDI file. If not specified, on Windows it will attempt to open /windows/system32/drivers/gm.dls or /windows/system32/drivers/etc/gm.dls, on Mac it will attempt to load /System/Library/Components/CoreAudio.component/Contents/Resources/gs_instruments.dls, otherwise the MIDI will fail to open. Current DLS support is for level 1 of the specification. */
-    encryptionkey : *c_char,      						/* [w] Optional. Specify 0 to ignore. Key for encrypted FSB file.  Without this key an encrypted FSB file will not load. */
-    maxpolyphony : c_int,       						/* [w] Optional. Specify 0 to ignore. For sequenced formats with dynamic channel allocation such as .MID and .IT, this specifies the maximum voice count allowed while playing.  .IT defaults to 64.  .MID defaults to 32. */
-    userdata : *c_void,		           					/* [w] Optional. Specify 0 to ignore. This is user data to be attached to the sound during creation.  Access via Sound::getUserData.  Note: This is not passed to FMOD_FILE_OPENCALLBACK, that is a different userdata that is file specific. */
-    suggestedsoundtype : FMOD_SOUND_TYPE, 				/* [w] Optional. Specify 0 or FMOD_SOUND_TYPE_UNKNOWN to ignore.  Instead of scanning all codec types, use this to speed up loading by making it jump straight to this codec. */
-    useropen : FMOD_FILE_OPENCALLBACK,           		/* [w] Optional. Specify 0 to ignore. Callback for opening this file. */
-    userclose : FMOD_FILE_CLOSECALLBACK,          		/* [w] Optional. Specify 0 to ignore. Callback for closing this file. */
-    userread : FMOD_FILE_READCALLBACK,           		/* [w] Optional. Specify 0 to ignore. Callback for reading from this file. */
-    userseek : FMOD_FILE_SEEKCALLBACK,           		/* [w] Optional. Specify 0 to ignore. Callback for seeking within this file. */
-    userasyncread : FMOD_FILE_ASYNCREADCALLBACK,      	/* [w] Optional. Specify 0 to ignore. Callback for seeking within this file. */
-    userasynccancel : FMOD_FILE_ASYNCCANCELCALLBACK,    /* [w] Optional. Specify 0 to ignore. Callback for seeking within this file. */
-    speakermap : FMOD_SPEAKERMAPTYPE,			        /* [w] Optional. Specify 0 to ignore. Use this to differ the way fmod maps multichannel sounds to speakers.  See FMOD_SPEAKERMAPTYPE for more. */
-    initialsoundgroup : *FMOD_SOUNDGROUP,  				/* [w] Optional. Specify 0 to ignore. Specify a sound group if required, to put sound in as it is created. */
+	cbsize 				: c_int,             			/* [w] Size of this structure.  This is used so the structure can be expanded in the future and still work on older versions of FMOD Ex. */
+    length 				: c_uint,            			/* [w] Optional. Specify 0 to ignore. Size in bytes of file to load, or sound to create (in this case only if FMOD_OPENUSER is used).  Required if loading from memory.  If 0 is specified, then it will use the size of the file (unless loading from memory then an error will be returned). */
+    fileoffset 			: c_uint,        				/* [w] Optional. Specify 0 to ignore. Offset from start of the file to start loading from.  This is useful for loading files from inside big data files. */
+    numchannels 		: c_int,						/* [w] Optional. Specify 0 to ignore. Number of channels in a sound mandatory if FMOD_OPENUSER or FMOD_OPENRAW is used. */
+    defaultfrequency 	: c_int,						/* [w] Optional. Specify 0 to ignore. Default frequency of sound in a sound mandatory if FMOD_OPENUSER or FMOD_OPENRAW is used.  Other formats use the frequency determined by the file format. */
+    format 				: FMOD_SOUND_FORMAT,			/* [w] Optional. Specify 0 or FMOD_SOUND_FORMAT_NONE to ignore. Format of the sound mandatory if FMOD_OPENUSER or FMOD_OPENRAW is used.  Other formats use the format determined by the file format.   */
+    decodebuffersize 	: c_uint,						/* [w] Optional. Specify 0 to ignore. For streams.  This determines the size of the double buffer (in PCM samples) that a stream uses.  Use this for user created streams if you want to determine the size of the callback buffer passed to you.  Specify 0 to use FMOD's default size which is currently equivalent to 400ms of the sound format created/loaded. */
+   	initialsubsound 	: c_int, 						/* [w] Optional. Specify 0 to ignore. In a multi-sample file format such as .FSB/.DLS/.SF2, specify the initial subsound to seek to, only if FMOD_CREATESTREAM is used. */
+    numsubsounds 		: c_int,       					/* [w] Optional. Specify 0 to ignore or have no subsounds.  In a sound created with FMOD_OPENUSER, specify the number of subsounds that are accessable with Sound::getSubSound.  If not created with FMOD_OPENUSER, this will limit the number of subsounds loaded within a multi-subsound file.  If using FSB, then if FMOD_CREATESOUNDEXINFO::inclusionlist is used, this will shuffle subsounds down so that there are not any gaps.  It will mean that the indices of the sounds will be different. */
+    inclusionlist 		: *c_int,     					/* [w] Optional. Specify 0 to ignore. In a multi-sample format such as .FSB/.DLS/.SF2 it may be desirable to specify only a subset of sounds to be loaded out of the whole file.  This is an array of subsound indices to load into memory when created. */
+    inclusionlistnum 	: c_int,						/* [w] Optional. Specify 0 to ignore. This is the number of integers contained within the inclusionlist array. */
+    pcmreadcallback 	: FMOD_SOUND_PCMREADCALLBACK,   /* [w] Optional. Specify 0 to ignore. Callback to 'piggyback' on FMOD's read functions and accept or even write PCM data while FMOD is opening the sound.  Used for user sounds created with FMOD_OPENUSER or for capturing decoded data as FMOD reads it. */
+    pcmsetposcallback 	: FMOD_SOUND_PCMSETPOSCALLBACK,	/* [w] Optional. Specify 0 to ignore. Callback for when the user calls a seeking function such as Channel::setTime or Channel::setPosition within a multi-sample sound, and for when it is opened.*/
+    nonblockcallback 	: FMOD_SOUND_NONBLOCKCALLBACK,  /* [w] Optional. Specify 0 to ignore. Callback for successful completion, or error while loading a sound that used the FMOD_NONBLOCKING flag.  Also called duing seeking, when setPosition is called or a stream is restarted. */
+    dlsname 			: *c_char,            			/* [w] Optional. Specify 0 to ignore. Filename for a DLS or SF2 sample set when loading a MIDI file. If not specified, on Windows it will attempt to open /windows/system32/drivers/gm.dls or /windows/system32/drivers/etc/gm.dls, on Mac it will attempt to load /System/Library/Components/CoreAudio.component/Contents/Resources/gs_instruments.dls, otherwise the MIDI will fail to open. Current DLS support is for level 1 of the specification. */
+    encryptionkey 		: *c_char,      				/* [w] Optional. Specify 0 to ignore. Key for encrypted FSB file.  Without this key an encrypted FSB file will not load. */
+    maxpolyphony 		: c_int,       					/* [w] Optional. Specify 0 to ignore. For sequenced formats with dynamic channel allocation such as .MID and .IT, this specifies the maximum voice count allowed while playing.  .IT defaults to 64.  .MID defaults to 32. */
+    userdata 			: *c_void,		           		/* [w] Optional. Specify 0 to ignore. This is user data to be attached to the sound during creation.  Access via Sound::getUserData.  Note: This is not passed to FMOD_FILE_OPENCALLBACK, that is a different userdata that is file specific. */
+    suggestedsoundtype 	: FMOD_SOUND_TYPE, 				/* [w] Optional. Specify 0 or FMOD_SOUND_TYPE_UNKNOWN to ignore.  Instead of scanning all codec types, use this to speed up loading by making it jump straight to this codec. */
+    useropen 			: FMOD_FILE_OPENCALLBACK,       /* [w] Optional. Specify 0 to ignore. Callback for opening this file. */
+    userclose 			: FMOD_FILE_CLOSECALLBACK,      /* [w] Optional. Specify 0 to ignore. Callback for closing this file. */
+    userread 			: FMOD_FILE_READCALLBACK,       /* [w] Optional. Specify 0 to ignore. Callback for reading from this file. */
+    userseek 			: FMOD_FILE_SEEKCALLBACK,       /* [w] Optional. Specify 0 to ignore. Callback for seeking within this file. */
+    userasyncread 		: FMOD_FILE_ASYNCREADCALLBACK,  /* [w] Optional. Specify 0 to ignore. Callback for seeking within this file. */
+    userasynccancel 	: FMOD_FILE_ASYNCCANCELCALLBACK,/* [w] Optional. Specify 0 to ignore. Callback for seeking within this file. */
+    speakermap 			: FMOD_SPEAKERMAPTYPE,			/* [w] Optional. Specify 0 to ignore. Use this to differ the way fmod maps multichannel sounds to speakers.  See FMOD_SPEAKERMAPTYPE for more. */
+    initialsoundgroup 	: *FMOD_SOUNDGROUP,  			/* [w] Optional. Specify 0 to ignore. Specify a sound group if required, to put sound in as it is created. */
     initialseekposition : c_uint,						/* [w] Optional. Specify 0 to ignore. For streams. Specify an initial position to seek the stream to. */
-    initialseekpostype : FMOD_TIMEUNIT, 				/* [w] Optional. Specify 0 to ignore. For streams. Specify the time unit for the position set in initialseekposition. */
+    initialseekpostype 	: FMOD_TIMEUNIT, 				/* [w] Optional. Specify 0 to ignore. For streams. Specify the time unit for the position set in initialseekposition. */
     ignoresetfilesystem : c_int,						/* [w] Optional. Specify 0 to ignore. Set to 1 to use fmod's built in file system. Ignores setFileSystem callbacks and also FMOD_CREATESOUNEXINFO file callbacks.  Useful for specific cases where you don't want to use your own file system but want to use fmod's file system (ie net streaming). */
-    cddaforceaspi : c_int,     							/* [w] Optional. Specify 0 to ignore. For CDDA sounds only - if non-zero use ASPI instead of NTSCSI to access the specified CD/DVD device. */
-    audioqueuepolicy : c_uint,   						/* [w] Optional. Specify 0 or FMOD_AUDIOQUEUE_CODECPOLICY_DEFAULT to ignore. Policy used to determine whether hardware or software is used for decoding, see FMOD_AUDIOQUEUE_CODECPOLICY for options (iOS >= 3.0 required, otherwise only hardware is available) */ 
-    minmidigranularity : c_uint, 						/* [w] Optional. Specify 0 to ignore. Allows you to set a minimum desired MIDI mixer granularity. Values smaller than 512 give greater than default accuracy at the cost of more CPU and vice versa. Specify 0 for default (512 samples). */
-    nonblockthreadid : c_int,   						/* [w] Optional. Specify 0 to ignore. Specifies a thread index to execute non blocking load on.  Allows for up to 5 threads to be used for loading at once.  This is to avoid one load blocking another.  Maximum value = 4. */
+    cddaforceaspi 		: c_int,     					/* [w] Optional. Specify 0 to ignore. For CDDA sounds only - if non-zero use ASPI instead of NTSCSI to access the specified CD/DVD device. */
+    audioqueuepolicy 	: c_uint,   					/* [w] Optional. Specify 0 or FMOD_AUDIOQUEUE_CODECPOLICY_DEFAULT to ignore. Policy used to determine whether hardware or software is used for decoding, see FMOD_AUDIOQUEUE_CODECPOLICY for options (iOS >= 3.0 required, otherwise only hardware is available) */ 
+    minmidigranularity 	: c_uint, 						/* [w] Optional. Specify 0 to ignore. Allows you to set a minimum desired MIDI mixer granularity. Values smaller than 512 give greater than default accuracy at the cost of more CPU and vice versa. Specify 0 for default (512 samples). */
+    nonblockthreadid 	: c_int,   						/* [w] Optional. Specify 0 to ignore. Specifies a thread index to execute non blocking load on.  Allows for up to 5 threads to be used for loading at once.  This is to avoid one load blocking another.  Maximum value = 4. */
 }
 
 pub static FMOD_DEFAULT                 : c_uint = 0x00000000;  /* Default for all modes listed below. FMOD_LOOP_OFF, FMOD_2D, FMOD_HARDWARE */
@@ -322,37 +411,105 @@ pub static FMOD_INIT_PS3_DISABLEDOLBYDIGITAL    : c_uint = 0x20000000; /* PS3 on
 pub static FMOD_INIT_7POINT1_DOLBYMAPPING       : c_uint = 0x40000000; /* PS3/PS4 only - FMOD uses the WAVEFORMATEX Microsoft 7.1 speaker mapping where the last 2 pairs of speakers are 'rears' then 'sides', but on PS3/PS4 these are mapped to 'surrounds' and 'backs'.  Use this flag to swap fmod's last 2 pair of speakers on PS3/PS4 to avoid needing to do a special case for these platforms. */
 
 
-#[link(name = "z")]
 extern "C" {
 	fn FMOD_System_Create(system: *FMOD_SYSTEM) -> FMOD_RESULT;
 	fn FMOD_System_Init(system: FMOD_SYSTEM, maxchannels: c_int, flags: FMOD_INITFLAGS, extradriverdata: *c_void) -> FMOD_RESULT;
 	fn FMOD_System_Close(sound: FMOD_SOUND) -> FMOD_RESULT;
 	fn FMOD_System_Release(system: FMOD_SYSTEM) -> FMOD_RESULT;
-
 	fn FMOD_System_CreateSound(system: FMOD_SYSTEM, name_or_data: *c_char, mode: FMOD_MODE, exinfo: *FMOD_CREATESOUNDEXINFO,
 		sound: *FMOD_SOUND) -> FMOD_RESULT;
+
 	fn FMOD_System_PlaySound(system : FMOD_SYSTEM, channel_id : FMOD_CHANNELINDEX, sound : FMOD_SOUND, paused : FMOD_BOOL,
 		channel : *FMOD_CHANNEL) -> FMOD_RESULT;
 	fn FMOD_Sound_Release(sound: FMOD_SOUND) -> FMOD_RESULT;
 
+	fn FMOD_System_GetSpectrum(system : FMOD_SYSTEM, array : *c_float, num_values : c_int, channel_offset : c_int,
+		window_type : FMOD_DSP_FFT_WINDOW) -> FMOD_RESULT;
 	fn FMOD_Channel_IsPlaying(channel : FMOD_CHANNEL, is_playing : *FMOD_BOOL) -> FMOD_RESULT;
+	fn FMOD_Channel_SetVolume(channel : FMOD_CHANNEL, volume : c_float) -> FMOD_RESULT;
+	fn FMOD_Channel_GetVolume(channel : FMOD_CHANNEL, volume : *c_float) -> FMOD_RESULT;
+	fn FMOD_Channel_SetFrequency(channel : FMOD_CHANNEL, frequency : c_float) -> FMOD_RESULT;
+	fn FMOD_Channel_GetFrequency(channel : FMOD_CHANNEL, frequency : *c_float) -> FMOD_RESULT;
+	fn FMOD_Channel_SetPan(channel : FMOD_CHANNEL, pan : c_float) -> FMOD_RESULT;
+	fn FMOD_Channel_GetPan(channel : FMOD_CHANNEL, pan : *c_float) -> FMOD_RESULT;
+	fn FMOD_Channel_SetMute(channel : FMOD_CHANNEL, mute : FMOD_BOOL) -> FMOD_RESULT;
+	fn FMOD_Channel_GetMute(channel : FMOD_CHANNEL, mute : *FMOD_BOOL) -> FMOD_RESULT;
+	fn FMOD_Channel_SetPaused(channel : FMOD_CHANNEL, pause : FMOD_BOOL) -> FMOD_RESULT;
+	fn FMOD_Channel_GetPaused(channel : FMOD_CHANNEL, pause : *FMOD_BOOL) -> FMOD_RESULT;
+	fn FMOD_Channel_SetDelay(channel : FMOD_CHANNEL, delaytype : FMOD_DELAYTYPE, delayhi : c_uint, delaylo : c_uint) -> FMOD_RESULT;
+	fn FMOD_Channel_GetDelay(channel : FMOD_CHANNEL, delaytype : FMOD_DELAYTYPE, delayhi : *c_uint, delaylo : *c_uint) -> FMOD_RESULT;
+	fn FMOD_Channel_SetSpeakerMix(channel : FMOD_CHANNEL, frontleft : c_float, frontright : c_float, center : c_float, lfe : c_float,
+								backleft : c_float, backright : c_float, sideleft : c_float, sideright : c_float) -> FMOD_RESULT;
+	fn FMOD_Channel_GetSpeakerMix(channel : FMOD_CHANNEL, frontleft : *c_float, frontright : *c_float, center : *c_float, lfe : *c_float, backleft : *c_float,
+								backright : *c_float, sideleft : *c_float, sideright : *c_float) -> FMOD_RESULT;
+	fn FMOD_Channel_SetSpeakerLevels(channel : FMOD_CHANNEL, speaker : FMOD_SPEAKER, levels : *c_float, numlevels : c_int) -> FMOD_RESULT;
+	fn FMOD_Channel_GetSpeakerLevels(channel : FMOD_CHANNEL, speaker : FMOD_SPEAKER, levels : *c_float, numlevels : c_int) -> FMOD_RESULT;
+	fn FMOD_Channel_SetInputChannelMix(channel : FMOD_CHANNEL, levels : *c_float, numlevels : c_int) -> FMOD_RESULT;
+	fn FMOD_Channel_GetInputChannelMix(channel : FMOD_CHANNEL, levels : *c_float, numlevels : c_int) -> FMOD_RESULT;
+	fn FMOD_Channel_SetPriority(channel : FMOD_CHANNEL, priority : c_int) -> FMOD_RESULT;
+	fn FMOD_Channel_GetPriority(channel : FMOD_CHANNEL, priority : *c_int) -> FMOD_RESULT;
+	fn FMOD_Channel_SetPosition(channel : FMOD_CHANNEL, position : c_uint, postype : FMOD_TIMEUNIT) -> FMOD_RESULT;
+	fn FMOD_Channel_GetPosition(channel : FMOD_CHANNEL, position : *c_uint, postype : FMOD_TIMEUNIT) -> FMOD_RESULT;
+	fn FMOD_Channel_SetReverbProperties(channel : FMOD_CHANNEL, prop : *FMOD_REVERB_CHANNELPROPERTIES) -> FMOD_RESULT;
+	fn FMOD_Channel_GetReverbProperties(channel : FMOD_CHANNEL, prop : *FMOD_REVERB_CHANNELPROPERTIES) -> FMOD_RESULT;
+	fn FMOD_Channel_SetLowPassGain(channel : FMOD_CHANNEL, gain : c_float) -> FMOD_RESULT;
+	fn FMOD_Channel_GetLowPassGain(channel : FMOD_CHANNEL, gain : *c_float) -> FMOD_RESULT;
+	
+	//fn FMOD_Channel_SetChannelGroup(channel : FMOD_CHANNEL, channelgroup : FMOD_CHANNEL_GROUP) -> FMOD_RESULT;
+	//fn FMOD_Channel_GetChannelGroup(channel : FMOD_CHANNEL, channelgroup : *FMOD_CHANNEL_GROUP) -> FMOD_RESULT;
 }
 
-pub struct Sound {
-	sound : FMOD_SOUND,
+pub struct SpectrumOptions {
+	pub window_type 	: FMOD_DSP_FFT_WINDOW,
+	pub channel_offset 	: c_int
+}
+
+pub struct DelayOptions {
+	pub delaytype 	: FMOD_DELAYTYPE,
+	pub delayhi 	: uint,
+	pub delaylo 	: uint
+}
+
+pub struct SpeakerMixOptions {
+	pub front_left 	: f32,
+	pub front_right : f32,
+	pub center 		: f32,
+	pub lfe 		: f32,
+	pub back_left 	: f32,
+	pub back_right 	: f32,
+	pub side_left 	: f32,
+	pub side_right 	: f32
+}
+
+pub struct Channel {
 	channel : FMOD_CHANNEL,
-	pub name : StrBuf,
-	system : FMOD_SYSTEM,
 }
 
-impl Sound {
-	pub fn release(&mut self) -> FMOD_RESULT {
-		self.system = ::std::ptr::null();
-		unsafe { FMOD_Sound_Release(self.sound) }
+impl Channel {
+	fn new() -> Channel {
+		Channel{channel : ::std::ptr::null()}
 	}
 
-	pub fn play(&self) -> FMOD_RESULT {
-		unsafe { FMOD_System_PlaySound(self.system, FMOD_CHANNEL_FREE, self.sound, 0, &self.channel) }
+	fn release(&mut self) {
+		self.channel = ::std::ptr::null();
+	}
+
+	pub fn get_spectrum(&self, num_values : uint, options : Option<SpectrumOptions>) -> Result<Vec<f32>, FMOD_RESULT> {
+		let ptr = Vec::from_elem(num_values, 0f32);
+		let mut window_type = FMOD_DSP_FFT_WINDOW_RECT;
+		let mut channel_offset = 0;
+
+		match options {
+			Some(v) => {
+				window_type = v.window_type;
+				channel_offset = v.channel_offset;
+			}
+			None => {}
+		};
+		match unsafe { FMOD_System_GetSpectrum(self.channel, ptr.as_ptr(), num_values as c_int, channel_offset, window_type) } {
+			FMOD_OK => Ok(ptr),
+			e => Err(e),
+		}
 	}
 
 	pub fn is_playing(&self) -> Result<bool, FMOD_RESULT> {
@@ -362,6 +519,227 @@ impl Sound {
 			FMOD_OK => Ok(is_playing == 1),
 			err => Err(err),
 		}
+	}
+
+	pub fn set_volume(&self, volume : f32) -> FMOD_RESULT {
+		unsafe { FMOD_Channel_SetVolume(self.channel, volume) }
+	}
+
+	pub fn get_volume(&self) -> Result<f32, FMOD_RESULT> {
+		let volume = 0f32;
+
+		match unsafe { FMOD_Channel_GetVolume(self.channel, &volume) } {
+			FMOD_OK => Ok(volume),
+			e => Err(e),
+		}
+	}
+
+	pub fn set_frequency(&self, frequency : f32) -> FMOD_RESULT {
+		unsafe { FMOD_Channel_SetFrequency(self.channel, frequency) }
+	}
+
+	pub fn get_frequency(&self) -> Result<f32, FMOD_RESULT> {
+		let frequency = 0f32;
+
+		match unsafe { FMOD_Channel_GetFrequency(self.channel, &frequency) } {
+			FMOD_OK => Ok(frequency),
+			e => Err(e),
+		}
+	}
+
+	pub fn set_pan(&self, pan : f32) -> FMOD_RESULT {
+		unsafe { FMOD_Channel_SetPan(self.channel, pan) }
+	}
+
+	pub fn get_pan(&self) -> Result<f32, FMOD_RESULT> {
+		let pan = 0f32;
+
+		match unsafe { FMOD_Channel_GetPan(self.channel, &pan) } {
+			FMOD_OK => Ok(pan),
+			e => Err(e),
+		}
+	}
+
+	pub fn set_mute(&self, mute : bool) -> FMOD_RESULT {
+		let t = match mute {
+			true => 1,
+			false => 0,
+		};
+		unsafe { FMOD_Channel_SetMute(self.channel, t) }
+	}
+
+	pub fn get_mute(&self) -> Result<bool, FMOD_RESULT> {
+		let mute = 0;
+
+		match unsafe { FMOD_Channel_GetMute(self.channel, &mute) } {
+			FMOD_OK => Ok(match mute {
+				1 => true,
+				_ => false,
+			}),
+			e => Err(e),
+		}
+	}
+
+	pub fn set_paused(&self, paused : bool) -> FMOD_RESULT {
+		let t : FMOD_BOOL = match paused {
+			true => 1,
+			false => 0,
+		};
+		unsafe { FMOD_Channel_SetPaused(self.channel, t) }
+	}
+
+	pub fn get_paused(&self) -> Result<bool, FMOD_RESULT> {
+		let t = 0;
+
+		match unsafe { FMOD_Channel_GetPaused(self.channel, &t) } {
+			FMOD_OK => Ok(match t {
+				1 => true,
+				_ => false,
+			}),
+			e => Err(e),
+		}
+	}
+
+	pub fn set_delay(&self, d_o : DelayOptions) -> FMOD_RESULT {
+		unsafe { FMOD_Channel_SetDelay(self.channel, d_o.delaytype, d_o.delayhi as u32, d_o.delaylo as u32) }
+	}
+
+	pub fn get_delay(&self, delaytype : FMOD_DELAYTYPE) -> Result<DelayOptions, FMOD_RESULT> {
+		let delaylo = 0u32;
+		let delayhi = 0u32;
+
+		match unsafe { FMOD_Channel_GetDelay(self.channel, delaytype, &delayhi, &delaylo) } {
+			FMOD_OK => Ok(DelayOptions{delaytype: delaytype, delayhi: delayhi as uint, delaylo: delaylo as uint}),
+			e => Err(e),
+		}
+	}
+
+	pub fn set_speaker_mix(&self, smo : SpeakerMixOptions) -> FMOD_RESULT {
+		unsafe { FMOD_Channel_SetSpeakerMix(self.channel, smo.front_left, smo.front_right, smo.center, smo.lfe,
+											smo.back_left, smo.back_right, smo.side_left, smo.side_right) }
+	}
+
+	pub fn get_speaker_mix(&self) -> Result<SpeakerMixOptions, FMOD_RESULT> {
+		let smo = SpeakerMixOptions{front_left: 0f32, front_right: 0f32, center: 0f32, lfe: 0f32, back_left: 0f32,
+									back_right: 0f32, side_left: 0f32, side_right: 0f32};
+
+		match unsafe { FMOD_Channel_GetSpeakerMix(self.channel, &smo.front_left, &smo.front_right, &smo.center, &smo.lfe,
+												&smo.back_left, &smo.back_right, &smo.side_left, &smo.side_right) } {
+			FMOD_OK => Ok(smo),
+			e => Err(e),
+		}
+	}
+
+	pub fn set_speaker_level(&self, speaker : FMOD_SPEAKER, levels : Vec<f32>) -> FMOD_RESULT {
+		unsafe { FMOD_Channel_SetSpeakerLevels(self.channel, speaker, levels.as_ptr(), levels.len() as i32) }
+	}
+
+	pub fn get_speaker_level(&self, speaker : FMOD_SPEAKER, num_levels : uint) -> Result<Vec<f32>, FMOD_RESULT> {
+		let ptr = Vec::from_elem(num_levels, 0f32);
+
+		match unsafe { FMOD_Channel_GetSpeakerLevels(self.channel, speaker, ptr.as_ptr(), num_levels as i32) } {
+			FMOD_OK => Ok(ptr),
+			e => Err(e),
+		}
+	}
+
+	pub fn set_input_channel_mix(&self, levels : Vec<f32>) -> FMOD_RESULT {
+		unsafe { FMOD_Channel_SetInputChannelMix(self.channel, levels.as_ptr(), levels.len() as i32) }
+	}
+
+	pub fn get_input_channel_mix(&self, num_levels : uint) -> Result<Vec<f32>, FMOD_RESULT> {
+		let ptr = Vec::from_elem(num_levels, 0f32);
+
+		match unsafe { FMOD_Channel_GetInputChannelMix(self.channel, ptr.as_ptr(), num_levels as i32) } {
+			FMOD_OK => Ok(ptr),
+			e => Err(e),
+		}
+	}
+
+	pub fn set_priority(&self, priority : i32) -> FMOD_RESULT {
+		unsafe { FMOD_Channel_SetPriority(self.channel, priority) }
+	}
+
+	pub fn get_priority(&self) -> Result<i32, FMOD_RESULT> {
+		let t = 0i32;
+
+		match unsafe { FMOD_Channel_GetPriority(self.channel, &t) } {
+			FMOD_OK => Ok(t),
+			e => Err(e),
+		}
+	}
+
+	pub fn set_position(&self, position : uint, postype : FMOD_TIMEUNIT) -> FMOD_RESULT {
+		unsafe { FMOD_Channel_SetPosition(self.channel, position as u32, postype) }
+	}
+
+	pub fn get_position(&self, postype : FMOD_TIMEUNIT) -> Result<uint, FMOD_RESULT> {
+		let t = 0u32;
+
+		match unsafe { FMOD_Channel_GetPosition(self.channel, &t, postype) } {
+			FMOD_OK => Ok(t as uint),
+			e => Err(e),
+		}
+	}
+
+	pub fn set_reverb_properties(&self, prop : FMOD_REVERB_CHANNELPROPERTIES) -> FMOD_RESULT {
+		unsafe { FMOD_Channel_SetReverbProperties(self.channel, &prop) }
+	}
+
+	pub fn get_reverb_properties(&self) -> Result<FMOD_REVERB_CHANNELPROPERTIES, FMOD_RESULT> {
+		let t = FMOD_REVERB_CHANNELPROPERTIES{Direct : 0, Room : 0, Flags : 0, ConnectionPoint : ::std::ptr::null()};
+
+		match unsafe { FMOD_Channel_GetReverbProperties(self.channel, &t) } {
+			FMOD_OK => Ok(t),
+			e => Err(e),
+		}
+	}
+
+	pub fn set_low_pass_gain(&self, gain : f32) -> FMOD_RESULT {
+		unsafe { FMOD_Channel_SetLowPassGain(self.channel, gain) }
+	}
+
+	pub fn get_low_pass_gain(&self) -> Result<f32, FMOD_RESULT> {
+		let t = 0f32;
+
+		match unsafe { FMOD_Channel_GetLowPassGain(self.channel, &t) } {
+			FMOD_OK => Ok(t),
+			e => Err(e),
+		}
+	}
+}
+
+pub struct Sound {
+	sound 		: FMOD_SOUND,
+	pub name 	: StrBuf,
+	system 		: FMOD_SYSTEM,
+	channel 	: Channel,
+}
+
+impl Sound {
+	fn new(system : FMOD_SYSTEM, name : StrBuf, sound: FMOD_SOUND) -> Sound {
+		Sound{sound: sound, channel: Channel::new(), name: name.clone(), system: system}
+	}
+	pub fn release(&mut self) -> FMOD_RESULT {
+		self.system = ::std::ptr::null();
+		self.channel.release();
+		unsafe { FMOD_Sound_Release(self.sound) }
+	}
+
+	pub fn play(&self) -> FMOD_RESULT {
+		if self.channel.channel == ::std::ptr::null() {
+			unsafe { FMOD_System_PlaySound(self.system, FMOD_CHANNEL_FREE, self.sound, 0, &self.channel.channel) }
+		} else {
+			self.channel.set_paused(false)
+		}
+	}
+
+	pub fn pause(&self) -> FMOD_RESULT {
+		self.channel.set_paused(true)
+	}
+
+	pub fn is_playing(&self) -> Result<bool, FMOD_RESULT> {
+		self.channel.is_playing()
 	}
 
 	fn play_loop(&self) -> FMOD_RESULT {
@@ -383,6 +761,10 @@ impl Sound {
 			FMOD_OK => self.play_loop(),
 			err => err,
 		}
+	}
+
+	pub fn get_channel<'a>(&'a self) -> &'a Channel {
+		&self.channel
 	}
 }
 
@@ -415,25 +797,16 @@ impl Fmod {
 		}
 	}
 
-	pub fn create_sound(&mut self, music : StrBuf) -> Result<Sound, FMOD_RESULT> {
-	   	let tmp_v = music.into_owned();
+	pub fn create_sound(&self, music : StrBuf) -> Result<Sound, FMOD_RESULT> {
+	   	let tmp_v = music.clone().into_owned();
 	   	let sound = ::std::ptr::null();
 
-	    /*tmp_v.with_c_str(|c_str|{
-	       	let x = unsafe { FMOD_System_CreateSound(self.system, c_str,
-	           								FMOD_SOFTWARE | FMOD_LOOP_OFF | FMOD_2D | FMOD_CREATESTREAM, ::std::ptr::null(), &sound) };
-	        match x {
-	           	FMOD_Ok => {Ok(Sound{sound: sound, channel: ::std::ptr::null(), name: music.clone(), system: self.system})},
-	           	_ => Err(x),
+	    tmp_v.with_c_str(|c_str|{
+	        match unsafe { FMOD_System_CreateSound(self.system, c_str,
+	           								FMOD_SOFTWARE | FMOD_LOOP_OFF | FMOD_2D | FMOD_CREATESTREAM, ::std::ptr::null(), &sound) } {
+	           	FMOD_OK => {Ok(Sound::new(self.system, music.clone(), sound))},
+	           	err => Err(err),
 	        }
-	    })*/
-		let t = tmp_v.to_c_str().unwrap();
-
-		let x = unsafe { FMOD_System_CreateSound(self.system, t,
-	           								FMOD_SOFTWARE | FMOD_LOOP_OFF | FMOD_2D | FMOD_CREATESTREAM, ::std::ptr::null(), &sound) };
-	        match x {
-	           	FMOD_Ok => {Ok(Sound{sound: sound, channel: ::std::ptr::null(), name: music.clone(), system: self.system})},
-	           	_ => Err(x),
-	        }
+	    })
 	}	
 }

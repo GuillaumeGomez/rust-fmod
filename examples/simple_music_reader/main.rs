@@ -1,16 +1,15 @@
 #![feature(globs)]
 
 extern crate libc;
+extern crate rfmod;
 
-use fmod::*;
+use rfmod::*;
 use std::os;
-
-mod fmod;
 
 fn main() {
 	let args = os::args();
 	let tmp = args.tail();
-	let mut fmod = match Fmod::new() {
+	let fmod = match Fmod::new() {
 		Ok(f) => f,
 		Err(e) => {
 			fail!("Error code : {}", e);
@@ -23,7 +22,7 @@ fn main() {
 
 	let arg1 = tmp.get(0).unwrap();
 
-	let sound = match fmod.create_sound(StrBuf::from_str(*arg1)) {
+	let mut sound = match fmod.create_sound(StrBuf::from_str(*arg1)) {
 		Ok(s) => s,
 		Err(err) => {fail!("Error code : {}", err);},
 	};
