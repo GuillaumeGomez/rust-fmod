@@ -240,6 +240,45 @@ pub enum FMOD_DELAYTYPE
 
 #[deriving(Eq, Ord, Show)]
 #[repr(C)]
+pub enum FMOD_OUTPUTTYPE
+{
+    FMOD_OUTPUTTYPE_AUTODETECT,      /* Picks the best output mode for the platform.  This is the default. */
+                                     
+    FMOD_OUTPUTTYPE_UNKNOWN,         /* All             - 3rd party plugin, unknown.  This is for use with System::getOutput only. */
+    FMOD_OUTPUTTYPE_NOSOUND,         /* All             - All calls in this mode succeed but make no sound. */
+    FMOD_OUTPUTTYPE_WAVWRITER,       /* All             - Writes output to fmodoutput.wav by default.  Use the 'extradriverdata' parameter in System::init, by simply passing the filename as a string, to set the wav filename. */
+    FMOD_OUTPUTTYPE_NOSOUND_NRT,     /* All             - Non-realtime version of FMOD_OUTPUTTYPE_NOSOUND.  User can drive mixer with System::update at whatever rate they want. */
+    FMOD_OUTPUTTYPE_WAVWRITER_NRT,   /* All             - Non-realtime version of FMOD_OUTPUTTYPE_WAVWRITER.  User can drive mixer with System::update at whatever rate they want. */
+                                     
+    FMOD_OUTPUTTYPE_DSOUND,          /* Win32/Win64     - DirectSound output.                       (Default on Windows XP and below) */
+    FMOD_OUTPUTTYPE_WINMM,           /* Win32/Win64     - Windows Multimedia output. */
+    FMOD_OUTPUTTYPE_WASAPI,          /* Win32           - Windows Audio Session API.                (Default on Windows Vista and above) */
+    FMOD_OUTPUTTYPE_ASIO,            /* Win32           - Low latency ASIO 2.0 driver. */
+    FMOD_OUTPUTTYPE_OSS,             /* Linux/Linux64   - Open Sound System output.                 (Default on Linux, third preference) */
+    FMOD_OUTPUTTYPE_ALSA,            /* Linux/Linux64   - Advanced Linux Sound Architecture output. (Default on Linux, second preference if available) */
+    FMOD_OUTPUTTYPE_ESD,             /* Linux/Linux64   - Enlightment Sound Daemon output. */
+    FMOD_OUTPUTTYPE_PULSEAUDIO,      /* Linux/Linux64   - PulseAudio output.                        (Default on Linux, first preference if available) */
+    FMOD_OUTPUTTYPE_COREAUDIO,       /* Mac             - Macintosh CoreAudio output.               (Default on Mac) */
+    FMOD_OUTPUTTYPE_XBOX360,         /* Xbox 360        - Native Xbox360 output.                    (Default on Xbox 360) */
+    FMOD_OUTPUTTYPE_PSP,             /* PSP             - Native PSP output.                        (Default on PSP) */
+    FMOD_OUTPUTTYPE_PS3,             /* PS3             - Native PS3 output.                        (Default on PS3) */
+    FMOD_OUTPUTTYPE_NGP,             /* NGP             - Native NGP output.                        (Default on NGP) */
+    FMOD_OUTPUTTYPE_WII,             /* Wii             - Native Wii output.                        (Default on Wii) */
+    FMOD_OUTPUTTYPE_3DS,             /* 3DS             - Native 3DS output                         (Default on 3DS) */
+    FMOD_OUTPUTTYPE_AUDIOTRACK,      /* Android         - Java Audio Track output.                  (Default on Android 2.2 and below) */
+    FMOD_OUTPUTTYPE_OPENSL,          /* Android         - OpenSL ES output.                         (Default on Android 2.3 and above) */   
+    FMOD_OUTPUTTYPE_NACL,            /* Native Client   - Native Client output.                     (Default on Native Client) */
+    FMOD_OUTPUTTYPE_WIIU,            /* Wii U           - Native Wii U output.                      (Default on Wii U) */
+    FMOD_OUTPUTTYPE_ASOUND,          /* BlackBerry      - Native BlackBerry asound output.          (Default on BlackBerry) */
+    FMOD_OUTPUTTYPE_AUDIOOUT,        /* Orbis           - Audio Out output.                         (Default on Orbis) */
+    FMOD_OUTPUTTYPE_XAUDIO,          /* Durango         - XAudio2 output. */
+
+    FMOD_OUTPUTTYPE_MAX,             /* Maximum number of output types supported. */
+    FMOD_OUTPUTTYPE_FORCEINT = 65536 /* Makes sure this enum is signed 32bit. */
+}
+
+#[deriving(Eq, Ord, Show)]
+#[repr(C)]
 // I need to find a solution for this enum...
 pub enum FMOD_SPEAKER
 {
@@ -258,6 +297,26 @@ pub enum FMOD_SPEAKER
     //FMOD_SPEAKER_SBL         = FMOD_SPEAKER_SIDE_LEFT,      /* For use with FMOD_SPEAKERMODE_7POINT1 on PS3 where the extra speakers are surround back inside of side speakers. */
     //FMOD_SPEAKER_SBR         = FMOD_SPEAKER_SIDE_RIGHT,     /* For use with FMOD_SPEAKERMODE_7POINT1 on PS3 where the extra speakers are surround back inside of side speakers. */
     FMOD_SPEAKER_FORCEINT    = 65536                        /* Makes sure this enum is signed 32bit. */
+}
+
+#[deriving(Eq, Ord, Show)]
+#[repr(C)]
+pub enum FMOD_SPEAKERMODE
+{
+    FMOD_SPEAKERMODE_RAW,              /* There is no specific speakermode.  Sound channels are mapped in order of input to output.  Use System::setSoftwareFormat to specify speaker count. See remarks for more information. */
+    FMOD_SPEAKERMODE_MONO,             /* The speakers are monaural. */
+    FMOD_SPEAKERMODE_STEREO,           /* The speakers are stereo (DEFAULT). */
+    FMOD_SPEAKERMODE_QUAD,             /* 4 speaker setup.  This includes front left, front right, rear left, rear right.  */
+    FMOD_SPEAKERMODE_SURROUND,         /* 5 speaker setup.  This includes front left, front right, center, rear left, rear right. */
+    FMOD_SPEAKERMODE_5POINT1,          /* 5.1 speaker setup.  This includes front left, front right, center, rear left, rear right and a subwoofer. */
+    FMOD_SPEAKERMODE_7POINT1,          /* 7.1 speaker setup.  This includes front left, front right, center, rear left, rear right, side left, side right and a subwoofer. */
+    
+    FMOD_SPEAKERMODE_SRS5_1_MATRIX,    /* Stereo compatible output, embedded with surround information. SRS 5.1/Prologic/Prologic2 decoders will split the signal into a 5.1 speaker set-up or SRS virtual surround will decode into a 2-speaker/headphone setup.  See remarks about limitations.*/
+    FMOD_SPEAKERMODE_DOLBY5_1_MATRIX,  /* Stereo compatible output, embedded with surround information. Dolby Pro Logic II decoders will split the signal into a 5.1 speaker set-up. */
+    FMOD_SPEAKERMODE_MYEARS,           /* Stereo output, but data is encoded using personalized HRTF algorithms.  See myears.net.au */
+
+    FMOD_SPEAKERMODE_MAX,              /* Maximum number of speaker modes supported. */
+    FMOD_SPEAKERMODE_FORCEINT = 65536  /* Makes sure this enum is signed 32bit. */
 }
 
 pub static FMOD_DEFAULT                 : c_uint = 0x00000000;  /* Default for all modes listed below. FMOD_LOOP_OFF, FMOD_2D, FMOD_HARDWARE */

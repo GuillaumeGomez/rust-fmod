@@ -22,29 +22,6 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#![crate_id = "github.com/GuillaumeGomez/rust-fmod#rfmod:0.1"]
-#![desc = "Rust binding for FMOD"]
-#![crate_type = "rlib"]
-#![crate_type = "dylib"]
-
-#![allow(non_camel_case_types)]
-#![allow(unused_imports)]
-#![allow(dead_code)]
-#![allow(uppercase_variables)]
-
-#![feature(globs)]
-
-extern crate libc;
-
-pub use channel::{Channel, SpectrumOptions, DelayOptions, SpeakerMixOptions, ReverbChannelProperties};
-pub use sound::Sound;
-pub use fmod_sys::{FmodSys, FmodGuid};
-
-mod ffi;
-mod sound;
-mod channel;
-mod fmod_sys;
-pub mod types;
-pub mod enums;
-
-#[link(name = "fmodex64")] extern{}
+pub struct FmodMode(pub u32);
+pub struct FmodTimeUnit(pub u32);
+pub struct FmodCaps(pub u32);

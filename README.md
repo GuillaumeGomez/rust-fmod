@@ -10,6 +10,22 @@ FMOD website : www.fmod.org
 
 You must install on your computer the FMOD library which is used for the binding.
 
+To build it, please use :
+
+```Shell
+> make
+```
+
+This command build rfmod, the examples, and the documentation.
+
+You can build them separatly too.
+
+```Shell
+> make rfmod
+> make examples
+> make docs
+```
+
 ##Short example
 
 Here is a short example on how to create a file and to play it :
@@ -20,21 +36,30 @@ Here is a short example on how to create a file and to play it :
 extern crate libc;
 extern crate rfmod;
 
+use rfmod::enums::FMOD_OK;
 use rfmod::*;
 use std::os;
 
 fn main() {
-    let fmod = match Fmod::new() {
+    let fmod = match FmodSys::new() {
         Ok(f) => f,
         Err(e) => {
        	    fail!("Error code : {}", e);
         }
     };
 
-    let mut sound = match fmod.create_sound(StrBuf::from_str("music.mp3")) {
-		      Ok(s) => s,
-		      Err(err) => {fail!("Error code : {}", err);},
-		    };
+    match fmod.init() {
+        FMOD_OK => {}
+        e => {
+            fmod.release();
+            fail!("FmodSys.init failed : {}", e);
+        }
+    };
+
+    let mut sound = match fmod.create_sound(StrBuf::from_str("music.mp3"), None) {
+		              Ok(s) => s,
+		              Err(err) => {fail!("Error code : {}", err);},
+		            };
 
     match sound.play_to_the_end() {
         FMOD_OK => {println!("Ok !");}

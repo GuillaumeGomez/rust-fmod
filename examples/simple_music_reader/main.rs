@@ -10,10 +10,18 @@ use std::os;
 fn main() {
 	let args = os::args();
 	let tmp = args.tail();
-	let fmod = match Fmod::new() {
+	let fmod = match FmodSys::new() {
 		Ok(f) => f,
 		Err(e) => {
-			fail!("Error code : {}", e);
+			fail!("FmodSys.new : {}", e);
+		}
+	};
+
+	match fmod.init() {
+		FMOD_OK => {}
+		e => {
+			fmod.release();
+			fail!("FmodSys.init failed : {}", e);
 		}
 	};
 
@@ -23,14 +31,14 @@ fn main() {
 
 	let arg1 = tmp.get(0).unwrap();
 
-	let mut sound = match fmod.create_sound(StrBuf::from_str(*arg1)) {
+	let mut sound = match fmod.create_sound(StrBuf::from_str(*arg1), None) {
 		Ok(s) => s,
-		Err(err) => {fail!("Error code : {}", err);},
+		Err(err) => {fail!("FmodSys.create_sound failed : {}", err);},
 	};
 
 	match sound.play_to_the_end() {
 		FMOD_OK => {println!("Ok !");},
-		err => {fail!("Error code : {}", err);},
+		err => {fail!("FmodSys.play_to_the_end : {}", err);},
 	};
 
 	sound.release();

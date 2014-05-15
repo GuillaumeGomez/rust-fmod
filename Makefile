@@ -20,7 +20,7 @@
 #
 # 3. This notice may not be removed or altered from any source distribution.
 
-all: rfmod examples
+all: rfmod examples docs
 
 rfmod:
 	mkdir -p lib
@@ -30,7 +30,7 @@ examples: rfmod
 	  rustc -o bin/simple_music_reader -L ./lib examples/simple_music_reader/main.rs
 
 
-doc:
+docs:
 	rustdoc -o doc src/lib.rs
 
 clean:
