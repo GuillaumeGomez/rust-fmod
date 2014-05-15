@@ -27,18 +27,18 @@ use types::*;
 use libc::{c_int, c_uint};
 use ffi;
 
-pub struct SpectrumOptions {
+pub struct FmodSpectrumOptions {
     pub window_type     : FMOD_DSP_FFT_WINDOW,
     pub channel_offset  : i32
 }
 
-pub struct DelayOptions {
+pub struct FmodDelayOptions {
     pub delaytype   : FMOD_DELAYTYPE,
     pub delayhi     : uint,
     pub delaylo     : uint
 }
 
-pub struct SpeakerMixOptions {
+pub struct FmodSpeakerMixOptions {
     pub front_left  : f32,
     pub front_right : f32,
     pub center      : f32,
@@ -49,7 +49,7 @@ pub struct SpeakerMixOptions {
     pub side_right  : f32
 }
 
-pub struct ReverbChannelProperties {
+pub struct FmodReverbChannelProperties {
     pub direct  : c_int,
     pub room    : c_int,
     pub flags   : c_uint,
@@ -72,7 +72,7 @@ impl Channel {
         self.channel = ::std::ptr::null();
     }
 
-    pub fn get_spectrum(&self, num_values : uint, options : Option<SpectrumOptions>) -> Result<Vec<f32>, FMOD_RESULT> {
+    pub fn get_spectrum(&self, num_values : uint, options : Option<FmodSpectrumOptions>) -> Result<Vec<f32>, FMOD_RESULT> {
         let ptr = Vec::from_elem(num_values, 0f32);
         let mut window_type = FMOD_DSP_FFT_WINDOW_RECT;
         let mut channel_offset = 0;
@@ -178,27 +178,27 @@ impl Channel {
         }
     }
 
-    pub fn set_delay(&self, d_o : DelayOptions) -> FMOD_RESULT {
+    pub fn set_delay(&self, d_o : FmodDelayOptions) -> FMOD_RESULT {
         unsafe { ffi::FMOD_Channel_SetDelay(self.channel, d_o.delaytype, d_o.delayhi as u32, d_o.delaylo as u32) }
     }
 
-    pub fn get_delay(&self, delaytype : FMOD_DELAYTYPE) -> Result<DelayOptions, FMOD_RESULT> {
+    pub fn get_delay(&self, delaytype : FMOD_DELAYTYPE) -> Result<FmodDelayOptions, FMOD_RESULT> {
         let delaylo = 0u32;
         let delayhi = 0u32;
 
         match unsafe { ffi::FMOD_Channel_GetDelay(self.channel, delaytype, &delayhi, &delaylo) } {
-            FMOD_OK => Ok(DelayOptions{delaytype: delaytype, delayhi: delayhi as uint, delaylo: delaylo as uint}),
+            FMOD_OK => Ok(FmodDelayOptions{delaytype: delaytype, delayhi: delayhi as uint, delaylo: delaylo as uint}),
             e => Err(e),
         }
     }
 
-    pub fn set_speaker_mix(&self, smo : SpeakerMixOptions) -> FMOD_RESULT {
+    pub fn set_speaker_mix(&self, smo : FmodSpeakerMixOptions) -> FMOD_RESULT {
         unsafe { ffi::FMOD_Channel_SetSpeakerMix(self.channel, smo.front_left, smo.front_right, smo.center, smo.lfe,
                                             smo.back_left, smo.back_right, smo.side_left, smo.side_right) }
     }
 
-    pub fn get_speaker_mix(&self) -> Result<SpeakerMixOptions, FMOD_RESULT> {
-        let smo = SpeakerMixOptions{front_left: 0f32, front_right: 0f32, center: 0f32, lfe: 0f32, back_left: 0f32,
+    pub fn get_speaker_mix(&self) -> Result<FmodSpeakerMixOptions, FMOD_RESULT> {
+        let smo = FmodSpeakerMixOptions{front_left: 0f32, front_right: 0f32, center: 0f32, lfe: 0f32, back_left: 0f32,
                                     back_right: 0f32, side_left: 0f32, side_right: 0f32};
 
         match unsafe { ffi::FMOD_Channel_GetSpeakerMix(self.channel, &smo.front_left, &smo.front_right, &smo.center, &smo.lfe,
@@ -260,17 +260,17 @@ impl Channel {
         }
     }
 
-    pub fn set_reverb_properties(&self, prop : ReverbChannelProperties) -> FMOD_RESULT {
+    pub fn set_reverb_properties(&self, prop : FmodReverbChannelProperties) -> FMOD_RESULT {
         let t = ffi::FMOD_REVERB_CHANNELPROPERTIES{Direct: prop.direct, Room: prop.room, Flags: prop.flags, ConnectionPoint: ::std::ptr::null()};
 
         unsafe { ffi::FMOD_Channel_SetReverbProperties(self.channel, &t) }
     }
 
-    pub fn get_reverb_properties(&self) -> Result<ReverbChannelProperties, FMOD_RESULT> {
+    pub fn get_reverb_properties(&self) -> Result<FmodReverbChannelProperties, FMOD_RESULT> {
         let t = ffi::FMOD_REVERB_CHANNELPROPERTIES{Direct : 0, Room : 0, Flags : 0, ConnectionPoint : ::std::ptr::null()};
 
         match unsafe { ffi::FMOD_Channel_GetReverbProperties(self.channel, &t) } {
-            FMOD_OK => Ok(ReverbChannelProperties{direct: t.Direct, room: t.Room, flags: t.Flags}),
+            FMOD_OK => Ok(FmodReverbChannelProperties{direct: t.Direct, room: t.Room, flags: t.Flags}),
             e => Err(e),
         }
     }

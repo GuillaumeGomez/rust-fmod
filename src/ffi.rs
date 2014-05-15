@@ -60,24 +60,42 @@ extern "C" {
     pub fn FMOD_System_GetDriverInfo(system: FMOD_SYSTEM, id: c_int, name: *c_char, name_len: c_int, guid: *FMOD_GUID) -> FMOD_RESULT;
     pub fn FMOD_System_GetDriverInfoW(system: FMOD_SYSTEM, id: c_int, name: *c_short, name_len: c_int, guid: *FMOD_GUID) -> FMOD_RESULT;
     pub fn FMOD_System_GetDriverCaps(system: FMOD_SYSTEM, id: c_int, caps: *FMOD_CAPS, control_panel_output_rate: *c_int,
-                                    controlpanelspeakermode: *FMOD_SPEAKERMODE) -> FMOD_RESULT;
+        controlpanelspeakermode: *FMOD_SPEAKERMODE) -> FMOD_RESULT;
     pub fn FMOD_System_SetDriver(system: FMOD_SYSTEM, driver: c_int) -> FMOD_RESULT;
     pub fn FMOD_System_GetDriver(system: FMOD_SYSTEM, driver: *c_int) -> FMOD_RESULT;
     pub fn FMOD_System_SetHardwareChannels(system: FMOD_SYSTEM, num_hardware_channels: c_int) -> FMOD_RESULT;
     pub fn FMOD_System_GetHardwareChannels(system: FMOD_SYSTEM, num_hardware_channels: *c_int) -> FMOD_RESULT;
     pub fn FMOD_System_SetSoftwareChannels(system: FMOD_SYSTEM, num_software_channels: c_int) -> FMOD_RESULT;
     pub fn FMOD_System_GetSoftwareChannels(system: FMOD_SYSTEM, num_software_channels: *c_int) -> FMOD_RESULT;
+    pub fn FMOD_System_SetSoftwareFormat(system: FMOD_SYSTEM, sample_rate: c_int, format: FMOD_SOUND_FORMAT, num_output_channels: c_int,
+        max_input_channels: c_int, resample_method: FMOD_DSP_RESAMPLER) -> FMOD_RESULT;
+    pub fn FMOD_System_GetSoftwareFormat(system: FMOD_SYSTEM, sample_rate: *c_int, format: *FMOD_SOUND_FORMAT,
+        num_output_channels: *c_int, max_input_channels: *c_int, resample_method: *FMOD_DSP_RESAMPLER, bits: *c_int) -> FMOD_RESULT;
+    pub fn FMOD_System_SetDSPBufferSize(system: FMOD_SYSTEM, buffer_length: c_uint, num_buffers: c_int) -> FMOD_RESULT;
+    pub fn FMOD_System_GetDSPBufferSize(system: FMOD_SYSTEM, buffer_length: *c_uint, num_buffers: *c_int) -> FMOD_RESULT;
+    //I'll bind it a little later
+    pub fn FMOD_System_SetFileSystem(system: FMOD_SYSTEM, user_open: FMOD_FILE_OPENCALLBACK, user_close: FMOD_FILE_CLOSECALLBACK,
+        user_read: FMOD_FILE_READCALLBACK, user_seek: FMOD_FILE_SEEKCALLBACK, user_async_read: FMOD_FILE_ASYNCREADCALLBACK,
+        user_async_cancel: FMOD_FILE_ASYNCCANCELCALLBACK, block_align: c_int) -> FMOD_RESULT;
+    //I'll bind it a little later
+    pub fn FMOD_System_AttachFileSystem(system: FMOD_SYSTEM, user_open: FMOD_FILE_OPENCALLBACK, user_close: FMOD_FILE_CLOSECALLBACK,
+        user_read: FMOD_FILE_READCALLBACK, user_seek: FMOD_FILE_SEEKCALLBACK) -> FMOD_RESULT;
+    pub fn FMOD_System_SetAdvancedSettings(system: FMOD_SYSTEM, settings: *FMOD_ADVANCEDSETTINGS) -> FMOD_RESULT;
+    pub fn FMOD_System_GetAdvancedSettings(system: FMOD_SYSTEM, settings: *FMOD_ADVANCEDSETTINGS) -> FMOD_RESULT;
 
-    pub fn FMOD_System_Init(system: FMOD_SYSTEM, maxchannels: c_int, flags: FMOD_INITFLAGS, extradriverdata: *c_void) -> FMOD_RESULT;
+
+    pub fn FMOD_System_Init(system: FMOD_SYSTEM, max_channels: c_int, flags: FMOD_INITFLAGS, extra_driver_data: *c_void) -> FMOD_RESULT;
     pub fn FMOD_System_Close(sound: FMOD_SOUND) -> FMOD_RESULT;
     pub fn FMOD_System_Release(system: FMOD_SYSTEM) -> FMOD_RESULT;
     pub fn FMOD_System_CreateSound(system: FMOD_SYSTEM, name_or_data: *c_char, mode: FMOD_MODE, exinfo: *FMOD_CREATESOUNDEXINFO,
         sound: *FMOD_SOUND) -> FMOD_RESULT;
 
+
     /* sound functions */
     pub fn FMOD_System_PlaySound(system : FMOD_SYSTEM, channel_id : FMOD_CHANNELINDEX, sound : FMOD_SOUND, paused : FMOD_BOOL,
         channel : *FMOD_CHANNEL) -> FMOD_RESULT;
     pub fn FMOD_Sound_Release(sound: FMOD_SOUND) -> FMOD_RESULT;
+
 
     /* channel functions */
     pub fn FMOD_System_GetSpectrum(system : FMOD_SYSTEM, array : *c_float, num_values : c_int, channel_offset : c_int,
@@ -93,16 +111,16 @@ extern "C" {
     pub fn FMOD_Channel_GetMute(channel : FMOD_CHANNEL, mute : *FMOD_BOOL) -> FMOD_RESULT;
     pub fn FMOD_Channel_SetPaused(channel : FMOD_CHANNEL, pause : FMOD_BOOL) -> FMOD_RESULT;
     pub fn FMOD_Channel_GetPaused(channel : FMOD_CHANNEL, pause : *FMOD_BOOL) -> FMOD_RESULT;
-    pub fn FMOD_Channel_SetDelay(channel : FMOD_CHANNEL, delaytype : FMOD_DELAYTYPE, delayhi : c_uint, delaylo : c_uint) -> FMOD_RESULT;
-    pub fn FMOD_Channel_GetDelay(channel : FMOD_CHANNEL, delaytype : FMOD_DELAYTYPE, delayhi : *c_uint, delaylo : *c_uint) -> FMOD_RESULT;
-    pub fn FMOD_Channel_SetSpeakerMix(channel : FMOD_CHANNEL, frontleft : c_float, frontright : c_float, center : c_float, lfe : c_float,
-                                backleft : c_float, backright : c_float, sideleft : c_float, sideright : c_float) -> FMOD_RESULT;
-    pub fn FMOD_Channel_GetSpeakerMix(channel : FMOD_CHANNEL, frontleft : *c_float, frontright : *c_float, center : *c_float, lfe : *c_float, backleft : *c_float,
-                                backright : *c_float, sideleft : *c_float, sideright : *c_float) -> FMOD_RESULT;
-    pub fn FMOD_Channel_SetSpeakerLevels(channel : FMOD_CHANNEL, speaker : FMOD_SPEAKER, levels : *c_float, numlevels : c_int) -> FMOD_RESULT;
-    pub fn FMOD_Channel_GetSpeakerLevels(channel : FMOD_CHANNEL, speaker : FMOD_SPEAKER, levels : *c_float, numlevels : c_int) -> FMOD_RESULT;
-    pub fn FMOD_Channel_SetInputChannelMix(channel : FMOD_CHANNEL, levels : *c_float, numlevels : c_int) -> FMOD_RESULT;
-    pub fn FMOD_Channel_GetInputChannelMix(channel : FMOD_CHANNEL, levels : *c_float, numlevels : c_int) -> FMOD_RESULT;
+    pub fn FMOD_Channel_SetDelay(channel : FMOD_CHANNEL, delay_type : FMOD_DELAYTYPE, delayhi : c_uint, delaylo : c_uint) -> FMOD_RESULT;
+    pub fn FMOD_Channel_GetDelay(channel : FMOD_CHANNEL, delay_type : FMOD_DELAYTYPE, delayhi : *c_uint, delaylo : *c_uint) -> FMOD_RESULT;
+    pub fn FMOD_Channel_SetSpeakerMix(channel : FMOD_CHANNEL, front_left : c_float, front_right : c_float, center : c_float, lfe : c_float,
+        back_left : c_float, back_right : c_float, side_left : c_float, side_right : c_float) -> FMOD_RESULT;
+    pub fn FMOD_Channel_GetSpeakerMix(channel : FMOD_CHANNEL, front_left : *c_float, front_right : *c_float, center : *c_float, lfe : *c_float,
+        back_left : *c_float, back_right : *c_float, side_left : *c_float, side_right : *c_float) -> FMOD_RESULT;
+    pub fn FMOD_Channel_SetSpeakerLevels(channel : FMOD_CHANNEL, speaker : FMOD_SPEAKER, levels : *c_float, num_levels : c_int) -> FMOD_RESULT;
+    pub fn FMOD_Channel_GetSpeakerLevels(channel : FMOD_CHANNEL, speaker : FMOD_SPEAKER, levels : *c_float, num_levels : c_int) -> FMOD_RESULT;
+    pub fn FMOD_Channel_SetInputChannelMix(channel : FMOD_CHANNEL, levels : *c_float, num_levels : c_int) -> FMOD_RESULT;
+    pub fn FMOD_Channel_GetInputChannelMix(channel : FMOD_CHANNEL, levels : *c_float, num_levels : c_int) -> FMOD_RESULT;
     pub fn FMOD_Channel_SetPriority(channel : FMOD_CHANNEL, priority : c_int) -> FMOD_RESULT;
     pub fn FMOD_Channel_GetPriority(channel : FMOD_CHANNEL, priority : *c_int) -> FMOD_RESULT;
     pub fn FMOD_Channel_SetPosition(channel : FMOD_CHANNEL, position : c_uint, postype : FMOD_TIMEUNIT) -> FMOD_RESULT;
@@ -181,4 +199,35 @@ pub struct FMOD_GUID
     pub Data2: c_ushort,            /* Specifies the first group of 4 hexadecimal digits.   */
     pub Data3: c_ushort,            /* Specifies the second group of 4 hexadecimal digits.  */
     pub Data4: [c_uchar, ..8]       /* Array of 8 bytes. The first 2 bytes contain the third group of 4 hexadecimal digits. The remaining 6 bytes contain the final 12 hexadecimal digits. */
+}
+
+pub struct FMOD_ADVANCEDSETTINGS
+{
+    pub cbsize                      : c_int,        /* [w]   Size of this structure.  Use sizeof(FMOD_ADVANCEDSETTINGS)  NOTE: This must be set before calling System::getAdvancedSettings! */
+    pub maxMPEGcodecs               : c_int,        /* [r/w] Optional. Specify 0 to ignore. For use with FMOD_CREATECOMPRESSEDSAMPLE only.  Mpeg  codecs consume 21,684 bytes per instance and this number will determine how many mpeg channels can be played simultaneously.   Default = 32. */
+    pub maxADPCMcodecs              : c_int,        /* [r/w] Optional. Specify 0 to ignore. For use with FMOD_CREATECOMPRESSEDSAMPLE only.  ADPCM codecs consume  2,136 bytes per instance and this number will determine how many ADPCM channels can be played simultaneously.  Default = 32. */
+    pub maxXMAcodecs                : c_int,        /* [r/w] Optional. Specify 0 to ignore. For use with FMOD_CREATECOMPRESSEDSAMPLE only.  XMA   codecs consume 14,836 bytes per instance and this number will determine how many XMA channels can be played simultaneously.    Default = 32. */
+    pub maxCELTcodecs               : c_int,        /* [r/w] Optional. Specify 0 to ignore. For use with FMOD_CREATECOMPRESSEDSAMPLE only.  CELT  codecs consume 11,500 bytes per instance and this number will determine how many CELT channels can be played simultaneously.   Default = 32. */    
+    pub maxVORBIScodecs             : c_int,        /* [r/w] Optional. Specify 0 to ignore. For use with FMOD_CREATECOMPRESSEDSAMPLE only.  Vorbis codecs consume 12,000 bytes per instance and this number will determine how many Vorbis channels can be played simultaneously. Default = 32. */    
+    pub maxAT9Codecs                : c_int,        /* [r/w] Optional. Specify 0 to ignore. For use with FMOD_CREATECOMPRESSEDSAMPLE only.  AT9 codecs consume  8,720 bytes per instance and this number will determine how many AT9 channels can be played simultaneously. Default = 32. */    
+    pub maxPCMcodecs                : c_int,        /* [r/w] Optional. Specify 0 to ignore. For use with PS3 only.                          PCM   codecs consume 12,672 bytes per instance and this number will determine how many streams and PCM voices can be played simultaneously. Default = 16. */
+    pub ASIONumChannels             : c_int,        /* [r/w] Optional. Specify 0 to ignore. Number of channels available on the ASIO device. */
+    pub ASIOChannelList             : **c_char,     /* [r/w] Optional. Specify 0 to ignore. Pointer to an array of strings (number of entries defined by ASIONumChannels) with ASIO channel names. */
+    pub ASIOSpeakerList             : *FMOD_SPEAKER,/* [r/w] Optional. Specify 0 to ignore. Pointer to a list of speakers that the ASIO channels map to.  This can be called after System::init to remap ASIO output. */
+    pub max3DReverbDSPs             : c_int,        /* [r/w] Optional. Specify 0 to ignore. The max number of 3d reverb DSP's in the system. (NOTE: CURRENTLY DISABLED / UNUSED) */
+    pub HRTFMinAngle                : c_float,      /* [r/w] Optional.                      For use with FMOD_INIT_HRTF_LOWPASS.  The angle range (0-360) of a 3D sound in relation to the listener, at which the HRTF function begins to have an effect. 0 = in front of the listener. 180 = from 90 degrees to the left of the listener to 90 degrees to the right. 360 = behind the listener. Default = 180.0. */
+    pub HRTFMaxAngle                : c_float,      /* [r/w] Optional.                      For use with FMOD_INIT_HRTF_LOWPASS.  The angle range (0-360) of a 3D sound in relation to the listener, at which the HRTF function has maximum effect. 0 = front of the listener. 180 = from 90 degrees to the left of the listener to 90 degrees to the right. 360 = behind the listener. Default = 360.0. */
+    pub HRTFFreq                    : c_float,      /* [r/w] Optional. Specify 0 to ignore. For use with FMOD_INIT_HRTF_LOWPASS.  The cutoff frequency of the HRTF's lowpass filter function when at maximum effect. (i.e. at HRTFMaxAngle).  Default = 4000.0. */
+    pub vol0virtualvol              : c_float,      /* [r/w] Optional. Specify 0 to ignore. For use with FMOD_INIT_VOL0_BECOMES_VIRTUAL.  If this flag is used, and the volume is 0.0, then the sound will become virtual.  Use this value to raise the threshold to a different point where a sound goes virtual. */
+    pub eventqueuesize              : c_int,        /* [r/w] Optional. Specify 0 to ignore. For use with FMOD Event system only.  Specifies the number of slots available for simultaneous non blocking loads, across all threads.  Default = 32. */
+    pub defaultDecodeBufferSize     : c_uint,       /* [r/w] Optional. Specify 0 to ignore. For streams. This determines the default size of the double buffer (in milliseconds) that a stream uses.  Default = 400ms */
+    pub debugLogFilename            : *c_char,      /* [r/w] Optional. Specify 0 to ignore. Gives fmod's logging system a path/filename.  Normally the log is placed in the same directory as the executable and called fmod.log. When using System::getAdvancedSettings, provide at least 256 bytes of memory to copy into. */
+    pub profileport                 : c_ushort,     /* [r/w] Optional. Specify 0 to ignore. For use with FMOD_INIT_ENABLE_PROFILE.  Specify the port to listen on for connections by the profiler application. */
+    pub geometryMaxFadeTime         : c_uint,       /* [r/w] Optional. Specify 0 to ignore. The maximum time in miliseconds it takes for a channel to fade to the new level when its occlusion changes. */
+    pub maxSpectrumWaveDataBuffers  : c_uint,       /* [r/w] Optional. Specify 0 to ignore. Tells System::init to allocate a pool of wavedata/spectrum buffers to prevent memory fragmentation, any additional buffers will be allocated normally. */
+    pub musicSystemCacheDelay       : c_uint,       /* [r/w] Optional. Specify 0 to ignore. The delay the music system should allow for loading a sample from disk (in milliseconds). Default = 400 ms. */
+    pub distanceFilterCenterFreq    : c_float,      /* [r/w] Optional. Specify 0 to ignore. For use with FMOD_INIT_DISTANCE_FILTERING.  The default center frequency in Hz for the distance filtering effect. Default = 1500.0. */
+    pub stackSizeStream             : c_uint,       /* [r/w] Optional. Specify 0 to ignore. Specify the stack size for the FMOD Stream thread in bytes.  Useful for custom codecs that use excess stack.  Default 49,152 (48kb) */
+    pub stackSizeNonBlocking        : c_uint,       /* [r/w] Optional. Specify 0 to ignore. Specify the stack size for the FMOD_NONBLOCKING loading thread.  Useful for custom codecs that use excess stack.  Default 65,536 (64kb) */
+    pub stackSizeMixer              : c_uint        /* [r/w] Optional. Specify 0 to ignore. Specify the stack size for the FMOD mixer thread.  Useful for custom dsps that use excess stack.  Default 49,152 (48kb) */
 }

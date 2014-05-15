@@ -36,9 +36,9 @@
 
 extern crate libc;
 
-pub use channel::{Channel, SpectrumOptions, DelayOptions, SpeakerMixOptions, ReverbChannelProperties};
+pub use channel::{Channel, FmodSpectrumOptions, FmodDelayOptions, FmodSpeakerMixOptions, FmodReverbChannelProperties};
 pub use sound::Sound;
-pub use fmod_sys::{FmodSys, FmodGuid};
+pub use fmod_sys::{FmodSys, FmodGuid, FmodSoftwareFormat, FmodAdvancedSettings};
 
 mod ffi;
 mod sound;

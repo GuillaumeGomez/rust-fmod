@@ -319,6 +319,19 @@ pub enum FMOD_SPEAKERMODE
     FMOD_SPEAKERMODE_FORCEINT = 65536  /* Makes sure this enum is signed 32bit. */
 }
 
+#[deriving(Eq, Ord, Show)]
+#[repr(C)]
+pub enum FMOD_DSP_RESAMPLER
+{
+    FMOD_DSP_RESAMPLER_NOINTERP,        /* No interpolation.  High frequency aliasing hiss will be audible depending on the sample rate of the sound. */
+    FMOD_DSP_RESAMPLER_LINEAR,          /* Linear interpolation (default method).  Fast and good quality, causes very slight lowpass effect on low frequency sounds. */
+    FMOD_DSP_RESAMPLER_CUBIC,           /* Cubic interpolation.  Slower than linear interpolation but better quality. */
+    FMOD_DSP_RESAMPLER_SPLINE,          /* 5 point spline interpolation.  Slowest resampling method but best quality. */
+
+    FMOD_DSP_RESAMPLER_MAX,             /* Maximum number of resample methods supported. */
+    FMOD_DSP_RESAMPLER_FORCEINT = 65536 /* Makes sure this enum is signed 32bit. */
+}
+
 pub static FMOD_DEFAULT                 : c_uint = 0x00000000;  /* Default for all modes listed below. FMOD_LOOP_OFF, FMOD_2D, FMOD_HARDWARE */
 pub static FMOD_LOOP_OFF                : c_uint = 0x00000001;  /* For non looping sounds. (DEFAULT).  Overrides FMOD_LOOP_NORMAL / FMOD_LOOP_BIDI. */
 pub static FMOD_LOOP_NORMAL             : c_uint = 0x00000002;  /* For forward looping sounds. */

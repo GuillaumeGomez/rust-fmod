@@ -63,23 +63,23 @@ impl Sound {
         self.channel.is_playing()
     }
 
-    fn play_loop(&self) -> FMOD_RESULT {
-        match self.is_playing() {
-            Ok(b) => {
-                if b == true {
-                    sleep(30);
-                    self.play_loop()
-                } else {
-                    FMOD_OK
-                }
-            },
-            Err(e) => e,
-        }
-    }
-
     pub fn play_to_the_end(&self) -> FMOD_RESULT {
         match self.play() {
-            FMOD_OK => self.play_loop(),
+            FMOD_OK => {
+                loop {
+                    match self.is_playing() {
+                        Ok(b) => {
+                            if b == true {
+                                sleep(30)
+                            } else {
+                                break;
+                            }
+                        },
+                        Err(e) => return e,
+                    }
+                }
+                FMOD_OK
+            }
             err => err,
         }
     }
