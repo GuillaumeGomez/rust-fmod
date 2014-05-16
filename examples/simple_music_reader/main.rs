@@ -10,6 +10,10 @@ use std::os;
 fn main() {
 	let args = os::args();
 	let tmp = args.tail();
+
+	if tmp.len() < 1 {
+		fail!("USAGE: ./fmod [music_file]");
+	}
 	let fmod = match FmodSys::new() {
 		Ok(f) => f,
 		Err(e) => {
@@ -24,10 +28,6 @@ fn main() {
 			fail!("FmodSys.init failed : {}", e);
 		}
 	};
-
-	if tmp.len() < 1 {
-		fail!("USAGE: ./fmod [music_file]");
-	}
 
 	let arg1 = tmp.get(0).unwrap();
 

@@ -1,7 +1,7 @@
 /*
 * Rust-FMOD - Copyright (c) 2014 Gomez Guillaume.
 *
-* The Original software, FMOD library, is provided by FIRELIGHT TECHNOLOGIES.
+* The Original software, FmodEx library, is provided by FIRELIGHT TECHNOLOGIES.
 *
 * This software is provided 'as-is', without any express or implied warranty.
 * In no event will the authors be held liable for any damages arising from

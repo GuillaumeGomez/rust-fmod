@@ -1,7 +1,7 @@
 /*
 * Rust-FMOD - Copyright (c) 2014 Gomez Guillaume.
 *
-* The Original software, FMOD library, is provided by FIRELIGHT TECHNOLOGIES.
+* The Original software, FmodEx library, is provided by FIRELIGHT TECHNOLOGIES.
 *
 * This software is provided 'as-is', without any express or implied warranty.
 * In no event will the authors be held liable for any damages arising from
@@ -76,6 +76,56 @@ pub struct FmodAdvancedSettings
     pub stack_size_mixer              : u32
 }
 
+pub struct FmodCodecDescription {
+    pub name            : StrBuf,                             /* [in] Name of the codec. */
+    pub version         : u32,                                /* [in] Plugin writer's version number. */
+    pub defaultasstream : i32,                                /* [in] Tells FMOD to open the file as a stream when calling System::createSound, and not a static sample.  Should normally be 0 (FALSE), because generally the user wants to decode the file into memory when using System::createSound.   Mainly used for formats that decode for a very long time, or could use large amounts of memory when decoded.  Usually sequenced formats such as mod/s3m/xm/it/midi fall into this category.   It is mainly to stop users that don't know what they're doing from getting FMOD_ERR_MEMORY returned from createSound when they should have in fact called System::createStream or used FMOD_CREATESTREAM in System::createSound. */
+    pub timeunits       : FmodTimeUnit,                       /* [in] When setposition codec is called, only these time formats will be passed to the codec. Use bitwise OR to accumulate different types. */
+    pub open            : ffi::FMOD_CODEC_OPENCALLBACK,       /* [in] Open callback for the codec for when FMOD tries to open a sound using this codec. */
+    pub close           : ffi::FMOD_CODEC_CLOSECALLBACK,      /* [in] Close callback for the codec for when FMOD tries to close a sound using this codec.  */
+    pub read            : ffi::FMOD_CODEC_READCALLBACK,       /* [in] Read callback for the codec for when FMOD tries to read some data from the file to the destination format (specified in the open callback). */
+    pub getlength       : ffi::FMOD_CODEC_GETLENGTHCALLBACK,  /* [in] Callback to return the length of the song in whatever format required when Sound::getLength is called. */
+    pub setposition     : ffi::FMOD_CODEC_SETPOSITIONCALLBACK,/* [in] Seek callback for the codec for when FMOD tries to seek within the file with Channel::setPosition. */
+    pub getposition     : ffi::FMOD_CODEC_GETPOSITIONCALLBACK,/* [in] Tell callback for the codec for when FMOD tries to get the current position within the with Channel::getPosition. */
+    pub soundcreate     : ffi::FMOD_CODEC_SOUNDCREATECALLBACK,/* [in] Sound creation callback for the codec when FMOD finishes creating the sound.  (So the codec can set more parameters for the related created sound, ie loop points/mode or 3D attributes etc). */
+    pub getwaveformat   : ffi::FMOD_CODEC_GETWAVEFORMAT       /* [in] Callback to tell FMOD about the waveformat of a particular subsound.  This is to save memory, rather than saving 1000 FMOD_CODEC_WAVEFORMAT structures in the codec, the codec might have a more optimal way of storing this information. */
+}
+
+pub struct FmodDSP {
+    dsp : ffi::FMOD_DSP
+}
+
+impl FmodDSP {
+    pub fn new() -> FmodDSP {
+        FmodDSP{dsp: ::std::ptr::null()}
+    }
+}
+
+pub struct FmodOutputHandle {
+    handle: *c_void
+}
+
+pub struct FmodVector
+{
+    pub x: f32, /* X co-ordinate in 3D space. */
+    pub y: f32, /* Y co-ordinate in 3D space. */
+    pub z: f32  /* Z co-ordinate in 3D space. */
+}
+
+impl FmodVector {
+    pub fn new() -> FmodVector {
+        FmodVector{x: 0f32, y: 0f32, z: 0f32}
+    }
+
+    fn from_c(vec : ffi::FMOD_VECTOR) -> FmodVector {
+        FmodVector{x: vec.x, y: vec.y, z: vec.z}
+    }
+
+    fn convert_to_c(&self) -> ffi::FMOD_VECTOR {
+        ffi::FMOD_VECTOR{x: self.x, y: self.y, z: self.z}
+    }
+}
+
 pub struct FmodSys {
     system : ffi::FMOD_SYSTEM,
 }
@@ -92,6 +142,14 @@ impl FmodSys {
 
     pub fn init(&self) -> FMOD_RESULT {
         unsafe { ffi::FMOD_System_Init(self.system, 1, FMOD_INIT_NORMAL, ::std::ptr::null()) }
+    }
+
+    pub fn init_with_parameters(&self, max_channels: i32, FmodInitFlag(flag) : FmodInitFlag) -> FMOD_RESULT {
+        unsafe { ffi::FMOD_System_Init(self.system, max_channels, flag, ::std::ptr::null()) }
+    }
+
+    pub fn update(&self) -> FMOD_RESULT {
+        unsafe { ffi::FMOD_System_Update(self.system) }
     }
 
     pub fn release(&self) -> FMOD_RESULT {
@@ -299,5 +357,261 @@ impl FmodSys {
             }
             e => Err(e)
         }
+    }
+
+    pub fn set_speaker_mode(&self, speaker_mode: FMOD_SPEAKERMODE) -> FMOD_RESULT {
+        unsafe { ffi::FMOD_System_SetSpeakerMode(self.system, &speaker_mode) }
+    }
+
+    pub fn get_speaker_mode(&self) -> Result<FMOD_SPEAKERMODE, FMOD_RESULT> {
+        let speaker_mode = FMOD_SPEAKERMODE_RAW;
+
+        match unsafe { ffi::FMOD_System_GetSpeakerMode(self.system, &speaker_mode) } {
+            FMOD_OK => Ok(speaker_mode),
+            e => Err(e)
+        }
+    }
+
+    pub fn set_plugin_path(&self, path: StrBuf) -> FMOD_RESULT {
+        let tmp_v = path.clone().into_owned();
+
+        tmp_v.with_c_str(|c_str|{
+            unsafe { ffi::FMOD_System_SetPluginPath(self.system, c_str) }
+        })
+    }
+
+    pub fn load_plugin(&self, filename: StrBuf, priority: u32) -> Result<FmodPluginHandle, FMOD_RESULT> {
+        let tmp_v = filename.clone().into_owned();
+        let handle = 0u32;
+
+        tmp_v.with_c_str(|c_str|{
+            match unsafe { ffi::FMOD_System_LoadPlugin(self.system, c_str, &handle, priority) } {
+                FMOD_OK => Ok(FmodPluginHandle(handle)),
+                e => Err(e)
+            }
+        })
+    }
+
+    pub fn unload_plugin(&self, FmodPluginHandle(handle): FmodPluginHandle) -> FMOD_RESULT {
+        unsafe { ffi::FMOD_System_UnloadPlugin(self.system, handle) }
+    }
+
+    pub fn get_num_plugins(&self, plugin_type: FMOD_PLUGINTYPE) -> Result<i32, FMOD_RESULT> {
+        let num_plugins = 0i32;
+
+        match unsafe { ffi::FMOD_System_GetNumPlugins(self.system, plugin_type, &num_plugins) } {
+            FMOD_OK => Ok(num_plugins),
+            e => Err(e)
+        }
+    }
+
+    pub fn get_plugin_handle(&self, plugin_type: FMOD_PLUGINTYPE, index: i32) ->Result<FmodPluginHandle, FMOD_RESULT> {
+        let handle = 0u32;
+
+        match unsafe { ffi::FMOD_System_GetPluginHandle(self.system, plugin_type, index, &handle) } {
+            FMOD_OK => Ok(FmodPluginHandle(handle)),
+            e => Err(e)
+        }
+    }
+
+    pub fn get_plugin_info(&self, FmodPluginHandle(handle): FmodPluginHandle, name_len: u32) -> Result<(StrBuf, FMOD_PLUGINTYPE, u32), FMOD_RESULT> {
+        let name = StrBuf::with_capacity(name_len as uint).into_owned();
+        let plugin_type = FMOD_PLUGINTYPE_OUTPUT;
+        let version = 0u32;
+
+        name.with_c_str(|c_str|{
+            match unsafe { ffi::FMOD_System_GetPluginInfo(self.system, handle, &plugin_type, c_str, name_len as i32, &version) } {
+                FMOD_OK => Ok((StrBuf::from_owned_str(unsafe { ::std::str::raw::from_c_str(c_str) }).clone(), plugin_type, version)),
+                e => Err(e)
+            }
+        })
+    }
+
+    pub fn set_output_by_plugin(&self, FmodPluginHandle(handle): FmodPluginHandle) -> FMOD_RESULT {
+        unsafe { ffi::FMOD_System_SetOutputByPlugin(self.system, handle) }
+    }
+
+    pub fn get_output_by_plugin(&self) -> Result<FmodPluginHandle, FMOD_RESULT> {
+        let handle = 0u32;
+
+        match unsafe { ffi::FMOD_System_GetOutputByPlugin(self.system, &handle) } {
+            FMOD_OK => Ok(FmodPluginHandle(handle)),
+            e => Err(e)
+        }
+    }
+
+    pub fn create_DSP_by_plugin(&self, FmodPluginHandle(handle): FmodPluginHandle) -> Result<FmodDSP, FMOD_RESULT> {
+        let dsp = FmodDSP::new();
+
+        match unsafe { ffi::FMOD_System_CreateDSPByPlugin(self.system, handle, &dsp.dsp) } {
+            FMOD_OK => Ok(dsp),
+            e => Err(e)
+        }
+    }
+
+    pub fn set_3D_settings(&self, doppler_scale: f32, distance_factor: f32, roll_off_scale: f32) -> FMOD_RESULT {
+        unsafe { ffi::FMOD_System_Set3DSettings(self.system, doppler_scale, distance_factor, roll_off_scale) }
+    }
+
+    pub fn get_3D_settings(&self) -> Result<(f32, f32, f32), FMOD_RESULT> {
+        let doppler_scale = 0f32;
+        let distance_factor = 0f32;
+        let roll_off_scale = 0f32;
+
+        match unsafe { ffi::FMOD_System_Get3DSettings(self.system, &doppler_scale, &distance_factor, &roll_off_scale) } {
+            FMOD_OK => Ok((doppler_scale, distance_factor, roll_off_scale)),
+            e => Err(e)
+        }
+    }
+
+    pub fn set_3D_num_listeners(&self, num_listeners : i32) -> FMOD_RESULT {
+        unsafe { ffi::FMOD_System_Set3DNumListeners(self.system, num_listeners) }
+    }
+
+    pub fn get_3D_num_listeners(&self) -> Result<i32, FMOD_RESULT> {
+        let num_listeners = 0i32;
+
+        match unsafe { ffi::FMOD_System_Get3DNumListeners(self.system, &num_listeners) } {
+            FMOD_OK => Ok(num_listeners),
+            e => Err(e)
+        }
+    }
+
+    pub fn set_3D_listener_attributes(&self, listener: i32, pos: FmodVector, vel: FmodVector, forward: FmodVector,
+        up: FmodVector) -> FMOD_RESULT {
+        let c_p = pos.convert_to_c();
+        let c_v = vel.convert_to_c();
+        let c_f = forward.convert_to_c();
+        let c_u = up.convert_to_c();
+
+        unsafe { ffi::FMOD_System_Set3DListenerAttributes(self.system, listener, &c_p, &c_v, &c_f, &c_u) }
+    }
+
+    pub fn get_3D_listener_attributes(&self, listener: i32) -> Result<(FmodVector, FmodVector, FmodVector, FmodVector), FMOD_RESULT> {
+        let pos = FmodVector::new().convert_to_c();
+        let vel = FmodVector::new().convert_to_c();
+        let forward = FmodVector::new().convert_to_c();
+        let up = FmodVector::new().convert_to_c();
+
+        match unsafe { ffi::FMOD_System_Get3DListenerAttributes(self.system, listener, &pos, &vel, &forward, &up) } {
+            FMOD_OK => Ok((FmodVector::from_c(pos), FmodVector::from_c(vel), FmodVector::from_c(forward), FmodVector::from_c(up))),
+            e => Err(e)
+        }
+    }
+
+    pub fn set_3D_speaker_position(&self, speaker: FMOD_SPEAKER, x: f32, y: f32, active: bool) -> FMOD_RESULT {
+        let t_active = match active {
+            true => 1i32,
+            false => 0i32
+        };
+        unsafe { ffi::FMOD_System_Set3DSpeakerPosition(self.system, speaker, x, y, t_active) }
+    }
+
+    pub fn get_3D_speaker_position(&self, speaker: FMOD_SPEAKER) -> Result<(f32, f32, bool), FMOD_RESULT> {
+        let x = 0f32;
+        let y = 0f32;
+        let active = 0i32;
+
+        match unsafe { ffi::FMOD_System_Get3DSpeakerPosition(self.system, speaker, &x, &y, &active) } {
+            FMOD_OK => Ok((x, y, match active {
+                1 => true,
+                _ => false
+            })),
+            e => Err(e)
+        }
+    }
+
+    pub fn set_stream_buffer_size(&self, file_buffer_size: u32, FmodTimeUnit(file_buffer_size_type): FmodTimeUnit) -> FMOD_RESULT {
+        unsafe { ffi::FMOD_System_SetStreamBufferSize(self.system, file_buffer_size, file_buffer_size_type) }
+    }
+
+    pub fn get_stream_buffer_size(&self) -> Result<(u32, FmodTimeUnit), FMOD_RESULT> {
+        let file_buffer_size = 0u32;
+        let file_buffer_size_type = 0u32;
+
+        match unsafe { ffi::FMOD_System_GetStreamBufferSize(self.system, &file_buffer_size, &file_buffer_size_type) } {
+            FMOD_OK => Ok((file_buffer_size, FmodTimeUnit(file_buffer_size_type))),
+            e => Err(e)
+        }
+    }
+
+    pub fn get_version(&self) -> Result<u32, FMOD_RESULT> {
+        let version = 0u32;
+
+        match unsafe { ffi::FMOD_System_GetVersion(self.system, &version) } {
+            FMOD_OK => Ok(version),
+            e => Err(e)
+        }
+    }
+
+    pub fn get_output_handle(&self) -> Result<FmodOutputHandle, FMOD_RESULT> {
+        let output_h = ::std::ptr::null();
+
+        match unsafe { ffi::FMOD_System_GetOutputHandle(self.system, &output_h) } {
+            FMOD_OK => Ok(FmodOutputHandle{handle: output_h}),
+            e => Err(e)
+        }
+    }
+
+    pub fn get_channels_playing(&self) -> Result<i32, FMOD_RESULT> {
+        let playing_chans = 0i32;
+
+        match unsafe { ffi::FMOD_System_GetChannelsPlaying(self.system, &playing_chans) } {
+            FMOD_OK => Ok(playing_chans),
+            e => Err(e)
+        }
+    }
+
+    pub fn get_CPU_usage(&self) -> Result<(f32, f32, f32, f32, f32), FMOD_RESULT> {
+        let dsp = 0f32;
+        let stream = 0f32;
+        let geometry = 0f32;
+        let update = 0f32;
+        let total = 0f32;
+
+        match unsafe { ffi::FMOD_System_GetCPUUsage(self.system, &dsp, &stream, &geometry, &update, &total) } {
+            FMOD_OK => Ok((dsp, stream, geometry, update, total)),
+            e => Err(e)
+        }
+    }
+
+    pub fn get_sound_RAM(&self) -> Result<(i32, i32, i32), FMOD_RESULT> {
+        let current_alloced = 0i32;
+        let max_alloced = 0i32;
+        let total = 0i32;
+
+        match unsafe { ffi::FMOD_System_GetSoundRAM(self.system, &current_alloced, &max_alloced, &total) } {
+            FMOD_OK => Ok((current_alloced, max_alloced, total)),
+            e => Err(e)
+        }
+    }
+
+    pub fn get_num_CDROM_drives(&self) -> Result<i32, FMOD_RESULT> {
+        let num_drives = 0i32;
+
+        match unsafe { ffi::FMOD_System_GetNumCDROMDrives(self.system, &num_drives) } {
+            FMOD_OK => Ok(num_drives),
+            e => Err(e)
+        }
+    }
+
+    pub fn get_CDROM_drive_name(&self, drive: i32, drive_name_len: u32, scsi_name_len: u32, device_name_len: u32) -> Result<(StrBuf, StrBuf, StrBuf), FMOD_RESULT> {
+        let drive_name = StrBuf::with_capacity(drive_name_len as uint).into_owned();
+        let scsi_name = StrBuf::with_capacity(scsi_name_len as uint).into_owned();
+        let device_name = StrBuf::with_capacity(device_name_len as uint).into_owned();
+
+        drive_name.with_c_str(|c_drive_name|{
+            scsi_name.with_c_str(|c_scsi_name|{
+                device_name.with_c_str(|c_device_name|{
+                    match unsafe { ffi::FMOD_System_GetCDROMDriveName(self.system, drive, c_drive_name, drive_name_len as i32, c_scsi_name, scsi_name_len as i32,
+                        c_device_name, device_name_len as i32) } {
+                        FMOD_OK => Ok((StrBuf::from_owned_str(unsafe { ::std::str::raw::from_c_str(c_drive_name) }).clone(),
+                                        StrBuf::from_owned_str(unsafe { ::std::str::raw::from_c_str(c_scsi_name) }).clone(),
+                                        StrBuf::from_owned_str(unsafe { ::std::str::raw::from_c_str(c_device_name) }).clone())),
+                        e => Err(e)
+                    }
+                })
+            })
+        })
     }
 }

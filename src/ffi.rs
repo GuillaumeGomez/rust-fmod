@@ -39,6 +39,26 @@ pub type FMOD_FILE_ASYNCREADCALLBACK = ::std::option::Option<extern "C" fn(arg1:
 pub type FMOD_FILE_ASYNCCANCELCALLBACK = ::std::option::Option<extern "C" fn(arg1: *c_void, arg2: *c_void, arg3: c_uint) -> FMOD_RESULT>;
 pub type FMOD_SOUND_PCMSETPOSCALLBACK = ::std::option::Option<extern "C" fn(arg1: FMOD_SOUND, arg2: c_int, arg3: c_uint, arg4: FMOD_TIMEUNIT) -> FMOD_RESULT>;
 
+
+pub type FMOD_SYSTEM_CALLBACK = ::std::option::Option<extern "C" fn(system: FMOD_SYSTEM, _type : FMOD_SYSTEM_CALLBACKTYPE, commanddata1 : *c_void, commanddata2 : *c_void) -> FMOD_RESULT>;
+
+
+/*
+ *  codec callbacks
+ */
+pub type FMOD_CODEC_OPENCALLBACK = ::std::option::Option<extern "C" fn(codec_state: *FMOD_CODEC_STATE, user_mode: FMOD_MODE, userexinfo: *FMOD_CREATESOUNDEXINFO) -> FMOD_RESULT>;
+pub type FMOD_CODEC_CLOSECALLBACK = ::std::option::Option<extern "C" fn(codec_state: *FMOD_CODEC_STATE) -> FMOD_RESULT>;
+pub type FMOD_CODEC_READCALLBACK = ::std::option::Option<extern "C" fn(codec_state: *FMOD_CODEC_STATE, buffer: *c_void, size_bytes: c_uint, bytes_read: *c_uint) -> FMOD_RESULT>;
+pub type FMOD_CODEC_GETLENGTHCALLBACK = ::std::option::Option<extern "C" fn(codec_state: *FMOD_CODEC_STATE, length: *c_uint, length_type: FMOD_TIMEUNIT) -> FMOD_RESULT>;
+pub type FMOD_CODEC_SETPOSITIONCALLBACK = ::std::option::Option<extern "C" fn(codec_state: *FMOD_CODEC_STATE, sub_sound: c_int, position: c_uint, postype: FMOD_TIMEUNIT) -> FMOD_RESULT>;
+pub type FMOD_CODEC_GETPOSITIONCALLBACK = ::std::option::Option<extern "C" fn(codec_state: *FMOD_CODEC_STATE, position: *c_uint, postype: FMOD_TIMEUNIT) -> FMOD_RESULT>;
+pub type FMOD_CODEC_SOUNDCREATECALLBACK = ::std::option::Option<extern "C" fn(codec_state: *FMOD_CODEC_STATE, sub_sound: c_int, sound: FMOD_SOUND) -> FMOD_RESULT>;
+pub type FMOD_CODEC_METADATACALLBACK = ::std::option::Option<extern "C" fn(codec_state: *FMOD_CODEC_STATE, tag_type: FMOD_TAGTYPE, name: *c_char, data: *c_void,
+    data_len: c_uint, data_type: FMOD_TAGDATATYPE, unique: c_int) -> FMOD_RESULT>;
+pub type FMOD_CODEC_GETWAVEFORMAT = ::std::option::Option<extern "C" fn(codec_state: *FMOD_CODEC_STATE, index: c_int, wave_format: *FMOD_CODEC_WAVEFORMAT) -> FMOD_RESULT>;
+pub type FMOD_3D_ROLLOFFCALLBACK = ::std::option::Option<extern "C" fn(channel: FMOD_CHANNEL, distance: c_float) -> FMOD_RESULT>;
+
+
 pub type FMOD_SYSTEM = *c_void;
 pub type FMOD_SOUND = *c_void;
 pub type FMOD_CHANNEL = *c_void;
@@ -48,12 +68,13 @@ pub type FMOD_MODE = c_uint;
 pub type FMOD_TIMEUNIT = c_uint;
 pub type FMOD_SOUNDGROUP = c_void;
 pub type FMOD_INITFLAGS = c_uint;
-pub type FMOD_DSP = c_void;
+pub type FMOD_DSP = *c_void;
 pub type FMOD_CAPS = c_uint;
 
 extern "C" {
     /* pre-init functions */
     pub fn FMOD_System_Create(system: *FMOD_SYSTEM) -> FMOD_RESULT;
+    pub fn FMOD_System_Release(system: FMOD_SYSTEM) -> FMOD_RESULT;
     pub fn FMOD_System_SetOutput(system: FMOD_SYSTEM, output_type: FMOD_OUTPUTTYPE) -> FMOD_RESULT;
     pub fn FMOD_System_GetOutput(system: FMOD_SYSTEM, output_type: *FMOD_OUTPUTTYPE) -> FMOD_RESULT;
     pub fn FMOD_System_GetNumDrivers(system: FMOD_SYSTEM, num_drivers: *c_int) -> FMOD_RESULT;
@@ -73,20 +94,70 @@ extern "C" {
         num_output_channels: *c_int, max_input_channels: *c_int, resample_method: *FMOD_DSP_RESAMPLER, bits: *c_int) -> FMOD_RESULT;
     pub fn FMOD_System_SetDSPBufferSize(system: FMOD_SYSTEM, buffer_length: c_uint, num_buffers: c_int) -> FMOD_RESULT;
     pub fn FMOD_System_GetDSPBufferSize(system: FMOD_SYSTEM, buffer_length: *c_uint, num_buffers: *c_int) -> FMOD_RESULT;
-    //I'll bind it a little later
+    // I'll bind it a little later
     pub fn FMOD_System_SetFileSystem(system: FMOD_SYSTEM, user_open: FMOD_FILE_OPENCALLBACK, user_close: FMOD_FILE_CLOSECALLBACK,
         user_read: FMOD_FILE_READCALLBACK, user_seek: FMOD_FILE_SEEKCALLBACK, user_async_read: FMOD_FILE_ASYNCREADCALLBACK,
         user_async_cancel: FMOD_FILE_ASYNCCANCELCALLBACK, block_align: c_int) -> FMOD_RESULT;
-    //I'll bind it a little later
+    // I'll bind it a little later
     pub fn FMOD_System_AttachFileSystem(system: FMOD_SYSTEM, user_open: FMOD_FILE_OPENCALLBACK, user_close: FMOD_FILE_CLOSECALLBACK,
         user_read: FMOD_FILE_READCALLBACK, user_seek: FMOD_FILE_SEEKCALLBACK) -> FMOD_RESULT;
     pub fn FMOD_System_SetAdvancedSettings(system: FMOD_SYSTEM, settings: *FMOD_ADVANCEDSETTINGS) -> FMOD_RESULT;
     pub fn FMOD_System_GetAdvancedSettings(system: FMOD_SYSTEM, settings: *FMOD_ADVANCEDSETTINGS) -> FMOD_RESULT;
+    pub fn FMOD_System_SetSpeakerMode(system: FMOD_SYSTEM, speaker_mode: *FMOD_SPEAKERMODE) -> FMOD_RESULT;
+    pub fn FMOD_System_GetSpeakerMode(system: FMOD_SYSTEM, speaker_mode: *FMOD_SPEAKERMODE) -> FMOD_RESULT;
+    // I'll bind it a little later
+    pub fn FMOD_System_SetCallback(system: FMOD_SYSTEM, call_back: FMOD_SYSTEM_CALLBACK) -> FMOD_RESULT;
+
+
+    /* plug-in part functions */
+    pub fn FMOD_System_SetPluginPath(system: FMOD_SYSTEM, path: *c_char) -> FMOD_RESULT;
+    pub fn FMOD_System_LoadPlugin(system: FMOD_SYSTEM, filename: *c_char, handle: *c_uint, priority: c_uint) -> FMOD_RESULT;
+    pub fn FMOD_System_UnloadPlugin(system: FMOD_SYSTEM, handle: c_uint) -> FMOD_RESULT;
+    pub fn FMOD_System_GetNumPlugins(system: FMOD_SYSTEM, plugin_type: FMOD_PLUGINTYPE, num_plugins: *c_int) -> FMOD_RESULT;
+    pub fn FMOD_System_GetPluginHandle(system: FMOD_SYSTEM, plugin_type: FMOD_PLUGINTYPE, index: c_int, handle: *c_uint) -> FMOD_RESULT;
+    pub fn FMOD_System_GetPluginInfo(system: FMOD_SYSTEM, handle: c_uint, plugin_type: *FMOD_PLUGINTYPE, name: *c_char,
+        name_len: c_int, version: *c_uint) -> FMOD_RESULT;
+    pub fn FMOD_System_SetOutputByPlugin(system: FMOD_SYSTEM, handle: c_uint) -> FMOD_RESULT;
+    pub fn FMOD_System_GetOutputByPlugin(system: FMOD_SYSTEM, handle: *c_uint) -> FMOD_RESULT;
+    pub fn FMOD_System_CreateDSPByPlugin(system: FMOD_SYSTEM, handle: c_uint, dsp: *FMOD_DSP) -> FMOD_RESULT;
+
+
+    /* codec part functions */
+    pub fn FMOD_System_RegisterCodec(system: FMOD_SYSTEM, description: *FMOD_CODEC_DESCRIPTION, handle: *c_uint, priority: c_uint) -> FMOD_RESULT;
 
 
     pub fn FMOD_System_Init(system: FMOD_SYSTEM, max_channels: c_int, flags: FMOD_INITFLAGS, extra_driver_data: *c_void) -> FMOD_RESULT;
     pub fn FMOD_System_Close(sound: FMOD_SOUND) -> FMOD_RESULT;
-    pub fn FMOD_System_Release(system: FMOD_SYSTEM) -> FMOD_RESULT;
+
+    /* post-init functions */
+    pub fn FMOD_System_Update(system: FMOD_SYSTEM) -> FMOD_RESULT;
+    pub fn FMOD_System_Set3DSettings(system: FMOD_SYSTEM, doppler_scale: c_float, distance_factor: c_float, roll_off_scale: c_float) -> FMOD_RESULT;
+    pub fn FMOD_System_Get3DSettings(system: FMOD_SYSTEM, doppler_scale: *c_float, distance_factor: *c_float, roll_off_scale: *c_float) -> FMOD_RESULT;
+    pub fn FMOD_System_Set3DNumListeners(system: FMOD_SYSTEM, num_listeners: c_int) -> FMOD_RESULT;
+    pub fn FMOD_System_Get3DNumListeners(system: FMOD_SYSTEM, num_listeners: *c_int) -> FMOD_RESULT;
+    pub fn FMOD_System_Set3DListenerAttributes(system: FMOD_SYSTEM, listener: c_int, pos: *FMOD_VECTOR, vel: *FMOD_VECTOR, forward: *FMOD_VECTOR,
+        up: *FMOD_VECTOR) -> FMOD_RESULT;
+    pub fn FMOD_System_Get3DListenerAttributes(system: FMOD_SYSTEM, listener: c_int, pos: *FMOD_VECTOR, vel: *FMOD_VECTOR, forward: *FMOD_VECTOR,
+        up: *FMOD_VECTOR) -> FMOD_RESULT;
+    // I'll bind it later
+    pub fn FMOD_System_Set3DRolloffCallback(system: FMOD_SYSTEM, callback: FMOD_3D_ROLLOFFCALLBACK) -> FMOD_RESULT;
+    pub fn FMOD_System_Set3DSpeakerPosition(system: FMOD_SYSTEM, speaker: FMOD_SPEAKER, x: c_float, y: c_float, active: FMOD_BOOL) -> FMOD_RESULT;
+    pub fn FMOD_System_Get3DSpeakerPosition(system: FMOD_SYSTEM, speaker: FMOD_SPEAKER, x: *c_float, y: *c_float, active: *FMOD_BOOL) -> FMOD_RESULT;
+    pub fn FMOD_System_SetStreamBufferSize(system: FMOD_SYSTEM, file_buffer_size: c_uint, file_buffer_size_type: FMOD_TIMEUNIT) -> FMOD_RESULT;
+    pub fn FMOD_System_GetStreamBufferSize(system: FMOD_SYSTEM, file_buffer_size: *c_uint, file_buffer_size_type: *FMOD_TIMEUNIT) -> FMOD_RESULT;
+
+
+    /* system information functions */
+    pub fn FMOD_System_GetVersion(system: FMOD_SYSTEM, version: *c_uint) -> FMOD_RESULT;
+    pub fn FMOD_System_GetOutputHandle(system: FMOD_SYSTEM, handle: **c_void) -> FMOD_RESULT;
+    pub fn FMOD_System_GetChannelsPlaying(system: FMOD_SYSTEM, channels: *c_int) -> FMOD_RESULT;
+    pub fn FMOD_System_GetCPUUsage(system: FMOD_SYSTEM, dsp: *c_float, stream: *c_float, geometry: *c_float, update: *c_float, total: *c_float) -> FMOD_RESULT;
+    pub fn FMOD_System_GetSoundRAM(system: FMOD_SYSTEM, current_alloced: *c_int, max_alloced: *c_int, total: *c_int) -> FMOD_RESULT;
+    pub fn FMOD_System_GetNumCDROMDrives(system: FMOD_SYSTEM, num_drives: *c_int) -> FMOD_RESULT;
+    pub fn FMOD_System_GetCDROMDriveName(system: FMOD_SYSTEM, drive: c_int, drive_name: *c_char, drive_name_len: c_int, scsi_name: *c_char, scsi_name_len: c_int,
+        device_name: *c_char, device_name_len: c_int) -> FMOD_RESULT;
+
+
     pub fn FMOD_System_CreateSound(system: FMOD_SYSTEM, name_or_data: *c_char, mode: FMOD_MODE, exinfo: *FMOD_CREATESOUNDEXINFO,
         sound: *FMOD_SOUND) -> FMOD_RESULT;
 
@@ -98,8 +169,9 @@ extern "C" {
 
 
     /* channel functions */
-    pub fn FMOD_System_GetSpectrum(system : FMOD_SYSTEM, array : *c_float, num_values : c_int, channel_offset : c_int,
+    pub fn FMOD_System_GetSpectrum(system : FMOD_SYSTEM, spectrum_array : *c_float, num_values : c_int, channel_offset : c_int,
         window_type : FMOD_DSP_FFT_WINDOW) -> FMOD_RESULT;
+    pub fn FMOD_System_GetWaveData(system: FMOD_SYSTEM, wave_array: *c_float, num_values: c_int, channel_offset: c_int) -> FMOD_RESULT;
     pub fn FMOD_Channel_IsPlaying(channel : FMOD_CHANNEL, is_playing : *FMOD_BOOL) -> FMOD_RESULT;
     pub fn FMOD_Channel_SetVolume(channel : FMOD_CHANNEL, volume : c_float) -> FMOD_RESULT;
     pub fn FMOD_Channel_GetVolume(channel : FMOD_CHANNEL, volume : *c_float) -> FMOD_RESULT;
@@ -190,7 +262,7 @@ pub struct FMOD_REVERB_CHANNELPROPERTIES
     pub Direct          : c_int,            /* [r/w] -10000 1000 0        Direct path level                                        (SUPPORTED:SFX) */
     pub Room            : c_int,            /* [r/w] -10000 1000 0        Room effect level                                        (SUPPORTED:SFX) */
     pub Flags           : c_uint,           /* [r/w] FMOD_REVERB_CHANNELFLAGS - modifies the behavior of properties                (SUPPORTED:SFX) */
-    pub ConnectionPoint : *FMOD_DSP         /* [r/w] See remarks.         DSP network location to connect reverb for this channel. (SUPPORTED:SFX).*/
+    pub ConnectionPoint : FMOD_DSP          /* [r/w] See remarks.         DSP network location to connect reverb for this channel. (SUPPORTED:SFX).*/
 }
 
 pub struct FMOD_GUID
@@ -230,4 +302,59 @@ pub struct FMOD_ADVANCEDSETTINGS
     pub stackSizeStream             : c_uint,       /* [r/w] Optional. Specify 0 to ignore. Specify the stack size for the FMOD Stream thread in bytes.  Useful for custom codecs that use excess stack.  Default 49,152 (48kb) */
     pub stackSizeNonBlocking        : c_uint,       /* [r/w] Optional. Specify 0 to ignore. Specify the stack size for the FMOD_NONBLOCKING loading thread.  Useful for custom codecs that use excess stack.  Default 65,536 (64kb) */
     pub stackSizeMixer              : c_uint        /* [r/w] Optional. Specify 0 to ignore. Specify the stack size for the FMOD mixer thread.  Useful for custom dsps that use excess stack.  Default 49,152 (48kb) */
+}
+
+pub struct FMOD_CODEC_DESCRIPTION
+{
+    pub name            : *c_char,                       /* [in] Name of the codec. */
+    pub version         : c_uint,                        /* [in] Plugin writer's version number. */
+    pub defaultasstream : c_int,                         /* [in] Tells FMOD to open the file as a stream when calling System::createSound, and not a static sample.  Should normally be 0 (FALSE), because generally the user wants to decode the file into memory when using System::createSound.   Mainly used for formats that decode for a very long time, or could use large amounts of memory when decoded.  Usually sequenced formats such as mod/s3m/xm/it/midi fall into this category.   It is mainly to stop users that don't know what they're doing from getting FMOD_ERR_MEMORY returned from createSound when they should have in fact called System::createStream or used FMOD_CREATESTREAM in System::createSound. */
+    pub timeunits       : FMOD_TIMEUNIT,                 /* [in] When setposition codec is called, only these time formats will be passed to the codec. Use bitwise OR to accumulate different types. */
+    pub open            : FMOD_CODEC_OPENCALLBACK,       /* [in] Open callback for the codec for when FMOD tries to open a sound using this codec. */
+    pub close           : FMOD_CODEC_CLOSECALLBACK,      /* [in] Close callback for the codec for when FMOD tries to close a sound using this codec.  */
+    pub read            : FMOD_CODEC_READCALLBACK,       /* [in] Read callback for the codec for when FMOD tries to read some data from the file to the destination format (specified in the open callback). */
+    pub getlength       : FMOD_CODEC_GETLENGTHCALLBACK,  /* [in] Callback to return the length of the song in whatever format required when Sound::getLength is called. */
+    pub setposition     : FMOD_CODEC_SETPOSITIONCALLBACK,/* [in] Seek callback for the codec for when FMOD tries to seek within the file with Channel::setPosition. */
+    pub getposition     : FMOD_CODEC_GETPOSITIONCALLBACK,/* [in] Tell callback for the codec for when FMOD tries to get the current position within the with Channel::getPosition. */
+    pub soundcreate     : FMOD_CODEC_SOUNDCREATECALLBACK,/* [in] Sound creation callback for the codec when FMOD finishes creating the sound.  (So the codec can set more parameters for the related created sound, ie loop points/mode or 3D attributes etc). */
+    pub getwaveformat   : FMOD_CODEC_GETWAVEFORMAT       /* [in] Callback to tell FMOD about the waveformat of a particular subsound.  This is to save memory, rather than saving 1000 FMOD_CODEC_WAVEFORMAT structures in the codec, the codec might have a more optimal way of storing this information. */
+}
+
+/*
+ * codec part
+ */
+
+pub struct FMOD_CODEC_WAVEFORMAT
+{
+    pub name        : [c_char, ..256],  /* [in] Name of sound.*/
+    pub format      : FMOD_SOUND_FORMAT,/* [in] Format for (decompressed) codec output, ie FMOD_SOUND_FORMAT_PCM8, FMOD_SOUND_FORMAT_PCM16.*/
+    pub channels    : c_int,            /* [in] Number of channels used by codec, ie mono = 1, stereo = 2. */
+    pub frequency   : c_int,            /* [in] Default frequency in hz of the codec, ie 44100. */
+    pub lengthbytes : c_uint,           /* [in] Length in bytes of the source data. */
+    pub lengthpcm   : c_uint,           /* [in] Length in decompressed, PCM samples of the file, ie length in seconds * frequency.  Used for Sound::getLength and for memory allocation of static decompressed sample data. */
+    pub blockalign  : c_int,            /* [in] Blockalign in decompressed, PCM samples of the optimal decode chunk size for this format.  The codec read callback will be called in multiples of this value. */
+    pub loopstart   : c_int,            /* [in] Loopstart in decompressed, PCM samples of file. */
+    pub loopend     : c_int,            /* [in] Loopend in decompressed, PCM samples of file. */
+    pub mode        : FMOD_MODE,        /* [in] Mode to determine whether the sound should by default load as looping, non looping, 2d or 3d. */
+    pub channelmask : c_uint            /* [in] Microsoft speaker channel mask, as defined for WAVEFORMATEXTENSIBLE and is found in ksmedia.h.  Leave at 0 to play in natural speaker order. */
+}
+
+pub struct FMOD_CODEC_STATE
+{
+    pub numsubsounds : c_int,                      /* [in] Number of 'subsounds' in this sound.  Anything other than 0 makes it a 'container' format (ie CDDA/DLS/FSB etc which contain 1 or more su bsounds).  For most normal, single sound codec such as WAV/AIFF/MP3, this should be 0 as they are not a container for subsounds, they are the sound by itself. */
+    pub waveformat   : FMOD_CODEC_WAVEFORMAT,      /* [in] Pointer to an array of format structures containing information about each sample.  Can be 0 or NULL if FMOD_CODEC_GETWAVEFORMAT callback is preferred.  The number of entries here must equal the number of subsounds defined in the subsound parameter. If numsubsounds = 0 then there should be 1 instance of this structure. */
+    pub plugindata   : *c_void,                    /* [in] Plugin writer created data the codec author wants to attach to this object. */
+                                               
+    pub filehandle   : *c_void,                    /* [out] This will return an internal FMOD file handle to use with the callbacks provided.  */
+    pub filesize     : c_uint,                     /* [out] This will contain the size of the file in bytes. */
+    pub fileread     : FMOD_FILE_READCALLBACK,     /* [out] This will return a callable FMOD file function to use from codec. */
+    pub fileseek     : FMOD_FILE_SEEKCALLBACK,     /* [out] This will return a callable FMOD file function to use from codec.  */
+    pub metadata     : FMOD_CODEC_METADATACALLBACK /* [out] This will return a callable FMOD metadata function to use from codec.  */
+}
+
+pub struct FMOD_VECTOR
+{
+    pub x: c_float, /* X co-ordinate in 3D space. */
+    pub y: c_float, /* Y co-ordinate in 3D space. */
+    pub z: c_float  /* Z co-ordinate in 3D space. */
 }

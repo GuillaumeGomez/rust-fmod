@@ -1,7 +1,7 @@
 /*
 * Rust-FMOD - Copyright (c) 2014 Gomez Guillaume.
 *
-* The Original software, FMOD library, is provided by FIRELIGHT TECHNOLOGIES.
+* The Original software, FmodEx library, is provided by FIRELIGHT TECHNOLOGIES.
 *
 * This software is provided 'as-is', without any express or implied warranty.
 * In no event will the authors be held liable for any damages arising from
@@ -38,7 +38,7 @@ extern crate libc;
 
 pub use channel::{Channel, FmodSpectrumOptions, FmodDelayOptions, FmodSpeakerMixOptions, FmodReverbChannelProperties};
 pub use sound::Sound;
-pub use fmod_sys::{FmodSys, FmodGuid, FmodSoftwareFormat, FmodAdvancedSettings};
+pub use fmod_sys::{FmodSys, FmodGuid, FmodSoftwareFormat, FmodAdvancedSettings, FmodDSP, FmodVector, FmodOutputHandle};
 
 mod ffi;
 mod sound;

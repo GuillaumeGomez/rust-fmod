@@ -1,7 +1,7 @@
 /*
 * Rust-FMOD - Copyright (c) 2014 Gomez Guillaume.
 *
-* The Original software, FMOD library, is provided by FIRELIGHT TECHNOLOGIES.
+* The Original software, FmodEx library, is provided by FIRELIGHT TECHNOLOGIES.
 *
 * This software is provided 'as-is', without any express or implied warranty.
 * In no event will the authors be held liable for any damages arising from
@@ -25,3 +25,5 @@
 pub struct FmodMode(pub u32);
 pub struct FmodTimeUnit(pub u32);
 pub struct FmodCaps(pub u32);
+pub struct FmodPluginHandle(pub u32);
+pub struct FmodInitFlag(pub u32);

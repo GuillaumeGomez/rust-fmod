@@ -1,7 +1,7 @@
 /*
 * Rust-FMOD - Copyright (c) 2014 Gomez Guillaume.
 *
-* The Original software, FMOD library, is provided by FIRELIGHT TECHNOLOGIES.
+* The Original software, FmodEx library, is provided by FIRELIGHT TECHNOLOGIES.
 *
 * This software is provided 'as-is', without any express or implied warranty.
 * In no event will the authors be held liable for any damages arising from
@@ -332,6 +332,71 @@ pub enum FMOD_DSP_RESAMPLER
     FMOD_DSP_RESAMPLER_FORCEINT = 65536 /* Makes sure this enum is signed 32bit. */
 }
 
+#[deriving(Eq, Ord, Show)]
+#[repr(C)]
+pub enum FMOD_PLUGINTYPE
+{
+    FMOD_PLUGINTYPE_OUTPUT,          /* The plugin type is an output module.  FMOD mixed audio will play through one of these devices */
+    FMOD_PLUGINTYPE_CODEC,           /* The plugin type is a file format codec.  FMOD will use these codecs to load file formats for playback. */
+    FMOD_PLUGINTYPE_DSP,             /* The plugin type is a DSP unit.  FMOD will use these plugins as part of its DSP network to apply effects to output or generate sound in realtime. */
+
+    FMOD_PLUGINTYPE_MAX,             /* Maximum number of plugin types supported. */
+    FMOD_PLUGINTYPE_FORCEINT = 65536 /* Makes sure this enum is signed 32bit. */
+}
+
+#[deriving(Eq, Ord, Show)]
+#[repr(C)]
+pub enum FMOD_TAGTYPE
+{
+    FMOD_TAGTYPE_UNKNOWN = 0,
+    FMOD_TAGTYPE_ID3V1,
+    FMOD_TAGTYPE_ID3V2,
+    FMOD_TAGTYPE_VORBISCOMMENT,
+    FMOD_TAGTYPE_SHOUTCAST,
+    FMOD_TAGTYPE_ICECAST,
+    FMOD_TAGTYPE_ASF,
+    FMOD_TAGTYPE_MIDI,
+    FMOD_TAGTYPE_PLAYLIST,
+    FMOD_TAGTYPE_FMOD,
+    FMOD_TAGTYPE_USER,
+
+    FMOD_TAGTYPE_MAX,               /* Maximum number of tag types supported. */
+    FMOD_TAGTYPE_FORCEINT = 65536   /* Makes sure this enum is signed 32bit. */
+}
+
+#[deriving(Eq, Ord, Show)]
+#[repr(C)]
+pub enum FMOD_TAGDATATYPE
+{
+    FMOD_TAGDATATYPE_BINARY = 0,
+    FMOD_TAGDATATYPE_INT,
+    FMOD_TAGDATATYPE_FLOAT,
+    FMOD_TAGDATATYPE_STRING,
+    FMOD_TAGDATATYPE_STRING_UTF16,
+    FMOD_TAGDATATYPE_STRING_UTF16BE,
+    FMOD_TAGDATATYPE_STRING_UTF8,
+    FMOD_TAGDATATYPE_CDTOC,
+
+    FMOD_TAGDATATYPE_MAX,               /* Maximum number of tag datatypes supported. */
+    FMOD_TAGDATATYPE_FORCEINT = 65536   /* Makes sure this enum is signed 32bit. */
+}
+
+#[deriving(Eq, Ord, Show)]
+#[repr(C)]
+pub enum FMOD_SYSTEM_CALLBACKTYPE
+{
+    FMOD_SYSTEM_CALLBACKTYPE_DEVICELISTCHANGED,         /* Called from System::update when the enumerated list of devices has changed. */
+    FMOD_SYSTEM_CALLBACKTYPE_DEVICELOST,                /* Called from System::update when an output device has been lost due to control panel parameter changes and FMOD cannot automatically recover. */
+    FMOD_SYSTEM_CALLBACKTYPE_MEMORYALLOCATIONFAILED,    /* Called directly when a memory allocation fails somewhere in FMOD.  (NOTE - 'system' will be NULL in this callback type.)*/
+    FMOD_SYSTEM_CALLBACKTYPE_THREADCREATED,             /* Called directly when a thread is created. */
+    FMOD_SYSTEM_CALLBACKTYPE_BADDSPCONNECTION,          /* Called when a bad connection was made with DSP::addInput. Usually called from mixer thread because that is where the connections are made.  */
+    FMOD_SYSTEM_CALLBACKTYPE_BADDSPLEVEL,               /* Called when too many effects were added exceeding the maximum tree depth of 128.  This is most likely caused by accidentally adding too many DSP effects. Usually called from mixer thread because that is where the connections are made.  */
+    FMOD_SYSTEM_CALLBACKTYPE_THREADDESTROYED,           /* Called directly when a thread is destroyed. */
+
+    FMOD_SYSTEM_CALLBACKTYPE_MAX,                       /* Maximum number of callback types supported. */
+    FMOD_SYSTEM_CALLBACKTYPE_FORCEINT = 65536           /* Makes sure this enum is signed 32bit. */
+}
+
 pub static FMOD_DEFAULT                 : c_uint = 0x00000000;  /* Default for all modes listed below. FMOD_LOOP_OFF, FMOD_2D, FMOD_HARDWARE */
 pub static FMOD_LOOP_OFF                : c_uint = 0x00000001;  /* For non looping sounds. (DEFAULT).  Overrides FMOD_LOOP_NORMAL / FMOD_LOOP_BIDI. */
 pub static FMOD_LOOP_NORMAL             : c_uint = 0x00000002;  /* For forward looping sounds. */
@@ -365,6 +430,7 @@ pub static FMOD_LOWMEM                  : c_uint = 0x08000000;  /* Removes some 
 pub static FMOD_LOADSECONDARYRAM        : c_uint = 0x20000000;  /* Load sound into the secondary RAM of supported platform. On PS3, sounds will be loaded into RSX/VRAM. */
 pub static FMOD_VIRTUAL_PLAYFROMSTART   : c_uint = 0x80000000;  /* For sounds that start virtual (due to being quiet or low importance), instead of swapping back to audible, and playing at the correct offset according to time, this flag makes the sound play from the start. */
 
+/* FMOD_INITFLAGS values list */
 pub static FMOD_INIT_NORMAL                     : c_uint = 0x00000000; /* All platforms - Initialize normally */
 pub static FMOD_INIT_STREAM_FROM_UPDATE         : c_uint = 0x00000001; /* All platforms - No stream thread is created internally.  Streams are driven from System::update.  Mainly used with non-realtime outputs. */
 pub static FMOD_INIT_3D_RIGHTHANDED             : c_uint = 0x00000002; /* All platforms - FMOD will treat +X as right, +Y as up and +Z as backwards (towards you). */

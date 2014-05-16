@@ -1,7 +1,7 @@
 /*
 * Rust-FMOD - Copyright (c) 2014 Gomez Guillaume.
 *
-* The Original software, FMOD library, is provided by FIRELIGHT TECHNOLOGIES.
+* The Original software, FmodEx library, is provided by FIRELIGHT TECHNOLOGIES.
 *
 * This software is provided 'as-is', without any express or implied warranty.
 * In no event will the authors be held liable for any damages arising from
@@ -72,8 +72,8 @@ impl Channel {
         self.channel = ::std::ptr::null();
     }
 
-    pub fn get_spectrum(&self, num_values : uint, options : Option<FmodSpectrumOptions>) -> Result<Vec<f32>, FMOD_RESULT> {
-        let ptr = Vec::from_elem(num_values, 0f32);
+    pub fn get_spectrum(&self, spectrum_size : uint, options : Option<FmodSpectrumOptions>) -> Result<Vec<f32>, FMOD_RESULT> {
+        let ptr = Vec::from_elem(spectrum_size, 0f32);
         let mut window_type = FMOD_DSP_FFT_WINDOW_RECT;
         let mut channel_offset = 0;
 
@@ -84,9 +84,18 @@ impl Channel {
             }
             None => {}
         };
-        match unsafe { ffi::FMOD_System_GetSpectrum(self.channel, ptr.as_ptr(), num_values as c_int, channel_offset, window_type) } {
+        match unsafe { ffi::FMOD_System_GetSpectrum(self.channel, ptr.as_ptr(), spectrum_size as c_int, channel_offset, window_type) } {
             FMOD_OK => Ok(ptr),
             e => Err(e),
+        }
+    }
+
+    pub fn get_wave_data(&self, wave_size : uint, channel_offset : i32) -> Result<Vec<f32>, FMOD_RESULT> {
+        let ptr = Vec::from_elem(wave_size, 0f32);
+
+        match unsafe { ffi::FMOD_System_GetWaveData(self.channel, ptr.as_ptr(), wave_size as c_int, channel_offset) } {
+            FMOD_OK => Ok(ptr),
+            e => Err(e)
         }
     }
 
