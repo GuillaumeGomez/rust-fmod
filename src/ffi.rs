@@ -62,7 +62,7 @@ pub type FMOD_3D_ROLLOFFCALLBACK = ::std::option::Option<extern "C" fn(channel: 
 pub type FMOD_SYSTEM = *c_void;
 pub type FMOD_SOUND = *c_void;
 pub type FMOD_CHANNEL = *c_void;
-pub type FMOD_CHANNEL_GROUP = *c_void;
+pub type FMOD_CHANNELGROUP = *c_void;
 pub type FMOD_BOOL = c_int;
 pub type FMOD_MODE = c_uint;
 pub type FMOD_TIMEUNIT = c_uint;
@@ -70,6 +70,8 @@ pub type FMOD_SOUNDGROUP = c_void;
 pub type FMOD_INITFLAGS = c_uint;
 pub type FMOD_DSP = *c_void;
 pub type FMOD_CAPS = c_uint;
+pub type FMOD_MEMORY_USAGE_DETAILS = c_void;
+pub type FMOD_DSPCONNECTION = c_void;
 
 extern "C" {
     /* pre-init functions */
@@ -131,20 +133,26 @@ extern "C" {
 
     /* post-init functions */
     pub fn FMOD_System_Update(system: FMOD_SYSTEM) -> FMOD_RESULT;
-    pub fn FMOD_System_Set3DSettings(system: FMOD_SYSTEM, doppler_scale: c_float, distance_factor: c_float, roll_off_scale: c_float) -> FMOD_RESULT;
-    pub fn FMOD_System_Get3DSettings(system: FMOD_SYSTEM, doppler_scale: *c_float, distance_factor: *c_float, roll_off_scale: *c_float) -> FMOD_RESULT;
+    pub fn FMOD_System_GetSpectrum(system : FMOD_SYSTEM, spectrum_array : *c_float, num_values : c_int, channel_offset : c_int,
+        window_type : FMOD_DSP_FFT_WINDOW) -> FMOD_RESULT;
+    pub fn FMOD_System_GetWaveData(system: FMOD_SYSTEM, wave_array: *c_float, num_values: c_int, channel_offset: c_int) -> FMOD_RESULT;
+    pub fn FMOD_System_SetStreamBufferSize(system: FMOD_SYSTEM, file_buffer_size: c_uint, file_buffer_size_type: FMOD_TIMEUNIT) -> FMOD_RESULT;
+    pub fn FMOD_System_GetStreamBufferSize(system: FMOD_SYSTEM, file_buffer_size: *c_uint, file_buffer_size_type: *FMOD_TIMEUNIT) -> FMOD_RESULT;
     pub fn FMOD_System_Set3DNumListeners(system: FMOD_SYSTEM, num_listeners: c_int) -> FMOD_RESULT;
     pub fn FMOD_System_Get3DNumListeners(system: FMOD_SYSTEM, num_listeners: *c_int) -> FMOD_RESULT;
     pub fn FMOD_System_Set3DListenerAttributes(system: FMOD_SYSTEM, listener: c_int, pos: *FMOD_VECTOR, vel: *FMOD_VECTOR, forward: *FMOD_VECTOR,
         up: *FMOD_VECTOR) -> FMOD_RESULT;
     pub fn FMOD_System_Get3DListenerAttributes(system: FMOD_SYSTEM, listener: c_int, pos: *FMOD_VECTOR, vel: *FMOD_VECTOR, forward: *FMOD_VECTOR,
         up: *FMOD_VECTOR) -> FMOD_RESULT;
+    /* I'll bind it later */
+    pub fn FMOD_System_GetMemoryInfo(channel_group: FMOD_CHANNELGROUP, memory_bits: c_uint, event_memory_bits: c_uint, memory_used: *c_int,
+        memoryused_details: *FMOD_MEMORY_USAGE_DETAILS) -> FMOD_RESULT;
     // I'll bind it later
     pub fn FMOD_System_Set3DRolloffCallback(system: FMOD_SYSTEM, callback: FMOD_3D_ROLLOFFCALLBACK) -> FMOD_RESULT;
     pub fn FMOD_System_Set3DSpeakerPosition(system: FMOD_SYSTEM, speaker: FMOD_SPEAKER, x: c_float, y: c_float, active: FMOD_BOOL) -> FMOD_RESULT;
     pub fn FMOD_System_Get3DSpeakerPosition(system: FMOD_SYSTEM, speaker: FMOD_SPEAKER, x: *c_float, y: *c_float, active: *FMOD_BOOL) -> FMOD_RESULT;
-    pub fn FMOD_System_SetStreamBufferSize(system: FMOD_SYSTEM, file_buffer_size: c_uint, file_buffer_size_type: FMOD_TIMEUNIT) -> FMOD_RESULT;
-    pub fn FMOD_System_GetStreamBufferSize(system: FMOD_SYSTEM, file_buffer_size: *c_uint, file_buffer_size_type: *FMOD_TIMEUNIT) -> FMOD_RESULT;
+    pub fn FMOD_System_Set3DSettings(system: FMOD_SYSTEM, doppler_scale: c_float, distance_factor: c_float, roll_off_scale: c_float) -> FMOD_RESULT;
+    pub fn FMOD_System_Get3DSettings(system: FMOD_SYSTEM, doppler_scale: *c_float, distance_factor: *c_float, roll_off_scale: *c_float) -> FMOD_RESULT;
 
 
     /* system information functions */
@@ -160,6 +168,9 @@ extern "C" {
 
     pub fn FMOD_System_CreateSound(system: FMOD_SYSTEM, name_or_data: *c_char, mode: FMOD_MODE, exinfo: *FMOD_CREATESOUNDEXINFO,
         sound: *FMOD_SOUND) -> FMOD_RESULT;
+    pub fn FMOD_System_CreateStream(system: FMOD_SYSTEM, name_or_data: *c_char, mode: FMOD_MODE, exinfo: *FMOD_CREATESOUNDEXINFO,
+        sound: *FMOD_SOUND) -> FMOD_RESULT;
+    pub fn FMOD_System_CreateChannelGroup(system: FMOD_SYSTEM, name: *c_char, channel_group: *FMOD_CHANNELGROUP) -> FMOD_RESULT;
 
 
     /* sound functions */
@@ -169,9 +180,12 @@ extern "C" {
 
 
     /* channel functions */
-    pub fn FMOD_System_GetSpectrum(system : FMOD_SYSTEM, spectrum_array : *c_float, num_values : c_int, channel_offset : c_int,
+    pub fn FMOD_Channel_GetSpectrum(system : FMOD_SYSTEM, spectrum_array : *c_float, num_values : c_int, channel_offset : c_int,
         window_type : FMOD_DSP_FFT_WINDOW) -> FMOD_RESULT;
-    pub fn FMOD_System_GetWaveData(system: FMOD_SYSTEM, wave_array: *c_float, num_values: c_int, channel_offset: c_int) -> FMOD_RESULT;
+    pub fn FMOD_Channel_GetWaveData(system: FMOD_SYSTEM, wave_array: *c_float, num_values: c_int, channel_offset: c_int) -> FMOD_RESULT;
+    /* I'll bind it later */
+    pub fn FMOD_Channel_GetMemoryInfo(channel_group: FMOD_CHANNELGROUP, memory_bits: c_uint, event_memory_bits: c_uint, memory_used: *c_int,
+        memoryused_details: *FMOD_MEMORY_USAGE_DETAILS) -> FMOD_RESULT;
     pub fn FMOD_Channel_IsPlaying(channel : FMOD_CHANNEL, is_playing : *FMOD_BOOL) -> FMOD_RESULT;
     pub fn FMOD_Channel_SetVolume(channel : FMOD_CHANNEL, volume : c_float) -> FMOD_RESULT;
     pub fn FMOD_Channel_GetVolume(channel : FMOD_CHANNEL, volume : *c_float) -> FMOD_RESULT;
@@ -202,59 +216,105 @@ extern "C" {
     pub fn FMOD_Channel_SetLowPassGain(channel : FMOD_CHANNEL, gain : c_float) -> FMOD_RESULT;
     pub fn FMOD_Channel_GetLowPassGain(channel : FMOD_CHANNEL, gain : *c_float) -> FMOD_RESULT;
     
-    //pub fn FMOD_Channel_SetChannelGroup(channel : FMOD_CHANNEL, channelgroup : FMOD_CHANNEL_GROUP) -> FMOD_RESULT;
-    //pub fn FMOD_Channel_GetChannelGroup(channel : FMOD_CHANNEL, channelgroup : *FMOD_CHANNEL_GROUP) -> FMOD_RESULT;
+    
+    /* channel_group functions*/
+    pub fn FMOD_ChannelGroup_Release(channel_group: FMOD_CHANNELGROUP) -> FMOD_RESULT;
+    pub fn FMOD_Channel_SetChannelGroup(channel : FMOD_CHANNEL, channelgroup : FMOD_CHANNELGROUP) -> FMOD_RESULT;
+    pub fn FMOD_Channel_GetChannelGroup(channel : FMOD_CHANNEL, channelgroup : *FMOD_CHANNELGROUP) -> FMOD_RESULT;
+    /* Channelgroup scale values.  (changes attributes relative to the channels, doesn't overwrite them)*/
+    pub fn FMOD_ChannelGroup_SetVolume(channel_group: FMOD_CHANNELGROUP, volume: c_float) -> FMOD_RESULT;
+    pub fn FMOD_ChannelGroup_GetVolume(channel_group: FMOD_CHANNELGROUP, volume: *c_float) -> FMOD_RESULT;
+    pub fn FMOD_ChannelGroup_SetPitch(channel_group: FMOD_CHANNELGROUP, pitch: c_float) -> FMOD_RESULT;
+    pub fn FMOD_ChannelGroup_GetPitch(channel_group: FMOD_CHANNELGROUP, pitch: *c_float) -> FMOD_RESULT;
+    pub fn FMOD_ChannelGroup_Set3DOcclusion(channel_group: FMOD_CHANNELGROUP, direct_occlusion: c_float, reverb_occlusion: c_float) -> FMOD_RESULT;
+    pub fn FMOD_ChannelGroup_Get3DOcclusion(channel_group: FMOD_CHANNELGROUP, direct_occlusion: *c_float, reverb_occlusion: *c_float) -> FMOD_RESULT;
+    pub fn FMOD_ChannelGroup_SetPaused(channel_group: FMOD_CHANNELGROUP, paused: FMOD_BOOL) -> FMOD_RESULT;
+    pub fn FMOD_ChannelGroup_GetPaused(channel_group: FMOD_CHANNELGROUP, paused: *FMOD_BOOL) -> FMOD_RESULT;
+    pub fn FMOD_ChannelGroup_SetMute(channel_group: FMOD_CHANNELGROUP, mute: FMOD_BOOL) -> FMOD_RESULT;
+    pub fn FMOD_ChannelGroup_GetMute(channel_group: FMOD_CHANNELGROUP, mute: *FMOD_BOOL) -> FMOD_RESULT;
+    /* Channelgroup override values.  (recursively overwrites whatever settings the channels had) */
+    pub fn FMOD_ChannelGroup_Stop(channel_group: FMOD_CHANNELGROUP) -> FMOD_RESULT;
+    pub fn FMOD_ChannelGroup_OverrideVolume(channel_group: FMOD_CHANNELGROUP, volume: c_float) -> FMOD_RESULT;
+    pub fn FMOD_ChannelGroup_OverrideFrequency(channel_group: FMOD_CHANNELGROUP, frequency: c_float) -> FMOD_RESULT;
+    pub fn FMOD_ChannelGroup_OverridePan(channel_group: FMOD_CHANNELGROUP, pan: c_float) -> FMOD_RESULT;
+    pub fn FMOD_ChannelGroup_OverrideReverbProperties(channel_group: FMOD_CHANNELGROUP, prop: *FMOD_REVERB_CHANNELPROPERTIES) -> FMOD_RESULT;
+    pub fn FMOD_ChannelGroup_Override3DAttributes(channel_group: FMOD_CHANNELGROUP, pos: *FMOD_VECTOR, vel: *FMOD_VECTOR) -> FMOD_RESULT;
+    pub fn FMOD_ChannelGroup_OverrideSpeakerMix(channel_group: FMOD_CHANNELGROUP, front_left : c_float, front_right : c_float, center : c_float, lfe : c_float,
+        back_left : c_float, back_right : c_float, side_left : c_float, side_right : c_float) -> FMOD_RESULT;
+    /* Nested channel groups.*/
+    pub fn FMOD_ChannelGroup_AddGroup(channel_group: FMOD_CHANNELGROUP, group: FMOD_CHANNELGROUP) -> FMOD_RESULT;
+    pub fn FMOD_ChannelGroup_GetNumGroups(channel_group: FMOD_CHANNELGROUP, num_groups: *c_int) -> FMOD_RESULT;
+    pub fn FMOD_ChannelGroup_GetGroup(channel_group: FMOD_CHANNELGROUP, index: c_int, group: *FMOD_CHANNELGROUP) -> FMOD_RESULT;
+    pub fn FMOD_ChannelGroup_GetParentGroup(channel_group: FMOD_CHANNELGROUP, group: *FMOD_CHANNELGROUP) -> FMOD_RESULT;
+    /* DSP functionality only for channel groups playing sounds created with FMOD_SOFTWARE. */
+    pub fn FMOD_ChannelGroup_GetDSPHead(channel_group: FMOD_CHANNELGROUP, dsp: *FMOD_DSP) -> FMOD_RESULT;
+    pub fn FMOD_ChannelGroup_AddDSP(channel_group: FMOD_CHANNELGROUP, dsp: FMOD_DSP, disp_connection: **FMOD_DSPCONNECTION) -> FMOD_RESULT;
+    /* Information only functions. */
+    pub fn FMOD_ChannelGroup_GetName(channel_group: FMOD_CHANNELGROUP, name: *c_char, name_len: c_int) -> FMOD_RESULT;
+    pub fn FMOD_ChannelGroup_GetNumChannels(channel_group: FMOD_CHANNELGROUP, num_channels: *c_int) -> FMOD_RESULT;
+    pub fn FMOD_ChannelGroup_GetChannel(channel_group: FMOD_CHANNELGROUP, index: c_int, channel: *FMOD_CHANNEL) -> FMOD_RESULT;
+    pub fn FMOD_ChannelGroup_GetSpectrum(channel_group: FMOD_CHANNELGROUP, spectrum_array: *c_float, num_values: c_int, channel_offset: c_int,
+        window_type: FMOD_DSP_FFT_WINDOW) -> FMOD_RESULT;
+    pub fn FMOD_ChannelGroup_GetWaveData(channel_group: FMOD_CHANNELGROUP, wave_array: *c_float, num_values: c_int, channel_offset: c_int) -> FMOD_RESULT;
+    /* Userdata set/get. */
+    /* I'll bind it later */
+    pub fn FMOD_ChannelGroup_SetUserData(channel_group: FMOD_CHANNELGROUP, user_data: *c_void) -> FMOD_RESULT;
+    /* I'll bind it latter */
+    pub fn FMOD_ChannelGroup_GetUserData(channel_group: FMOD_CHANNELGROUP, user_data: **c_void) -> FMOD_RESULT;
+    /* I'll will bind it later */
+    pub fn FMOD_ChannelGroup_GetMemoryInfo(channel_group: FMOD_CHANNELGROUP, memory_bits: c_uint, event_memory_bits: c_uint, memory_used: *c_int,
+        memoryused_details: *FMOD_MEMORY_USAGE_DETAILS) -> FMOD_RESULT;
 }
 
 pub struct FMOD_ASYNCREADINFO
 {
-    handle      : *c_void,      /* [r] The file handle that was filled out in the open callback. */
-    offset      : c_uint,       /* [r] Seek position, make sure you read from this file offset. */
-    sizebytes   : c_uint,       /* [r] how many bytes requested for read. */
-    priority    : c_int,        /* [r] 0 = low importance.  100 = extremely important (ie 'must read now or stuttering may occur') */
+    pub handle      : *c_void,      /* [r] The file handle that was filled out in the open callback. */
+    pub offset      : c_uint,       /* [r] Seek position, make sure you read from this file offset. */
+    pub sizebytes   : c_uint,       /* [r] how many bytes requested for read. */
+    pub priority    : c_int,        /* [r] 0 = low importance.  100 = extremely important (ie 'must read now or stuttering may occur') */
 
-    buffer      : *c_void,      /* [w] Buffer to read file data into. */
-    bytesread   : c_uint,       /* [w] Fill this in before setting result code to tell FMOD how many bytes were read. */
-    result      : FMOD_RESULT,  /* [r/w] Result code, FMOD_OK tells the system it is ready to consume the data.  Set this last!  Default value = FMOD_ERR_NOTREADY. */
-    userdata    : *c_void,      /* [r] User data pointer. */
+    pub buffer      : *c_void,      /* [w] Buffer to read file data into. */
+    pub bytesread   : c_uint,       /* [w] Fill this in before setting result code to tell FMOD how many bytes were read. */
+    pub result      : FMOD_RESULT,  /* [r/w] Result code, FMOD_OK tells the system it is ready to consume the data.  Set this last!  Default value = FMOD_ERR_NOTREADY. */
+    pub userdata    : *c_void,      /* [r] User data pointer. */
 }
 
 pub struct FMOD_CREATESOUNDEXINFO
 {
-    cbsize              : c_int,                        /* [w] Size of this structure.  This is used so the structure can be expanded in the future and still work on older versions of FMOD Ex. */
-    length              : c_uint,                       /* [w] Optional. Specify 0 to ignore. Size in bytes of file to load, or sound to create (in this case only if FMOD_OPENUSER is used).  Required if loading from memory.  If 0 is specified, then it will use the size of the file (unless loading from memory then an error will be returned). */
-    fileoffset          : c_uint,                       /* [w] Optional. Specify 0 to ignore. Offset from start of the file to start loading from.  This is useful for loading files from inside big data files. */
-    numchannels         : c_int,                        /* [w] Optional. Specify 0 to ignore. Number of channels in a sound mandatory if FMOD_OPENUSER or FMOD_OPENRAW is used. */
-    defaultfrequency    : c_int,                        /* [w] Optional. Specify 0 to ignore. Default frequency of sound in a sound mandatory if FMOD_OPENUSER or FMOD_OPENRAW is used.  Other formats use the frequency determined by the file format. */
-    format              : FMOD_SOUND_FORMAT,            /* [w] Optional. Specify 0 or FMOD_SOUND_FORMAT_NONE to ignore. Format of the sound mandatory if FMOD_OPENUSER or FMOD_OPENRAW is used.  Other formats use the format determined by the file format.   */
-    decodebuffersize    : c_uint,                       /* [w] Optional. Specify 0 to ignore. For streams.  This determines the size of the double buffer (in PCM samples) that a stream uses.  Use this for user created streams if you want to determine the size of the callback buffer passed to you.  Specify 0 to use FMOD's default size which is currently equivalent to 400ms of the sound format created/loaded. */
-    initialsubsound     : c_int,                        /* [w] Optional. Specify 0 to ignore. In a multi-sample file format such as .FSB/.DLS/.SF2, specify the initial subsound to seek to, only if FMOD_CREATESTREAM is used. */
-    numsubsounds        : c_int,                        /* [w] Optional. Specify 0 to ignore or have no subsounds.  In a sound created with FMOD_OPENUSER, specify the number of subsounds that are accessable with Sound::getSubSound.  If not created with FMOD_OPENUSER, this will limit the number of subsounds loaded within a multi-subsound file.  If using FSB, then if FMOD_CREATESOUNDEXINFO::inclusionlist is used, this will shuffle subsounds down so that there are not any gaps.  It will mean that the indices of the sounds will be different. */
-    inclusionlist       : *c_int,                       /* [w] Optional. Specify 0 to ignore. In a multi-sample format such as .FSB/.DLS/.SF2 it may be desirable to specify only a subset of sounds to be loaded out of the whole file.  This is an array of subsound indices to load into memory when created. */
-    inclusionlistnum    : c_int,                        /* [w] Optional. Specify 0 to ignore. This is the number of integers contained within the inclusionlist array. */
-    pcmreadcallback     : FMOD_SOUND_PCMREADCALLBACK,   /* [w] Optional. Specify 0 to ignore. Callback to 'piggyback' on FMOD's read functions and accept or even write PCM data while FMOD is opening the sound.  Used for user sounds created with FMOD_OPENUSER or for capturing decoded data as FMOD reads it. */
-    pcmsetposcallback   : FMOD_SOUND_PCMSETPOSCALLBACK, /* [w] Optional. Specify 0 to ignore. Callback for when the user calls a seeking function such as Channel::setTime or Channel::setPosition within a multi-sample sound, and for when it is opened.*/
-    nonblockcallback    : FMOD_SOUND_NONBLOCKCALLBACK,  /* [w] Optional. Specify 0 to ignore. Callback for successful completion, or error while loading a sound that used the FMOD_NONBLOCKING flag.  Also called duing seeking, when setPosition is called or a stream is restarted. */
-    dlsname             : *c_char,                      /* [w] Optional. Specify 0 to ignore. Filename for a DLS or SF2 sample set when loading a MIDI file. If not specified, on Windows it will attempt to open /windows/system32/drivers/gm.dls or /windows/system32/drivers/etc/gm.dls, on Mac it will attempt to load /System/Library/Components/CoreAudio.component/Contents/Resources/gs_instruments.dls, otherwise the MIDI will fail to open. Current DLS support is for level 1 of the specification. */
-    encryptionkey       : *c_char,                      /* [w] Optional. Specify 0 to ignore. Key for encrypted FSB file.  Without this key an encrypted FSB file will not load. */
-    maxpolyphony        : c_int,                        /* [w] Optional. Specify 0 to ignore. For sequenced formats with dynamic channel allocation such as .MID and .IT, this specifies the maximum voice count allowed while playing.  .IT defaults to 64.  .MID defaults to 32. */
-    userdata            : *c_void,                      /* [w] Optional. Specify 0 to ignore. This is user data to be attached to the sound during creation.  Access via Sound::getUserData.  Note: This is not passed to FMOD_FILE_OPENCALLBACK, that is a different userdata that is file specific. */
-    suggestedsoundtype  : FMOD_SOUND_TYPE,              /* [w] Optional. Specify 0 or FMOD_SOUND_TYPE_UNKNOWN to ignore.  Instead of scanning all codec types, use this to speed up loading by making it jump straight to this codec. */
-    useropen            : FMOD_FILE_OPENCALLBACK,       /* [w] Optional. Specify 0 to ignore. Callback for opening this file. */
-    userclose           : FMOD_FILE_CLOSECALLBACK,      /* [w] Optional. Specify 0 to ignore. Callback for closing this file. */
-    userread            : FMOD_FILE_READCALLBACK,       /* [w] Optional. Specify 0 to ignore. Callback for reading from this file. */
-    userseek            : FMOD_FILE_SEEKCALLBACK,       /* [w] Optional. Specify 0 to ignore. Callback for seeking within this file. */
-    userasyncread       : FMOD_FILE_ASYNCREADCALLBACK,  /* [w] Optional. Specify 0 to ignore. Callback for seeking within this file. */
-    userasynccancel     : FMOD_FILE_ASYNCCANCELCALLBACK,/* [w] Optional. Specify 0 to ignore. Callback for seeking within this file. */
-    speakermap          : FMOD_SPEAKERMAPTYPE,          /* [w] Optional. Specify 0 to ignore. Use this to differ the way fmod maps multichannel sounds to speakers.  See FMOD_SPEAKERMAPTYPE for more. */
-    initialsoundgroup   : *FMOD_SOUNDGROUP,             /* [w] Optional. Specify 0 to ignore. Specify a sound group if required, to put sound in as it is created. */
-    initialseekposition : c_uint,                       /* [w] Optional. Specify 0 to ignore. For streams. Specify an initial position to seek the stream to. */
-    initialseekpostype  : FMOD_TIMEUNIT,                /* [w] Optional. Specify 0 to ignore. For streams. Specify the time unit for the position set in initialseekposition. */
-    ignoresetfilesystem : c_int,                        /* [w] Optional. Specify 0 to ignore. Set to 1 to use fmod's built in file system. Ignores setFileSystem callbacks and also FMOD_CREATESOUNEXINFO file callbacks.  Useful for specific cases where you don't want to use your own file system but want to use fmod's file system (ie net streaming). */
-    cddaforceaspi       : c_int,                        /* [w] Optional. Specify 0 to ignore. For CDDA sounds only - if non-zero use ASPI instead of NTSCSI to access the specified CD/DVD device. */
-    audioqueuepolicy    : c_uint,                       /* [w] Optional. Specify 0 or FMOD_AUDIOQUEUE_CODECPOLICY_DEFAULT to ignore. Policy used to determine whether hardware or software is used for decoding, see FMOD_AUDIOQUEUE_CODECPOLICY for options (iOS >= 3.0 required, otherwise only hardware is available) */ 
-    minmidigranularity  : c_uint,                       /* [w] Optional. Specify 0 to ignore. Allows you to set a minimum desired MIDI mixer granularity. Values smaller than 512 give greater than default accuracy at the cost of more CPU and vice versa. Specify 0 for default (512 samples). */
-    nonblockthreadid    : c_int,                        /* [w] Optional. Specify 0 to ignore. Specifies a thread index to execute non blocking load on.  Allows for up to 5 threads to be used for loading at once.  This is to avoid one load blocking another.  Maximum value = 4. */
+    pub cbsize              : c_int,                        /* [w] Size of this structure.  This is used so the structure can be expanded in the future and still work on older versions of FMOD Ex. */
+    pub length              : c_uint,                       /* [w] Optional. Specify 0 to ignore. Size in bytes of file to load, or sound to create (in this case only if FMOD_OPENUSER is used).  Required if loading from memory.  If 0 is specified, then it will use the size of the file (unless loading from memory then an error will be returned). */
+    pub fileoffset          : c_uint,                       /* [w] Optional. Specify 0 to ignore. Offset from start of the file to start loading from.  This is useful for loading files from inside big data files. */
+    pub numchannels         : c_int,                        /* [w] Optional. Specify 0 to ignore. Number of channels in a sound mandatory if FMOD_OPENUSER or FMOD_OPENRAW is used. */
+    pub defaultfrequency    : c_int,                        /* [w] Optional. Specify 0 to ignore. Default frequency of sound in a sound mandatory if FMOD_OPENUSER or FMOD_OPENRAW is used.  Other formats use the frequency determined by the file format. */
+    pub format              : FMOD_SOUND_FORMAT,            /* [w] Optional. Specify 0 or FMOD_SOUND_FORMAT_NONE to ignore. Format of the sound mandatory if FMOD_OPENUSER or FMOD_OPENRAW is used.  Other formats use the format determined by the file format.   */
+    pub decodebuffersize    : c_uint,                       /* [w] Optional. Specify 0 to ignore. For streams.  This determines the size of the double buffer (in PCM samples) that a stream uses.  Use this for user created streams if you want to determine the size of the callback buffer passed to you.  Specify 0 to use FMOD's default size which is currently equivalent to 400ms of the sound format created/loaded. */
+    pub initialsubsound     : c_int,                        /* [w] Optional. Specify 0 to ignore. In a multi-sample file format such as .FSB/.DLS/.SF2, specify the initial subsound to seek to, only if FMOD_CREATESTREAM is used. */
+    pub numsubsounds        : c_int,                        /* [w] Optional. Specify 0 to ignore or have no subsounds.  In a sound created with FMOD_OPENUSER, specify the number of subsounds that are accessable with Sound::getSubSound.  If not created with FMOD_OPENUSER, this will limit the number of subsounds loaded within a multi-subsound file.  If using FSB, then if FMOD_CREATESOUNDEXINFO::inclusionlist is used, this will shuffle subsounds down so that there are not any gaps.  It will mean that the indices of the sounds will be different. */
+    pub inclusionlist       : *c_int,                       /* [w] Optional. Specify 0 to ignore. In a multi-sample format such as .FSB/.DLS/.SF2 it may be desirable to specify only a subset of sounds to be loaded out of the whole file.  This is an array of subsound indices to load into memory when created. */
+    pub inclusionlistnum    : c_int,                        /* [w] Optional. Specify 0 to ignore. This is the number of integers contained within the inclusionlist array. */
+    pub pcmreadcallback     : FMOD_SOUND_PCMREADCALLBACK,   /* [w] Optional. Specify 0 to ignore. Callback to 'piggyback' on FMOD's read functions and accept or even write PCM data while FMOD is opening the sound.  Used for user sounds created with FMOD_OPENUSER or for capturing decoded data as FMOD reads it. */
+    pub pcmsetposcallback   : FMOD_SOUND_PCMSETPOSCALLBACK, /* [w] Optional. Specify 0 to ignore. Callback for when the user calls a seeking function such as Channel::setTime or Channel::setPosition within a multi-sample sound, and for when it is opened.*/
+    pub nonblockcallback    : FMOD_SOUND_NONBLOCKCALLBACK,  /* [w] Optional. Specify 0 to ignore. Callback for successful completion, or error while loading a sound that used the FMOD_NONBLOCKING flag.  Also called duing seeking, when setPosition is called or a stream is restarted. */
+    pub dlsname             : *c_char,                      /* [w] Optional. Specify 0 to ignore. Filename for a DLS or SF2 sample set when loading a MIDI file. If not specified, on Windows it will attempt to open /windows/system32/drivers/gm.dls or /windows/system32/drivers/etc/gm.dls, on Mac it will attempt to load /System/Library/Components/CoreAudio.component/Contents/Resources/gs_instruments.dls, otherwise the MIDI will fail to open. Current DLS support is for level 1 of the specification. */
+    pub encryptionkey       : *c_char,                      /* [w] Optional. Specify 0 to ignore. Key for encrypted FSB file.  Without this key an encrypted FSB file will not load. */
+    pub maxpolyphony        : c_int,                        /* [w] Optional. Specify 0 to ignore. For sequenced formats with dynamic channel allocation such as .MID and .IT, this specifies the maximum voice count allowed while playing.  .IT defaults to 64.  .MID defaults to 32. */
+    pub userdata            : *c_void,                      /* [w] Optional. Specify 0 to ignore. This is user data to be attached to the sound during creation.  Access via Sound::getUserData.  Note: This is not passed to FMOD_FILE_OPENCALLBACK, that is a different userdata that is file specific. */
+    pub suggestedsoundtype  : FMOD_SOUND_TYPE,              /* [w] Optional. Specify 0 or FMOD_SOUND_TYPE_UNKNOWN to ignore.  Instead of scanning all codec types, use this to speed up loading by making it jump straight to this codec. */
+    pub useropen            : FMOD_FILE_OPENCALLBACK,       /* [w] Optional. Specify 0 to ignore. Callback for opening this file. */
+    pub userclose           : FMOD_FILE_CLOSECALLBACK,      /* [w] Optional. Specify 0 to ignore. Callback for closing this file. */
+    pub userread            : FMOD_FILE_READCALLBACK,       /* [w] Optional. Specify 0 to ignore. Callback for reading from this file. */
+    pub userseek            : FMOD_FILE_SEEKCALLBACK,       /* [w] Optional. Specify 0 to ignore. Callback for seeking within this file. */
+    pub userasyncread       : FMOD_FILE_ASYNCREADCALLBACK,  /* [w] Optional. Specify 0 to ignore. Callback for seeking within this file. */
+    pub userasynccancel     : FMOD_FILE_ASYNCCANCELCALLBACK,/* [w] Optional. Specify 0 to ignore. Callback for seeking within this file. */
+    pub speakermap          : FMOD_SPEAKERMAPTYPE,          /* [w] Optional. Specify 0 to ignore. Use this to differ the way fmod maps multichannel sounds to speakers.  See FMOD_SPEAKERMAPTYPE for more. */
+    pub initialsoundgroup   : *FMOD_SOUNDGROUP,             /* [w] Optional. Specify 0 to ignore. Specify a sound group if required, to put sound in as it is created. */
+    pub initialseekposition : c_uint,                       /* [w] Optional. Specify 0 to ignore. For streams. Specify an initial position to seek the stream to. */
+    pub initialseekpostype  : FMOD_TIMEUNIT,                /* [w] Optional. Specify 0 to ignore. For streams. Specify the time unit for the position set in initialseekposition. */
+    pub ignoresetfilesystem : c_int,                        /* [w] Optional. Specify 0 to ignore. Set to 1 to use fmod's built in file system. Ignores setFileSystem callbacks and also FMOD_CREATESOUNEXINFO file callbacks.  Useful for specific cases where you don't want to use your own file system but want to use fmod's file system (ie net streaming). */
+    pub cddaforceaspi       : c_int,                        /* [w] Optional. Specify 0 to ignore. For CDDA sounds only - if non-zero use ASPI instead of NTSCSI to access the specified CD/DVD device. */
+    pub audioqueuepolicy    : c_uint,                       /* [w] Optional. Specify 0 or FMOD_AUDIOQUEUE_CODECPOLICY_DEFAULT to ignore. Policy used to determine whether hardware or software is used for decoding, see FMOD_AUDIOQUEUE_CODECPOLICY for options (iOS >= 3.0 required, otherwise only hardware is available) */ 
+    pub minmidigranularity  : c_uint,                       /* [w] Optional. Specify 0 to ignore. Allows you to set a minimum desired MIDI mixer granularity. Values smaller than 512 give greater than default accuracy at the cost of more CPU and vice versa. Specify 0 for default (512 samples). */
+    pub nonblockthreadid    : c_int,                        /* [w] Optional. Specify 0 to ignore. Specifies a thread index to execute non blocking load on.  Allows for up to 5 threads to be used for loading at once.  This is to avoid one load blocking another.  Maximum value = 4. */
 }
 
 pub struct FMOD_REVERB_CHANNELPROPERTIES
@@ -357,4 +417,36 @@ pub struct FMOD_VECTOR
     pub x: c_float, /* X co-ordinate in 3D space. */
     pub y: c_float, /* Y co-ordinate in 3D space. */
     pub z: c_float  /* Z co-ordinate in 3D space. */
+}
+
+pub fn get_DSP_ffi(dsp: FmodDSP) -> FMOD_DSP {
+    dsp.dsp
+}
+
+pub struct FmodDSP {
+    dsp : FMOD_DSP
+}
+
+impl FmodDSP {
+    pub fn new() -> FmodDSP {
+        FmodDSP{dsp: ::std::ptr::null()}
+    }
+
+    pub fn from_ptr(dsp: FMOD_DSP) -> FmodDSP {
+        FmodDSP{dsp: dsp}
+    }
+}
+
+pub struct FmodDSPConnection {
+    dsp_connection: *FMOD_DSPCONNECTION
+}
+
+impl FmodDSPConnection {
+    pub fn new() -> FmodDSPConnection {
+        FmodDSPConnection{dsp_connection: ::std::ptr::null()}
+    }
+
+    pub fn from_ptr(dsp_connection: *FMOD_DSPCONNECTION) -> FmodDSPConnection {
+        FmodDSPConnection{dsp_connection: dsp_connection}
+    }
 }

@@ -26,6 +26,8 @@ use enums::*;
 use types::*;
 use libc::{c_int, c_uint};
 use ffi;
+use channel_group;
+use channel_group::ChannelGroup;
 
 pub struct FmodSpectrumOptions {
     pub window_type     : FMOD_DSP_FFT_WINDOW,
@@ -50,9 +52,10 @@ pub struct FmodSpeakerMixOptions {
 }
 
 pub struct FmodReverbChannelProperties {
-    pub direct  : c_int,
-    pub room    : c_int,
-    pub flags   : c_uint,
+    pub direct           : c_int,
+    pub room             : c_int,
+    pub flags            : c_uint,
+    pub connection_point : ffi::FmodDSP
 }
 
 pub fn get_ffi(channel : &Channel) -> *ffi::FMOD_CHANNEL {
@@ -63,8 +66,12 @@ pub fn new() -> Channel {
     Channel{channel : ::std::ptr::null()}
 }
 
+pub fn from_ptr(channel: ffi::FMOD_CHANNEL) -> Channel {
+    Channel{channel: channel}
+}
+
 pub struct Channel {
-    channel : ffi::FMOD_CHANNEL,
+    channel : ffi::FMOD_CHANNEL
 }
 
 impl Channel {
@@ -84,7 +91,7 @@ impl Channel {
             }
             None => {}
         };
-        match unsafe { ffi::FMOD_System_GetSpectrum(self.channel, ptr.as_ptr(), spectrum_size as c_int, channel_offset, window_type) } {
+        match unsafe { ffi::FMOD_Channel_GetSpectrum(self.channel, ptr.as_ptr(), spectrum_size as c_int, channel_offset, window_type) } {
             FMOD_OK => Ok(ptr),
             e => Err(e),
         }
@@ -93,7 +100,7 @@ impl Channel {
     pub fn get_wave_data(&self, wave_size : uint, channel_offset : i32) -> Result<Vec<f32>, FMOD_RESULT> {
         let ptr = Vec::from_elem(wave_size, 0f32);
 
-        match unsafe { ffi::FMOD_System_GetWaveData(self.channel, ptr.as_ptr(), wave_size as c_int, channel_offset) } {
+        match unsafe { ffi::FMOD_Channel_GetWaveData(self.channel, ptr.as_ptr(), wave_size as c_int, channel_offset) } {
             FMOD_OK => Ok(ptr),
             e => Err(e)
         }
@@ -279,7 +286,8 @@ impl Channel {
         let t = ffi::FMOD_REVERB_CHANNELPROPERTIES{Direct : 0, Room : 0, Flags : 0, ConnectionPoint : ::std::ptr::null()};
 
         match unsafe { ffi::FMOD_Channel_GetReverbProperties(self.channel, &t) } {
-            FMOD_OK => Ok(FmodReverbChannelProperties{direct: t.Direct, room: t.Room, flags: t.Flags}),
+            FMOD_OK => Ok(FmodReverbChannelProperties{direct: t.Direct, room: t.Room, flags: t.Flags,
+                connection_point: ffi::FmodDSP::from_ptr(t.ConnectionPoint)}),
             e => Err(e),
         }
     }
@@ -294,6 +302,19 @@ impl Channel {
         match unsafe { ffi::FMOD_Channel_GetLowPassGain(self.channel, &t) } {
             FMOD_OK => Ok(t),
             e => Err(e),
+        }
+    }
+
+    pub fn set_channel_group(&mut self, channel_group : ChannelGroup) -> FMOD_RESULT {
+        unsafe { ffi::FMOD_Channel_SetChannelGroup(self.channel, channel_group::get_ffi(channel_group)) }
+    }
+
+    pub fn get_channel_group(&self) -> Result<ChannelGroup, FMOD_RESULT> {
+        let channel_group = ::std::ptr::null();
+
+        match unsafe { ffi::FMOD_Channel_GetChannelGroup(self.channel, &channel_group) } {
+            FMOD_OK => Ok(channel_group::new(channel_group)),
+            e => Err(e)
         }
     }
 }

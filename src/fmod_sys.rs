@@ -29,6 +29,8 @@ use enums::*;
 use sound;
 use sound::Sound;
 use std::mem;
+use channel_group;
+use channel;
 
 pub struct FmodGuid {
     pub data1: u32,
@@ -91,16 +93,6 @@ pub struct FmodCodecDescription {
     pub getwaveformat   : ffi::FMOD_CODEC_GETWAVEFORMAT       /* [in] Callback to tell FMOD about the waveformat of a particular subsound.  This is to save memory, rather than saving 1000 FMOD_CODEC_WAVEFORMAT structures in the codec, the codec might have a more optimal way of storing this information. */
 }
 
-pub struct FmodDSP {
-    dsp : ffi::FMOD_DSP
-}
-
-impl FmodDSP {
-    pub fn new() -> FmodDSP {
-        FmodDSP{dsp: ::std::ptr::null()}
-    }
-}
-
 pub struct FmodOutputHandle {
     handle: *c_void
 }
@@ -121,7 +113,7 @@ impl FmodVector {
         FmodVector{x: vec.x, y: vec.y, z: vec.z}
     }
 
-    fn convert_to_c(&self) -> ffi::FMOD_VECTOR {
+    pub fn convert_to_c(&self) -> ffi::FMOD_VECTOR {
         ffi::FMOD_VECTOR{x: self.x, y: self.y, z: self.z}
     }
 }
@@ -171,6 +163,34 @@ impl FmodSys {
             match unsafe { ffi::FMOD_System_CreateSound(self.system, c_str, op, ::std::ptr::null(), &sound) } {
                 FMOD_OK => {Ok(sound::new(self.system, music.clone(), sound))},
                 err => Err(err)
+            }
+        })
+    }
+
+    pub fn create_stream(&self, music : StrBuf, options: Option<FmodMode>) -> Result<Sound, FMOD_RESULT> {
+        let tmp_v = music.clone().into_owned();
+        let sound = ::std::ptr::null();
+        let op = match options {
+            Some(FmodMode(t)) => t,
+            None => FMOD_SOFTWARE | FMOD_LOOP_OFF | FMOD_2D | FMOD_CREATESTREAM
+        };
+
+        tmp_v.with_c_str(|c_str|{
+            match unsafe { ffi::FMOD_System_CreateStream(self.system, c_str, op, ::std::ptr::null(), &sound) } {
+                FMOD_OK => {Ok(sound::new(self.system, music.clone(), sound))},
+                err => Err(err)
+            }
+        })
+    }
+
+    pub fn create_channel_group(&self, group_name : StrBuf) -> Result<channel_group::ChannelGroup, FMOD_RESULT> {
+        let t_group_name = group_name.clone().into_owned();
+        let channel_group = ::std::ptr::null();
+
+        t_group_name.with_c_str(|c_str|{
+            match unsafe { ffi::FMOD_System_CreateChannelGroup(self.system, c_str, &channel_group) } {
+                FMOD_OK => Ok(channel_group::new(channel_group)),
+                e => Err(e)
             }
         })
     }
@@ -440,26 +460,11 @@ impl FmodSys {
         }
     }
 
-    pub fn create_DSP_by_plugin(&self, FmodPluginHandle(handle): FmodPluginHandle) -> Result<FmodDSP, FMOD_RESULT> {
-        let dsp = FmodDSP::new();
+    pub fn create_DSP_by_plugin(&self, FmodPluginHandle(handle): FmodPluginHandle) -> Result<ffi::FmodDSP, FMOD_RESULT> {
+        let dsp = ::std::ptr::null();
 
-        match unsafe { ffi::FMOD_System_CreateDSPByPlugin(self.system, handle, &dsp.dsp) } {
-            FMOD_OK => Ok(dsp),
-            e => Err(e)
-        }
-    }
-
-    pub fn set_3D_settings(&self, doppler_scale: f32, distance_factor: f32, roll_off_scale: f32) -> FMOD_RESULT {
-        unsafe { ffi::FMOD_System_Set3DSettings(self.system, doppler_scale, distance_factor, roll_off_scale) }
-    }
-
-    pub fn get_3D_settings(&self) -> Result<(f32, f32, f32), FMOD_RESULT> {
-        let doppler_scale = 0f32;
-        let distance_factor = 0f32;
-        let roll_off_scale = 0f32;
-
-        match unsafe { ffi::FMOD_System_Get3DSettings(self.system, &doppler_scale, &distance_factor, &roll_off_scale) } {
-            FMOD_OK => Ok((doppler_scale, distance_factor, roll_off_scale)),
+        match unsafe { ffi::FMOD_System_CreateDSPByPlugin(self.system, handle, &dsp) } {
+            FMOD_OK => Ok(ffi::FmodDSP::from_ptr(dsp)),
             e => Err(e)
         }
     }
@@ -517,6 +522,21 @@ impl FmodSys {
                 1 => true,
                 _ => false
             })),
+            e => Err(e)
+        }
+    }
+
+    pub fn set_3D_settings(&self, doppler_scale: f32, distance_factor: f32, roll_off_scale: f32) -> FMOD_RESULT {
+        unsafe { ffi::FMOD_System_Set3DSettings(self.system, doppler_scale, distance_factor, roll_off_scale) }
+    }
+
+    pub fn get_3D_settings(&self) -> Result<(f32, f32, f32), FMOD_RESULT> {
+        let doppler_scale = 0f32;
+        let distance_factor = 0f32;
+        let roll_off_scale = 0f32;
+
+        match unsafe { ffi::FMOD_System_Get3DSettings(self.system, &doppler_scale, &distance_factor, &roll_off_scale) } {
+            FMOD_OK => Ok((doppler_scale, distance_factor, roll_off_scale)),
             e => Err(e)
         }
     }
@@ -613,5 +633,32 @@ impl FmodSys {
                 })
             })
         })
+    }
+
+    pub fn get_spectrum(&self, spectrum_size : uint, options : Option<channel::FmodSpectrumOptions>) -> Result<Vec<f32>, FMOD_RESULT> {
+        let ptr = Vec::from_elem(spectrum_size, 0f32);
+        let mut window_type = FMOD_DSP_FFT_WINDOW_RECT;
+        let mut channel_offset = 0;
+
+        match options {
+            Some(v) => {
+                window_type = v.window_type;
+                channel_offset = v.channel_offset;
+            }
+            None => {}
+        };
+        match unsafe { ffi::FMOD_System_GetSpectrum(self.system, ptr.as_ptr(), spectrum_size as c_int, channel_offset, window_type) } {
+            FMOD_OK => Ok(ptr),
+            e => Err(e),
+        }
+    }
+
+    pub fn get_wave_data(&self, wave_size : uint, channel_offset : i32) -> Result<Vec<f32>, FMOD_RESULT> {
+        let ptr = Vec::from_elem(wave_size, 0f32);
+
+        match unsafe { ffi::FMOD_System_GetWaveData(self.system, ptr.as_ptr(), wave_size as c_int, channel_offset) } {
+            FMOD_OK => Ok(ptr),
+            e => Err(e)
+        }
     }
 }
