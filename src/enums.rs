@@ -23,6 +23,7 @@
 */
 
 use libc::{c_void, c_uint, c_int, c_char, c_float};
+use types::FmodTimeUnit;
 
 #[deriving(Eq, Ord, Show)]
 #[repr(C)]
@@ -205,6 +206,43 @@ pub enum FMOD_SOUND_TYPE
 
 #[deriving(Eq, Ord, Show)]
 #[repr(C)]
+pub enum FMOD_TAGTYPE
+{
+    FMOD_TAGTYPE_UNKNOWN = 0,
+    FMOD_TAGTYPE_ID3V1,
+    FMOD_TAGTYPE_ID3V2,
+    FMOD_TAGTYPE_VORBISCOMMENT,
+    FMOD_TAGTYPE_SHOUTCAST,
+    FMOD_TAGTYPE_ICECAST,
+    FMOD_TAGTYPE_ASF,
+    FMOD_TAGTYPE_MIDI,
+    FMOD_TAGTYPE_PLAYLIST,
+    FMOD_TAGTYPE_FMOD,
+    FMOD_TAGTYPE_USER,
+
+    FMOD_TAGTYPE_MAX,               /* Maximum number of tag types supported. */
+    FMOD_TAGTYPE_FORCEINT = 65536   /* Makes sure this enum is signed 32bit. */
+}
+
+#[deriving(Eq, Ord, Show)]
+#[repr(C)]
+pub enum FMOD_TAGDATATYPE
+{
+    FMOD_TAGDATATYPE_BINARY = 0,
+    FMOD_TAGDATATYPE_INT,
+    FMOD_TAGDATATYPE_FLOAT,
+    FMOD_TAGDATATYPE_STRING,
+    FMOD_TAGDATATYPE_STRING_UTF16,
+    FMOD_TAGDATATYPE_STRING_UTF16BE,
+    FMOD_TAGDATATYPE_STRING_UTF8,
+    FMOD_TAGDATATYPE_CDTOC,
+
+    FMOD_TAGDATATYPE_MAX,               /* Maximum number of tag datatypes supported. */
+    FMOD_TAGDATATYPE_FORCEINT = 65536   /* Makes sure this enum is signed 32bit. */
+}
+
+#[deriving(Eq, Ord, Show)]
+#[repr(C)]
 pub enum FMOD_CHANNELINDEX {
     FMOD_CHANNEL_FREE  = -1,      /* For a channel index, FMOD chooses a free voice using the priority system. */
     FMOD_CHANNEL_REUSE = -2,      /* For a channel index, re-use the channel handle that was passed in. */
@@ -346,39 +384,19 @@ pub enum FMOD_PLUGINTYPE
 
 #[deriving(Eq, Ord, Show)]
 #[repr(C)]
-pub enum FMOD_TAGTYPE
+pub enum FMOD_OPENSTATE
 {
-    FMOD_TAGTYPE_UNKNOWN = 0,
-    FMOD_TAGTYPE_ID3V1,
-    FMOD_TAGTYPE_ID3V2,
-    FMOD_TAGTYPE_VORBISCOMMENT,
-    FMOD_TAGTYPE_SHOUTCAST,
-    FMOD_TAGTYPE_ICECAST,
-    FMOD_TAGTYPE_ASF,
-    FMOD_TAGTYPE_MIDI,
-    FMOD_TAGTYPE_PLAYLIST,
-    FMOD_TAGTYPE_FMOD,
-    FMOD_TAGTYPE_USER,
+    FMOD_OPENSTATE_READY = 0,       /* Opened and ready to play. */
+    FMOD_OPENSTATE_LOADING,         /* Initial load in progress. */
+    FMOD_OPENSTATE_ERROR,           /* Failed to open - file not found, out of memory etc.  See return value of Sound::getOpenState for what happened. */
+    FMOD_OPENSTATE_CONNECTING,      /* Connecting to remote host (internet sounds only). */
+    FMOD_OPENSTATE_BUFFERING,       /* Buffering data. */
+    FMOD_OPENSTATE_SEEKING,         /* Seeking to subsound and re-flushing stream buffer. */
+    FMOD_OPENSTATE_PLAYING,         /* Ready and playing, but not possible to release at this time without stalling the main thread. */
+    FMOD_OPENSTATE_SETPOSITION,     /* Seeking within a stream to a different position. */
 
-    FMOD_TAGTYPE_MAX,               /* Maximum number of tag types supported. */
-    FMOD_TAGTYPE_FORCEINT = 65536   /* Makes sure this enum is signed 32bit. */
-}
-
-#[deriving(Eq, Ord, Show)]
-#[repr(C)]
-pub enum FMOD_TAGDATATYPE
-{
-    FMOD_TAGDATATYPE_BINARY = 0,
-    FMOD_TAGDATATYPE_INT,
-    FMOD_TAGDATATYPE_FLOAT,
-    FMOD_TAGDATATYPE_STRING,
-    FMOD_TAGDATATYPE_STRING_UTF16,
-    FMOD_TAGDATATYPE_STRING_UTF16BE,
-    FMOD_TAGDATATYPE_STRING_UTF8,
-    FMOD_TAGDATATYPE_CDTOC,
-
-    FMOD_TAGDATATYPE_MAX,               /* Maximum number of tag datatypes supported. */
-    FMOD_TAGDATATYPE_FORCEINT = 65536   /* Makes sure this enum is signed 32bit. */
+    FMOD_OPENSTATE_MAX,             /* Maximum number of open state types. */
+    FMOD_OPENSTATE_FORCEINT = 65536 /* Makes sure this enum is signed 32bit. */
 }
 
 #[deriving(Eq, Ord, Show)]
@@ -395,6 +413,18 @@ pub enum FMOD_SYSTEM_CALLBACKTYPE
 
     FMOD_SYSTEM_CALLBACKTYPE_MAX,                       /* Maximum number of callback types supported. */
     FMOD_SYSTEM_CALLBACKTYPE_FORCEINT = 65536           /* Makes sure this enum is signed 32bit. */
+}
+
+#[deriving(Eq, Ord, Show)]
+#[repr(C)]
+pub enum FMOD_SOUNDGROUP_BEHAVIOR
+{
+    FMOD_SOUNDGROUP_BEHAVIOR_FAIL,              /* Any sound played that puts the sound count over the SoundGroup::setMaxAudible setting, will simply fail during System::playSound. */
+    FMOD_SOUNDGROUP_BEHAVIOR_MUTE,              /* Any sound played that puts the sound count over the SoundGroup::setMaxAudible setting, will be silent, then if another sound in the group stops the sound that was silent before becomes audible again. */
+    FMOD_SOUNDGROUP_BEHAVIOR_STEALLOWEST,       /* Any sound played that puts the sound count over the SoundGroup::setMaxAudible setting, will steal the quietest / least important sound playing in the group. */
+
+    FMOD_SOUNDGROUP_BEHAVIOR_MAX,               /* Maximum number of open state types. */
+    FMOD_SOUNDGROUP_BEHAVIOR_FORCEINT = 65536   /* Makes sure this enum is signed 32bit. */
 }
 
 pub static FMOD_DEFAULT                 : c_uint = 0x00000000;  /* Default for all modes listed below. FMOD_LOOP_OFF, FMOD_2D, FMOD_HARDWARE */
@@ -452,3 +482,18 @@ pub static FMOD_INIT_DISABLE_MYEARS_AUTODETECT  : c_uint = 0x08000000; /* Win32 
 pub static FMOD_INIT_PS3_DISABLEDTS             : c_uint = 0x10000000; /* PS3 only - Disable DTS output mode selection */
 pub static FMOD_INIT_PS3_DISABLEDOLBYDIGITAL    : c_uint = 0x20000000; /* PS3 only - Disable Dolby Digital output mode selection */
 pub static FMOD_INIT_7POINT1_DOLBYMAPPING       : c_uint = 0x40000000; /* PS3/PS4 only - FMOD uses the WAVEFORMATEX Microsoft 7.1 speaker mapping where the last 2 pairs of speakers are 'rears' then 'sides', but on PS3/PS4 these are mapped to 'surrounds' and 'backs'.  Use this flag to swap fmod's last 2 pair of speakers on PS3/PS4 to avoid needing to do a special case for these platforms. */
+
+pub static FMOD_TIMEUNIT_MS                : FmodTimeUnit = FmodTimeUnit(0x00000001);  /* Milliseconds. */
+pub static FMOD_TIMEUNIT_PCM               : FmodTimeUnit = FmodTimeUnit(0x00000002);  /* PCM samples, related to milliseconds * samplerate / 1000. */
+pub static FMOD_TIMEUNIT_PCMBYTES          : FmodTimeUnit = FmodTimeUnit(0x00000004);  /* Bytes, related to PCM samples * channels * datawidth (ie 16bit = 2 bytes). */
+pub static FMOD_TIMEUNIT_RAWBYTES          : FmodTimeUnit = FmodTimeUnit(0x00000008);  /* Raw file bytes of (compressed) sound data (does not include headers).  Only used by Sound::getLength and Channel::getPosition. */
+pub static FMOD_TIMEUNIT_PCMFRACTION       : FmodTimeUnit = FmodTimeUnit(0x00000010);  /* Fractions of 1 PCM sample.  Unsigned int range 0 to 0xFFFFFFFF.  Used for sub-sample granularity for DSP purposes. */
+pub static FMOD_TIMEUNIT_MODORDER          : FmodTimeUnit = FmodTimeUnit(0x00000100);  /* MOD/S3M/XM/IT.  Order in a sequenced module format.  Use Sound::getFormat to determine the PCM format being decoded to. */
+pub static FMOD_TIMEUNIT_MODROW            : FmodTimeUnit = FmodTimeUnit(0x00000200);  /* MOD/S3M/XM/IT.  Current row in a sequenced module format.  Sound::getLength will return the number of rows in the currently playing or seeked to pattern. */
+pub static FMOD_TIMEUNIT_MODPATTERN        : FmodTimeUnit = FmodTimeUnit(0x00000400);  /* MOD/S3M/XM/IT.  Current pattern in a sequenced module format.  Sound::getLength will return the number of patterns in the song and Channel::getPosition will return the currently playing pattern. */
+pub static FMOD_TIMEUNIT_SENTENCE_MS       : FmodTimeUnit = FmodTimeUnit(0x00010000);  /* Currently playing subsound in a sentence time in milliseconds. */
+pub static FMOD_TIMEUNIT_SENTENCE_PCM      : FmodTimeUnit = FmodTimeUnit(0x00020000);  /* Currently playing subsound in a sentence time in PCM Samples, related to milliseconds * samplerate / 1000. */
+pub static FMOD_TIMEUNIT_SENTENCE_PCMBYTES : FmodTimeUnit = FmodTimeUnit(0x00040000);  /* Currently playing subsound in a sentence time in bytes, related to PCM samples * channels * datawidth (ie 16bit = 2 bytes). */
+pub static FMOD_TIMEUNIT_SENTENCE          : FmodTimeUnit = FmodTimeUnit(0x00080000);  /* Currently playing sentence index according to the channel. */
+pub static FMOD_TIMEUNIT_SENTENCE_SUBSOUND : FmodTimeUnit = FmodTimeUnit(0x00100000);  /* Currently playing subsound index in a sentence. */
+pub static FMOD_TIMEUNIT_BUFFERED          : FmodTimeUnit = FmodTimeUnit(0x10000000);  /* Time value as seen by buffered stream.  This is always ahead of audible time, and is only used for processing. */

@@ -61,17 +61,18 @@ pub type FMOD_3D_ROLLOFFCALLBACK = ::std::option::Option<extern "C" fn(channel: 
 
 pub type FMOD_SYSTEM = *c_void;
 pub type FMOD_SOUND = *c_void;
+pub type FMOD_SOUNDGROUP = *c_void;
 pub type FMOD_CHANNEL = *c_void;
 pub type FMOD_CHANNELGROUP = *c_void;
 pub type FMOD_BOOL = c_int;
 pub type FMOD_MODE = c_uint;
 pub type FMOD_TIMEUNIT = c_uint;
-pub type FMOD_SOUNDGROUP = c_void;
 pub type FMOD_INITFLAGS = c_uint;
 pub type FMOD_DSP = *c_void;
 pub type FMOD_CAPS = c_uint;
 pub type FMOD_MEMORY_USAGE_DETAILS = c_void;
 pub type FMOD_DSPCONNECTION = c_void;
+pub type FMOD_SYNCPOINT = *c_void;
 
 extern "C" {
     /* pre-init functions */
@@ -109,8 +110,6 @@ extern "C" {
     pub fn FMOD_System_GetSpeakerMode(system: FMOD_SYSTEM, speaker_mode: *FMOD_SPEAKERMODE) -> FMOD_RESULT;
     // I'll bind it a little later
     pub fn FMOD_System_SetCallback(system: FMOD_SYSTEM, call_back: FMOD_SYSTEM_CALLBACK) -> FMOD_RESULT;
-
-
     /* plug-in part functions */
     pub fn FMOD_System_SetPluginPath(system: FMOD_SYSTEM, path: *c_char) -> FMOD_RESULT;
     pub fn FMOD_System_LoadPlugin(system: FMOD_SYSTEM, filename: *c_char, handle: *c_uint, priority: c_uint) -> FMOD_RESULT;
@@ -122,16 +121,12 @@ extern "C" {
     pub fn FMOD_System_SetOutputByPlugin(system: FMOD_SYSTEM, handle: c_uint) -> FMOD_RESULT;
     pub fn FMOD_System_GetOutputByPlugin(system: FMOD_SYSTEM, handle: *c_uint) -> FMOD_RESULT;
     pub fn FMOD_System_CreateDSPByPlugin(system: FMOD_SYSTEM, handle: c_uint, dsp: *FMOD_DSP) -> FMOD_RESULT;
-
-
     /* codec part functions */
     pub fn FMOD_System_RegisterCodec(system: FMOD_SYSTEM, description: *FMOD_CODEC_DESCRIPTION, handle: *c_uint, priority: c_uint) -> FMOD_RESULT;
-
-
+    /* init function */
     pub fn FMOD_System_Init(system: FMOD_SYSTEM, max_channels: c_int, flags: FMOD_INITFLAGS, extra_driver_data: *c_void) -> FMOD_RESULT;
-    pub fn FMOD_System_Close(sound: FMOD_SOUND) -> FMOD_RESULT;
-
     /* post-init functions */
+    pub fn FMOD_System_Close(sound: FMOD_SOUND) -> FMOD_RESULT;
     pub fn FMOD_System_Update(system: FMOD_SYSTEM) -> FMOD_RESULT;
     pub fn FMOD_System_GetSpectrum(system : FMOD_SYSTEM, spectrum_array : *c_float, num_values : c_int, channel_offset : c_int,
         window_type : FMOD_DSP_FFT_WINDOW) -> FMOD_RESULT;
@@ -153,8 +148,6 @@ extern "C" {
     pub fn FMOD_System_Get3DSpeakerPosition(system: FMOD_SYSTEM, speaker: FMOD_SPEAKER, x: *c_float, y: *c_float, active: *FMOD_BOOL) -> FMOD_RESULT;
     pub fn FMOD_System_Set3DSettings(system: FMOD_SYSTEM, doppler_scale: c_float, distance_factor: c_float, roll_off_scale: c_float) -> FMOD_RESULT;
     pub fn FMOD_System_Get3DSettings(system: FMOD_SYSTEM, doppler_scale: *c_float, distance_factor: *c_float, roll_off_scale: *c_float) -> FMOD_RESULT;
-
-
     /* system information functions */
     pub fn FMOD_System_GetVersion(system: FMOD_SYSTEM, version: *c_uint) -> FMOD_RESULT;
     pub fn FMOD_System_GetOutputHandle(system: FMOD_SYSTEM, handle: **c_void) -> FMOD_RESULT;
@@ -164,19 +157,76 @@ extern "C" {
     pub fn FMOD_System_GetNumCDROMDrives(system: FMOD_SYSTEM, num_drives: *c_int) -> FMOD_RESULT;
     pub fn FMOD_System_GetCDROMDriveName(system: FMOD_SYSTEM, drive: c_int, drive_name: *c_char, drive_name_len: c_int, scsi_name: *c_char, scsi_name_len: c_int,
         device_name: *c_char, device_name_len: c_int) -> FMOD_RESULT;
-
-
     pub fn FMOD_System_CreateSound(system: FMOD_SYSTEM, name_or_data: *c_char, mode: FMOD_MODE, exinfo: *FMOD_CREATESOUNDEXINFO,
         sound: *FMOD_SOUND) -> FMOD_RESULT;
     pub fn FMOD_System_CreateStream(system: FMOD_SYSTEM, name_or_data: *c_char, mode: FMOD_MODE, exinfo: *FMOD_CREATESOUNDEXINFO,
         sound: *FMOD_SOUND) -> FMOD_RESULT;
     pub fn FMOD_System_CreateChannelGroup(system: FMOD_SYSTEM, name: *c_char, channel_group: *FMOD_CHANNELGROUP) -> FMOD_RESULT;
+    pub fn FMOD_System_CreateSoundGroup(system: FMOD_SYSTEM, name: *c_char, sound_group: *FMOD_SOUNDGROUP) -> FMOD_RESULT;
 
 
     /* sound functions */
     pub fn FMOD_System_PlaySound(system : FMOD_SYSTEM, channel_id : FMOD_CHANNELINDEX, sound : FMOD_SOUND, paused : FMOD_BOOL,
         channel : *FMOD_CHANNEL) -> FMOD_RESULT;
     pub fn FMOD_Sound_Release(sound: FMOD_SOUND) -> FMOD_RESULT;
+    /* Standard sound manipulation functions. */
+    pub fn FMOD_Sound_GetSystemObject(sound: FMOD_SOUND, system: *FMOD_SYSTEM) -> FMOD_RESULT;
+    pub fn FMOD_Sound_SetDefaults(sound: FMOD_SOUND, frequency: c_float, volume: c_float, pan: c_float, priority: c_int) -> FMOD_RESULT;
+    pub fn FMOD_Sound_GetDefaults(sound: FMOD_SOUND, frequency: *c_float, volume: *c_float, pan: *c_float, priority: *c_int) -> FMOD_RESULT;
+    pub fn FMOD_Sound_SetVariations(sound: FMOD_SOUND, frequency_var: c_float, volume_var: c_float, pan_var: c_float) -> FMOD_RESULT;
+    pub fn FMOD_Sound_GetVariations(sound: FMOD_SOUND, frequency_var: *c_float, volume_var: *c_float, pan_var: *c_float) -> FMOD_RESULT;
+    pub fn FMOD_Sound_Set3DMinMaxDistance(sound: FMOD_SOUND, min: c_float, max: c_float) -> FMOD_RESULT;
+    pub fn FMOD_Sound_Get3DMinMaxDistance(sound: FMOD_SOUND, min: *c_float, max: *c_float) -> FMOD_RESULT;
+    pub fn FMOD_Sound_Set3DConeSettings(sound: FMOD_SOUND, inside_cone_angle: c_float, outside_cone_angle: c_float, outside_volume: c_float) -> FMOD_RESULT;
+    pub fn FMOD_Sound_Get3DConeSettings(sound: FMOD_SOUND, inside_cone_angle: *c_float, outside_cone_angle: *c_float, outside_volume: *c_float) -> FMOD_RESULT;
+    pub fn FMOD_Sound_Set3DCustomRolloff(sound: FMOD_SOUND, points: *FMOD_VECTOR, num_points: c_int) -> FMOD_RESULT;
+    pub fn FMOD_Sound_Get3DCustomRolloff(sound: FMOD_SOUND, points: **FMOD_VECTOR, num_points: c_int) -> FMOD_RESULT;
+    pub fn FMOD_Sound_SetSubSound(sound: FMOD_SOUND, index: c_int, sub_sound: FMOD_SOUND) -> FMOD_RESULT;
+    pub fn FMOD_Sound_GetSubSound(sound: FMOD_SOUND, index: c_int, sub_sound: *FMOD_SOUND) -> FMOD_RESULT;
+    //I'll bind it later
+    pub fn FMOD_Sound_SetSubSoundSentence(sound: FMOD_SOUND, sub_sound_list: *c_int, num_sub_sound: c_int) -> FMOD_RESULT;
+    pub fn FMOD_Sound_GetName(sound: FMOD_SOUND, name: *c_char, name_len: c_int) -> FMOD_RESULT;
+    pub fn FMOD_Sound_GetLength(sound: FMOD_SOUND, length: *c_uint, length_type: FMOD_TIMEUNIT) -> FMOD_RESULT;
+    pub fn FMOD_Sound_GetFormat(sound: FMOD_SOUND, _type: *FMOD_SOUND_TYPE, format: *FMOD_SOUND_FORMAT, channels: *c_int, bits: *c_int) -> FMOD_RESULT;
+    pub fn FMOD_Sound_GetNumSubSounds(sound: FMOD_SOUND, num_sub_sound: *c_int) -> FMOD_RESULT;
+    pub fn FMOD_Sound_GetNumTags(sound: FMOD_SOUND, num_tags: *c_int, num_tags_updated: *c_int) -> FMOD_RESULT;
+    pub fn FMOD_Sound_GetTag(sound: FMOD_SOUND, name: *c_char, index: c_int, tag: *FMOD_TAG) -> FMOD_RESULT;
+    pub fn FMOD_Sound_GetOpenState(sound: FMOD_SOUND, open_state: *FMOD_OPENSTATE, percent_buffered: *c_uint, starving: *FMOD_BOOL,
+        disk_busy: *FMOD_BOOL) -> FMOD_RESULT;
+    /* I'll bind it later */
+    pub fn FMOD_Sound_ReadData(sound: FMOD_SOUND, buffer: *c_void, len_bytes: c_uint, read: *c_uint) -> FMOD_RESULT;
+    /* I'll bind it later */
+    pub fn FMOD_Sound_SeekData(sound: FMOD_SOUND, pcm: c_uint) -> FMOD_RESULT;
+    pub fn FMOD_Sound_SetSoundGroup(sound: FMOD_SOUND, sound_group: FMOD_SOUNDGROUP) -> FMOD_RESULT;
+    pub fn FMOD_Sound_GetSoundGroup(sound: FMOD_SOUND, sound_group: *FMOD_SOUNDGROUP) -> FMOD_RESULT;
+    /* Synchronization point API.  These points can come from markers embedded in wav files, and can also generate channel callbacks. */
+    pub fn FMOD_Sound_GetNumSyncPoints(sound: FMOD_SOUND, num_sync_points: *c_int) -> FMOD_RESULT;
+    pub fn FMOD_Sound_GetSyncPoint(sound: FMOD_SOUND, index: c_int, point: *FMOD_SYNCPOINT) -> FMOD_RESULT;
+    pub fn FMOD_Sound_GetSyncPointInfo(sound: FMOD_SOUND, point: FMOD_SYNCPOINT, name: *c_char, name_len: c_int, offset: *c_uint,
+        offset_type: FMOD_TIMEUNIT) -> FMOD_RESULT;
+    pub fn FMOD_Sound_AddSyncPoint(sound: FMOD_SOUND, offset: c_uint, offset_type: FMOD_TIMEUNIT, name: *c_char, point: *FMOD_SYNCPOINT) -> FMOD_RESULT;
+    pub fn FMOD_Sound_DeleteSyncPoint(sound: FMOD_SOUND, point: FMOD_SYNCPOINT) -> FMOD_RESULT;
+    /* Functions also in Channel class but here they are the 'default' to save having to change it in Channel all the time. */
+    pub fn FMOD_Sound_SetMode(sound: FMOD_SOUND, mode: FMOD_MODE) -> FMOD_RESULT;
+    pub fn FMOD_Sound_GetMode(sound: FMOD_SOUND, mode: *FMOD_MODE) -> FMOD_RESULT;
+    pub fn FMOD_Sound_SetLoopCount(sound: FMOD_SOUND, loop_count: c_int) -> FMOD_RESULT;
+    pub fn FMOD_Sound_GetLoopCount(sound: FMOD_SOUND, loop_count: *c_int) -> FMOD_RESULT;
+    pub fn FMOD_Sound_SetLoopPoints(sound: FMOD_SOUND, loop_start: c_uint, loop_start_type: FMOD_TIMEUNIT, loop_end: c_uint, loop_end_type: FMOD_TIMEUNIT) -> FMOD_RESULT;
+    pub fn FMOD_Sound_GetLoopPoints(sound: FMOD_SOUND, loop_start: *c_uint, loop_start_type: FMOD_TIMEUNIT, loop_end: *c_uint, loop_end_type: FMOD_TIMEUNIT) -> FMOD_RESULT;
+    /* For MOD/S3M/XM/IT/MID sequenced formats only. */
+    pub fn FMOD_Sound_GetMusicNumChannels(sound: FMOD_SOUND, num_channels: *c_int) -> FMOD_RESULT;
+    pub fn FMOD_Sound_SetMusicChannelVolume(sound: FMOD_SOUND, channel: c_int, volume: c_float) -> FMOD_RESULT;
+    pub fn FMOD_Sound_GetMusicChannelVolume(sound: FMOD_SOUND, channel: c_int, volume: *c_float) -> FMOD_RESULT;
+    pub fn FMOD_Sound_SetMusicSpeed(sound: FMOD_SOUND, speed: c_float) -> FMOD_RESULT;
+    pub fn FMOD_Sound_GetMusicSpeed(sound: FMOD_SOUND, speed: *c_float) -> FMOD_RESULT;
+    /* Userdata set/get. */
+    /* I'll bind it later */
+    pub fn FMOD_Sound_SetUserData(sound: FMOD_SOUND, user_data: *c_void) -> FMOD_RESULT;
+    /* I'll bind it later */
+    pub fn FMOD_Sound_GetUserData(sound: FMOD_SOUND, user_data: **c_void) -> FMOD_RESULT;
+    /* I'll bind it later */
+    pub fn FMOD_Sound_GetMemoryInfo(sound: FMOD_SOUND, memory_bits: c_uint, event_memory_bits: c_uint, memory_used: *c_uint,
+        memory_used_details: *FMOD_MEMORY_USAGE_DETAILS) -> FMOD_RESULT;
 
 
     /* channel functions */
@@ -263,6 +313,33 @@ extern "C" {
     pub fn FMOD_ChannelGroup_GetUserData(channel_group: FMOD_CHANNELGROUP, user_data: **c_void) -> FMOD_RESULT;
     /* I'll will bind it later */
     pub fn FMOD_ChannelGroup_GetMemoryInfo(channel_group: FMOD_CHANNELGROUP, memory_bits: c_uint, event_memory_bits: c_uint, memory_used: *c_int,
+        memoryused_details: *FMOD_MEMORY_USAGE_DETAILS) -> FMOD_RESULT;
+
+
+    /* sound_group functions */
+    pub fn FMOD_SoundGroup_Release(sound_group: FMOD_SOUNDGROUP) -> FMOD_RESULT;
+    /* SoundGroup control functions.*/
+    pub fn FMOD_SoundGroup_SetMaxAudible(sound_group: FMOD_SOUNDGROUP, max_audible: c_int) -> FMOD_RESULT;
+    pub fn FMOD_SoundGroup_GetMaxAudible(sound_group: FMOD_SOUNDGROUP, max_audible: *c_int) -> FMOD_RESULT;
+    pub fn FMOD_SoundGroup_SetMaxAudibleBehavior(sound_group: FMOD_SOUNDGROUP, behavior: FMOD_SOUNDGROUP_BEHAVIOR) -> FMOD_RESULT;
+    pub fn FMOD_SoundGroup_GetMaxAudibleBehavior(sound_group: FMOD_SOUNDGROUP, behavior: *FMOD_SOUNDGROUP_BEHAVIOR) -> FMOD_RESULT;
+    pub fn FMOD_SoundGroup_SetMuteFadeSpeed(sound_group: FMOD_SOUNDGROUP, speed: c_float) -> FMOD_RESULT;
+    pub fn FMOD_SoundGroup_GetMuteFadeSpeed(sound_group: FMOD_SOUNDGROUP, speed: *c_float) -> FMOD_RESULT;
+    pub fn FMOD_SoundGroup_SetVolume(sound_group: FMOD_SOUNDGROUP, volume: c_float) -> FMOD_RESULT;
+    pub fn FMOD_SoundGroup_GetVolume(sound_group: FMOD_SOUNDGROUP, volume: *c_float) -> FMOD_RESULT;
+    pub fn FMOD_SoundGroup_Stop(sound_group: FMOD_SOUNDGROUP) -> FMOD_RESULT;
+    /* Information only functions. */
+    pub fn FMOD_SoundGroup_GetName(sound_group: FMOD_SOUNDGROUP, name: *c_char, name_len: c_int) -> FMOD_RESULT;
+    pub fn FMOD_SoundGroup_GetNumSounds(sound_group: FMOD_SOUNDGROUP, num_sounds: *c_int) -> FMOD_RESULT;
+    pub fn FMOD_SoundGroup_GetSound(sound_group: FMOD_SOUNDGROUP, index: c_int, sound: *FMOD_SOUND) -> FMOD_RESULT;
+    pub fn FMOD_SoundGroup_GetNumPlaying(sound_group: FMOD_SOUNDGROUP, num_playing: *c_int) -> FMOD_RESULT;
+    /* Userdata set/get. */
+    /* I'll bind it later */
+    pub fn FMOD_SoundGroup_SetUserData(sound_group: FMOD_SOUNDGROUP, user_data: *c_void) -> FMOD_RESULT;
+    /* I'll bind it later */
+    pub fn FMOD_SoundGroup_GetUserData(sound_group: FMOD_SOUNDGROUP, user_data: **c_void) -> FMOD_RESULT;
+    /* I'll bind it later */
+    pub fn FMOD_SoundGroup_GetMemoryInfo(sound_group: FMOD_SOUNDGROUP, memory_bits: c_uint, event_memory_bits: c_uint, memory_used: *c_int,
         memoryused_details: *FMOD_MEMORY_USAGE_DETAILS) -> FMOD_RESULT;
 }
 
@@ -380,10 +457,6 @@ pub struct FMOD_CODEC_DESCRIPTION
     pub getwaveformat   : FMOD_CODEC_GETWAVEFORMAT       /* [in] Callback to tell FMOD about the waveformat of a particular subsound.  This is to save memory, rather than saving 1000 FMOD_CODEC_WAVEFORMAT structures in the codec, the codec might have a more optimal way of storing this information. */
 }
 
-/*
- * codec part
- */
-
 pub struct FMOD_CODEC_WAVEFORMAT
 {
     pub name        : [c_char, ..256],  /* [in] Name of sound.*/
@@ -410,6 +483,16 @@ pub struct FMOD_CODEC_STATE
     pub fileread     : FMOD_FILE_READCALLBACK,     /* [out] This will return a callable FMOD file function to use from codec. */
     pub fileseek     : FMOD_FILE_SEEKCALLBACK,     /* [out] This will return a callable FMOD file function to use from codec.  */
     pub metadata     : FMOD_CODEC_METADATACALLBACK /* [out] This will return a callable FMOD metadata function to use from codec.  */
+}
+
+pub struct FMOD_TAG
+{
+    pub _type    : FMOD_TAGTYPE,        /* [r] The type of this tag. */
+    pub datatype : FMOD_TAGDATATYPE,    /* [r] The type of data that this tag contains */
+    pub name     : *c_char,             /* [r] The name of this tag i.e. "TITLE", "ARTIST" etc. */
+    pub data     : *c_void,             /* [r] Pointer to the tag data - its format is determined by the datatype member */
+    pub datalen  : c_uint,              /* [r] Length of the data contained in this tag */
+    pub updated  : FMOD_BOOL            /* [r] True if this tag has been updated since last being accessed with Sound::getTag */
 }
 
 pub struct FMOD_VECTOR

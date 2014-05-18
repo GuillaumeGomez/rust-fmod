@@ -28,6 +28,7 @@ use types::*;
 use enums::*;
 use sound;
 use sound::Sound;
+use sound_group;
 use std::mem;
 use channel_group;
 use channel;
@@ -104,13 +105,13 @@ pub struct FmodVector
     pub z: f32  /* Z co-ordinate in 3D space. */
 }
 
+pub fn from_c(vec : ffi::FMOD_VECTOR) -> FmodVector {
+    FmodVector{x: vec.x, y: vec.y, z: vec.z}
+}
+
 impl FmodVector {
     pub fn new() -> FmodVector {
         FmodVector{x: 0f32, y: 0f32, z: 0f32}
-    }
-
-    fn from_c(vec : ffi::FMOD_VECTOR) -> FmodVector {
-        FmodVector{x: vec.x, y: vec.y, z: vec.z}
     }
 
     pub fn convert_to_c(&self) -> ffi::FMOD_VECTOR {
@@ -161,7 +162,7 @@ impl FmodSys {
 
         tmp_v.with_c_str(|c_str|{
             match unsafe { ffi::FMOD_System_CreateSound(self.system, c_str, op, ::std::ptr::null(), &sound) } {
-                FMOD_OK => {Ok(sound::new(self.system, music.clone(), sound))},
+                FMOD_OK => {Ok(sound::Sound::from_ptr(sound))},
                 err => Err(err)
             }
         })
@@ -177,7 +178,7 @@ impl FmodSys {
 
         tmp_v.with_c_str(|c_str|{
             match unsafe { ffi::FMOD_System_CreateStream(self.system, c_str, op, ::std::ptr::null(), &sound) } {
-                FMOD_OK => {Ok(sound::new(self.system, music.clone(), sound))},
+                FMOD_OK => {Ok(sound::Sound::from_ptr(sound))},
                 err => Err(err)
             }
         })
@@ -190,6 +191,18 @@ impl FmodSys {
         t_group_name.with_c_str(|c_str|{
             match unsafe { ffi::FMOD_System_CreateChannelGroup(self.system, c_str, &channel_group) } {
                 FMOD_OK => Ok(channel_group::new(channel_group)),
+                e => Err(e)
+            }
+        })
+    }
+
+    pub fn create_sound_group(&self, group_name : StrBuf) -> Result<sound_group::SoundGroup, FMOD_RESULT> {
+        let t_group_name = group_name.clone().into_owned();
+        let sound_group = ::std::ptr::null();
+
+        t_group_name.with_c_str(|c_str|{
+            match unsafe { ffi::FMOD_System_CreateSoundGroup(self.system, c_str, &sound_group) } {
+                FMOD_OK => Ok(sound_group::new(sound_group)),
                 e => Err(e)
             }
         })
@@ -499,7 +512,7 @@ impl FmodSys {
         let up = FmodVector::new().convert_to_c();
 
         match unsafe { ffi::FMOD_System_Get3DListenerAttributes(self.system, listener, &pos, &vel, &forward, &up) } {
-            FMOD_OK => Ok((FmodVector::from_c(pos), FmodVector::from_c(vel), FmodVector::from_c(forward), FmodVector::from_c(up))),
+            FMOD_OK => Ok((from_c(pos), from_c(vel), from_c(forward), from_c(up))),
             e => Err(e)
         }
     }
