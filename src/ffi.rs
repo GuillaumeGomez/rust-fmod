@@ -73,11 +73,12 @@ pub type FMOD_CAPS = c_uint;
 pub type FMOD_MEMORY_USAGE_DETAILS = c_void;
 pub type FMOD_DSPCONNECTION = c_void;
 pub type FMOD_SYNCPOINT = *c_void;
+pub type FMOD_GEOMETRY = *c_void;
 
 extern "C" {
-    /* pre-init functions */
     pub fn FMOD_System_Create(system: *FMOD_SYSTEM) -> FMOD_RESULT;
     pub fn FMOD_System_Release(system: FMOD_SYSTEM) -> FMOD_RESULT;
+    /* pre-init functions */
     pub fn FMOD_System_SetOutput(system: FMOD_SYSTEM, output_type: FMOD_OUTPUTTYPE) -> FMOD_RESULT;
     pub fn FMOD_System_GetOutput(system: FMOD_SYSTEM, output_type: *FMOD_OUTPUTTYPE) -> FMOD_RESULT;
     pub fn FMOD_System_GetNumDrivers(system: FMOD_SYSTEM, num_drivers: *c_int) -> FMOD_RESULT;
@@ -123,10 +124,10 @@ extern "C" {
     pub fn FMOD_System_CreateDSPByPlugin(system: FMOD_SYSTEM, handle: c_uint, dsp: *FMOD_DSP) -> FMOD_RESULT;
     /* codec part functions */
     pub fn FMOD_System_RegisterCodec(system: FMOD_SYSTEM, description: *FMOD_CODEC_DESCRIPTION, handle: *c_uint, priority: c_uint) -> FMOD_RESULT;
-    /* init function */
+    /* init/close functions */
     pub fn FMOD_System_Init(system: FMOD_SYSTEM, max_channels: c_int, flags: FMOD_INITFLAGS, extra_driver_data: *c_void) -> FMOD_RESULT;
-    /* post-init functions */
     pub fn FMOD_System_Close(sound: FMOD_SOUND) -> FMOD_RESULT;
+    /* post-init functions */
     pub fn FMOD_System_Update(system: FMOD_SYSTEM) -> FMOD_RESULT;
     pub fn FMOD_System_GetSpectrum(system : FMOD_SYSTEM, spectrum_array : *c_float, num_values : c_int, channel_offset : c_int,
         window_type : FMOD_DSP_FFT_WINDOW) -> FMOD_RESULT;
@@ -157,16 +158,49 @@ extern "C" {
     pub fn FMOD_System_GetNumCDROMDrives(system: FMOD_SYSTEM, num_drives: *c_int) -> FMOD_RESULT;
     pub fn FMOD_System_GetCDROMDriveName(system: FMOD_SYSTEM, drive: c_int, drive_name: *c_char, drive_name_len: c_int, scsi_name: *c_char, scsi_name_len: c_int,
         device_name: *c_char, device_name_len: c_int) -> FMOD_RESULT;
+    /* Sound/DSP/Channel/FX creation and retrieval. */
     pub fn FMOD_System_CreateSound(system: FMOD_SYSTEM, name_or_data: *c_char, mode: FMOD_MODE, exinfo: *FMOD_CREATESOUNDEXINFO,
         sound: *FMOD_SOUND) -> FMOD_RESULT;
     pub fn FMOD_System_CreateStream(system: FMOD_SYSTEM, name_or_data: *c_char, mode: FMOD_MODE, exinfo: *FMOD_CREATESOUNDEXINFO,
         sound: *FMOD_SOUND) -> FMOD_RESULT;
     pub fn FMOD_System_CreateChannelGroup(system: FMOD_SYSTEM, name: *c_char, channel_group: *FMOD_CHANNELGROUP) -> FMOD_RESULT;
     pub fn FMOD_System_CreateSoundGroup(system: FMOD_SYSTEM, name: *c_char, sound_group: *FMOD_SOUNDGROUP) -> FMOD_RESULT;
-
+    pub fn FMOD_System_GetChannel(system: FMOD_SYSTEM, channel_id: c_int, channel: *FMOD_CHANNEL) -> FMOD_RESULT;
+    pub fn FMOD_System_GetMasterChannelGroup(system: FMOD_SYSTEM, channel_group: *FMOD_CHANNELGROUP) -> FMOD_RESULT;
+    pub fn FMOD_System_GetMasterSoundGroup(system: FMOD_SYSTEM, sound_group: *FMOD_SOUNDGROUP) -> FMOD_RESULT;
+    /* Reverb API */
+    pub fn FMOD_System_SetReverbProperties(system: FMOD_SYSTEM, prop: *FMOD_REVERB_PROPERTIES) -> FMOD_RESULT;
+    pub fn FMOD_System_GetReverbProperties(system: FMOD_SYSTEM, prop: *FMOD_REVERB_PROPERTIES) -> FMOD_RESULT;
+    pub fn FMOD_System_SetReverbAmbientProperties(system: FMOD_SYSTEM, prop: *FMOD_REVERB_PROPERTIES) -> FMOD_RESULT;
+    pub fn FMOD_System_GetReverbAmbientProperties(system: FMOD_SYSTEM, prop: *FMOD_REVERB_PROPERTIES) -> FMOD_RESULT;
+    /* System level DSP access.*/
+    pub fn FMOD_System_GetDSPHead(system: FMOD_SYSTEM, dsp: *FMOD_DSP) -> FMOD_RESULT;
+    pub fn FMOD_System_AddDSP(system: FMOD_SYSTEM, dsp: FMOD_DSP, connection: *FMOD_DSPCONNECTION) -> FMOD_RESULT;
+    pub fn FMOD_System_LockDSP(system: FMOD_SYSTEM) -> FMOD_RESULT;
+    pub fn FMOD_System_UnlockDSP(system: FMOD_SYSTEM) -> FMOD_RESULT;
+    pub fn FMOD_System_GetDSPClock(system: FMOD_SYSTEM, hi: *c_uint, lo: *c_uint) -> FMOD_RESULT;
+    /* Recording API */
+    pub fn FMOD_System_GetRecordNumDrivers(system: FMOD_SYSTEM, num_drivers: *c_int) -> FMOD_RESULT;
+    pub fn FMOD_System_GetRecordDriverInfo(system: FMOD_SYSTEM, id: c_int, name: *c_char, name_len: c_int, guid: *FMOD_GUID) -> FMOD_RESULT;
+    /* I'll bind it later */
+    pub fn FMOD_System_GetRecordDriverInfoW(system: FMOD_SYSTEM, id: c_int, name: *c_short, name_len: c_int, guid: *FMOD_GUID) -> FMOD_RESULT;
+    pub fn FMOD_System_GetRecordDriverCaps(system: FMOD_SYSTEM, id: c_int, caps: *FMOD_CAPS, min_frequency: *c_int, max_frequency: *c_int) -> FMOD_RESULT;
+    pub fn FMOD_System_GetRecordPosition(system: FMOD_SYSTEM, id: c_int, position: *c_uint) -> FMOD_RESULT;
+    pub fn FMOD_System_RecordStart(system: FMOD_SYSTEM, id: c_int, sound: FMOD_SOUND, _loop: FMOD_BOOL) -> FMOD_RESULT;
+    pub fn FMOD_System_RecordStop(system: FMOD_SYSTEM, id: c_int) -> FMOD_RESULT;
+    pub fn FMOD_System_IsRecording(system: FMOD_SYSTEM, id: c_int, recording: *FMOD_BOOL) -> FMOD_RESULT;
+    /* Geometry API. */
+    pub fn FMOD_System_CreateGeometry(system: FMOD_SYSTEM, max_polygons: c_int, max_vertices: c_int, geometry: *FMOD_GEOMETRY) -> FMOD_RESULT;
+    pub fn FMOD_System_SetGeometrySettings(system: FMOD_SYSTEM, max_world_size: c_float) -> FMOD_RESULT;
+    pub fn FMOD_System_GetGeometrySettings(system: FMOD_SYSTEM, max_world_size: *c_float) -> FMOD_RESULT;
+    /* I'll bind it later */
+    pub fn FMOD_System_LoadGeometry(system: FMOD_SYSTEM, data: *c_void, data_size: c_int, geometry: *FMOD_GEOMETRY) -> FMOD_RESULT;
+    pub fn FMOD_System_GetGeometryOcclusion(system: FMOD_SYSTEM, listener: *FMOD_VECTOR, source: *FMOD_VECTOR, direct: *c_float, reverb: *c_float) -> FMOD_RESULT;
+    /* Network functions.*/
+    /* to add */
 
     /* sound functions */
-    pub fn FMOD_System_PlaySound(system : FMOD_SYSTEM, channel_id : FMOD_CHANNELINDEX, sound : FMOD_SOUND, paused : FMOD_BOOL,
+    pub fn FMOD_System_PlaySound(system : FMOD_SYSTEM, channel_id: FMOD_CHANNELINDEX, sound : FMOD_SOUND, paused : FMOD_BOOL,
         channel : *FMOD_CHANNEL) -> FMOD_RESULT;
     pub fn FMOD_Sound_Release(sound: FMOD_SOUND) -> FMOD_RESULT;
     /* Standard sound manipulation functions. */
@@ -384,7 +418,7 @@ pub struct FMOD_CREATESOUNDEXINFO
     pub userasyncread       : FMOD_FILE_ASYNCREADCALLBACK,  /* [w] Optional. Specify 0 to ignore. Callback for seeking within this file. */
     pub userasynccancel     : FMOD_FILE_ASYNCCANCELCALLBACK,/* [w] Optional. Specify 0 to ignore. Callback for seeking within this file. */
     pub speakermap          : FMOD_SPEAKERMAPTYPE,          /* [w] Optional. Specify 0 to ignore. Use this to differ the way fmod maps multichannel sounds to speakers.  See FMOD_SPEAKERMAPTYPE for more. */
-    pub initialsoundgroup   : *FMOD_SOUNDGROUP,             /* [w] Optional. Specify 0 to ignore. Specify a sound group if required, to put sound in as it is created. */
+    pub initialsoundgroup   : FMOD_SOUNDGROUP,             /* [w] Optional. Specify 0 to ignore. Specify a sound group if required, to put sound in as it is created. */
     pub initialseekposition : c_uint,                       /* [w] Optional. Specify 0 to ignore. For streams. Specify an initial position to seek the stream to. */
     pub initialseekpostype  : FMOD_TIMEUNIT,                /* [w] Optional. Specify 0 to ignore. For streams. Specify the time unit for the position set in initialseekposition. */
     pub ignoresetfilesystem : c_int,                        /* [w] Optional. Specify 0 to ignore. Set to 1 to use fmod's built in file system. Ignores setFileSystem callbacks and also FMOD_CREATESOUNEXINFO file callbacks.  Useful for specific cases where you don't want to use your own file system but want to use fmod's file system (ie net streaming). */
@@ -483,6 +517,30 @@ pub struct FMOD_CODEC_STATE
     pub fileread     : FMOD_FILE_READCALLBACK,     /* [out] This will return a callable FMOD file function to use from codec. */
     pub fileseek     : FMOD_FILE_SEEKCALLBACK,     /* [out] This will return a callable FMOD file function to use from codec.  */
     pub metadata     : FMOD_CODEC_METADATACALLBACK /* [out] This will return a callable FMOD metadata function to use from codec.  */
+}
+
+pub struct FMOD_REVERB_PROPERTIES
+{                                   /*       MIN    MAX     DEFAULT DESCRIPTION */
+    pub Instance         : c_int,       /* [w]   0      3       0       Environment Instance.                                                 (SUPPORTED:SFX(4 instances) and Wii (3 instances)) */
+    pub Environment      : c_int,       /* [r/w] -1     25      -1      Sets all listener properties.  -1 = OFF.                              (SUPPORTED:SFX(-1 only)/PSP) */
+    pub EnvDiffusion     : c_float,     /* [r/w] 0.0    1.0     1.0     Environment diffusion                                                 (SUPPORTED:WII) */
+    pub Room             : c_int,       /* [r/w] -10000 0       -1000   Room effect level (at mid frequencies)                                (SUPPORTED:SFX/WII/PSP) */
+    pub RoomHF           : c_int,       /* [r/w] -10000 0       -100    Relative room effect level at high frequencies                        (SUPPORTED:SFX) */
+    pub RoomLF           : c_int,       /* [r/w] -10000 0       0       Relative room effect level at low frequencies                         (SUPPORTED:SFX) */
+    pub DecayTime        : c_float,     /* [r/w] 0.1    20.0    1.49    Reverberation decay time at mid frequencies                           (SUPPORTED:SFX/WII) */
+    pub DecayHFRatio     : c_float,     /* [r/w] 0.1    2.0     0.83    High-frequency to mid-frequency decay time ratio                      (SUPPORTED:SFX) */
+    pub DecayLFRatio     : c_float,     /* [r/w] 0.1    2.0     1.0     Low-frequency to mid-frequency decay time ratio                       (SUPPORTED:---) */
+    pub Reflections      : c_int,       /* [r/w] -10000 1000    -2602   Early reflections level relative to room effect                       (SUPPORTED:SFX/WII) */
+    pub ReflectionsDelay : c_float,     /* [r/w] 0.0    0.3     0.007   Initial reflection delay time                                         (SUPPORTED:SFX) */
+    pub Reverb           : c_int,       /* [r/w] -10000 2000    200     Late reverberation level relative to room effect                      (SUPPORTED:SFX) */
+    pub ReverbDelay      : c_float,     /* [r/w] 0.0    0.1     0.011   Late reverberation delay time relative to initial reflection          (SUPPORTED:SFX/WII) */
+    pub ModulationTime   : c_float,     /* [r/w] 0.04   4.0     0.25    Modulation time                                                       (SUPPORTED:---) */
+    pub ModulationDepth  : c_float,     /* [r/w] 0.0    1.0     0.0     Modulation depth                                                      (SUPPORTED:WII) */
+    pub HFReference      : c_float,     /* [r/w] 20.0   20000.0 5000.0  Reference high frequency (hz)                                         (SUPPORTED:SFX) */
+    pub LFReference      : c_float,     /* [r/w] 20.0   1000.0  250.0   Reference low frequency (hz)                                          (SUPPORTED:SFX) */
+    pub Diffusion        : c_float,     /* [r/w] 0.0    100.0   100.0   Value that controls the echo density in the late reverberation decay. (SUPPORTED:SFX) */
+    pub Density          : c_float,     /* [r/w] 0.0    100.0   100.0   Value that controls the modal density in the late reverberation decay (SUPPORTED:SFX) */
+    pub Flags            : c_uint       /* [r/w] FMOD_REVERB_FLAGS - modifies the behavior of above properties                                (SUPPORTED:WII) */
 }
 
 pub struct FMOD_TAG

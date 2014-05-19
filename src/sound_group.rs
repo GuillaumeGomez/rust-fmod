@@ -37,7 +37,7 @@ pub fn get_ffi(sound_group : SoundGroup) -> ffi::FMOD_SOUNDGROUP {
     sound_group.sound_group
 }
 
-pub fn new(sound_group : ffi::FMOD_SOUNDGROUP) -> SoundGroup {
+pub fn from_ptr(sound_group : ffi::FMOD_SOUNDGROUP) -> SoundGroup {
     SoundGroup{sound_group: sound_group}
 }
 

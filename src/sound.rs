@@ -89,6 +89,10 @@ pub struct Sound {
     channel : Channel,
 }
 
+pub fn get_ffi(sound: Sound) -> ffi::FMOD_SOUND {
+    sound.sound
+}
+
 impl Sound {
     pub fn from_ptr(sound: ffi::FMOD_SOUND) -> Sound {
         Sound{sound: sound, channel: channel::new()}
@@ -111,11 +115,16 @@ impl Sound {
     pub fn play(&self) -> FMOD_RESULT {
         match self.get_system() {
             Ok(s) => { 
-                if unsafe { *channel::get_ffi(&self.channel) == ::std::ptr::null() } {
-                    unsafe { ffi::FMOD_System_PlaySound(s, FMOD_CHANNEL_FREE, self.sound, 0, channel::get_ffi(&self.channel)) }
-                } else {
-                    self.channel.set_paused(false)
-                }
+                unsafe { ffi::FMOD_System_PlaySound(s, FMOD_CHANNEL_FREE, self.sound, 0, channel::get_ffi(&self.channel)) }
+            }
+            Err(e) => e
+        }
+    }
+
+    pub fn play_with_parameters(&self, channel_id: FMOD_CHANNELINDEX) -> FMOD_RESULT {
+        match self.get_system() {
+            Ok(s) => { 
+                unsafe { ffi::FMOD_System_PlaySound(s, channel_id, self.sound, 0, channel::get_ffi(&self.channel)) }
             }
             Err(e) => e
         }
@@ -123,6 +132,10 @@ impl Sound {
 
     pub fn pause(&self) -> FMOD_RESULT {
         self.channel.set_paused(true)
+    }
+
+    pub fn unpause(&self) -> FMOD_RESULT {
+        self.channel.set_paused(false)
     }
 
     pub fn is_playing(&self) -> Result<bool, FMOD_RESULT> {
@@ -344,7 +357,7 @@ impl Sound {
         let sound_group = ::std::ptr::null();
 
         match unsafe { ffi::FMOD_Sound_GetSoundGroup(self.sound, &sound_group) } {
-            FMOD_OK => Ok(sound_group::new(sound_group)),
+            FMOD_OK => Ok(sound_group::from_ptr(sound_group)),
             e => Err(e)
         }
     }

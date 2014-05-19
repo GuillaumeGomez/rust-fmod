@@ -37,7 +37,7 @@ pub fn get_ffi(channel_group : ChannelGroup) -> ffi::FMOD_CHANNELGROUP {
     channel_group.channel_group
 }
 
-pub fn new(channel_group : ffi::FMOD_CHANNELGROUP) -> ChannelGroup {
+pub fn from_ptr(channel_group : ffi::FMOD_CHANNELGROUP) -> ChannelGroup {
     ChannelGroup{channel_group: channel_group}
 }
 

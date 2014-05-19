@@ -38,7 +38,8 @@ extern crate libc;
 
 pub use channel::{Channel, FmodSpectrumOptions, FmodDelayOptions, FmodSpeakerMixOptions, FmodReverbChannelProperties};
 pub use sound::{Sound, FmodTag, FmodSyncPoint};
-pub use fmod_sys::{FmodSys, FmodGuid, FmodSoftwareFormat, FmodAdvancedSettings, FmodVector, FmodOutputHandle};
+pub use fmod_sys::{FmodSys, FmodGuid, FmodSoftwareFormat, FmodAdvancedSettings, FmodVector, FmodOutputHandle,
+    FmodReverbProperties, FmodGeometry, FmodCreateSoundexInfo};
 pub use channel_group::ChannelGroup;
 pub use sound_group::SoundGroup;
 pub use ffi::{FmodDSP, FmodDSPConnection};

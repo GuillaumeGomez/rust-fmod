@@ -313,7 +313,7 @@ impl Channel {
         let channel_group = ::std::ptr::null();
 
         match unsafe { ffi::FMOD_Channel_GetChannelGroup(self.channel, &channel_group) } {
-            FMOD_OK => Ok(channel_group::new(channel_group)),
+            FMOD_OK => Ok(channel_group::from_ptr(channel_group)),
             e => Err(e)
         }
     }
