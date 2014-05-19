@@ -56,7 +56,7 @@ fn main() {
         }
     };
 
-    let mut sound = match fmod.create_sound(StrBuf::from_str("music.mp3"), None) {
+    let mut sound = match fmod.create_sound(StrBuf::from_str("music.mp3"), None, None) {
 		              Ok(s) => s,
 		              Err(err) => {fail!("Error code : {}", err);},
 		            };

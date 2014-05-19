@@ -63,7 +63,7 @@ fn main() {
 
 	let arg1 = tmp.get(0).unwrap();
 
-	let mut sound = match fmod.create_sound(StrBuf::from_str(*arg1), None) {
+	let mut sound = match fmod.create_sound(StrBuf::from_str(*arg1), None, None) {
 		Ok(s) => s,
 		Err(err) => {fail!("FmodSys.create_sound failed : {}", err);},
 	};
