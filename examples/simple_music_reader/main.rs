@@ -57,7 +57,6 @@ fn main() {
 	match fmod.init() {
 		FMOD_OK => {}
 		e => {
-			fmod.release();
 			fail!("FmodSys.init failed : {}", e);
 		}
 	};
@@ -73,7 +72,4 @@ fn main() {
 		FMOD_OK => {println!("Ok !");},
 		err => {fail!("FmodSys.play_to_the_end : {}", err);},
 	};
-
-	sound.release();
-	fmod.release();
 }

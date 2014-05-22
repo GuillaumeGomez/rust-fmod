@@ -65,9 +65,6 @@ fn main() {
         FMOD_OK => {println!("Ok !");}
         err => {fail!("Error code : {}", err);}
     };
-
-    sound.release();
-    fmod.release();
 }
 ```
 

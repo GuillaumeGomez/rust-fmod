@@ -88,8 +88,14 @@ pub struct Sound {
     sound : ffi::FMOD_SOUND
 }
 
-pub fn get_ffi(sound: Sound) -> ffi::FMOD_SOUND {
+pub fn get_ffi(sound: &Sound) -> ffi::FMOD_SOUND {
     sound.sound
+}
+
+impl Drop for Sound {
+    fn drop(&mut self) {
+        self.release();
+    }
 }
 
 impl Sound {
@@ -106,8 +112,18 @@ impl Sound {
         }
     }
 
-    pub fn release(&self) -> FMOD_RESULT {
-        unsafe { ffi::FMOD_Sound_Release(self.sound) }
+    pub fn release(&mut self) -> FMOD_RESULT {
+        if self.sound != ::std::ptr::null() {
+            match unsafe { ffi::FMOD_Sound_Release(self.sound) } {
+                FMOD_OK => {
+                    self.sound = ::std::ptr::null();
+                    FMOD_OK
+                }
+                e => e
+            }
+        } else {
+            FMOD_OK
+        }
     }
 
     pub fn play(&self) -> Result<channel::Channel, FMOD_RESULT> {
@@ -343,7 +359,7 @@ impl Sound {
     }
 
     pub fn set_sound_group(&self, sound_group: sound_group::SoundGroup) -> FMOD_RESULT {
-        unsafe { ffi::FMOD_Sound_SetSoundGroup(self.sound, sound_group::get_ffi(sound_group)) }
+        unsafe { ffi::FMOD_Sound_SetSoundGroup(self.sound, sound_group::get_ffi(&sound_group)) }
     }
 
     pub fn get_sound_group(&self) -> Result<sound_group::SoundGroup, FMOD_RESULT> {

@@ -184,7 +184,7 @@ impl FmodCreateSoundexInfo {
             encryptionkey: self.encryptionkey.clone().into_owned().with_c_str(|c_str|{c_str}), maxpolyphony: self.maxpolyphony, userdata: self.userdata,
             suggestedsoundtype: self.suggestedsoundtype, useropen: self.useropen, userclose: self.userclose, userread: self.userread,
             userseek: self.userseek, userasynccancel: self.userasynccancel, userasyncread: self.userasyncread, speakermap: self.speakermap,
-            initialsoundgroup: sound_group::get_ffi(self.initialsoundgroup), initialseekposition: self.initialseekposition,
+            initialsoundgroup: sound_group::get_ffi(&self.initialsoundgroup), initialseekposition: self.initialseekposition,
             initialseekpostype: match self.initialseekpostype {
                 FmodTimeUnit(v) => v},
             ignoresetfilesystem: self.ignoresetfilesystem, cddaforceaspi: self.cddaforceaspi, audioqueuepolicy: self.audioqueuepolicy,
@@ -266,6 +266,12 @@ pub struct FmodSys {
     system : ffi::FMOD_SYSTEM,
 }
 
+impl Drop for FmodSys {
+    fn drop(&mut self) {
+        self.release();
+    }
+}
+
 impl FmodSys {
     pub fn new() -> Result<FmodSys, FMOD_RESULT> {
         let tmp = ::std::ptr::null();
@@ -288,10 +294,23 @@ impl FmodSys {
         unsafe { ffi::FMOD_System_Update(self.system) }
     }
 
-    pub fn release(&self) -> FMOD_RESULT {
-        unsafe {
-            ffi::FMOD_System_Close(self.system);
-            ffi::FMOD_System_Release(self.system)
+    pub fn release(&mut self) -> FMOD_RESULT {
+        if self.system != ::std::ptr::null() {
+            unsafe {
+                match match ffi::FMOD_System_Close(self.system) {
+                    FMOD_OK => ffi::FMOD_System_Release(self.system),
+                    e => e
+                } {
+                    FMOD_OK => {
+                        self.system = ::std::ptr::null();
+                        FMOD_OK
+                    }
+                    e => e
+                }
+                
+            }
+        } else {
+            FMOD_OK
         }
     }
 
@@ -953,7 +972,7 @@ impl FmodSys {
         }
     }
 
-    pub fn start_record(&self, id: i32, sound: sound::Sound, _loop: bool) -> FMOD_RESULT {
+    pub fn start_record(&self, id: i32, sound: &sound::Sound, _loop: bool) -> FMOD_RESULT {
         let t_loop = match _loop {
                 true => 1,
                 _ => 0

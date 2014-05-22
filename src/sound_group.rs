@@ -33,7 +33,7 @@ pub struct SoundGroup {
     sound_group: ffi::FMOD_SOUNDGROUP,
 }
 
-pub fn get_ffi(sound_group : SoundGroup) -> ffi::FMOD_SOUNDGROUP {
+pub fn get_ffi(sound_group : &SoundGroup) -> ffi::FMOD_SOUNDGROUP {
     sound_group.sound_group
 }
 
@@ -41,14 +41,24 @@ pub fn from_ptr(sound_group : ffi::FMOD_SOUNDGROUP) -> SoundGroup {
     SoundGroup{sound_group: sound_group}
 }
 
+impl Drop for SoundGroup {
+    fn drop(&mut self) {
+        self.release();
+    }
+}
+
 impl SoundGroup {
     pub fn release(&mut self) -> FMOD_RESULT {
-        match unsafe { ffi::FMOD_SoundGroup_Release(self.sound_group) } {
-            FMOD_OK => {
-                self.sound_group = ::std::ptr::null();
-                FMOD_OK
+        if self.sound_group != ::std::ptr::null() {
+            match unsafe { ffi::FMOD_SoundGroup_Release(self.sound_group) } {
+                FMOD_OK => {
+                    self.sound_group = ::std::ptr::null();
+                    FMOD_OK
+                }
+                e => e
             }
-            e => e
+        } else {
+            FMOD_OK
         }
     }
 

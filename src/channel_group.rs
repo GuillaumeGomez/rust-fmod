@@ -41,14 +41,24 @@ pub fn from_ptr(channel_group : ffi::FMOD_CHANNELGROUP) -> ChannelGroup {
     ChannelGroup{channel_group: channel_group}
 }
 
+impl Drop for ChannelGroup {
+    fn drop(&mut self) {
+        self.release();
+    }
+}
+
 impl ChannelGroup {
     pub fn release(&mut self) -> FMOD_RESULT {
-        match unsafe { ffi::FMOD_ChannelGroup_Release(self.channel_group) } {
-            FMOD_OK => {
-                self.channel_group = ::std::ptr::null();
-                FMOD_OK
+        if self.channel_group != ::std::ptr::null() {
+            match unsafe { ffi::FMOD_ChannelGroup_Release(self.channel_group) } {
+                FMOD_OK => {
+                    self.channel_group = ::std::ptr::null();
+                    FMOD_OK
+                }
+                e => e
             }
-            e => e
+        } else {
+            FMOD_OK
         }
     }
 

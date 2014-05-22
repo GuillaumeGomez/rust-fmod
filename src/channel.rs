@@ -74,6 +74,12 @@ pub struct Channel {
     channel : ffi::FMOD_CHANNEL
 }
 
+impl Drop for Channel {
+    fn drop(&mut self) {
+        self.release();
+    }
+}
+
 impl Channel {
     pub fn release(&mut self) {
         self.channel = ::std::ptr::null();

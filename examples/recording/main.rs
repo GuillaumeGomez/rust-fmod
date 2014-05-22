@@ -7,7 +7,6 @@ use rfmod::enums::*;
 use rfmod::types::*;
 use rfmod::enums::{FMOD_OK};
 use rfmod::*;
-use std::io;
 use std::io::timer::sleep;
 use std::mem;
 
@@ -21,6 +20,7 @@ fn get_key() -> u8 {
         Ok(nb) => nb,
         Err(_) => 0u8
     }
+    //::std::from_str<uint>(nb)
 }
 
 
@@ -99,7 +99,6 @@ fn main() {
     match fmod.init() {
         FMOD_OK => {}
         e => {
-            fmod.release();
             fail!("FmodSys.init failed : {}", e);
         }
     };
@@ -124,13 +123,12 @@ fn main() {
     println!("Press '0' to record a {} second segment of audio.", secs);
     println!("Press '1' to play the {} second segment of audio.", secs);
 
-    //example_function(fmod, sound);
     let record_driver = 0;
     
     loop {
         match match get_key() as char {
             '0' => {
-                match fmod.start_record(record_driver, sound, false) {
+                match fmod.start_record(record_driver, &sound, false) {
                     FMOD_OK => {
                         while fmod.is_recording(record_driver).unwrap() == true {
                             print!("\rRecording : {}", fmod.get_record_position(record_driver).unwrap());
@@ -144,14 +142,13 @@ fn main() {
             },
             '1' => {
                 match sound.play_with_parameters(FMOD_CHANNEL_REUSE) {
-                    Ok(mut chan) => {
+                    Ok(chan) => {
                         fmod.update();
                         while chan.is_playing().unwrap() == true {
                             print!("\rPlaying : {} / {}", chan.get_position(FMOD_TIMEUNIT_MS).unwrap(), sound.get_length(FMOD_TIMEUNIT_MS).unwrap());
                             fmod.update();
                             sleep(15);
                         }
-                        chan.release();
                         Some(FMOD_OK)
                     }
                     Err(e) => Some(e)
@@ -168,7 +165,4 @@ fn main() {
             None => {}
         }
     }
-
-    sound.release();
-    fmod.release();
 }
