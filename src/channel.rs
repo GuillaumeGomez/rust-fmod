@@ -106,6 +106,10 @@ impl Channel {
         }
     }
 
+    pub fn is_init(&self) -> bool {
+        self.channel != ::std::ptr::null()
+    }
+
     pub fn is_playing(&self) -> Result<bool, FMOD_RESULT> {
         let is_playing = 0;
 

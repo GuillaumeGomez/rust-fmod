@@ -14,12 +14,12 @@ fn play_to_the_end(sound: Sound, len: uint) -> FMOD_RESULT {
 	let mut old_position = 100u;
 
     match sound.play() {
-        FMOD_OK => {
+        Ok(mut chan) => {
             loop {
-                match sound.is_playing() {
+                match chan.is_playing() {
                     Ok(b) => {
                         if b == true {
-                        	let position = sound.get_channel().get_position(FMOD_TIMEUNIT_MS).unwrap();
+                        	let position = chan.get_position(FMOD_TIMEUNIT_MS).unwrap();
 
                         	if position != old_position {
                         		old_position = position;
@@ -33,9 +33,10 @@ fn play_to_the_end(sound: Sound, len: uint) -> FMOD_RESULT {
                     Err(e) => return e,
                 }
             }
+            chan.release();
             FMOD_OK
         }
-        err => err,
+        Err(err) => err,
     }
 }
 
@@ -63,7 +64,7 @@ fn main() {
 
 	let arg1 = tmp.get(0).unwrap();
 
-	let mut sound = match fmod.create_sound(StrBuf::from_str(*arg1), None, None) {
+	let sound = match fmod.create_sound(StrBuf::from_str(*arg1), None, None) {
 		Ok(s) => s,
 		Err(err) => {fail!("FmodSys.create_sound failed : {}", err);},
 	};

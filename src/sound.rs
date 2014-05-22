@@ -85,8 +85,7 @@ impl FmodTag {
 }
 
 pub struct Sound {
-    sound   : ffi::FMOD_SOUND,
-    channel : Channel,
+    sound : ffi::FMOD_SOUND
 }
 
 pub fn get_ffi(sound: Sound) -> ffi::FMOD_SOUND {
@@ -95,7 +94,7 @@ pub fn get_ffi(sound: Sound) -> ffi::FMOD_SOUND {
 
 impl Sound {
     pub fn from_ptr(sound: ffi::FMOD_SOUND) -> Sound {
-        Sound{sound: sound, channel: channel::new()}
+        Sound{sound: sound}
     }
 
     fn get_system(&self) -> Result<ffi::FMOD_SYSTEM, FMOD_RESULT> {
@@ -107,46 +106,43 @@ impl Sound {
         }
     }
 
-    pub fn release(&mut self) -> FMOD_RESULT {
-        self.channel.release();
+    pub fn release(&self) -> FMOD_RESULT {
         unsafe { ffi::FMOD_Sound_Release(self.sound) }
     }
 
-    pub fn play(&self) -> FMOD_RESULT {
-        match self.get_system() {
+    pub fn play(&self) -> Result<channel::Channel, FMOD_RESULT> {
+        let channel = ::std::ptr::null();
+
+        match match self.get_system() {
             Ok(s) => { 
-                unsafe { ffi::FMOD_System_PlaySound(s, FMOD_CHANNEL_FREE, self.sound, 0, channel::get_ffi(&self.channel)) }
+                unsafe { ffi::FMOD_System_PlaySound(s, FMOD_CHANNEL_FREE, self.sound, 0, &channel) }
             }
             Err(e) => e
+        } {
+            FMOD_OK => Ok(channel::from_ptr(channel)),
+            e => Err(e)
         }
     }
 
-    pub fn play_with_parameters(&self, channel_id: FMOD_CHANNELINDEX) -> FMOD_RESULT {
-        match self.get_system() {
+    pub fn play_with_parameters(&self, channel_id: FMOD_CHANNELINDEX) -> Result<channel::Channel, FMOD_RESULT> {
+        let channel = ::std::ptr::null();
+        
+        match match self.get_system() {
             Ok(s) => { 
-                unsafe { ffi::FMOD_System_PlaySound(s, channel_id, self.sound, 0, channel::get_ffi(&self.channel)) }
+                unsafe { ffi::FMOD_System_PlaySound(s, channel_id, self.sound, 0, &channel) }
             }
             Err(e) => e
+        } {
+            FMOD_OK => Ok(channel::from_ptr(channel)),
+            e => Err(e)
         }
-    }
-
-    pub fn pause(&self) -> FMOD_RESULT {
-        self.channel.set_paused(true)
-    }
-
-    pub fn unpause(&self) -> FMOD_RESULT {
-        self.channel.set_paused(false)
-    }
-
-    pub fn is_playing(&self) -> Result<bool, FMOD_RESULT> {
-        self.channel.is_playing()
     }
 
     pub fn play_to_the_end(&self) -> FMOD_RESULT {
         match self.play() {
-            FMOD_OK => {
+            Ok(mut chan) => {
                 loop {
-                    match self.is_playing() {
+                    match chan.is_playing() {
                         Ok(b) => {
                             if b == true {
                                 sleep(30)
@@ -157,14 +153,11 @@ impl Sound {
                         Err(e) => return e,
                     }
                 }
+                chan.release();
                 FMOD_OK
             }
-            err => err,
+            Err(err) => err,
         }
-    }
-
-    pub fn get_channel<'a>(&'a self) -> &'a Channel {
-        &self.channel
     }
 
     pub fn set_defaults(&self, frequency: f32, volume: f32, pan: f32, priority: i32) -> FMOD_RESULT {
