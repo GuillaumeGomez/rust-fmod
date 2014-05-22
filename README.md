@@ -36,7 +36,7 @@ Here is a short example on how to create a file and to play it :
 extern crate libc;
 extern crate rfmod;
 
-use rfmod::enums::FMOD_OK;
+use rfmod::enums::*;
 use rfmod::*;
 use std::os;
 
@@ -49,7 +49,7 @@ fn main() {
     };
 
     match fmod.init() {
-        FMOD_OK => {}
+        fmod::Ok => {}
         e => {
             fmod.release();
             fail!("FmodSys.init failed : {}", e);

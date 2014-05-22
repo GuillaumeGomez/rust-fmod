@@ -3,12 +3,12 @@
 extern crate libc;
 extern crate rfmod;
 
-use rfmod::enums::{FMOD_OK, FMOD_RESULT, FMOD_TIMEUNIT_MS};
+use rfmod::enums::*;
 use rfmod::*;
 use std::os;
 use std::io::timer::sleep;
 
-fn play_to_the_end(sound: Sound, len: uint) -> FMOD_RESULT {
+fn play_to_the_end(sound: Sound, len: uint) -> fmod::Result {
 	let length = sound.get_length(FMOD_TIMEUNIT_MS).unwrap();
 	let name = sound.get_name(len as u32).unwrap();
 	let mut old_position = 100u;
@@ -34,7 +34,7 @@ fn play_to_the_end(sound: Sound, len: uint) -> FMOD_RESULT {
                 }
             }
             chan.release();
-            FMOD_OK
+            fmod::Ok
         }
         Err(err) => err,
     }
@@ -55,7 +55,7 @@ fn main() {
 	};
 
 	match fmod.init() {
-		FMOD_OK => {}
+		fmod::Ok => {}
 		e => {
 			fail!("FmodSys.init failed : {}", e);
 		}
@@ -69,7 +69,7 @@ fn main() {
 	};
 
 	match play_to_the_end(sound, arg1.len()) {
-		FMOD_OK => {println!("Ok !");},
+		fmod::Ok => {println!("Ok !");},
 		err => {fail!("FmodSys.play_to_the_end : {}", err);},
 	};
 }

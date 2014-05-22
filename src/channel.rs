@@ -30,12 +30,12 @@ use channel_group;
 use channel_group::ChannelGroup;
 
 pub struct FmodSpectrumOptions {
-    pub window_type     : FMOD_DSP_FFT_WINDOW,
+    pub window_type     : fmod::DSP_FFT_Window,
     pub channel_offset  : i32
 }
 
 pub struct FmodDelayOptions {
-    pub delaytype   : FMOD_DELAYTYPE,
+    pub delaytype   : fmod::DelayType,
     pub delayhi     : uint,
     pub delaylo     : uint
 }
@@ -85,9 +85,9 @@ impl Channel {
         self.channel = ::std::ptr::null();
     }
 
-    pub fn get_spectrum(&self, spectrum_size : uint, options : Option<FmodSpectrumOptions>) -> Result<Vec<f32>, FMOD_RESULT> {
+    pub fn get_spectrum(&self, spectrum_size : uint, options : Option<FmodSpectrumOptions>) -> Result<Vec<f32>, fmod::Result> {
         let ptr = Vec::from_elem(spectrum_size, 0f32);
-        let mut window_type = FMOD_DSP_FFT_WINDOW_RECT;
+        let mut window_type = fmod::DSP_FFT_WindowRect;
         let mut channel_offset = 0;
 
         match options {
@@ -98,16 +98,16 @@ impl Channel {
             None => {}
         };
         match unsafe { ffi::FMOD_Channel_GetSpectrum(self.channel, ptr.as_ptr(), spectrum_size as c_int, channel_offset, window_type) } {
-            FMOD_OK => Ok(ptr),
+            fmod::Ok => Ok(ptr),
             e => Err(e),
         }
     }
 
-    pub fn get_wave_data(&self, wave_size : uint, channel_offset : i32) -> Result<Vec<f32>, FMOD_RESULT> {
+    pub fn get_wave_data(&self, wave_size : uint, channel_offset : i32) -> Result<Vec<f32>, fmod::Result> {
         let ptr = Vec::from_elem(wave_size, 0f32);
 
         match unsafe { ffi::FMOD_Channel_GetWaveData(self.channel, ptr.as_ptr(), wave_size as c_int, channel_offset) } {
-            FMOD_OK => Ok(ptr),
+            fmod::Ok => Ok(ptr),
             e => Err(e)
         }
     }
@@ -116,55 +116,55 @@ impl Channel {
         self.channel != ::std::ptr::null()
     }
 
-    pub fn is_playing(&self) -> Result<bool, FMOD_RESULT> {
+    pub fn is_playing(&self) -> Result<bool, fmod::Result> {
         let is_playing = 0;
 
         match unsafe { ffi::FMOD_Channel_IsPlaying(self.channel, &is_playing) } {
-            FMOD_OK => Ok(is_playing == 1),
+            fmod::Ok => Ok(is_playing == 1),
             err => Err(err),
         }
     }
 
-    pub fn set_volume(&self, volume : f32) -> FMOD_RESULT {
+    pub fn set_volume(&self, volume : f32) -> fmod::Result {
         unsafe { ffi::FMOD_Channel_SetVolume(self.channel, volume) }
     }
 
-    pub fn get_volume(&self) -> Result<f32, FMOD_RESULT> {
+    pub fn get_volume(&self) -> Result<f32, fmod::Result> {
         let volume = 0f32;
 
         match unsafe { ffi::FMOD_Channel_GetVolume(self.channel, &volume) } {
-            FMOD_OK => Ok(volume),
+            fmod::Ok => Ok(volume),
             e => Err(e),
         }
     }
 
-    pub fn set_frequency(&self, frequency : f32) -> FMOD_RESULT {
+    pub fn set_frequency(&self, frequency : f32) -> fmod::Result {
         unsafe { ffi::FMOD_Channel_SetFrequency(self.channel, frequency) }
     }
 
-    pub fn get_frequency(&self) -> Result<f32, FMOD_RESULT> {
+    pub fn get_frequency(&self) -> Result<f32, fmod::Result> {
         let frequency = 0f32;
 
         match unsafe { ffi::FMOD_Channel_GetFrequency(self.channel, &frequency) } {
-            FMOD_OK => Ok(frequency),
+            fmod::Ok => Ok(frequency),
             e => Err(e),
         }
     }
 
-    pub fn set_pan(&self, pan : f32) -> FMOD_RESULT {
+    pub fn set_pan(&self, pan : f32) -> fmod::Result {
         unsafe { ffi::FMOD_Channel_SetPan(self.channel, pan) }
     }
 
-    pub fn get_pan(&self) -> Result<f32, FMOD_RESULT> {
+    pub fn get_pan(&self) -> Result<f32, fmod::Result> {
         let pan = 0f32;
 
         match unsafe { ffi::FMOD_Channel_GetPan(self.channel, &pan) } {
-            FMOD_OK => Ok(pan),
+            fmod::Ok => Ok(pan),
             e => Err(e),
         }
     }
 
-    pub fn set_mute(&self, mute : bool) -> FMOD_RESULT {
+    pub fn set_mute(&self, mute : bool) -> fmod::Result {
         let t = match mute {
             true => 1,
             false => 0,
@@ -172,11 +172,11 @@ impl Channel {
         unsafe { ffi::FMOD_Channel_SetMute(self.channel, t) }
     }
 
-    pub fn get_mute(&self) -> Result<bool, FMOD_RESULT> {
+    pub fn get_mute(&self) -> Result<bool, fmod::Result> {
         let mute = 0;
 
         match unsafe { ffi::FMOD_Channel_GetMute(self.channel, &mute) } {
-            FMOD_OK => Ok(match mute {
+            fmod::Ok => Ok(match mute {
                 1 => true,
                 _ => false,
             }),
@@ -184,7 +184,7 @@ impl Channel {
         }
     }
 
-    pub fn set_paused(&self, paused : bool) -> FMOD_RESULT {
+    pub fn set_paused(&self, paused : bool) -> fmod::Result {
         let t : ffi::FMOD_BOOL = match paused {
             true => 1,
             false => 0,
@@ -192,11 +192,11 @@ impl Channel {
         unsafe { ffi::FMOD_Channel_SetPaused(self.channel, t) }
     }
 
-    pub fn get_paused(&self) -> Result<bool, FMOD_RESULT> {
+    pub fn get_paused(&self) -> Result<bool, fmod::Result> {
         let t = 0;
 
         match unsafe { ffi::FMOD_Channel_GetPaused(self.channel, &t) } {
-            FMOD_OK => Ok(match t {
+            fmod::Ok => Ok(match t {
                 1 => true,
                 _ => false,
             }),
@@ -204,126 +204,132 @@ impl Channel {
         }
     }
 
-    pub fn set_delay(&self, d_o : FmodDelayOptions) -> FMOD_RESULT {
+    pub fn set_delay(&self, d_o : FmodDelayOptions) -> fmod::Result {
         unsafe { ffi::FMOD_Channel_SetDelay(self.channel, d_o.delaytype, d_o.delayhi as u32, d_o.delaylo as u32) }
     }
 
-    pub fn get_delay(&self, delaytype : FMOD_DELAYTYPE) -> Result<FmodDelayOptions, FMOD_RESULT> {
+    pub fn get_delay(&self, delaytype : fmod::DelayType) -> Result<FmodDelayOptions, fmod::Result> {
         let delaylo = 0u32;
         let delayhi = 0u32;
 
         match unsafe { ffi::FMOD_Channel_GetDelay(self.channel, delaytype, &delayhi, &delaylo) } {
-            FMOD_OK => Ok(FmodDelayOptions{delaytype: delaytype, delayhi: delayhi as uint, delaylo: delaylo as uint}),
+            fmod::Ok => Ok(FmodDelayOptions{
+                delaytype: delaytype,
+                delayhi: delayhi as uint,
+                delaylo: delaylo as uint}),
             e => Err(e),
         }
     }
 
-    pub fn set_speaker_mix(&self, smo : FmodSpeakerMixOptions) -> FMOD_RESULT {
+    pub fn set_speaker_mix(&self, smo : FmodSpeakerMixOptions) -> fmod::Result {
         unsafe { ffi::FMOD_Channel_SetSpeakerMix(self.channel, smo.front_left, smo.front_right, smo.center, smo.lfe,
                                             smo.back_left, smo.back_right, smo.side_left, smo.side_right) }
     }
 
-    pub fn get_speaker_mix(&self) -> Result<FmodSpeakerMixOptions, FMOD_RESULT> {
+    pub fn get_speaker_mix(&self) -> Result<FmodSpeakerMixOptions, fmod::Result> {
         let smo = FmodSpeakerMixOptions{front_left: 0f32, front_right: 0f32, center: 0f32, lfe: 0f32, back_left: 0f32,
                                     back_right: 0f32, side_left: 0f32, side_right: 0f32};
 
         match unsafe { ffi::FMOD_Channel_GetSpeakerMix(self.channel, &smo.front_left, &smo.front_right, &smo.center, &smo.lfe,
                                                 &smo.back_left, &smo.back_right, &smo.side_left, &smo.side_right) } {
-            FMOD_OK => Ok(smo),
+            fmod::Ok => Ok(smo),
             e => Err(e),
         }
     }
 
-    pub fn set_speaker_level(&self, speaker : FMOD_SPEAKER, levels : Vec<f32>) -> FMOD_RESULT {
+    pub fn set_speaker_level(&self, speaker : fmod::Speaker, levels : Vec<f32>) -> fmod::Result {
         unsafe { ffi::FMOD_Channel_SetSpeakerLevels(self.channel, speaker, levels.as_ptr(), levels.len() as i32) }
     }
 
-    pub fn get_speaker_level(&self, speaker : FMOD_SPEAKER, num_levels : uint) -> Result<Vec<f32>, FMOD_RESULT> {
+    pub fn get_speaker_level(&self, speaker : fmod::Speaker, num_levels : uint) -> Result<Vec<f32>, fmod::Result> {
         let ptr = Vec::from_elem(num_levels, 0f32);
 
         match unsafe { ffi::FMOD_Channel_GetSpeakerLevels(self.channel, speaker, ptr.as_ptr(), num_levels as i32) } {
-            FMOD_OK => Ok(ptr),
+            fmod::Ok => Ok(ptr),
             e => Err(e),
         }
     }
 
-    pub fn set_input_channel_mix(&self, levels : Vec<f32>) -> FMOD_RESULT {
+    pub fn set_input_channel_mix(&self, levels : Vec<f32>) -> fmod::Result {
         unsafe { ffi::FMOD_Channel_SetInputChannelMix(self.channel, levels.as_ptr(), levels.len() as i32) }
     }
 
-    pub fn get_input_channel_mix(&self, num_levels : uint) -> Result<Vec<f32>, FMOD_RESULT> {
+    pub fn get_input_channel_mix(&self, num_levels : uint) -> Result<Vec<f32>, fmod::Result> {
         let ptr = Vec::from_elem(num_levels, 0f32);
 
         match unsafe { ffi::FMOD_Channel_GetInputChannelMix(self.channel, ptr.as_ptr(), num_levels as i32) } {
-            FMOD_OK => Ok(ptr),
+            fmod::Ok => Ok(ptr),
             e => Err(e),
         }
     }
 
-    pub fn set_priority(&self, priority : i32) -> FMOD_RESULT {
+    pub fn set_priority(&self, priority : i32) -> fmod::Result {
         unsafe { ffi::FMOD_Channel_SetPriority(self.channel, priority) }
     }
 
-    pub fn get_priority(&self) -> Result<i32, FMOD_RESULT> {
+    pub fn get_priority(&self) -> Result<i32, fmod::Result> {
         let t = 0i32;
 
         match unsafe { ffi::FMOD_Channel_GetPriority(self.channel, &t) } {
-            FMOD_OK => Ok(t),
+            fmod::Ok => Ok(t),
             e => Err(e),
         }
     }
 
-    pub fn set_position(&self, position : uint, FmodTimeUnit(postype) : FmodTimeUnit) -> FMOD_RESULT {
+    pub fn set_position(&self, position : uint, FmodTimeUnit(postype) : FmodTimeUnit) -> fmod::Result {
         unsafe { ffi::FMOD_Channel_SetPosition(self.channel, position as u32, postype) }
     }
 
-    pub fn get_position(&self, FmodTimeUnit(postype) : FmodTimeUnit) -> Result<uint, FMOD_RESULT> {
+    pub fn get_position(&self, FmodTimeUnit(postype) : FmodTimeUnit) -> Result<uint, fmod::Result> {
         let t = 0u32;
 
         match unsafe { ffi::FMOD_Channel_GetPosition(self.channel, &t, postype) } {
-            FMOD_OK => Ok(t as uint),
+            fmod::Ok => Ok(t as uint),
             e => Err(e),
         }
     }
 
-    pub fn set_reverb_properties(&self, prop : FmodReverbChannelProperties) -> FMOD_RESULT {
+    pub fn set_reverb_properties(&self, prop : FmodReverbChannelProperties) -> fmod::Result {
         let t = ffi::FMOD_REVERB_CHANNELPROPERTIES{Direct: prop.direct, Room: prop.room, Flags: prop.flags, ConnectionPoint: ::std::ptr::null()};
 
         unsafe { ffi::FMOD_Channel_SetReverbProperties(self.channel, &t) }
     }
 
-    pub fn get_reverb_properties(&self) -> Result<FmodReverbChannelProperties, FMOD_RESULT> {
+    pub fn get_reverb_properties(&self) -> Result<FmodReverbChannelProperties, fmod::Result> {
         let t = ffi::FMOD_REVERB_CHANNELPROPERTIES{Direct : 0, Room : 0, Flags : 0, ConnectionPoint : ::std::ptr::null()};
 
         match unsafe { ffi::FMOD_Channel_GetReverbProperties(self.channel, &t) } {
-            FMOD_OK => Ok(FmodReverbChannelProperties{direct: t.Direct, room: t.Room, flags: t.Flags,
+            fmod::Ok => Ok(FmodReverbChannelProperties{
+                direct: t.Direct,
+                room: t.Room,
+                flags: t.Flags,
                 connection_point: ffi::FmodDSP::from_ptr(t.ConnectionPoint)}),
             e => Err(e),
         }
     }
 
-    pub fn set_low_pass_gain(&self, gain : f32) -> FMOD_RESULT {
+    pub fn set_low_pass_gain(&self, gain : f32) -> fmod::Result {
         unsafe { ffi::FMOD_Channel_SetLowPassGain(self.channel, gain) }
     }
 
-    pub fn get_low_pass_gain(&self) -> Result<f32, FMOD_RESULT> {
+    pub fn get_low_pass_gain(&self) -> Result<f32, fmod::Result> {
         let t = 0f32;
 
         match unsafe { ffi::FMOD_Channel_GetLowPassGain(self.channel, &t) } {
-            FMOD_OK => Ok(t),
+            fmod::Ok => Ok(t),
             e => Err(e),
         }
     }
 
-    pub fn set_channel_group(&mut self, channel_group : ChannelGroup) -> FMOD_RESULT {
+    pub fn set_channel_group(&mut self, channel_group : ChannelGroup) -> fmod::Result {
         unsafe { ffi::FMOD_Channel_SetChannelGroup(self.channel, channel_group::get_ffi(channel_group)) }
     }
 
-    pub fn get_channel_group(&self) -> Result<ChannelGroup, FMOD_RESULT> {
+    pub fn get_channel_group(&self) -> Result<ChannelGroup, fmod::Result> {
         let channel_group = ::std::ptr::null();
 
         match unsafe { ffi::FMOD_Channel_GetChannelGroup(self.channel, &channel_group) } {
-            FMOD_OK => Ok(channel_group::from_ptr(channel_group)),
+            fmod::Ok => Ok(channel_group::from_ptr(channel_group)),
             e => Err(e)
         }
     }

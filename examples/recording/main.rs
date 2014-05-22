@@ -5,7 +5,6 @@ extern crate rfmod;
 
 use rfmod::enums::*;
 use rfmod::types::*;
-use rfmod::enums::{FMOD_OK};
 use rfmod::*;
 use std::io::timer::sleep;
 use std::mem;
@@ -45,14 +44,14 @@ fn main() {
 
     while done == false {
         match match get_key() as char {
-            '1' => Some(fmod.set_output(FMOD_OUTPUTTYPE_OSS)),
-            '2' => Some(fmod.set_output(FMOD_OUTPUTTYPE_ALSA)),
-            '3' => Some(fmod.set_output(FMOD_OUTPUTTYPE_ESD)),
-            '4' => Some(fmod.set_output(FMOD_OUTPUTTYPE_PULSEAUDIO)),
+            '1' => Some(fmod.set_output(fmod::OutputTypeOSS)),
+            '2' => Some(fmod.set_output(fmod::OutputTypeALSA)),
+            '3' => Some(fmod.set_output(fmod::OutputTypeESD)),
+            '4' => Some(fmod.set_output(fmod::OutputTypePulseAudio)),
             c if c == 27u8 as char => return,
             _ => None
         } {
-            Some(FMOD_OK) => {
+            Some(fmod::Ok) => {
                 done = true
             },
             Some(e) => fail!("Output type error: {}", e),
@@ -97,7 +96,7 @@ fn main() {
     }
 
     match fmod.init() {
-        FMOD_OK => {}
+        fmod::Ok => {}
         e => {
             fail!("FmodSys.init failed : {}", e);
         }
@@ -108,7 +107,7 @@ fn main() {
 
     //exinfo.cbsize           = mem::size_of::<FMOD_CREATESOUNDEXINFO>() as i32;
     exinfo.numchannels      = 2;
-    exinfo.format           = FMOD_SOUND_FORMAT_PCM16;
+    exinfo.format           = fmod::SoundFormatPCM16;
     exinfo.defaultfrequency = 44100;
     exinfo.length           = (exinfo.defaultfrequency * mem::size_of::<i16>() as i32 * exinfo.numchannels * secs) as u32;
 
@@ -129,19 +128,19 @@ fn main() {
         match match get_key() as char {
             '0' => {
                 match fmod.start_record(record_driver, &sound, false) {
-                    FMOD_OK => {
+                    fmod::Ok => {
                         while fmod.is_recording(record_driver).unwrap() == true {
                             print!("\rRecording : {}", fmod.get_record_position(record_driver).unwrap());
                             fmod.update();
                             sleep(15);
                         }
-                        Some(FMOD_OK)
+                        Some(fmod::Ok)
                     }
                     e => Some(e)
                 }
             },
             '1' => {
-                match sound.play_with_parameters(FMOD_CHANNEL_REUSE) {
+                match sound.play_with_parameters(fmod::ChannelReUse) {
                     Ok(chan) => {
                         fmod.update();
                         while chan.is_playing().unwrap() == true {
@@ -149,7 +148,7 @@ fn main() {
                             fmod.update();
                             sleep(15);
                         }
-                        Some(FMOD_OK)
+                        Some(fmod::Ok)
                     }
                     Err(e) => Some(e)
                 }
@@ -157,7 +156,7 @@ fn main() {
             c if c == 27u8 as char => break,
             _ => None
         } {
-            Some(r) if r == FMOD_OK => {}
+            Some(r) if r == fmod::Ok => {}
             Some(e) => {
                 println!("Error : {}", e);
                 break;
