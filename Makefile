@@ -26,9 +26,17 @@ rfmod:
 	mkdir -p lib
 	rustc --out-dir=lib src/lib.rs
 
+x86_rfmod:
+	mkdir -p lib
+	rustc --out-dir=lib src/lib32.rs
+
 examples: rfmod
 	  rustc -o bin/simple_music_reader -L ./lib examples/simple_music_reader/main.rs
+	  rustc -o bin/recording -L ./lib examples/recording/main.rs
 
+x86_examples: x86_rfmod
+	  rustc -o bin/simple_music_reader -L ./lib examples/simple_music_reader/main.rs
+	  rustc -o bin/recording -L ./lib examples/recording/main.rs
 
 docs:
 	rustdoc -o doc src/lib.rs
@@ -36,5 +44,6 @@ docs:
 clean:
 	rm -rf lib
 	rm -rf bin/simple_music_reader
+	rm -rf bin/recording
 
 re: clean all
