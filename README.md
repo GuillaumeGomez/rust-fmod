@@ -62,7 +62,7 @@ fn main() {
 		            };
 
     match sound.play_to_the_end() {
-        FMOD_OK => {println!("Ok !");}
+        fmod::Ok => {println!("Ok !");}
         err => {fail!("Error code : {}", err);}
     };
 }
