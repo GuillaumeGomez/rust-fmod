@@ -294,7 +294,7 @@ impl FmodCreateSoundexInfo {
     }
 
     fn from_ptr(ptr: ffi::FMOD_CREATESOUNDEXINFO) -> FmodCreateSoundexInfo {
-        let mut inc : *mut i32 = ptr.inclusionlist as *mut i32;
+        let inc : *mut i32 = ptr.inclusionlist as *mut i32;
 
         FmodCreateSoundexInfo{
             length: ptr.length,

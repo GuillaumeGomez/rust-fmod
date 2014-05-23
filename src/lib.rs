@@ -53,4 +53,7 @@ mod fmod_sys;
 pub mod types;
 pub mod enums;
 
+#[cfg(target_arch="x86")]
+#[link(name = "fmodex")] extern{}
+#[cfg(target_arch="x86_64")]
 #[link(name = "fmodex64")] extern{}
