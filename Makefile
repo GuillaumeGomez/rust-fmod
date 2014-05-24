@@ -27,6 +27,7 @@ rfmod:
 	rustc --out-dir=lib src/lib.rs
 
 examples: rfmod
+	  mkdir -p bin
 	  rustc -o bin/simple_music_reader -L ./lib examples/simple_music_reader/main.rs
 	  rustc -o bin/recording -L ./lib examples/recording/main.rs
 

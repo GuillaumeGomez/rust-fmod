@@ -42,7 +42,8 @@ pub use fmod_sys::{FmodSys, FmodGuid, FmodSoftwareFormat, FmodAdvancedSettings, 
     FmodReverbProperties, FmodGeometry, FmodCreateSoundexInfo};
 pub use channel_group::ChannelGroup;
 pub use sound_group::SoundGroup;
-pub use ffi::{FmodDSP, FmodDSPConnection};
+pub use dsp::Dsp;
+pub use dsp_connection::DspConnection;
 
 mod ffi;
 mod sound;
@@ -50,6 +51,8 @@ mod channel;
 mod channel_group;
 mod sound_group;
 mod fmod_sys;
+mod dsp;
+mod dsp_connection;
 pub mod types;
 pub mod enums;
 

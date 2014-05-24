@@ -142,7 +142,7 @@ impl SoundGroup {
         let sound = ::std::ptr::null();
 
         match unsafe { ffi::FMOD_SoundGroup_GetSound(self.sound_group, index, &sound) } {
-            fmod::Ok => Ok(sound::Sound::from_ptr(sound)),
+            fmod::Ok => Ok(sound::from_ptr(sound)),
             e => Err(e)
         }
     }

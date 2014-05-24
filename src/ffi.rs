@@ -71,7 +71,7 @@ pub type FMOD_INITFLAGS = c_uint;
 pub type FMOD_DSP = *c_void;
 pub type FMOD_CAPS = c_uint;
 pub type FMOD_MEMORY_USAGE_DETAILS = c_void;
-pub type FMOD_DSPCONNECTION = c_void;
+pub type FMOD_DSPCONNECTION = *c_void;
 pub type FMOD_SYNCPOINT = *c_void;
 pub type FMOD_GEOMETRY = *c_void;
 
@@ -175,7 +175,7 @@ extern "C" {
     pub fn FMOD_System_GetReverbAmbientProperties(system: FMOD_SYSTEM, prop: *FMOD_REVERB_PROPERTIES) -> fmod::Result;
     /* System level DSP access.*/
     pub fn FMOD_System_GetDSPHead(system: FMOD_SYSTEM, dsp: *FMOD_DSP) -> fmod::Result;
-    pub fn FMOD_System_AddDSP(system: FMOD_SYSTEM, dsp: FMOD_DSP, connection: *FMOD_DSPCONNECTION) -> fmod::Result;
+    pub fn FMOD_System_AddDSP(system: FMOD_SYSTEM, dsp: FMOD_DSP, connection: FMOD_DSPCONNECTION) -> fmod::Result;
     pub fn FMOD_System_LockDSP(system: FMOD_SYSTEM) -> fmod::Result;
     pub fn FMOD_System_UnlockDSP(system: FMOD_SYSTEM) -> fmod::Result;
     pub fn FMOD_System_GetDSPClock(system: FMOD_SYSTEM, hi: *c_uint, lo: *c_uint) -> fmod::Result;
@@ -332,7 +332,7 @@ extern "C" {
     pub fn FMOD_ChannelGroup_GetParentGroup(channel_group: FMOD_CHANNELGROUP, group: *FMOD_CHANNELGROUP) -> fmod::Result;
     /* DSP functionality only for channel groups playing sounds created with FMOD_SOFTWARE. */
     pub fn FMOD_ChannelGroup_GetDSPHead(channel_group: FMOD_CHANNELGROUP, dsp: *FMOD_DSP) -> fmod::Result;
-    pub fn FMOD_ChannelGroup_AddDSP(channel_group: FMOD_CHANNELGROUP, dsp: FMOD_DSP, disp_connection: **FMOD_DSPCONNECTION) -> fmod::Result;
+    pub fn FMOD_ChannelGroup_AddDSP(channel_group: FMOD_CHANNELGROUP, dsp: FMOD_DSP, disp_connection: *FMOD_DSPCONNECTION) -> fmod::Result;
     /* Information only functions. */
     pub fn FMOD_ChannelGroup_GetName(channel_group: FMOD_CHANNELGROUP, name: *c_char, name_len: c_int) -> fmod::Result;
     pub fn FMOD_ChannelGroup_GetNumChannels(channel_group: FMOD_CHANNELGROUP, num_channels: *c_int) -> fmod::Result;
@@ -375,6 +375,66 @@ extern "C" {
     /* I'll bind it later */
     pub fn FMOD_SoundGroup_GetMemoryInfo(sound_group: FMOD_SOUNDGROUP, memory_bits: c_uint, event_memory_bits: c_uint, memory_used: *c_int,
         memoryused_details: *FMOD_MEMORY_USAGE_DETAILS) -> fmod::Result;
+
+
+    /* Dsp functions */
+    pub fn FMOD_DSP_Release(dsp: FMOD_DSP) -> fmod::Result;
+    /* Connection / disconnection / input and output enumeration. */
+    pub fn FMOD_DSP_AddInput(dsp: FMOD_DSP, target: FMOD_DSP, connection: *FMOD_DSPCONNECTION) -> fmod::Result;
+    pub fn FMOD_DSP_DisconnectFrom(dsp: FMOD_DSP, target: FMOD_DSP) -> fmod::Result;
+    pub fn FMOD_DSP_DisconnectAll(dsp: FMOD_DSP, inputs: FMOD_BOOL, outputs: FMOD_BOOL) -> fmod::Result;
+    pub fn FMOD_DSP_Remove(dsp: FMOD_DSP) -> fmod::Result;
+    pub fn FMOD_DSP_GetNumInputs(dsp: FMOD_DSP, num_inputs: *c_int) -> fmod::Result;
+    pub fn FMOD_DSP_GetNumOutputs(dsp: FMOD_DSP, num_outputs: *c_int) -> fmod::Result;
+    pub fn FMOD_DSP_GetInput(dsp: FMOD_DSP, index: c_int, input: *FMOD_DSP, input_connection: *FMOD_DSPCONNECTION) -> fmod::Result;
+    pub fn FMOD_DSP_GetOutput(dsp: FMOD_DSP, index: c_int, output: *FMOD_DSP, output_connection: *FMOD_DSPCONNECTION) -> fmod::Result;
+    /* DSP unit control. */
+    pub fn FMOD_DSP_SetActive(dsp: FMOD_DSP, active: FMOD_BOOL) -> fmod::Result;
+    pub fn FMOD_DSP_GetActive(dsp: FMOD_DSP, active: *FMOD_BOOL) -> fmod::Result;
+    pub fn FMOD_DSP_SetBypass(dsp: FMOD_DSP, bypass: FMOD_BOOL) -> fmod::Result;
+    pub fn FMOD_DSP_GetBypass(dsp: FMOD_DSP, bypass: *FMOD_BOOL) -> fmod::Result;
+    pub fn FMOD_DSP_SetSpeakerActive(dsp: FMOD_DSP, speaker: fmod::Speaker, active: FMOD_BOOL) -> fmod::Result;
+    pub fn FMOD_DSP_GetSpeakerActive(dsp: FMOD_DSP, speaker: fmod::Speaker, active: *FMOD_BOOL) -> fmod::Result;
+    pub fn FMOD_DSP_Reset(dsp: FMOD_DSP) -> fmod::Result;
+    /* DSP parameter control. */
+    pub fn FMOD_DSP_SetParameter(dsp: FMOD_DSP, index: c_int, value: c_float) -> fmod::Result;
+    pub fn FMOD_DSP_GetParameter(dsp: FMOD_DSP, index: c_int, value: *c_float, value_str: *c_char, value_str_len: c_int) -> fmod::Result;
+    pub fn FMOD_DSP_GetNumParameters(dsp: FMOD_DSP, num_params: *c_int) -> fmod::Result;
+    pub fn FMOD_DSP_GetParameterInfo(dsp: FMOD_DSP, index: c_int, name: *c_char, label: *c_char, description: *c_char, description_len: c_int, min: *c_float,
+        max: *c_float) -> fmod::Result;
+    /* I'll bind it later */
+    pub fn FMOD_DSP_ShowConfigDialog(dsp: FMOD_DSP, hwnd: *c_void, show: FMOD_BOOL) -> fmod::Result;
+    /* DSP attributes. */
+    pub fn FMOD_DSP_GetInfo(dsp: FMOD_DSP, name: *c_char, version: *c_uint, channels: *c_int, config_width: *c_int, config_height: *c_int) -> fmod::Result;
+    /* I'll bind it later */
+    //pub fn FMOD_DSP_GetType(dsp: FMOD_DSP, _type: *FMOD_DSP_TYPE) -> fmod::Result;
+    pub fn FMOD_DSP_SetDefaults(dsp: FMOD_DSP, frequency: c_float, volume: c_float, pan: c_float, priority: c_int) -> fmod::Result;
+    pub fn FMOD_DSP_GetDefaults(dsp: FMOD_DSP, frequency: *c_float, volume: *c_float, pan: *c_float, priority: *c_int) -> fmod::Result;
+    /* Userdata set/get. */
+    /* I'll bind it later */
+    pub fn FMOD_DSP_SetUserData(dsp: FMOD_DSP, user_data: *c_void) -> fmod::Result;
+    /* I'll bind it later */
+    pub fn FMOD_DSP_GetUserData(dsp: FMOD_DSP, user_data: **c_void) -> fmod::Result;
+    /* I'll bind it later */
+    pub fn FMOD_DSP_GetMemoryInfo(dsp: FMOD_DSP, memory_bits: c_uint, event_memory_bits: c_uint, memory_used: *c_uint,
+        memory_used_details: *FMOD_MEMORY_USAGE_DETAILS) -> fmod::Result;
+
+
+    /* DspConnection functions */
+    pub fn FMOD_DSPConnection_GetInput(dsp_connection: FMOD_DSPCONNECTION, input: *FMOD_DSP) -> fmod::Result;
+    pub fn FMOD_DSPConnection_GetOutput(dsp_connection: FMOD_DSPCONNECTION, output: *FMOD_DSP) -> fmod::Result;
+    pub fn FMOD_DSPConnection_SetMix(dsp_connection: FMOD_DSPCONNECTION, volume: c_float) -> fmod::Result;
+    pub fn FMOD_DSPConnection_GetMix(dsp_connection: FMOD_DSPCONNECTION, volume: *c_float) -> fmod::Result;
+    pub fn FMOD_DSPConnection_SetLevels(dsp_connection: FMOD_DSPCONNECTION, speaker: fmod::Speaker, levels: *c_float, num_levels: c_int) -> fmod::Result;
+    pub fn FMOD_DSPConnection_GetLevels(dsp_connection: FMOD_DSPCONNECTION, speaker: fmod::Speaker, levels: *c_float, num_levels: c_int) -> fmod::Result;
+    /* Userdata set/get. */
+    /* I'll bind it later */
+    pub fn FMOD_DSPCONNECTION_SetUserData(dsp_connection: FMOD_DSPCONNECTION, user_data: *c_void) -> fmod::Result;
+    /* I'll bind it later */
+    pub fn FMOD_DSPCONNECTION_GetUserData(dsp_connection: FMOD_DSPCONNECTION, user_data: **c_void) -> fmod::Result;
+    /* I'll bind it later */
+    pub fn FMOD_DSPCONNECTION_GetMemoryInfo(dsp_connection: FMOD_DSPCONNECTION, memory_bits: c_uint, event_memory_bits: c_uint, memory_used: *c_uint,
+        memory_used_details: *FMOD_MEMORY_USAGE_DETAILS) -> fmod::Result;
 }
 
 pub struct FMOD_ASYNCREADINFO
@@ -558,36 +618,4 @@ pub struct FMOD_VECTOR
     pub x: c_float, /* X co-ordinate in 3D space. */
     pub y: c_float, /* Y co-ordinate in 3D space. */
     pub z: c_float  /* Z co-ordinate in 3D space. */
-}
-
-pub fn get_DSP_ffi(dsp: FmodDSP) -> FMOD_DSP {
-    dsp.dsp
-}
-
-pub struct FmodDSP {
-    dsp : FMOD_DSP
-}
-
-impl FmodDSP {
-    pub fn new() -> FmodDSP {
-        FmodDSP{dsp: ::std::ptr::null()}
-    }
-
-    pub fn from_ptr(dsp: FMOD_DSP) -> FmodDSP {
-        FmodDSP{dsp: dsp}
-    }
-}
-
-pub struct FmodDSPConnection {
-    dsp_connection: *FMOD_DSPCONNECTION
-}
-
-impl FmodDSPConnection {
-    pub fn new() -> FmodDSPConnection {
-        FmodDSPConnection{dsp_connection: ::std::ptr::null()}
-    }
-
-    pub fn from_ptr(dsp_connection: *FMOD_DSPCONNECTION) -> FmodDSPConnection {
-        FmodDSPConnection{dsp_connection: dsp_connection}
-    }
 }

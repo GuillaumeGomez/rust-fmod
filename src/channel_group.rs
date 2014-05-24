@@ -27,6 +27,8 @@ use types::*;
 use ffi;
 use channel;
 use fmod_sys;
+use dsp;
+use dsp_connection;
 use libc::{c_int};
 
 pub struct ChannelGroup {
@@ -162,7 +164,7 @@ impl ChannelGroup {
 
     pub fn override_reverb_properties(&self, properties: channel::FmodReverbChannelProperties) -> fmod::Result {
         let prop = ffi::FMOD_REVERB_CHANNELPROPERTIES {Direct: properties.direct, Room: properties.room, Flags: properties.flags,
-            ConnectionPoint: ffi::get_DSP_ffi(properties.connection_point)};
+            ConnectionPoint: dsp::get_ffi(properties.connection_point)};
 
         unsafe { ffi::FMOD_ChannelGroup_OverrideReverbProperties(self.channel_group, &prop) }
     }
@@ -210,20 +212,20 @@ impl ChannelGroup {
         }
     }
 
-    pub fn get_DSP_head(&self) -> Result<ffi::FmodDSP, fmod::Result> {
+    pub fn get_DSP_head(&self) -> Result<dsp::Dsp, fmod::Result> {
         let dsp = ::std::ptr::null();
 
         match unsafe { ffi::FMOD_ChannelGroup_GetDSPHead(self.channel_group, &dsp) } {
-            fmod::Ok => Ok(ffi::FmodDSP::from_ptr(dsp)),
+            fmod::Ok => Ok(dsp::from_ptr(dsp)),
             e => Err(e)
         }
     }
 
-    pub fn add_DSP(&self, dsp: ffi::FmodDSP) -> Result<ffi::FmodDSPConnection, fmod::Result> {
+    pub fn add_DSP(&self, dsp: dsp::Dsp) -> Result<dsp_connection::DspConnection, fmod::Result> {
         let dsp_connection = ::std::ptr::null();
 
-        match unsafe { ffi::FMOD_ChannelGroup_AddDSP(self.channel_group, ffi::get_DSP_ffi(dsp), &dsp_connection) } {
-            fmod::Ok => Ok(ffi::FmodDSPConnection::from_ptr(dsp_connection)),
+        match unsafe { ffi::FMOD_ChannelGroup_AddDSP(self.channel_group, dsp::get_ffi(dsp), &dsp_connection) } {
+            fmod::Ok => Ok(dsp_connection::from_ptr(dsp_connection)),
             e => Err(e)
         }
     }

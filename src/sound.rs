@@ -101,6 +101,10 @@ pub fn get_ffi(sound: &Sound) -> ffi::FMOD_SOUND {
     sound.sound
 }
 
+pub fn from_ptr(sound: ffi::FMOD_SOUND) -> Sound {
+    Sound{sound: sound}
+}
+
 impl Drop for Sound {
     fn drop(&mut self) {
         self.release();
@@ -108,10 +112,6 @@ impl Drop for Sound {
 }
 
 impl Sound {
-    pub fn from_ptr(sound: ffi::FMOD_SOUND) -> Sound {
-        Sound{sound: sound}
-    }
-
     fn get_system(&self) -> Result<ffi::FMOD_SYSTEM, fmod::Result> {
         let system = ::std::ptr::null();
 
@@ -280,7 +280,7 @@ impl Sound {
         let sub_sound = ::std::ptr::null();
 
         match unsafe { ffi::FMOD_Sound_GetSubSound(self.sound, index, &sub_sound) } {
-            fmod::Ok => Ok(Sound::from_ptr(sub_sound)),
+            fmod::Ok => Ok(from_ptr(sub_sound)),
             e => Err(e)
         }
     }

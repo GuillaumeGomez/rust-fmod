@@ -26,6 +26,7 @@ use enums::*;
 use types::*;
 use libc::{c_int, c_uint};
 use ffi;
+use dsp;
 use channel_group;
 use channel_group::ChannelGroup;
 
@@ -55,7 +56,7 @@ pub struct FmodReverbChannelProperties {
     pub direct           : c_int,
     pub room             : c_int,
     pub flags            : c_uint,
-    pub connection_point : ffi::FmodDSP
+    pub connection_point : dsp::Dsp
 }
 
 pub fn get_ffi(channel : &Channel) -> *ffi::FMOD_CHANNEL {
@@ -303,7 +304,7 @@ impl Channel {
                 direct: t.Direct,
                 room: t.Room,
                 flags: t.Flags,
-                connection_point: ffi::FmodDSP::from_ptr(t.ConnectionPoint)}),
+                connection_point: dsp::from_ptr(t.ConnectionPoint)}),
             e => Err(e),
         }
     }

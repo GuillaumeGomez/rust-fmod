@@ -32,6 +32,7 @@ use sound_group;
 use std::mem;
 use channel_group;
 use channel;
+use dsp;
 
 pub struct FmodGuid {
     pub data1: u32,
@@ -360,6 +361,7 @@ pub struct FmodOutputHandle {
     handle: *c_void
 }
 
+/* I'll wrap geometry functions then so it'll be moved out from this file */
 pub struct FmodGeometry {
     geometry: ffi::FMOD_GEOMETRY
 }
@@ -455,7 +457,7 @@ impl FmodSys {
                 } else {
                     ::std::ptr::null()
                 }, op, ex, &sound) } {
-                fmod::Ok => {Ok(sound::Sound::from_ptr(sound))},
+                fmod::Ok => {Ok(sound::from_ptr(sound))},
                 err => Err(err)
             }
         })
@@ -471,7 +473,7 @@ impl FmodSys {
 
         tmp_v.with_c_str(|c_str|{
             match unsafe { ffi::FMOD_System_CreateStream(self.system, c_str, op, ::std::ptr::null(), &sound) } {
-                fmod::Ok => {Ok(sound::Sound::from_ptr(sound))},
+                fmod::Ok => {Ok(sound::from_ptr(sound))},
                 err => Err(err)
             }
         })
@@ -825,11 +827,11 @@ impl FmodSys {
         }
     }
 
-    pub fn create_DSP_by_plugin(&self, FmodPluginHandle(handle): FmodPluginHandle) -> Result<ffi::FmodDSP, fmod::Result> {
+    pub fn create_DSP_by_plugin(&self, FmodPluginHandle(handle): FmodPluginHandle) -> Result<dsp::Dsp, fmod::Result> {
         let dsp = ::std::ptr::null();
 
         match unsafe { ffi::FMOD_System_CreateDSPByPlugin(self.system, handle, &dsp) } {
-            fmod::Ok => Ok(ffi::FmodDSP::from_ptr(dsp)),
+            fmod::Ok => Ok(dsp::from_ptr(dsp)),
             e => Err(e)
         }
     }
@@ -1084,11 +1086,11 @@ impl FmodSys {
         }
     }
 
-    pub fn get_DSP_head(&self) -> Result<ffi::FmodDSP, fmod::Result> {
+    pub fn get_DSP_head(&self) -> Result<dsp::Dsp, fmod::Result> {
         let head = ::std::ptr::null();
 
         match unsafe { ffi::FMOD_System_GetDSPHead(self.system, &head) } {
-            fmod::Ok => Ok(ffi::FmodDSP::from_ptr(head)),
+            fmod::Ok => Ok(dsp::from_ptr(head)),
             e => Err(e)
         }
     }
