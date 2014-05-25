@@ -38,12 +38,15 @@ extern crate libc;
 
 pub use channel::{Channel, FmodSpectrumOptions, FmodDelayOptions, FmodSpeakerMixOptions, FmodReverbChannelProperties};
 pub use sound::{Sound, FmodTag, FmodSyncPoint};
-pub use fmod_sys::{FmodSys, FmodGuid, FmodSoftwareFormat, FmodAdvancedSettings, FmodVector, FmodOutputHandle,
-    FmodReverbProperties, FmodGeometry, FmodCreateSoundexInfo};
+pub use fmod_sys::{FmodSys, FmodGuid, FmodSoftwareFormat, FmodAdvancedSettings, FmodOutputHandle, FmodCreateSoundexInfo};
 pub use channel_group::ChannelGroup;
 pub use sound_group::SoundGroup;
 pub use dsp::Dsp;
 pub use dsp_connection::DspConnection;
+pub use reverb::Reverb;
+pub use reverb_properties::ReverbProperties;
+pub use vector::FmodVector;
+pub use geometry::Geometry;
 
 mod ffi;
 mod sound;
@@ -53,6 +56,10 @@ mod sound_group;
 mod fmod_sys;
 mod dsp;
 mod dsp_connection;
+mod geometry;
+mod vector;
+mod reverb;
+mod reverb_properties;
 pub mod types;
 pub mod enums;
 

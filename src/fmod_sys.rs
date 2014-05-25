@@ -33,6 +33,9 @@ use std::mem;
 use channel_group;
 use channel;
 use dsp;
+use vector;
+use reverb_properties;
+use geometry;
 
 pub struct FmodGuid {
     pub data1: u32,
@@ -80,141 +83,42 @@ pub struct FmodAdvancedSettings
     pub stack_size_mixer              : u32
 }
 
-pub struct FmodReverbProperties
-{                                   /*       MIN    MAX     DEFAULT DESCRIPTION */
-    pub instance         : i32,     /* [w]   0      3       0       Environment Instance.                                                 (SUPPORTED:SFX(4 instances) and Wii (3 instances)) */
-    pub environment      : i32,     /* [r/w] -1     25      -1      Sets all listener properties.  -1 = OFF.                              (SUPPORTED:SFX(-1 only)/PSP) */
-    pub env_diffusion    : f32,     /* [r/w] 0.0    1.0     1.0     Environment diffusion                                                 (SUPPORTED:WII) */
-    pub room             : i32,     /* [r/w] -10000 0       -1000   Room effect level (at mid frequencies)                                (SUPPORTED:SFX/WII/PSP) */
-    pub room_HF          : i32,     /* [r/w] -10000 0       -100    Relative room effect level at high frequencies                        (SUPPORTED:SFX) */
-    pub room_LF          : i32,     /* [r/w] -10000 0       0       Relative room effect level at low frequencies                         (SUPPORTED:SFX) */
-    pub decay_time       : f32,     /* [r/w] 0.1    20.0    1.49    Reverberation decay time at mid frequencies                           (SUPPORTED:SFX/WII) */
-    pub decay_HF_ratio   : f32,     /* [r/w] 0.1    2.0     0.83    High-frequency to mid-frequency decay time ratio                      (SUPPORTED:SFX) */
-    pub decay_LF_ratio   : f32,     /* [r/w] 0.1    2.0     1.0     Low-frequency to mid-frequency decay time ratio                       (SUPPORTED:---) */
-    pub reflections      : i32,     /* [r/w] -10000 1000    -2602   Early reflections level relative to room effect                       (SUPPORTED:SFX/WII) */
-    pub reflections_delay: f32,     /* [r/w] 0.0    0.3     0.007   Initial reflection delay time                                         (SUPPORTED:SFX) */
-    pub reverb           : i32,     /* [r/w] -10000 2000    200     Late reverberation level relative to room effect                      (SUPPORTED:SFX) */
-    pub reverb_delay     : f32,     /* [r/w] 0.0    0.1     0.011   Late reverberation delay time relative to initial reflection          (SUPPORTED:SFX/WII) */
-    pub modulation_time  : f32,     /* [r/w] 0.04   4.0     0.25    Modulation time                                                       (SUPPORTED:---) */
-    pub modulation_depth : f32,     /* [r/w] 0.0    1.0     0.0     Modulation depth                                                      (SUPPORTED:WII) */
-    pub HF_reference     : f32,     /* [r/w] 20.0   20000.0 5000.0  Reference high frequency (hz)                                         (SUPPORTED:SFX) */
-    pub LF_reference     : f32,     /* [r/w] 20.0   1000.0  250.0   Reference low frequency (hz)                                          (SUPPORTED:SFX) */
-    pub diffusion        : f32,     /* [r/w] 0.0    100.0   100.0   Value that controls the echo density in the late reverberation decay. (SUPPORTED:SFX) */
-    pub density          : f32,     /* [r/w] 0.0    100.0   100.0   Value that controls the modal density in the late reverberation decay (SUPPORTED:SFX) */
-    pub flags            : u32      /* [r/w] FMOD_REVERB_FLAGS - modifies the behavior of above properties                                (SUPPORTED:WII) */
-}
 
-impl FmodReverbProperties {
-    fn new() -> FmodReverbProperties {
-        FmodReverbProperties{
-            instance: 0i32,
-            environment: 0i32,
-            env_diffusion: 0f32,
-            room: 0i32,
-            room_HF: 0i32,
-            room_LF: 0i32,
-            decay_time: 0f32,
-            decay_HF_ratio: 0f32,
-            decay_LF_ratio: 0f32,
-            reflections: 0i32,
-            reflections_delay: 0f32,
-            reverb: 0i32,
-            reverb_delay: 0f32,
-            modulation_time: 0f32,
-            modulation_depth: 0f32,
-            HF_reference: 0f32,
-            LF_reference: 0f32,
-            diffusion: 0f32,
-            density: 0f32,
-            flags: 0u32
-        }
-    }
-
-    fn from_ptr(pointer: ffi::FMOD_REVERB_PROPERTIES) -> FmodReverbProperties {
-        FmodReverbProperties{
-            instance: pointer.Instance,
-            environment: pointer.Environment,
-            env_diffusion: pointer.EnvDiffusion,
-            room: pointer.Room,
-            room_HF: pointer.RoomHF,
-            room_LF: pointer.RoomLF,
-            decay_time: pointer.DecayTime,
-            decay_HF_ratio: pointer.DecayHFRatio,
-            decay_LF_ratio: pointer.DecayLFRatio,
-            reflections: pointer.Reflections,
-            reflections_delay: pointer.ReflectionsDelay,
-            reverb: pointer.Reverb,
-            reverb_delay: pointer.ReverbDelay,
-            modulation_time: pointer.ModulationTime,
-            modulation_depth: pointer.ModulationDepth,
-            HF_reference: pointer.HFReference,
-            LF_reference: pointer.LFReference,
-            diffusion: pointer.Diffusion,
-            density: pointer.Density,
-            flags: pointer.Flags
-        }
-    }
-
-    fn convert_to_c(&self) -> ffi::FMOD_REVERB_PROPERTIES {
-        ffi::FMOD_REVERB_PROPERTIES{
-            Instance: self.instance,
-            Environment: self.environment,
-            EnvDiffusion: self.env_diffusion,
-            Room: self.room,
-            RoomHF: self.room_HF,
-            RoomLF: self.room_LF,
-            DecayTime: self.decay_time,
-            DecayHFRatio: self.decay_HF_ratio,
-            DecayLFRatio: self.decay_LF_ratio,
-            Reflections: self.reflections,
-            ReflectionsDelay: self.reflections_delay,
-            Reverb: self.reverb,
-            ReverbDelay: self.reverb_delay,
-            ModulationTime: self.modulation_time,
-            ModulationDepth: self.modulation_depth,
-            HFReference: self.HF_reference,
-            LFReference: self.LF_reference,
-            Diffusion: self.diffusion,
-            Density: self.density,
-            Flags: self.flags
-        }
-    }
-}
 
 pub struct FmodCreateSoundexInfo
 {
-    pub length              : u32,                       /* [w] Optional. Specify 0 to ignore. Size in bytes of file to load, or sound to create (in this case only if FMOD_OPENUSER is used).  Required if loading from memory.  If 0 is specified, then it will use the size of the file (unless loading from memory then an error will be returned). */
-    pub fileoffset          : u32,                       /* [w] Optional. Specify 0 to ignore. Offset from start of the file to start loading from.  This is useful for loading files from inside big data files. */
-    pub numchannels         : i32,                        /* [w] Optional. Specify 0 to ignore. Number of channels in a sound mandatory if FMOD_OPENUSER or FMOD_OPENRAW is used. */
-    pub defaultfrequency    : i32,                        /* [w] Optional. Specify 0 to ignore. Default frequency of sound in a sound mandatory if FMOD_OPENUSER or FMOD_OPENRAW is used.  Other formats use the frequency determined by the file format. */
-    pub format              : fmod::SoundFormat,            /* [w] Optional. Specify 0 or fmod::SoundFormatNone to ignore. Format of the sound mandatory if FMOD_OPENUSER or FMOD_OPENRAW is used.  Other formats use the format determined by the file format.   */
-    pub decodebuffersize    : u32,                       /* [w] Optional. Specify 0 to ignore. For streams.  This determines the size of the double buffer (in PCM samples) that a stream uses.  Use this for user created streams if you want to determine the size of the callback buffer passed to you.  Specify 0 to use FMOD's default size which is currently equivalent to 400ms of the sound format created/loaded. */
-    pub initialsubsound     : i32,                        /* [w] Optional. Specify 0 to ignore. In a multi-sample file format such as .FSB/.DLS/.SF2, specify the initial subsound to seek to, only if FMOD_CREATESTREAM is used. */
-    pub numsubsounds        : i32,                        /* [w] Optional. Specify 0 to ignore or have no subsounds.  In a sound created with FMOD_OPENUSER, specify the number of subsounds that are accessable with Sound::getSubSound.  If not created with FMOD_OPENUSER, this will limit the number of subsounds loaded within a multi-subsound file.  If using FSB, then if FMOD_CREATESOUNDEXINFO::inclusionlist is used, this will shuffle subsounds down so that there are not any gaps.  It will mean that the indices of the sounds will be different. */
-    pub inclusionlist       : Vec<i32>,                       /* [w] Optional. Specify 0 to ignore. In a multi-sample format such as .FSB/.DLS/.SF2 it may be desirable to specify only a subset of sounds to be loaded out of the whole file.  This is an array of subsound indices to load into memory when created. */
+    pub length              : u32,                               /* [w] Optional. Specify 0 to ignore. Size in bytes of file to load, or sound to create (in this case only if FMOD_OPENUSER is used).  Required if loading from memory.  If 0 is specified, then it will use the size of the file (unless loading from memory then an error will be returned). */
+    pub fileoffset          : u32,                               /* [w] Optional. Specify 0 to ignore. Offset from start of the file to start loading from.  This is useful for loading files from inside big data files. */
+    pub numchannels         : i32,                               /* [w] Optional. Specify 0 to ignore. Number of channels in a sound mandatory if FMOD_OPENUSER or FMOD_OPENRAW is used. */
+    pub defaultfrequency    : i32,                               /* [w] Optional. Specify 0 to ignore. Default frequency of sound in a sound mandatory if FMOD_OPENUSER or FMOD_OPENRAW is used.  Other formats use the frequency determined by the file format. */
+    pub format              : fmod::SoundFormat,                 /* [w] Optional. Specify 0 or fmod::SoundFormatNone to ignore. Format of the sound mandatory if FMOD_OPENUSER or FMOD_OPENRAW is used.  Other formats use the format determined by the file format.   */
+    pub decodebuffersize    : u32,                               /* [w] Optional. Specify 0 to ignore. For streams.  This determines the size of the double buffer (in PCM samples) that a stream uses.  Use this for user created streams if you want to determine the size of the callback buffer passed to you.  Specify 0 to use FMOD's default size which is currently equivalent to 400ms of the sound format created/loaded. */
+    pub initialsubsound     : i32,                               /* [w] Optional. Specify 0 to ignore. In a multi-sample file format such as .FSB/.DLS/.SF2, specify the initial subsound to seek to, only if FMOD_CREATESTREAM is used. */
+    pub numsubsounds        : i32,                               /* [w] Optional. Specify 0 to ignore or have no subsounds.  In a sound created with FMOD_OPENUSER, specify the number of subsounds that are accessable with Sound::getSubSound.  If not created with FMOD_OPENUSER, this will limit the number of subsounds loaded within a multi-subsound file.  If using FSB, then if FMOD_CREATESOUNDEXINFO::inclusionlist is used, this will shuffle subsounds down so that there are not any gaps.  It will mean that the indices of the sounds will be different. */
+    pub inclusionlist       : Vec<i32>,                          /* [w] Optional. Specify 0 to ignore. In a multi-sample format such as .FSB/.DLS/.SF2 it may be desirable to specify only a subset of sounds to be loaded out of the whole file.  This is an array of subsound indices to load into memory when created. */
     pub pcmreadcallback     : ffi::FMOD_SOUND_PCMREADCALLBACK,   /* [w] Optional. Specify 0 to ignore. Callback to 'piggyback' on FMOD's read functions and accept or even write PCM data while FMOD is opening the sound.  Used for user sounds created with FMOD_OPENUSER or for capturing decoded data as FMOD reads it. */
     pub pcmsetposcallback   : ffi::FMOD_SOUND_PCMSETPOSCALLBACK, /* [w] Optional. Specify 0 to ignore. Callback for when the user calls a seeking function such as Channel::setTime or Channel::setPosition within a multi-sample sound, and for when it is opened.*/
     pub nonblockcallback    : ffi::FMOD_SOUND_NONBLOCKCALLBACK,  /* [w] Optional. Specify 0 to ignore. Callback for successful completion, or error while loading a sound that used the FMOD_NONBLOCKING flag.  Also called duing seeking, when setPosition is called or a stream is restarted. */
-    pub dlsname             : StrBuf,                      /* [w] Optional. Specify 0 to ignore. Filename for a DLS or SF2 sample set when loading a MIDI file. If not specified, on Windows it will attempt to open /windows/system32/drivers/gm.dls or /windows/system32/drivers/etc/gm.dls, on Mac it will attempt to load /System/Library/Components/CoreAudio.component/Contents/Resources/gs_instruments.dls, otherwise the MIDI will fail to open. Current DLS support is for level 1 of the specification. */
-    pub encryptionkey       : StrBuf,                      /* [w] Optional. Specify 0 to ignore. Key for encrypted FSB file.  Without this key an encrypted FSB file will not load. */
-    pub maxpolyphony        : i32,                        /* [w] Optional. Specify 0 to ignore. For sequenced formats with dynamic channel allocation such as .MID and .IT, this specifies the maximum voice count allowed while playing.  .IT defaults to 64.  .MID defaults to 32. */
-    userdata                : *c_void,                      /* [w] Optional. Specify 0 to ignore. This is user data to be attached to the sound during creation.  Access via Sound::getUserData.  Note: This is not passed to FMOD_FILE_OPENCALLBACK, that is a different userdata that is file specific. */
-    pub suggestedsoundtype  : fmod::SoundType,              /* [w] Optional. Specify 0 or fmod::SoundTypeUnknown to ignore.  Instead of scanning all codec types, use this to speed up loading by making it jump straight to this codec. */
+    pub dlsname             : StrBuf,                            /* [w] Optional. Specify 0 to ignore. Filename for a DLS or SF2 sample set when loading a MIDI file. If not specified, on Windows it will attempt to open /windows/system32/drivers/gm.dls or /windows/system32/drivers/etc/gm.dls, on Mac it will attempt to load /System/Library/Components/CoreAudio.component/Contents/Resources/gs_instruments.dls, otherwise the MIDI will fail to open. Current DLS support is for level 1 of the specification. */
+    pub encryptionkey       : StrBuf,                            /* [w] Optional. Specify 0 to ignore. Key for encrypted FSB file.  Without this key an encrypted FSB file will not load. */
+    pub maxpolyphony        : i32,                               /* [w] Optional. Specify 0 to ignore. For sequenced formats with dynamic channel allocation such as .MID and .IT, this specifies the maximum voice count allowed while playing.  .IT defaults to 64.  .MID defaults to 32. */
+    userdata                : *c_void,                           /* [w] Optional. Specify 0 to ignore. This is user data to be attached to the sound during creation.  Access via Sound::getUserData.  Note: This is not passed to FMOD_FILE_OPENCALLBACK, that is a different userdata that is file specific. */
+    pub suggestedsoundtype  : fmod::SoundType,                   /* [w] Optional. Specify 0 or fmod::SoundTypeUnknown to ignore.  Instead of scanning all codec types, use this to speed up loading by making it jump straight to this codec. */
     pub useropen            : ffi::FMOD_FILE_OPENCALLBACK,       /* [w] Optional. Specify 0 to ignore. Callback for opening this file. */
     pub userclose           : ffi::FMOD_FILE_CLOSECALLBACK,      /* [w] Optional. Specify 0 to ignore. Callback for closing this file. */
     pub userread            : ffi::FMOD_FILE_READCALLBACK,       /* [w] Optional. Specify 0 to ignore. Callback for reading from this file. */
     pub userseek            : ffi::FMOD_FILE_SEEKCALLBACK,       /* [w] Optional. Specify 0 to ignore. Callback for seeking within this file. */
     pub userasyncread       : ffi::FMOD_FILE_ASYNCREADCALLBACK,  /* [w] Optional. Specify 0 to ignore. Callback for seeking within this file. */
     pub userasynccancel     : ffi::FMOD_FILE_ASYNCCANCELCALLBACK,/* [w] Optional. Specify 0 to ignore. Callback for seeking within this file. */
-    pub speakermap          : fmod::SpeakerMapType,          /* [w] Optional. Specify 0 to ignore. Use this to differ the way fmod maps multichannel sounds to speakers.  See fmod::SpeakerMapType for more. */
-    pub initialsoundgroup   : sound_group::SoundGroup,             /* [w] Optional. Specify 0 to ignore. Specify a sound group if required, to put sound in as it is created. */
-    pub initialseekposition : u32,                       /* [w] Optional. Specify 0 to ignore. For streams. Specify an initial position to seek the stream to. */
-    pub initialseekpostype  : FmodTimeUnit,                /* [w] Optional. Specify 0 to ignore. For streams. Specify the time unit for the position set in initialseekposition. */
-    pub ignoresetfilesystem : i32,                        /* [w] Optional. Specify 0 to ignore. Set to 1 to use fmod's built in file system. Ignores setFileSystem callbacks and also FMOD_CREATESOUNEXINFO file callbacks.  Useful for specific cases where you don't want to use your own file system but want to use fmod's file system (ie net streaming). */
-    pub cddaforceaspi       : i32,                        /* [w] Optional. Specify 0 to ignore. For CDDA sounds only - if non-zero use ASPI instead of NTSCSI to access the specified CD/DVD device. */
-    pub audioqueuepolicy    : u32,                       /* [w] Optional. Specify 0 or FMOD_AUDIOQUEUE_CODECPOLICY_DEFAULT to ignore. Policy used to determine whether hardware or software is used for decoding, see FMOD_AUDIOQUEUE_CODECPOLICY for options (iOS >= 3.0 required, otherwise only hardware is available) */ 
-    pub minmidigranularity  : u32,                       /* [w] Optional. Specify 0 to ignore. Allows you to set a minimum desired MIDI mixer granularity. Values smaller than 512 give greater than default accuracy at the cost of more CPU and vice versa. Specify 0 for default (512 samples). */
-    pub nonblockthreadid    : i32                        /* [w] Optional. Specify 0 to ignore. Specifies a thread index to execute non blocking load on.  Allows for up to 5 threads to be used for loading at once.  This is to avoid one load blocking another.  Maximum value = 4. */
+    pub speakermap          : fmod::SpeakerMapType,              /* [w] Optional. Specify 0 to ignore. Use this to differ the way fmod maps multichannel sounds to speakers.  See fmod::SpeakerMapType for more. */
+    pub initialsoundgroup   : sound_group::SoundGroup,           /* [w] Optional. Specify 0 to ignore. Specify a sound group if required, to put sound in as it is created. */
+    pub initialseekposition : u32,                               /* [w] Optional. Specify 0 to ignore. For streams. Specify an initial position to seek the stream to. */
+    pub initialseekpostype  : FmodTimeUnit,                      /* [w] Optional. Specify 0 to ignore. For streams. Specify the time unit for the position set in initialseekposition. */
+    pub ignoresetfilesystem : i32,                               /* [w] Optional. Specify 0 to ignore. Set to 1 to use fmod's built in file system. Ignores setFileSystem callbacks and also FMOD_CREATESOUNEXINFO file callbacks.  Useful for specific cases where you don't want to use your own file system but want to use fmod's file system (ie net streaming). */
+    pub cddaforceaspi       : i32,                               /* [w] Optional. Specify 0 to ignore. For CDDA sounds only - if non-zero use ASPI instead of NTSCSI to access the specified CD/DVD device. */
+    pub audioqueuepolicy    : u32,                               /* [w] Optional. Specify 0 or FMOD_AUDIOQUEUE_CODECPOLICY_DEFAULT to ignore. Policy used to determine whether hardware or software is used for decoding, see FMOD_AUDIOQUEUE_CODECPOLICY for options (iOS >= 3.0 required, otherwise only hardware is available) */ 
+    pub minmidigranularity  : u32,                               /* [w] Optional. Specify 0 to ignore. Allows you to set a minimum desired MIDI mixer granularity. Values smaller than 512 give greater than default accuracy at the cost of more CPU and vice versa. Specify 0 for default (512 samples). */
+    pub nonblockthreadid    : i32                                /* [w] Optional. Specify 0 to ignore. Specifies a thread index to execute non blocking load on.  Allows for up to 5 threads to be used for loading at once.  This is to avoid one load blocking another.  Maximum value = 4. */
 }
 
 impl FmodCreateSoundexInfo {
@@ -361,34 +265,8 @@ pub struct FmodOutputHandle {
     handle: *c_void
 }
 
-/* I'll wrap geometry functions then so it'll be moved out from this file */
-pub struct FmodGeometry {
-    geometry: ffi::FMOD_GEOMETRY
-}
-
-pub struct FmodVector
-{
-    pub x: f32, /* X co-ordinate in 3D space. */
-    pub y: f32, /* Y co-ordinate in 3D space. */
-    pub z: f32  /* Z co-ordinate in 3D space. */
-}
-
-pub fn from_c(vec : ffi::FMOD_VECTOR) -> FmodVector {
-    FmodVector{x: vec.x, y: vec.y, z: vec.z}
-}
-
-impl FmodVector {
-    pub fn new() -> FmodVector {
-        FmodVector{x: 0f32, y: 0f32, z: 0f32}
-    }
-
-    pub fn convert_to_c(&self) -> ffi::FMOD_VECTOR {
-        ffi::FMOD_VECTOR{x: self.x, y: self.y, z: self.z}
-    }
-}
-
 pub struct FmodSys {
-    system : ffi::FMOD_SYSTEM,
+    system : ffi::FMOD_SYSTEM
 }
 
 impl Drop for FmodSys {
@@ -849,24 +727,24 @@ impl FmodSys {
         }
     }
 
-    pub fn set_3D_listener_attributes(&self, listener: i32, pos: FmodVector, vel: FmodVector, forward: FmodVector,
-        up: FmodVector) -> fmod::Result {
-        let c_p = pos.convert_to_c();
-        let c_v = vel.convert_to_c();
-        let c_f = forward.convert_to_c();
-        let c_u = up.convert_to_c();
+    pub fn set_3D_listener_attributes(&self, listener: i32, pos: vector::FmodVector, vel: vector::FmodVector, forward: vector::FmodVector,
+        up: vector::FmodVector) -> fmod::Result {
+        let c_p = vector::get_ffi(&pos);
+        let c_v = vector::get_ffi(&vel);
+        let c_f = vector::get_ffi(&forward);
+        let c_u = vector::get_ffi(&up);
 
         unsafe { ffi::FMOD_System_Set3DListenerAttributes(self.system, listener, &c_p, &c_v, &c_f, &c_u) }
     }
 
-    pub fn get_3D_listener_attributes(&self, listener: i32) -> Result<(FmodVector, FmodVector, FmodVector, FmodVector), fmod::Result> {
-        let pos = FmodVector::new().convert_to_c();
-        let vel = FmodVector::new().convert_to_c();
-        let forward = FmodVector::new().convert_to_c();
-        let up = FmodVector::new().convert_to_c();
+    pub fn get_3D_listener_attributes(&self, listener: i32) -> Result<(vector::FmodVector, vector::FmodVector, vector::FmodVector, vector::FmodVector), fmod::Result> {
+        let pos = vector::get_ffi(&vector::new());
+        let vel = vector::get_ffi(&vector::new());
+        let forward = vector::get_ffi(&vector::new());
+        let up = vector::get_ffi(&vector::new());
 
         match unsafe { ffi::FMOD_System_Get3DListenerAttributes(self.system, listener, &pos, &vel, &forward, &up) } {
-            fmod::Ok => Ok((from_c(pos), from_c(vel), from_c(forward), from_c(up))),
+            fmod::Ok => Ok((vector::from_ptr(pos), vector::from_ptr(vel), vector::from_ptr(forward), vector::from_ptr(up))),
             e => Err(e)
         }
     }
@@ -1056,32 +934,32 @@ impl FmodSys {
         }
     }
 
-    pub fn set_reverb_properties(&self, properties: FmodReverbProperties) -> fmod::Result {
-        let t_properties = properties.convert_to_c();
+    pub fn set_reverb_properties(&self, properties: reverb_properties::ReverbProperties) -> fmod::Result {
+        let t_properties = reverb_properties::get_ffi(properties);
 
         unsafe { ffi::FMOD_System_SetReverbProperties(self.system, &t_properties) }
     }
 
-    pub fn get_reverb_properties(&self) -> Result<FmodReverbProperties, fmod::Result> {
-        let properties = FmodReverbProperties::new().convert_to_c();
+    pub fn get_reverb_properties(&self) -> Result<reverb_properties::ReverbProperties, fmod::Result> {
+        let properties = reverb_properties::get_ffi(reverb_properties::new());
 
         match unsafe { ffi::FMOD_System_GetReverbProperties(self.system, &properties) } {
-            fmod::Ok => Ok(FmodReverbProperties::from_ptr(properties)),
+            fmod::Ok => Ok(reverb_properties::from_ptr(properties)),
             e => Err(e)
         }
     }
 
-    pub fn set_reverb_ambient_properties(&self, properties: FmodReverbProperties) -> fmod::Result {
-        let t_properties = properties.convert_to_c();
+    pub fn set_reverb_ambient_properties(&self, properties: reverb_properties::ReverbProperties) -> fmod::Result {
+        let t_properties = reverb_properties::get_ffi(properties);
 
         unsafe { ffi::FMOD_System_SetReverbAmbientProperties(self.system, &t_properties) }
     }
 
-    pub fn get_reverb_ambient_properties(&self) -> Result<FmodReverbProperties, fmod::Result> {
-        let properties = FmodReverbProperties::new().convert_to_c();
+    pub fn get_reverb_ambient_properties(&self) -> Result<reverb_properties::ReverbProperties, fmod::Result> {
+        let properties = reverb_properties::get_ffi(reverb_properties::new());
 
         match unsafe { ffi::FMOD_System_GetReverbAmbientProperties(self.system, &properties) } {
-            fmod::Ok => Ok(FmodReverbProperties::from_ptr(properties)),
+            fmod::Ok => Ok(reverb_properties::from_ptr(properties)),
             e => Err(e)
         }
     }
@@ -1177,10 +1055,11 @@ impl FmodSys {
         }
     }
 
-    pub fn create_geometry(&self, max_polygons: i32, max_vertices: i32) -> Result<FmodGeometry, fmod::Result> {
+    pub fn create_geometry(&self, max_polygons: i32, max_vertices: i32) -> Result<geometry::Geometry, fmod::Result> {
         let geometry = ::std::ptr::null();
+
         match unsafe { ffi::FMOD_System_CreateGeometry(self.system, max_polygons, max_vertices, &geometry) } {
-            fmod::Ok => Ok(FmodGeometry{geometry: geometry}),
+            fmod::Ok => Ok(geometry::from_ptr(geometry)),
             e => Err(e)
         }
     }
@@ -1198,14 +1077,14 @@ impl FmodSys {
         }
     }
 
-    pub fn get_geometry_occlusion(&self) -> Result<(FmodVector, FmodVector, f32, f32), fmod::Result> {
-        let listener = FmodVector::new().convert_to_c();
-        let source = FmodVector::new().convert_to_c();
+    pub fn get_geometry_occlusion(&self) -> Result<(vector::FmodVector, vector::FmodVector, f32, f32), fmod::Result> {
+        let listener = vector::get_ffi(&vector::new());
+        let source = vector::get_ffi(&vector::new());
         let direct = 0f32;
         let reverb = 0f32;
 
         match unsafe { ffi::FMOD_System_GetGeometryOcclusion(self.system, &listener, &source, &direct, &reverb) } {
-            fmod::Ok => Ok((from_c(listener), from_c(source), direct, reverb)),
+            fmod::Ok => Ok((vector::from_ptr(listener), vector::from_ptr(source), direct, reverb)),
             e => Err(e)
         }
     }

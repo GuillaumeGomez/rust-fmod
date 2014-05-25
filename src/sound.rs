@@ -31,6 +31,7 @@ use channel::Channel;
 use sound_group;
 use fmod_sys;
 use std::io::timer::sleep;
+use vector;
 
 pub struct FmodSyncPoint {
     sync_point: ffi::FMOD_SYNCPOINT
@@ -245,17 +246,17 @@ impl Sound {
         }
     }
 
-    pub fn set_3D_custom_rolloff(&self, points: Vec<fmod_sys::FmodVector>) -> fmod::Result {
+    pub fn set_3D_custom_rolloff(&self, points: Vec<vector::FmodVector>) -> fmod::Result {
         let mut points_vec = Vec::with_capacity(points.len());
 
         for tmp in points.move_iter() {
-            points_vec.push(tmp.convert_to_c());
+            points_vec.push(vector::get_ffi(&tmp));
         }
         unsafe { ffi::FMOD_Sound_Set3DCustomRolloff(self.sound, points_vec.as_ptr(), points_vec.len() as i32) }
     }
 
     //to test
-    pub fn get_3D_custom_rolloff(&self, num_points: u32) -> Result<Vec<fmod_sys::FmodVector>, fmod::Result> {
+    pub fn get_3D_custom_rolloff(&self, num_points: u32) -> Result<Vec<vector::FmodVector>, fmod::Result> {
         let points_vec = Vec::with_capacity(num_points as uint);
         let pointer = points_vec.as_ptr();
 
@@ -264,7 +265,7 @@ impl Sound {
                 let mut points = Vec::with_capacity(points_vec.len());
 
                 for tmp in points_vec.move_iter() {
-                    points.push(fmod_sys::from_c(tmp));
+                    points.push(vector::from_ptr(tmp));
                 }
                 Ok(points)
             }

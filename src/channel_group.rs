@@ -30,6 +30,7 @@ use fmod_sys;
 use dsp;
 use dsp_connection;
 use libc::{c_int};
+use vector;
 
 pub struct ChannelGroup {
     channel_group: ffi::FMOD_CHANNELGROUP,
@@ -169,9 +170,9 @@ impl ChannelGroup {
         unsafe { ffi::FMOD_ChannelGroup_OverrideReverbProperties(self.channel_group, &prop) }
     }
 
-    pub fn override_3D_attributes(&self, pos: fmod_sys::FmodVector, vel: fmod_sys::FmodVector) -> fmod::Result {
-        let t_pos = pos.convert_to_c();
-        let t_vel = vel.convert_to_c();
+    pub fn override_3D_attributes(&self, pos: vector::FmodVector, vel: vector::FmodVector) -> fmod::Result {
+        let t_pos = vector::get_ffi(&pos);
+        let t_vel = vector::get_ffi(&vel);
 
         unsafe { ffi::FMOD_ChannelGroup_Override3DAttributes(self.channel_group, &t_pos, &t_vel) }
     }
