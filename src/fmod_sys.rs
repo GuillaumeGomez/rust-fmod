@@ -63,7 +63,7 @@ pub struct FmodAdvancedSettings
     pub max_AT9_codecs                : i32,
     pub max_PCM_codecs                : i32,
     pub ASIO_num_channels             : i32,
-    pub ASIO_channel_list             : Vec<StrBuf>,
+    pub ASIO_channel_list             : Vec<String>,
     pub ASIO_speaker_list             : Vec<fmod::Speaker>,
     pub max_3D_reverb_DSPs            : i32,
     pub HRTF_min_angle                : f32,
@@ -72,7 +72,7 @@ pub struct FmodAdvancedSettings
     pub vol0_virtual_vol              : f32,
     pub event_queue_size              : i32,
     pub default_decode_buffer_size    : u32,
-    pub debug_log_filename            : StrBuf,
+    pub debug_log_filename            : String,
     pub profile_port                  : u16,
     pub geometry_max_fade_time        : u32,
     pub max_spectrum_wave_data_buffers: u32,
@@ -99,8 +99,8 @@ pub struct FmodCreateSoundexInfo
     pub pcmreadcallback     : ffi::FMOD_SOUND_PCMREADCALLBACK,   /* [w] Optional. Specify 0 to ignore. Callback to 'piggyback' on FMOD's read functions and accept or even write PCM data while FMOD is opening the sound.  Used for user sounds created with FMOD_OPENUSER or for capturing decoded data as FMOD reads it. */
     pub pcmsetposcallback   : ffi::FMOD_SOUND_PCMSETPOSCALLBACK, /* [w] Optional. Specify 0 to ignore. Callback for when the user calls a seeking function such as Channel::setTime or Channel::setPosition within a multi-sample sound, and for when it is opened.*/
     pub nonblockcallback    : ffi::FMOD_SOUND_NONBLOCKCALLBACK,  /* [w] Optional. Specify 0 to ignore. Callback for successful completion, or error while loading a sound that used the FMOD_NONBLOCKING flag.  Also called duing seeking, when setPosition is called or a stream is restarted. */
-    pub dlsname             : StrBuf,                            /* [w] Optional. Specify 0 to ignore. Filename for a DLS or SF2 sample set when loading a MIDI file. If not specified, on Windows it will attempt to open /windows/system32/drivers/gm.dls or /windows/system32/drivers/etc/gm.dls, on Mac it will attempt to load /System/Library/Components/CoreAudio.component/Contents/Resources/gs_instruments.dls, otherwise the MIDI will fail to open. Current DLS support is for level 1 of the specification. */
-    pub encryptionkey       : StrBuf,                            /* [w] Optional. Specify 0 to ignore. Key for encrypted FSB file.  Without this key an encrypted FSB file will not load. */
+    pub dlsname             : String,                            /* [w] Optional. Specify 0 to ignore. Filename for a DLS or SF2 sample set when loading a MIDI file. If not specified, on Windows it will attempt to open /windows/system32/drivers/gm.dls or /windows/system32/drivers/etc/gm.dls, on Mac it will attempt to load /System/Library/Components/CoreAudio.component/Contents/Resources/gs_instruments.dls, otherwise the MIDI will fail to open. Current DLS support is for level 1 of the specification. */
+    pub encryptionkey       : String,                            /* [w] Optional. Specify 0 to ignore. Key for encrypted FSB file.  Without this key an encrypted FSB file will not load. */
     pub maxpolyphony        : i32,                               /* [w] Optional. Specify 0 to ignore. For sequenced formats with dynamic channel allocation such as .MID and .IT, this specifies the maximum voice count allowed while playing.  .IT defaults to 64.  .MID defaults to 32. */
     userdata                : *c_void,                           /* [w] Optional. Specify 0 to ignore. This is user data to be attached to the sound during creation.  Access via Sound::getUserData.  Note: This is not passed to FMOD_FILE_OPENCALLBACK, that is a different userdata that is file specific. */
     pub suggestedsoundtype  : fmod::SoundType,                   /* [w] Optional. Specify 0 or fmod::SoundTypeUnknown to ignore.  Instead of scanning all codec types, use this to speed up loading by making it jump straight to this codec. */
@@ -136,8 +136,8 @@ impl FmodCreateSoundexInfo {
             pcmreadcallback: None,
             pcmsetposcallback: None,
             nonblockcallback: None,
-            dlsname: StrBuf::new(),
-            encryptionkey: StrBuf::new(),
+            dlsname: String::new(),
+            encryptionkey: String::new(),
             maxpolyphony: 0,
             userdata: ::std::ptr::null(),
             suggestedsoundtype: fmod::SoundTypeUnknown,
@@ -215,14 +215,14 @@ impl FmodCreateSoundexInfo {
             pcmsetposcallback: ptr.pcmsetposcallback,
             nonblockcallback: ptr.nonblockcallback,
             dlsname: if ptr.dlsname != ::std::ptr::null() {
-                    StrBuf::from_owned_str(unsafe { ::std::str::raw::from_c_str(ptr.dlsname) }).clone()
+                    String::from_owned_str(unsafe { ::std::str::raw::from_c_str(ptr.dlsname) }).clone()
                 } else {
-                    StrBuf::new()
+                    String::new()
                 },
             encryptionkey: if ptr.encryptionkey != ::std::ptr::null() {
-                    StrBuf::from_owned_str(unsafe { ::std::str::raw::from_c_str(ptr.encryptionkey) }).clone()
+                    String::from_owned_str(unsafe { ::std::str::raw::from_c_str(ptr.encryptionkey) }).clone()
                 } else {
-                    StrBuf::new()
+                    String::new()
                 },
             maxpolyphony: ptr.maxpolyphony,
             userdata: ptr.userdata,
@@ -247,7 +247,7 @@ impl FmodCreateSoundexInfo {
 }
 
 pub struct FmodCodecDescription {
-    pub name            : StrBuf,                             /* [in] Name of the codec. */
+    pub name            : String,                             /* [in] Name of the codec. */
     pub version         : u32,                                /* [in] Plugin writer's version number. */
     pub defaultasstream : i32,                                /* [in] Tells FMOD to open the file as a stream when calling System::createSound, and not a static sample.  Should normally be 0 (FALSE), because generally the user wants to decode the file into memory when using System::createSound.   Mainly used for formats that decode for a very long time, or could use large amounts of memory when decoded.  Usually sequenced formats such as mod/s3m/xm/it/midi fall into this category.   It is mainly to stop users that don't know what they're doing from getting FMOD_ERR_MEMORY returned from createSound when they should have in fact called System::createStream or used FMOD_CREATESTREAM in System::createSound. */
     pub timeunits       : FmodTimeUnit,                       /* [in] When setposition codec is called, only these time formats will be passed to the codec. Use bitwise OR to accumulate different types. */
@@ -317,7 +317,7 @@ impl FmodSys {
         }
     }
 
-    pub fn create_sound(&self, music : StrBuf, options: Option<FmodMode>, exinfo: Option<FmodCreateSoundexInfo>) -> Result<Sound, fmod::Result> {
+    pub fn create_sound(&self, music : String, options: Option<FmodMode>, exinfo: Option<FmodCreateSoundexInfo>) -> Result<Sound, fmod::Result> {
         let tmp_v = music.clone().into_owned();
         let sound = ::std::ptr::null();
         let op = match options {
@@ -341,7 +341,7 @@ impl FmodSys {
         })
     }
 
-    pub fn create_stream(&self, music : StrBuf, options: Option<FmodMode>) -> Result<Sound, fmod::Result> {
+    pub fn create_stream(&self, music : String, options: Option<FmodMode>) -> Result<Sound, fmod::Result> {
         let tmp_v = music.clone().into_owned();
         let sound = ::std::ptr::null();
         let op = match options {
@@ -357,7 +357,7 @@ impl FmodSys {
         })
     }
 
-    pub fn create_channel_group(&self, group_name : StrBuf) -> Result<channel_group::ChannelGroup, fmod::Result> {
+    pub fn create_channel_group(&self, group_name : String) -> Result<channel_group::ChannelGroup, fmod::Result> {
         let t_group_name = group_name.clone().into_owned();
         let channel_group = ::std::ptr::null();
 
@@ -369,7 +369,7 @@ impl FmodSys {
         })
     }
 
-    pub fn create_sound_group(&self, group_name : StrBuf) -> Result<sound_group::SoundGroup, fmod::Result> {
+    pub fn create_sound_group(&self, group_name : String) -> Result<sound_group::SoundGroup, fmod::Result> {
         let t_group_name = group_name.clone().into_owned();
         let sound_group = ::std::ptr::null();
 
@@ -403,14 +403,14 @@ impl FmodSys {
         }
     }
 
-    pub fn get_driver_info(&self, id: i32, name_len: uint) -> Result<(FmodGuid, StrBuf), fmod::Result> {
-        let tmp_v = StrBuf::with_capacity(name_len).into_owned();
+    pub fn get_driver_info(&self, id: i32, name_len: uint) -> Result<(FmodGuid, String), fmod::Result> {
+        let tmp_v = String::with_capacity(name_len).into_owned();
         let guid = ffi::FMOD_GUID{Data1: 0, Data2: 0, Data3: 0, Data4: [0, 0, 0, 0, 0, 0, 0, 0]};
 
         tmp_v.with_c_str(|c_str|{
             match unsafe { ffi::FMOD_System_GetDriverInfo(self.system, id, c_str, name_len as i32, &guid) } {
                 fmod::Ok => Ok((FmodGuid{data1: guid.Data1, data2: guid.Data2, data3: guid.Data3, data4: guid.Data4},
-                    StrBuf::from_owned_str(unsafe { ::std::str::raw::from_c_str(c_str) }).clone())),
+                    String::from_owned_str(unsafe { ::std::str::raw::from_c_str(c_str) }).clone())),
                 e => Err(e)
             }
         })
@@ -573,7 +573,7 @@ impl FmodSys {
 
                 if advanced_settings.ASIOChannelList != ::std::ptr::null() {
                     unsafe {::std::ptr::array_each(advanced_settings.ASIOChannelList, |c_str| {
-                        converted_ASIO_channel_vec.push(StrBuf::from_owned_str(::std::str::raw::from_c_str(c_str)))
+                        converted_ASIO_channel_vec.push(String::from_owned_str(::std::str::raw::from_c_str(c_str)))
                     })};
                 }
                 if advanced_settings.ASIOSpeakerList != ::std::ptr::null() {
@@ -605,9 +605,9 @@ impl FmodSys {
                     default_decode_buffer_size: advanced_settings.defaultDecodeBufferSize,
                     debug_log_filename: {
                         if advanced_settings.debugLogFilename != ::std::ptr::null() {
-                            StrBuf::from_owned_str(unsafe { ::std::str::raw::from_c_str(advanced_settings.debugLogFilename) }).clone()
+                            String::from_owned_str(unsafe { ::std::str::raw::from_c_str(advanced_settings.debugLogFilename) }).clone()
                         } else {
-                            StrBuf::new()
+                            String::new()
                         }
                     },
                     profile_port: advanced_settings.profileport,
@@ -637,7 +637,7 @@ impl FmodSys {
         }
     }
 
-    pub fn set_plugin_path(&self, path: StrBuf) -> fmod::Result {
+    pub fn set_plugin_path(&self, path: String) -> fmod::Result {
         let tmp_v = path.clone().into_owned();
 
         tmp_v.with_c_str(|c_str|{
@@ -645,7 +645,7 @@ impl FmodSys {
         })
     }
 
-    pub fn load_plugin(&self, filename: StrBuf, priority: u32) -> Result<FmodPluginHandle, fmod::Result> {
+    pub fn load_plugin(&self, filename: String, priority: u32) -> Result<FmodPluginHandle, fmod::Result> {
         let tmp_v = filename.clone().into_owned();
         let handle = 0u32;
 
@@ -679,14 +679,14 @@ impl FmodSys {
         }
     }
 
-    pub fn get_plugin_info(&self, FmodPluginHandle(handle): FmodPluginHandle, name_len: u32) -> Result<(StrBuf, fmod::PluginType, u32), fmod::Result> {
-        let name = StrBuf::with_capacity(name_len as uint).into_owned();
+    pub fn get_plugin_info(&self, FmodPluginHandle(handle): FmodPluginHandle, name_len: u32) -> Result<(String, fmod::PluginType, u32), fmod::Result> {
+        let name = String::with_capacity(name_len as uint).into_owned();
         let plugin_type = fmod::PluginTypeOutput;
         let version = 0u32;
 
         name.with_c_str(|c_str|{
             match unsafe { ffi::FMOD_System_GetPluginInfo(self.system, handle, &plugin_type, c_str, name_len as i32, &version) } {
-                fmod::Ok => Ok((StrBuf::from_owned_str(unsafe { ::std::str::raw::from_c_str(c_str) }).clone(), plugin_type, version)),
+                fmod::Ok => Ok((String::from_owned_str(unsafe { ::std::str::raw::from_c_str(c_str) }).clone(), plugin_type, version)),
                 e => Err(e)
             }
         })
@@ -860,19 +860,19 @@ impl FmodSys {
         }
     }
 
-    pub fn get_CDROM_drive_name(&self, drive: i32, drive_name_len: u32, scsi_name_len: u32, device_name_len: u32) -> Result<(StrBuf, StrBuf, StrBuf), fmod::Result> {
-        let drive_name = StrBuf::with_capacity(drive_name_len as uint).into_owned();
-        let scsi_name = StrBuf::with_capacity(scsi_name_len as uint).into_owned();
-        let device_name = StrBuf::with_capacity(device_name_len as uint).into_owned();
+    pub fn get_CDROM_drive_name(&self, drive: i32, drive_name_len: u32, scsi_name_len: u32, device_name_len: u32) -> Result<(String, String, String), fmod::Result> {
+        let drive_name = String::with_capacity(drive_name_len as uint).into_owned();
+        let scsi_name = String::with_capacity(scsi_name_len as uint).into_owned();
+        let device_name = String::with_capacity(device_name_len as uint).into_owned();
 
         drive_name.with_c_str(|c_drive_name|{
             scsi_name.with_c_str(|c_scsi_name|{
                 device_name.with_c_str(|c_device_name|{
                     match unsafe { ffi::FMOD_System_GetCDROMDriveName(self.system, drive, c_drive_name, drive_name_len as i32, c_scsi_name, scsi_name_len as i32,
                         c_device_name, device_name_len as i32) } {
-                        fmod::Ok => Ok((StrBuf::from_owned_str(unsafe { ::std::str::raw::from_c_str(c_drive_name) }).clone(),
-                                        StrBuf::from_owned_str(unsafe { ::std::str::raw::from_c_str(c_scsi_name) }).clone(),
-                                        StrBuf::from_owned_str(unsafe { ::std::str::raw::from_c_str(c_device_name) }).clone())),
+                        fmod::Ok => Ok((String::from_owned_str(unsafe { ::std::str::raw::from_c_str(c_drive_name) }).clone(),
+                                        String::from_owned_str(unsafe { ::std::str::raw::from_c_str(c_scsi_name) }).clone(),
+                                        String::from_owned_str(unsafe { ::std::str::raw::from_c_str(c_device_name) }).clone())),
                         e => Err(e)
                     }
                 })
@@ -1000,14 +1000,14 @@ impl FmodSys {
         }
     }
 
-    pub fn get_record_driver_info(&self, id: i32, name_len: uint) -> Result<(FmodGuid, StrBuf), fmod::Result> {
-        let tmp_v = StrBuf::with_capacity(name_len).into_owned();
+    pub fn get_record_driver_info(&self, id: i32, name_len: uint) -> Result<(FmodGuid, String), fmod::Result> {
+        let tmp_v = String::with_capacity(name_len).into_owned();
         let guid = ffi::FMOD_GUID{Data1: 0, Data2: 0, Data3: 0, Data4: [0, 0, 0, 0, 0, 0, 0, 0]};
 
         tmp_v.with_c_str(|c_str|{
             match unsafe { ffi::FMOD_System_GetRecordDriverInfo(self.system, id, c_str, name_len as i32, &guid) } {
                 fmod::Ok => Ok((FmodGuid{data1: guid.Data1, data2: guid.Data2, data3: guid.Data3, data4: guid.Data4},
-                    StrBuf::from_owned_str(unsafe { ::std::str::raw::from_c_str(c_str) }).clone())),
+                    String::from_owned_str(unsafe { ::std::str::raw::from_c_str(c_str) }).clone())),
                 e => Err(e)
             }
         })

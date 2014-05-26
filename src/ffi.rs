@@ -27,8 +27,6 @@ extern crate libc;
 use enums::*;
 use libc::{c_void, c_uint, c_int, c_char, c_float, c_ushort, c_uchar, c_short};
 
-mod enums;
-
 pub type FMOD_FILE_OPENCALLBACK = ::std::option::Option<extern "C" fn(arg1: *c_char, arg2: int, arg3: *c_uint, arg4: **c_void, arg5: **c_void) -> fmod::Result>;
 pub type FMOD_FILE_CLOSECALLBACK = ::std::option::Option<extern "C" fn(arg1: *c_void, arg2: *c_void) -> fmod::Result>;
 pub type FMOD_FILE_READCALLBACK = ::std::option::Option<extern "C" fn(arg1: *c_void, arg2: *c_void, arg3: c_uint, arg4: *c_uint, arg5: *c_void) -> fmod::Result>;
@@ -633,7 +631,7 @@ pub struct FMOD_CODEC_STATE
 }
 
 pub struct FMOD_REVERB_PROPERTIES
-{                                   /*       MIN    MAX     DEFAULT DESCRIPTION */
+{                                       /*       MIN    MAX     DEFAULT DESCRIPTION */
     pub Instance         : c_int,       /* [w]   0      3       0       Environment Instance.                                                 (SUPPORTED:SFX(4 instances) and Wii (3 instances)) */
     pub Environment      : c_int,       /* [r/w] -1     25      -1      Sets all listener properties.  -1 = OFF.                              (SUPPORTED:SFX(-1 only)/PSP) */
     pub EnvDiffusion     : c_float,     /* [r/w] 0.0    1.0     1.0     Environment diffusion                                                 (SUPPORTED:WII) */

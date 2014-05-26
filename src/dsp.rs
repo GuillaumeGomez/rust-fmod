@@ -195,13 +195,13 @@ impl Dsp {
         unsafe { ffi::FMOD_DSP_SetParameter(self.dsp, index, value) }
     }
 
-    pub fn get_parameter(&self, index: i32, value_str_len: u32) -> Result<(f32, StrBuf), fmod::Result> {
-        let tmp_v = StrBuf::with_capacity(value_str_len as uint).into_owned();
+    pub fn get_parameter(&self, index: i32, value_str_len: u32) -> Result<(f32, String), fmod::Result> {
+        let tmp_v = String::with_capacity(value_str_len as uint).into_owned();
         let value = 0f32;
 
         tmp_v.with_c_str(|c_str|{
             match unsafe { ffi::FMOD_DSP_GetParameter(self.dsp, index, &value, c_str, value_str_len as i32) } {
-                fmod::Ok => Ok((value, StrBuf::from_owned_str(unsafe { ::std::str::raw::from_c_str(c_str) }).clone())),
+                fmod::Ok => Ok((value, String::from_owned_str(unsafe { ::std::str::raw::from_c_str(c_str) }).clone())),
                 e => Err(e)
             }
         })
@@ -216,10 +216,10 @@ impl Dsp {
         }
     }
 
-    pub fn get_parameter_info(&self, index: i32, name: StrBuf, label: StrBuf, description_len: u32) -> Result<(StrBuf, f32, f32), fmod::Result> {
+    pub fn get_parameter_info(&self, index: i32, name: String, label: String, description_len: u32) -> Result<(String, f32, f32), fmod::Result> {
         let min = 0f32;
         let max = 0f32;
-        let tmp_d = StrBuf::with_capacity(description_len as uint).into_owned();
+        let tmp_d = String::with_capacity(description_len as uint).into_owned();
         let t_name = name.into_owned();
         let t_label = label.into_owned();
 
@@ -227,7 +227,7 @@ impl Dsp {
             t_name.with_c_str(|c_name| {
                 t_label.with_c_str(|c_label|{
                     match unsafe { ffi::FMOD_DSP_GetParameterInfo(self.dsp, index, c_name, c_label, c_description, description_len as i32, &min, &max) } {
-                        fmod::Ok => Ok((StrBuf::from_owned_str(unsafe { ::std::str::raw::from_c_str(c_description) }).clone(), min, max)),
+                        fmod::Ok => Ok((String::from_owned_str(unsafe { ::std::str::raw::from_c_str(c_description) }).clone(), min, max)),
                         e => Err(e)
                     }
                 })
@@ -235,7 +235,7 @@ impl Dsp {
         })
     }
 
-    pub fn get_info(&self, name: StrBuf) -> Result<(u32, i32, i32, i32), fmod::Result> {
+    pub fn get_info(&self, name: String) -> Result<(u32, i32, i32, i32), fmod::Result> {
         let version = 0u32;
         let channels = 0i32;
         let config_width = 0i32;

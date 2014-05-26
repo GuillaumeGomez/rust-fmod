@@ -231,12 +231,12 @@ impl ChannelGroup {
         }
     }
 
-    pub fn get_name(&self, name_len: u32) -> Result<StrBuf, fmod::Result> {
-        let name = StrBuf::with_capacity(name_len as uint).into_owned();
+    pub fn get_name(&self, name_len: u32) -> Result<String, fmod::Result> {
+        let name = String::with_capacity(name_len as uint).into_owned();
 
         name.with_c_str(|c_name|{
             match unsafe { ffi::FMOD_ChannelGroup_GetName(self.channel_group, c_name, name_len as i32) } {
-                fmod::Ok => Ok(StrBuf::from_owned_str(unsafe { ::std::str::raw::from_c_str(c_name) }).clone()),
+                fmod::Ok => Ok(String::from_owned_str(unsafe { ::std::str::raw::from_c_str(c_name) }).clone()),
                 e => Err(e)
             }
         })

@@ -111,7 +111,7 @@ fn main() {
     exinfo.defaultfrequency = 44100;
     exinfo.length           = (exinfo.defaultfrequency * mem::size_of::<i16>() as i32 * exinfo.numchannels * secs) as u32;
 
-    let sound = match fmod.create_sound(StrBuf::new(), Some(FmodMode(FMOD_2D | FMOD_SOFTWARE | FMOD_OPENUSER)), Some(exinfo)) {
+    let sound = match fmod.create_sound(String::new(), Some(FmodMode(FMOD_2D | FMOD_SOFTWARE | FMOD_OPENUSER)), Some(exinfo)) {
         Ok(s) => s,
         Err(e) => fail!("create sound error: {}", e)
     };
