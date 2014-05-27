@@ -28,6 +28,8 @@ use ffi;
 use sound;
 use fmod_sys;
 use libc::{c_int};
+use fmod_sys;
+use fmod_sys::FmodMemoryUsageDetails;
 
 pub struct SoundGroup {
     sound_group: ffi::FMOD_SOUNDGROUP,
@@ -152,6 +154,17 @@ impl SoundGroup {
 
         match unsafe { ffi::FMOD_SoundGroup_GetNumPlaying(self.sound_group, &num_playing) } {
             fmod::Ok => Ok(num_playing),
+            e => Err(e)
+        }
+    }
+
+    pub fn get_memory_info(&self, FmodMemoryBits(memory_bits): FmodMemoryBits,
+        FmodEventMemoryBits(event_memory_bits): FmodEventMemoryBits) -> Result<(u32, FmodMemoryUsageDetails), fmod::Result> {
+        let details = fmod_sys::get_memory_usage_details_ffi(FmodMemoryUsageDetails::new());
+        let memory_used = 0u32;
+
+        match unsafe { ffi::FMOD_SoundGroup_GetMemoryInfo(self.sound_group, memory_bits, event_memory_bits, &memory_used, &details) } {
+            fmod::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
             e => Err(e)
         }
     }

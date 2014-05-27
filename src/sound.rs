@@ -499,4 +499,12 @@ impl Sound {
             e => Err(e)
         }
     }
+
+    pub fn set_sub_sound_sentence(&self, sub_sounds: Vec<i32>) -> fmod::Result {
+        unsafe { ffi::FMOD_Sound_SetSubSoundSentence(self.sound, sub_sounds.as_ptr(), sub_sounds.len() as c_int) }
+    }
+
+    pub fn seek_data(&self, pcm: u32) -> fmod::Result {
+        unsafe { ffi::FMOD_Sound_SeekData(self.sound, pcm) }
+    }
 }

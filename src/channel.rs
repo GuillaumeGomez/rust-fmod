@@ -29,6 +29,8 @@ use ffi;
 use dsp;
 use channel_group;
 use channel_group::ChannelGroup;
+use fmod_sys;
+use fmod_sys::FmodMemoryUsageDetails;
 
 pub struct FmodSpectrumOptions {
     pub window_type     : fmod::DSP_FFT_Window,
@@ -331,6 +333,17 @@ impl Channel {
 
         match unsafe { ffi::FMOD_Channel_GetChannelGroup(self.channel, &channel_group) } {
             fmod::Ok => Ok(channel_group::from_ptr(channel_group)),
+            e => Err(e)
+        }
+    }
+
+    pub fn get_memory_info(&self, FmodMemoryBits(memory_bits): FmodMemoryBits,
+        FmodEventMemoryBits(event_memory_bits): FmodEventMemoryBits) -> Result<(u32, FmodMemoryUsageDetails), fmod::Result> {
+        let details = fmod_sys::get_memory_usage_details_ffi(FmodMemoryUsageDetails::new());
+        let memory_used = 0u32;
+
+        match unsafe { ffi::FMOD_Channel_GetMemoryInfo(self.channel, memory_bits, event_memory_bits, &memory_used, &details) } {
+            fmod::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
             e => Err(e)
         }
     }

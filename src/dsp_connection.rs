@@ -27,6 +27,8 @@ use types::*;
 use enums::*;
 use dsp;
 use libc::c_int;
+use fmod_sys;
+use fmod_sys::FmodMemoryUsageDetails;
 
 pub fn from_ptr(dsp_connection: ffi::FMOD_DSPCONNECTION) -> DspConnection {
     DspConnection{dsp_connection: dsp_connection}
@@ -91,6 +93,17 @@ impl DspConnection {
 
         match unsafe { ffi::FMOD_DSPConnection_GetLevels(self.dsp_connection, speaker, levels.as_ptr(), levels.len() as c_int) } {
             fmod::Ok => Ok(levels),
+            e => Err(e)
+        }
+    }
+
+    pub fn get_memory_info(&self, FmodMemoryBits(memory_bits): FmodMemoryBits,
+        FmodEventMemoryBits(event_memory_bits): FmodEventMemoryBits) -> Result<(u32, FmodMemoryUsageDetails), fmod::Result> {
+        let details = fmod_sys::get_memory_usage_details_ffi(FmodMemoryUsageDetails::new());
+        let memory_used = 0u32;
+
+        match unsafe { ffi::FMOD_DSPCONNECTION_GetMemoryInfo(self.dsp_connection, memory_bits, event_memory_bits, &memory_used, &details) } {
+            fmod::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
             e => Err(e)
         }
     }

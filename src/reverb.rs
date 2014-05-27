@@ -27,6 +27,8 @@ use types::*;
 use enums::*;
 use vector;
 use reverb_properties;
+use fmod_sys;
+use fmod_sys::FmodMemoryUsageDetails;
 
 pub fn from_ptr(reverb: ffi::FMOD_REVERB) -> Reverb {
     Reverb{reverb: reverb}
@@ -108,6 +110,17 @@ impl Reverb {
 
         match unsafe { ffi::FMOD_Reverb_GetActive(self.reverb, &active) } {
             fmod::Ok => Ok(active == 1),
+            e => Err(e)
+        }
+    }
+
+    pub fn get_memory_info(&self, FmodMemoryBits(memory_bits): FmodMemoryBits,
+        FmodEventMemoryBits(event_memory_bits): FmodEventMemoryBits) -> Result<(u32, FmodMemoryUsageDetails), fmod::Result> {
+        let details = fmod_sys::get_memory_usage_details_ffi(FmodMemoryUsageDetails::new());
+        let memory_used = 0u32;
+
+        match unsafe { ffi::FMOD_Reverb_GetMemoryInfo(self.reverb, memory_bits, event_memory_bits, &memory_used, &details) } {
+            fmod::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
             e => Err(e)
         }
     }

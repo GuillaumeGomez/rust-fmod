@@ -31,6 +31,8 @@ use dsp;
 use dsp_connection;
 use libc::{c_int};
 use vector;
+use fmod_sys;
+use fmod_sys::FmodMemoryUsageDetails;
 
 pub struct ChannelGroup {
     channel_group: ffi::FMOD_CHANNELGROUP,
@@ -283,6 +285,17 @@ impl ChannelGroup {
 
         match unsafe { ffi::FMOD_ChannelGroup_GetWaveData(self.channel_group, ptr.as_ptr(), wave_size as c_int, channel_offset) } {
             fmod::Ok => Ok(ptr),
+            e => Err(e)
+        }
+    }
+
+    pub fn get_memory_info(&self, FmodMemoryBits(memory_bits): FmodMemoryBits,
+        FmodEventMemoryBits(event_memory_bits): FmodEventMemoryBits) -> Result<(u32, FmodMemoryUsageDetails), fmod::Result> {
+        let details = fmod_sys::get_memory_usage_details_ffi(FmodMemoryUsageDetails::new());
+        let memory_used = 0u32;
+
+        match unsafe { ffi::FMOD_ChannelGroup_GetMemoryInfo(self.channel_group, memory_bits, event_memory_bits, &memory_used, &details) } {
+            fmod::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
             e => Err(e)
         }
     }

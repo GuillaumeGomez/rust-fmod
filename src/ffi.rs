@@ -27,23 +27,24 @@ extern crate libc;
 use enums::*;
 use libc::{c_void, c_uint, c_int, c_char, c_float, c_ushort, c_uchar, c_short};
 
-pub type FMOD_FILE_OPENCALLBACK = ::std::option::Option<extern "C" fn(arg1: *c_char, arg2: int, arg3: *c_uint, arg4: **c_void, arg5: **c_void) -> fmod::Result>;
-pub type FMOD_FILE_CLOSECALLBACK = ::std::option::Option<extern "C" fn(arg1: *c_void, arg2: *c_void) -> fmod::Result>;
-pub type FMOD_FILE_READCALLBACK = ::std::option::Option<extern "C" fn(arg1: *c_void, arg2: *c_void, arg3: c_uint, arg4: *c_uint, arg5: *c_void) -> fmod::Result>;
-pub type FMOD_FILE_SEEKCALLBACK = ::std::option::Option<extern "C" fn(arg1: *c_void, arg2: c_uint, arg3: *c_void) -> fmod::Result>;
-pub type FMOD_SOUND_NONBLOCKCALLBACK = ::std::option::Option<extern "C" fn(arg1: FMOD_SOUND, arg2: fmod::Result) -> fmod::Result>;
-pub type FMOD_SOUND_PCMREADCALLBACK = ::std::option::Option<extern "C" fn(arg1: FMOD_SOUND, arg2: *c_void, arg3: c_uint) -> fmod::Result>;
+pub type FMOD_FILE_OPENCALLBACK = ::std::option::Option<extern "C" fn(name: *c_char, unicode: int, file_size: *c_uint, handle: **c_void,
+    user_data: **c_void) -> fmod::Result>;
+pub type FMOD_FILE_CLOSECALLBACK = ::std::option::Option<extern "C" fn(handle: *c_void, user_data: *c_void) -> fmod::Result>;
+pub type FMOD_FILE_READCALLBACK = ::std::option::Option<extern "C" fn(handle: *c_void, buffer: *c_void, size_bytes: c_uint, bytes_read: *c_uint,
+    user_data: *c_void) -> fmod::Result>;
+pub type FMOD_FILE_SEEKCALLBACK = ::std::option::Option<extern "C" fn(handle: *c_void, pos: c_uint, user_data: *c_void) -> fmod::Result>;
 pub type FMOD_FILE_ASYNCREADCALLBACK = ::std::option::Option<extern "C" fn(arg1: *FMOD_ASYNCREADINFO, arg2: *c_void) -> fmod::Result>;
 pub type FMOD_FILE_ASYNCCANCELCALLBACK = ::std::option::Option<extern "C" fn(arg1: *c_void, arg2: *c_void, arg3: c_uint) -> fmod::Result>;
-pub type FMOD_SOUND_PCMSETPOSCALLBACK = ::std::option::Option<extern "C" fn(arg1: FMOD_SOUND, arg2: c_int, arg3: c_uint, arg4: FMOD_TIMEUNIT) -> fmod::Result>;
 
+pub type FMOD_SOUND_NONBLOCKCALLBACK = ::std::option::Option<extern "C" fn(sound: FMOD_SOUND, result: fmod::Result) -> fmod::Result>;
+pub type FMOD_SOUND_PCMREADCALLBACK = ::std::option::Option<extern "C" fn(sound: FMOD_SOUND, data: *c_void, data_len: c_uint) -> fmod::Result>;
+pub type FMOD_SOUND_PCMSETPOSCALLBACK = ::std::option::Option<extern "C" fn(sound: FMOD_SOUND, sub_sound: c_int, position: c_uint,
+    postype: FMOD_TIMEUNIT) -> fmod::Result>;
 
-pub type FMOD_SYSTEM_CALLBACK = ::std::option::Option<extern "C" fn(system: FMOD_SYSTEM, _type : fmod::SystemCallbackType, commanddata1 : *c_void, commanddata2 : *c_void) -> fmod::Result>;
+pub type FMOD_SYSTEM_CALLBACK = ::std::option::Option<extern "C" fn(system: FMOD_SYSTEM, _type : fmod::SystemCallbackType, command_data1 : *c_void,
+    command_data2 : *c_void) -> fmod::Result>;
 
-
-/*
- *  codec callbacks
- */
+/*  codec callbacks */
 pub type FMOD_CODEC_OPENCALLBACK = ::std::option::Option<extern "C" fn(codec_state: *FMOD_CODEC_STATE, user_mode: FMOD_MODE, userexinfo: *FMOD_CREATESOUNDEXINFO) -> fmod::Result>;
 pub type FMOD_CODEC_CLOSECALLBACK = ::std::option::Option<extern "C" fn(codec_state: *FMOD_CODEC_STATE) -> fmod::Result>;
 pub type FMOD_CODEC_READCALLBACK = ::std::option::Option<extern "C" fn(codec_state: *FMOD_CODEC_STATE, buffer: *c_void, size_bytes: c_uint, bytes_read: *c_uint) -> fmod::Result>;
@@ -68,7 +69,6 @@ pub type FMOD_TIMEUNIT = c_uint;
 pub type FMOD_INITFLAGS = c_uint;
 pub type FMOD_DSP = *c_void;
 pub type FMOD_CAPS = c_uint;
-pub type FMOD_MEMORY_USAGE_DETAILS = c_void;
 pub type FMOD_DSPCONNECTION = *c_void;
 pub type FMOD_SYNCPOINT = *c_void;
 pub type FMOD_GEOMETRY = *c_void;
@@ -139,10 +139,9 @@ extern "C" {
         up: *FMOD_VECTOR) -> fmod::Result;
     pub fn FMOD_System_Get3DListenerAttributes(system: FMOD_SYSTEM, listener: c_int, pos: *FMOD_VECTOR, vel: *FMOD_VECTOR, forward: *FMOD_VECTOR,
         up: *FMOD_VECTOR) -> fmod::Result;
-    /* I'll bind it later */
-    pub fn FMOD_System_GetMemoryInfo(channel_group: FMOD_CHANNELGROUP, memory_bits: c_uint, event_memory_bits: c_uint, memory_used: *c_int,
+    pub fn FMOD_System_GetMemoryInfo(system: FMOD_SYSTEM, memory_bits: c_uint, event_memory_bits: c_uint, memory_used: *c_uint,
         memoryused_details: *FMOD_MEMORY_USAGE_DETAILS) -> fmod::Result;
-    // I'll bind it later
+    /* I'll bind it later */
     pub fn FMOD_System_Set3DRolloffCallback(system: FMOD_SYSTEM, callback: FMOD_3D_ROLLOFFCALLBACK) -> fmod::Result;
     pub fn FMOD_System_Set3DSpeakerPosition(system: FMOD_SYSTEM, speaker: fmod::Speaker, x: c_float, y: c_float, active: FMOD_BOOL) -> fmod::Result;
     pub fn FMOD_System_Get3DSpeakerPosition(system: FMOD_SYSTEM, speaker: fmod::Speaker, x: *c_float, y: *c_float, active: *FMOD_BOOL) -> fmod::Result;
@@ -216,7 +215,6 @@ extern "C" {
     pub fn FMOD_Sound_Get3DCustomRolloff(sound: FMOD_SOUND, points: **FMOD_VECTOR, num_points: c_int) -> fmod::Result;
     pub fn FMOD_Sound_SetSubSound(sound: FMOD_SOUND, index: c_int, sub_sound: FMOD_SOUND) -> fmod::Result;
     pub fn FMOD_Sound_GetSubSound(sound: FMOD_SOUND, index: c_int, sub_sound: *FMOD_SOUND) -> fmod::Result;
-    //I'll bind it later
     pub fn FMOD_Sound_SetSubSoundSentence(sound: FMOD_SOUND, sub_sound_list: *c_int, num_sub_sound: c_int) -> fmod::Result;
     pub fn FMOD_Sound_GetName(sound: FMOD_SOUND, name: *c_char, name_len: c_int) -> fmod::Result;
     pub fn FMOD_Sound_GetLength(sound: FMOD_SOUND, length: *c_uint, length_type: FMOD_TIMEUNIT) -> fmod::Result;
@@ -228,7 +226,6 @@ extern "C" {
         disk_busy: *FMOD_BOOL) -> fmod::Result;
     /* I'll bind it later */
     pub fn FMOD_Sound_ReadData(sound: FMOD_SOUND, buffer: *c_void, len_bytes: c_uint, read: *c_uint) -> fmod::Result;
-    /* I'll bind it later */
     pub fn FMOD_Sound_SeekData(sound: FMOD_SOUND, pcm: c_uint) -> fmod::Result;
     pub fn FMOD_Sound_SetSoundGroup(sound: FMOD_SOUND, sound_group: FMOD_SOUNDGROUP) -> fmod::Result;
     pub fn FMOD_Sound_GetSoundGroup(sound: FMOD_SOUND, sound_group: *FMOD_SOUNDGROUP) -> fmod::Result;
@@ -266,8 +263,7 @@ extern "C" {
     pub fn FMOD_Channel_GetSpectrum(system : FMOD_SYSTEM, spectrum_array : *c_float, num_values : c_int, channel_offset : c_int,
         window_type : fmod::DSP_FFT_Window) -> fmod::Result;
     pub fn FMOD_Channel_GetWaveData(system: FMOD_SYSTEM, wave_array: *c_float, num_values: c_int, channel_offset: c_int) -> fmod::Result;
-    /* I'll bind it later */
-    pub fn FMOD_Channel_GetMemoryInfo(channel_group: FMOD_CHANNELGROUP, memory_bits: c_uint, event_memory_bits: c_uint, memory_used: *c_int,
+    pub fn FMOD_Channel_GetMemoryInfo(channel_group: FMOD_CHANNELGROUP, memory_bits: c_uint, event_memory_bits: c_uint, memory_used: *c_uint,
         memoryused_details: *FMOD_MEMORY_USAGE_DETAILS) -> fmod::Result;
     pub fn FMOD_Channel_IsPlaying(channel : FMOD_CHANNEL, is_playing : *FMOD_BOOL) -> fmod::Result;
     pub fn FMOD_Channel_SetVolume(channel : FMOD_CHANNEL, volume : c_float) -> fmod::Result;
@@ -344,8 +340,7 @@ extern "C" {
     pub fn FMOD_ChannelGroup_SetUserData(channel_group: FMOD_CHANNELGROUP, user_data: *c_void) -> fmod::Result;
     /* I'll bind it latter */
     pub fn FMOD_ChannelGroup_GetUserData(channel_group: FMOD_CHANNELGROUP, user_data: **c_void) -> fmod::Result;
-    /* I'll will bind it later */
-    pub fn FMOD_ChannelGroup_GetMemoryInfo(channel_group: FMOD_CHANNELGROUP, memory_bits: c_uint, event_memory_bits: c_uint, memory_used: *c_int,
+    pub fn FMOD_ChannelGroup_GetMemoryInfo(channel_group: FMOD_CHANNELGROUP, memory_bits: c_uint, event_memory_bits: c_uint, memory_used: *c_uint,
         memoryused_details: *FMOD_MEMORY_USAGE_DETAILS) -> fmod::Result;
 
 
@@ -371,8 +366,7 @@ extern "C" {
     pub fn FMOD_SoundGroup_SetUserData(sound_group: FMOD_SOUNDGROUP, user_data: *c_void) -> fmod::Result;
     /* I'll bind it later */
     pub fn FMOD_SoundGroup_GetUserData(sound_group: FMOD_SOUNDGROUP, user_data: **c_void) -> fmod::Result;
-    /* I'll bind it later */
-    pub fn FMOD_SoundGroup_GetMemoryInfo(sound_group: FMOD_SOUNDGROUP, memory_bits: c_uint, event_memory_bits: c_uint, memory_used: *c_int,
+    pub fn FMOD_SoundGroup_GetMemoryInfo(sound_group: FMOD_SOUNDGROUP, memory_bits: c_uint, event_memory_bits: c_uint, memory_used: *c_uint,
         memoryused_details: *FMOD_MEMORY_USAGE_DETAILS) -> fmod::Result;
 
 
@@ -414,7 +408,6 @@ extern "C" {
     pub fn FMOD_DSP_SetUserData(dsp: FMOD_DSP, user_data: *c_void) -> fmod::Result;
     /* I'll bind it later */
     pub fn FMOD_DSP_GetUserData(dsp: FMOD_DSP, user_data: **c_void) -> fmod::Result;
-    /* I'll bind it later */
     pub fn FMOD_DSP_GetMemoryInfo(dsp: FMOD_DSP, memory_bits: c_uint, event_memory_bits: c_uint, memory_used: *c_uint,
         memory_used_details: *FMOD_MEMORY_USAGE_DETAILS) -> fmod::Result;
 
@@ -431,7 +424,6 @@ extern "C" {
     pub fn FMOD_DSPCONNECTION_SetUserData(dsp_connection: FMOD_DSPCONNECTION, user_data: *c_void) -> fmod::Result;
     /* I'll bind it later */
     pub fn FMOD_DSPCONNECTION_GetUserData(dsp_connection: FMOD_DSPCONNECTION, user_data: **c_void) -> fmod::Result;
-    /* I'll bind it later */
     pub fn FMOD_DSPCONNECTION_GetMemoryInfo(dsp_connection: FMOD_DSPCONNECTION, memory_bits: c_uint, event_memory_bits: c_uint, memory_used: *c_uint,
         memory_used_details: *FMOD_MEMORY_USAGE_DETAILS) -> fmod::Result;
 
@@ -466,7 +458,6 @@ extern "C" {
     pub fn FMOD_Geometry_SetUserData(geometry: FMOD_GEOMETRY, user_data: *c_void) -> fmod::Result;
     /* I'll bind it later */
     pub fn FMOD_Geometry_GetUserData(geometry: FMOD_GEOMETRY, user_data: **c_void) -> fmod::Result;
-    /* I'll bind it later */
     pub fn FMOD_Geometry_GetMemoryInfo(geometry: FMOD_GEOMETRY, memory_bits: c_uint, event_memory_bits: c_uint, memory_used: *c_uint,
         memory_used_details: *FMOD_MEMORY_USAGE_DETAILS) -> fmod::Result;
 
@@ -483,7 +474,6 @@ extern "C" {
     pub fn FMOD_Reverb_SetUserData(reverb: FMOD_REVERB, user_data: *c_void) -> fmod::Result;
     /* I'll bind it later */
     pub fn FMOD_Reverb_GetUserData(reverb: FMOD_REVERB, user_data: **c_void) -> fmod::Result;
-    /* I'll bind it later */
     pub fn FMOD_Reverb_GetMemoryInfo(reverb: FMOD_REVERB, memory_bits: c_uint, event_memory_bits: c_uint, memory_used: *c_uint,
         memory_used_details: *FMOD_MEMORY_USAGE_DETAILS) -> fmod::Result;
 }
@@ -669,4 +659,56 @@ pub struct FMOD_VECTOR
     pub x: c_float, /* X co-ordinate in 3D space. */
     pub y: c_float, /* Y co-ordinate in 3D space. */
     pub z: c_float  /* Z co-ordinate in 3D space. */
+}
+
+pub struct FMOD_MEMORY_USAGE_DETAILS
+{
+    pub other                   : c_uint, /* [out] Memory not accounted for by other types */
+    pub string                  : c_uint, /* [out] String data */
+    pub system                  : c_uint, /* [out] System object and various internals */
+    pub plugins                 : c_uint, /* [out] Plugin objects and internals */
+    pub output                  : c_uint, /* [out] Output module object and internals */
+    pub channel                 : c_uint, /* [out] Channel related memory */
+    pub channel_group           : c_uint, /* [out] ChannelGroup objects and internals */
+    pub codec                   : c_uint, /* [out] Codecs allocated for streaming */
+    pub file                    : c_uint, /* [out] File buffers and structures */
+    pub sound                   : c_uint, /* [out] Sound objects and internals */
+    pub secondary_ram           : c_uint, /* [out] Sound data stored in secondary RAM */
+    pub sound_group             : c_uint, /* [out] SoundGroup objects and internals */
+    pub stream_buffer           : c_uint, /* [out] Stream buffer memory */
+    pub dsp_connection          : c_uint, /* [out] DSPConnection objects and internals */
+    pub dsp                     : c_uint, /* [out] DSP implementation objects */
+    pub dsp_codec               : c_uint, /* [out] Realtime file format decoding DSP objects */
+    pub profile                 : c_uint, /* [out] Profiler memory footprint. */
+    pub record_buffer           : c_uint, /* [out] Buffer used to store recorded data from microphone */
+    pub reverb                  : c_uint, /* [out] Reverb implementation objects */
+    pub reverb_channel_props    : c_uint, /* [out] Reverb channel properties structs */
+    pub geometry                : c_uint, /* [out] Geometry objects and internals */
+    pub sync_point              : c_uint, /* [out] Sync point memory. */
+    pub event_system            : c_uint, /* [out] EventSystem and various internals */
+    pub music_system            : c_uint, /* [out] MusicSystem and various internals */
+    pub fev                     : c_uint, /* [out] Definition of objects contained in all loaded projects e.g. events, groups, categories */
+    pub memory_fsb              : c_uint, /* [out] Data loaded with preloadFSB */
+    pub event_project           : c_uint, /* [out] EventProject objects and internals */
+    pub event_group_i           : c_uint, /* [out] EventGroup objects and internals */
+    pub sound_bank_class        : c_uint, /* [out] Objects used to manage wave banks */
+    pub sound_bank_list         : c_uint, /* [out] Data used to manage lists of wave bank usage */
+    pub stream_instance         : c_uint, /* [out] Stream objects and internals */
+    pub sound_def_class         : c_uint, /* [out] Sound definition objects */
+    pub sound_def_def_class     : c_uint, /* [out] Sound definition static data objects */
+    pub sound_def_pool          : c_uint, /* [out] Sound definition pool data */
+    pub reverb_def              : c_uint, /* [out] Reverb definition objects */
+    pub event_reverb            : c_uint, /* [out] Reverb objects */
+    pub user_property           : c_uint, /* [out] User property objects */
+    pub event_instance          : c_uint, /* [out] Event instance base objects */
+    pub event_instance_complex  : c_uint, /* [out] Complex event instance objects */
+    pub event_instance_simple   : c_uint, /* [out] Simple event instance objects */
+    pub event_instance_layer    : c_uint, /* [out] Event layer instance objects */
+    pub event_instance_sound    : c_uint, /* [out] Event sound instance objects */
+    pub event_envelope          : c_uint, /* [out] Event envelope objects */
+    pub event_envelope_def      : c_uint, /* [out] Event envelope definition objects */
+    pub event_parameter         : c_uint, /* [out] Event parameter objects */
+    pub event_category          : c_uint, /* [out] Event category objects */
+    pub event_envelope_point    : c_uint, /* [out] Event envelope point objects */
+    pub event_instance_pool     : c_uint  /* [out] Event instance pool memory */
 }

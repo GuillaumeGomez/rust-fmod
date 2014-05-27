@@ -37,14 +37,16 @@ use vector;
 use reverb_properties;
 use geometry;
 
-pub struct FmodGuid {
+pub struct FmodGuid
+{
     pub data1: u32,
     pub data2: u16,
     pub data3: u16,
     pub data4: [u8, ..8] 
 }
 
-pub struct FmodSoftwareFormat {
+pub struct FmodSoftwareFormat
+{
     pub sample_rate         : i32,
     pub format              : fmod::SoundFormat,
     pub num_output_channels : i32,
@@ -82,8 +84,6 @@ pub struct FmodAdvancedSettings
     pub stack_size_non_blocking       : u32,
     pub stack_size_mixer              : u32
 }
-
-
 
 pub struct FmodCreateSoundexInfo
 {
@@ -263,6 +263,219 @@ pub struct FmodCodecDescription {
 
 pub struct FmodOutputHandle {
     handle: *c_void
+}
+
+pub struct FmodMemoryUsageDetails
+{
+    pub other                   : u32, /* [out] Memory not accounted for by other types */
+    pub string                  : u32, /* [out] String data */
+    pub system                  : u32, /* [out] System object and various internals */
+    pub plugins                 : u32, /* [out] Plugin objects and internals */
+    pub output                  : u32, /* [out] Output module object and internals */
+    pub channel                 : u32, /* [out] Channel related memory */
+    pub channel_group           : u32, /* [out] ChannelGroup objects and internals */
+    pub codec                   : u32, /* [out] Codecs allocated for streaming */
+    pub file                    : u32, /* [out] File buffers and structures */
+    pub sound                   : u32, /* [out] Sound objects and internals */
+    pub secondary_ram           : u32, /* [out] Sound data stored in secondary RAM */
+    pub sound_group             : u32, /* [out] SoundGroup objects and internals */
+    pub stream_buffer           : u32, /* [out] Stream buffer memory */
+    pub dsp_connection          : u32, /* [out] DSPConnection objects and internals */
+    pub dsp                     : u32, /* [out] DSP implementation objects */
+    pub dsp_codec               : u32, /* [out] Realtime file format decoding DSP objects */
+    pub profile                 : u32, /* [out] Profiler memory footprint. */
+    pub record_buffer           : u32, /* [out] Buffer used to store recorded data from microphone */
+    pub reverb                  : u32, /* [out] Reverb implementation objects */
+    pub reverb_channel_props    : u32, /* [out] Reverb channel properties structs */
+    pub geometry                : u32, /* [out] Geometry objects and internals */
+    pub sync_point              : u32, /* [out] Sync point memory. */
+    pub event_system            : u32, /* [out] EventSystem and various internals */
+    pub music_system            : u32, /* [out] MusicSystem and various internals */
+    pub fev                     : u32, /* [out] Definition of objects contained in all loaded projects e.g. events, groups, categories */
+    pub memory_fsb              : u32, /* [out] Data loaded with preloadFSB */
+    pub event_project           : u32, /* [out] EventProject objects and internals */
+    pub event_group_i           : u32, /* [out] EventGroup objects and internals */
+    pub sound_bank_class        : u32, /* [out] Objects used to manage wave banks */
+    pub sound_bank_list         : u32, /* [out] Data used to manage lists of wave bank usage */
+    pub stream_instance         : u32, /* [out] Stream objects and internals */
+    pub sound_def_class         : u32, /* [out] Sound definition objects */
+    pub sound_def_def_class     : u32, /* [out] Sound definition static data objects */
+    pub sound_def_pool          : u32, /* [out] Sound definition pool data */
+    pub reverb_def              : u32, /* [out] Reverb definition objects */
+    pub event_reverb            : u32, /* [out] Reverb objects */
+    pub user_property           : u32, /* [out] User property objects */
+    pub event_instance          : u32, /* [out] Event instance base objects */
+    pub event_instance_complex  : u32, /* [out] Complex event instance objects */
+    pub event_instance_simple   : u32, /* [out] Simple event instance objects */
+    pub event_instance_layer    : u32, /* [out] Event layer instance objects */
+    pub event_instance_sound    : u32, /* [out] Event sound instance objects */
+    pub event_envelope          : u32, /* [out] Event envelope objects */
+    pub event_envelope_def      : u32, /* [out] Event envelope definition objects */
+    pub event_parameter         : u32, /* [out] Event parameter objects */
+    pub event_category          : u32, /* [out] Event category objects */
+    pub event_envelope_point    : u32, /* [out] Event envelope point objects */
+    pub event_instance_pool     : u32  /* [out] Event instance pool memory */
+}
+
+impl FmodMemoryUsageDetails {
+    pub fn new() -> FmodMemoryUsageDetails {
+        FmodMemoryUsageDetails {
+            other: 0u32,
+            string: 0u32,
+            system: 0u32,
+            plugins: 0u32,
+            output: 0u32,
+            channel: 0u32,
+            channel_group: 0u32,
+            codec: 0u32,
+            file: 0u32,
+            sound: 0u32,
+            secondary_ram: 0u32,
+            sound_group: 0u32,
+            stream_buffer: 0u32,
+            dsp_connection: 0u32,
+            dsp: 0u32,
+            dsp_codec: 0u32,
+            profile: 0u32,
+            record_buffer: 0u32,
+            reverb: 0u32,
+            reverb_channel_props: 0u32,
+            geometry: 0u32,
+            sync_point: 0u32,
+            event_system: 0u32,
+            music_system: 0u32,
+            fev: 0u32,
+            memory_fsb: 0u32,
+            event_project: 0u32,
+            event_group_i: 0u32,
+            sound_bank_class: 0u32,
+            sound_bank_list: 0u32,
+            stream_instance: 0u32,
+            sound_def_class: 0u32,
+            sound_def_def_class: 0u32,
+            sound_def_pool: 0u32,
+            reverb_def: 0u32,
+            event_reverb: 0u32,
+            user_property: 0u32,
+            event_instance: 0u32,
+            event_instance_complex: 0u32,
+            event_instance_simple: 0u32,
+            event_instance_layer: 0u32,
+            event_instance_sound: 0u32,
+            event_envelope: 0u32,
+            event_envelope_def: 0u32,
+            event_parameter: 0u32,
+            event_category: 0u32,
+            event_envelope_point: 0u32,
+            event_instance_pool: 0u32
+        }
+    }
+}
+
+pub fn get_memory_usage_details_ffi(details: FmodMemoryUsageDetails) -> ffi::FMOD_MEMORY_USAGE_DETAILS {
+    ffi::FMOD_MEMORY_USAGE_DETAILS {
+        other: details.other,
+        string: details.string,
+        system: details.system,
+        plugins: details.plugins,
+        output: details.output,
+        channel: details.channel,
+        channel_group: details.channel_group,
+        codec: details.codec,
+        file: details.file,
+        sound: details.sound,
+        secondary_ram: details.secondary_ram,
+        sound_group: details.sound_group,
+        stream_buffer: details.stream_buffer,
+        dsp_connection: details.dsp_connection,
+        dsp: details.dsp,
+        dsp_codec: details.dsp_codec,
+        profile: details.profile,
+        record_buffer: details.record_buffer,
+        reverb: details.reverb,
+        reverb_channel_props: details.reverb_channel_props,
+        geometry: details.geometry,
+        sync_point: details.sync_point,
+        event_system: details.event_system,
+        music_system: details.music_system,
+        fev: details.fev,
+        memory_fsb: details.memory_fsb,
+        event_project: details.event_project,
+        event_group_i: details.event_group_i,
+        sound_bank_class: details.sound_bank_class,
+        sound_bank_list: details.sound_bank_list,
+        stream_instance: details.stream_instance,
+        sound_def_class: details.sound_def_class,
+        sound_def_def_class: details.sound_def_def_class,
+        sound_def_pool: details.sound_def_pool,
+        reverb_def: details.reverb_def,
+        event_reverb: details.event_reverb,
+        user_property: details.user_property,
+        event_instance: details.event_instance,
+        event_instance_complex: details.event_instance_complex,
+        event_instance_simple: details.event_instance_simple,
+        event_instance_layer: details.event_instance_layer,
+        event_instance_sound: details.event_instance_sound,
+        event_envelope: details.event_envelope,
+        event_envelope_def: details.event_envelope_def,
+        event_parameter: details.event_parameter,
+        event_category: details.event_category,
+        event_envelope_point: details.event_envelope_point,
+        event_instance_pool: details.event_instance_pool
+    }
+}
+
+pub fn from_memory_usage_details_ptr(details: ffi::FMOD_MEMORY_USAGE_DETAILS) -> FmodMemoryUsageDetails {
+    FmodMemoryUsageDetails {
+        other: details.other,
+        string: details.string,
+        system: details.system,
+        plugins: details.plugins,
+        output: details.output,
+        channel: details.channel,
+        channel_group: details.channel_group,
+        codec: details.codec,
+        file: details.file,
+        sound: details.sound,
+        secondary_ram: details.secondary_ram,
+        sound_group: details.sound_group,
+        stream_buffer: details.stream_buffer,
+        dsp_connection: details.dsp_connection,
+        dsp: details.dsp,
+        dsp_codec: details.dsp_codec,
+        profile: details.profile,
+        record_buffer: details.record_buffer,
+        reverb: details.reverb,
+        reverb_channel_props: details.reverb_channel_props,
+        geometry: details.geometry,
+        sync_point: details.sync_point,
+        event_system: details.event_system,
+        music_system: details.music_system,
+        fev: details.fev,
+        memory_fsb: details.memory_fsb,
+        event_project: details.event_project,
+        event_group_i: details.event_group_i,
+        sound_bank_class: details.sound_bank_class,
+        sound_bank_list: details.sound_bank_list,
+        stream_instance: details.stream_instance,
+        sound_def_class: details.sound_def_class,
+        sound_def_def_class: details.sound_def_def_class,
+        sound_def_pool: details.sound_def_pool,
+        reverb_def: details.reverb_def,
+        event_reverb: details.event_reverb,
+        user_property: details.user_property,
+        event_instance: details.event_instance,
+        event_instance_complex: details.event_instance_complex,
+        event_instance_simple: details.event_instance_simple,
+        event_instance_layer: details.event_instance_layer,
+        event_instance_sound: details.event_instance_sound,
+        event_envelope: details.event_envelope,
+        event_envelope_def: details.event_envelope_def,
+        event_parameter: details.event_parameter,
+        event_category: details.event_category,
+        event_envelope_point: details.event_envelope_point,
+        event_instance_pool: details.event_instance_pool
+    }
 }
 
 pub struct FmodSys {
@@ -1085,6 +1298,17 @@ impl FmodSys {
 
         match unsafe { ffi::FMOD_System_GetGeometryOcclusion(self.system, &listener, &source, &direct, &reverb) } {
             fmod::Ok => Ok((vector::from_ptr(listener), vector::from_ptr(source), direct, reverb)),
+            e => Err(e)
+        }
+    }
+
+    pub fn get_memory_info(&self, FmodMemoryBits(memory_bits): FmodMemoryBits,
+        FmodEventMemoryBits(event_memory_bits): FmodEventMemoryBits) -> Result<(u32, FmodMemoryUsageDetails), fmod::Result> {
+        let details = get_memory_usage_details_ffi(FmodMemoryUsageDetails::new());
+        let memory_used = 0u32;
+
+        match unsafe { ffi::FMOD_System_GetMemoryInfo(self.system, memory_bits, event_memory_bits, &memory_used, &details) } {
+            fmod::Ok => Ok((memory_used, from_memory_usage_details_ptr(details))),
             e => Err(e)
         }
     }

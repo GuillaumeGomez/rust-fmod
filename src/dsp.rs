@@ -26,6 +26,8 @@ use ffi;
 use types::*;
 use enums::*;
 use dsp_connection;
+use fmod_sys;
+use fmod_sys::FmodMemoryUsageDetails;
 
 pub fn from_ptr(dsp: ffi::FMOD_DSP) -> Dsp {
     Dsp{dsp: dsp}
@@ -262,6 +264,17 @@ impl Dsp {
 
         match unsafe { ffi::FMOD_DSP_GetDefaults(self.dsp, &frequency, &volume, &pan, &priority) } {
             fmod::Ok => Ok((frequency, volume, pan, priority)),
+            e => Err(e)
+        }
+    }
+
+    pub fn get_memory_info(&self, FmodMemoryBits(memory_bits): FmodMemoryBits,
+        FmodEventMemoryBits(event_memory_bits): FmodEventMemoryBits) -> Result<(u32, FmodMemoryUsageDetails), fmod::Result> {
+        let details = fmod_sys::get_memory_usage_details_ffi(FmodMemoryUsageDetails::new());
+        let memory_used = 0u32;
+
+        match unsafe { ffi::FMOD_DSP_GetMemoryInfo(self.dsp, memory_bits, event_memory_bits, &memory_used, &details) } {
+            fmod::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
             e => Err(e)
         }
     }

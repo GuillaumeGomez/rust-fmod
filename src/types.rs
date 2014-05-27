@@ -27,3 +27,5 @@ pub struct FmodTimeUnit(pub u32);
 pub struct FmodCaps(pub u32);
 pub struct FmodPluginHandle(pub u32);
 pub struct FmodInitFlag(pub u32);
+pub struct FmodMemoryBits(pub u32);
+pub struct FmodEventMemoryBits(pub u32);

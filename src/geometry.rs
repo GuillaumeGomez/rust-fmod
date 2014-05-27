@@ -27,6 +27,8 @@ use types::*;
 use enums::*;
 use vector;
 use libc::{c_int};
+use fmod_sys;
+use fmod_sys::FmodMemoryUsageDetails;
 
 pub fn from_ptr(geometry: ffi::FMOD_GEOMETRY) -> Geometry {
     Geometry{geometry: geometry}
@@ -207,6 +209,17 @@ impl Geometry {
 
         match unsafe { ffi::FMOD_Geometry_GetScale(self.geometry, &scale) } {
             fmod::Ok => Ok(vector::from_ptr(scale)),
+            e => Err(e)
+        }
+    }
+
+    pub fn get_memory_info(&self, FmodMemoryBits(memory_bits): FmodMemoryBits,
+        FmodEventMemoryBits(event_memory_bits): FmodEventMemoryBits) -> Result<(u32, FmodMemoryUsageDetails), fmod::Result> {
+        let details = fmod_sys::get_memory_usage_details_ffi(FmodMemoryUsageDetails::new());
+        let memory_used = 0u32;
+
+        match unsafe { ffi::FMOD_Geometry_GetMemoryInfo(self.geometry, memory_bits, event_memory_bits, &memory_used, &details) } {
+            fmod::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
             e => Err(e)
         }
     }

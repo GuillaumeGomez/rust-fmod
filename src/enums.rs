@@ -23,7 +23,7 @@
 */
 
 use libc::{c_void, c_uint, c_int, c_char, c_float};
-use types::FmodTimeUnit;
+use types::{FmodTimeUnit, FmodMemoryBits};
 
 pub mod fmod {
     #[deriving(Eq, Ord, Show)]
@@ -500,3 +500,61 @@ pub static FMOD_TIMEUNIT_SENTENCE_PCMBYTES : FmodTimeUnit = FmodTimeUnit(0x00040
 pub static FMOD_TIMEUNIT_SENTENCE          : FmodTimeUnit = FmodTimeUnit(0x00080000);  /* Currently playing sentence index according to the channel. */
 pub static FMOD_TIMEUNIT_SENTENCE_SUBSOUND : FmodTimeUnit = FmodTimeUnit(0x00100000);  /* Currently playing subsound index in a sentence. */
 pub static FMOD_TIMEUNIT_BUFFERED          : FmodTimeUnit = FmodTimeUnit(0x10000000);  /* Time value as seen by buffered stream.  This is always ahead of audible time, and is only used for processing. */
+
+pub static FMOD_MEMBITS_OTHER              : FmodMemoryBits = FmodMemoryBits(0x00000001);  /* Memory not accounted for by other types */
+pub static FMOD_MEMBITS_STRING             : FmodMemoryBits = FmodMemoryBits(0x00000002);  /* String data */
+pub static FMOD_MEMBITS_SYSTEM             : FmodMemoryBits = FmodMemoryBits(0x00000004);  /* System object and various internals */
+pub static FMOD_MEMBITS_PLUGINS            : FmodMemoryBits = FmodMemoryBits(0x00000008);  /* Plugin objects and internals */
+pub static FMOD_MEMBITS_OUTPUT             : FmodMemoryBits = FmodMemoryBits(0x00000010);  /* Output module object and internals */
+pub static FMOD_MEMBITS_CHANNEL            : FmodMemoryBits = FmodMemoryBits(0x00000020);  /* Channel related memory */
+pub static FMOD_MEMBITS_CHANNELGROUP       : FmodMemoryBits = FmodMemoryBits(0x00000040);  /* ChannelGroup objects and internals */
+pub static FMOD_MEMBITS_CODEC              : FmodMemoryBits = FmodMemoryBits(0x00000080);  /* Codecs allocated for streaming */
+pub static FMOD_MEMBITS_FILE               : FmodMemoryBits = FmodMemoryBits(0x00000100);  /* Codecs allocated for streaming */
+pub static FMOD_MEMBITS_SOUND              : FmodMemoryBits = FmodMemoryBits(0x00000200);  /* Sound objects and internals */
+pub static FMOD_MEMBITS_SOUND_SECONDARYRAM : FmodMemoryBits = FmodMemoryBits(0x00000400);  /* Sound data stored in secondary RAM */
+pub static FMOD_MEMBITS_SOUNDGROUP         : FmodMemoryBits = FmodMemoryBits(0x00000800);  /* SoundGroup objects and internals */
+pub static FMOD_MEMBITS_STREAMBUFFER       : FmodMemoryBits = FmodMemoryBits(0x00001000);  /* Stream buffer memory */
+pub static FMOD_MEMBITS_DSPCONNECTION      : FmodMemoryBits = FmodMemoryBits(0x00002000);  /* DSPConnection objects and internals */
+pub static FMOD_MEMBITS_DSP                : FmodMemoryBits = FmodMemoryBits(0x00004000);  /* DSP implementation objects */
+pub static FMOD_MEMBITS_DSPCODEC           : FmodMemoryBits = FmodMemoryBits(0x00008000);  /* Realtime file format decoding DSP objects */
+pub static FMOD_MEMBITS_PROFILE            : FmodMemoryBits = FmodMemoryBits(0x00010000);  /* Profiler memory footprint. */
+pub static FMOD_MEMBITS_RECORDBUFFER       : FmodMemoryBits = FmodMemoryBits(0x00020000);  /* Buffer used to store recorded data from microphone */
+pub static FMOD_MEMBITS_REVERB             : FmodMemoryBits = FmodMemoryBits(0x00040000);  /* Reverb implementation objects */
+pub static FMOD_MEMBITS_REVERBCHANNELPROPS : FmodMemoryBits = FmodMemoryBits(0x00080000);  /* Reverb channel properties structs */
+pub static FMOD_MEMBITS_GEOMETRY           : FmodMemoryBits = FmodMemoryBits(0x00100000);  /* Geometry objects and internals */
+pub static FMOD_MEMBITS_SYNCPOINT          : FmodMemoryBits = FmodMemoryBits(0x00200000);  /* Sync point memory. */
+pub static FMOD_MEMBITS_ALL                : FmodMemoryBits = FmodMemoryBits(0xffffffff);  /* All memory used by FMOD Ex */
+
+pub static FMOD_EVENT_MEMBITS_EVENTSYSTEM           : c_uint = 0x00000001;  /* EventSystem and various internals */
+pub static FMOD_EVENT_MEMBITS_MUSICSYSTEM           : c_uint = 0x00000002;  /* MusicSystem and various internals */
+pub static FMOD_EVENT_MEMBITS_FEV                   : c_uint = 0x00000004;  /* Definition of objects contained in all loaded projects e.g. events, groups, categories */
+pub static FMOD_EVENT_MEMBITS_MEMORYFSB             : c_uint = 0x00000008;  /* Data loaded with preloadFSB */
+pub static FMOD_EVENT_MEMBITS_EVENTPROJECT          : c_uint = 0x00000010;  /* EventProject objects and internals */
+pub static FMOD_EVENT_MEMBITS_EVENTGROUPI           : c_uint = 0x00000020;  /* EventGroup objects and internals */
+pub static FMOD_EVENT_MEMBITS_SOUNDBANKCLASS        : c_uint = 0x00000040;  /* Objects used to manage wave banks */
+pub static FMOD_EVENT_MEMBITS_SOUNDBANKLIST         : c_uint = 0x00000080;  /* Data used to manage lists of wave bank usage */
+pub static FMOD_EVENT_MEMBITS_STREAMINSTANCE        : c_uint = 0x00000100;  /* Stream objects and internals */
+pub static FMOD_EVENT_MEMBITS_SOUNDDEFCLASS         : c_uint = 0x00000200;  /* Sound definition objects */
+pub static FMOD_EVENT_MEMBITS_SOUNDDEFDEFCLASS      : c_uint = 0x00000400;  /* Sound definition static data objects */
+pub static FMOD_EVENT_MEMBITS_SOUNDDEFPOOL          : c_uint = 0x00000800;  /* Sound definition pool data */
+pub static FMOD_EVENT_MEMBITS_REVERBDEF             : c_uint = 0x00001000;  /* Reverb definition objects */
+pub static FMOD_EVENT_MEMBITS_EVENTREVERB           : c_uint = 0x00002000;  /* Reverb objects */
+pub static FMOD_EVENT_MEMBITS_USERPROPERTY          : c_uint = 0x00004000;  /* User property objects */
+pub static FMOD_EVENT_MEMBITS_EVENTINSTANCE         : c_uint = 0x00008000;  /* Event instance base objects */
+pub static FMOD_EVENT_MEMBITS_EVENTINSTANCE_COMPLEX : c_uint = 0x00010000;  /* Complex event instance objects */
+pub static FMOD_EVENT_MEMBITS_EVENTINSTANCE_SIMPLE  : c_uint = 0x00020000;  /* Simple event instance objects */
+pub static FMOD_EVENT_MEMBITS_EVENTINSTANCE_LAYER   : c_uint = 0x00040000;  /* Event layer instance objects */
+pub static FMOD_EVENT_MEMBITS_EVENTINSTANCE_SOUND   : c_uint = 0x00080000;  /* Event sound instance objects */
+pub static FMOD_EVENT_MEMBITS_EVENTENVELOPE         : c_uint = 0x00100000;  /* Event envelope objects */
+pub static FMOD_EVENT_MEMBITS_EVENTENVELOPEDEF      : c_uint = 0x00200000;  /* Event envelope definition objects */
+pub static FMOD_EVENT_MEMBITS_EVENTPARAMETER        : c_uint = 0x00400000;  /* Event parameter objects */
+pub static FMOD_EVENT_MEMBITS_EVENTCATEGORY         : c_uint = 0x00800000;  /* Event category objects */
+pub static FMOD_EVENT_MEMBITS_EVENTENVELOPEPOINT    : c_uint = 0x01000000;  /* Event envelope point object+s */
+pub static FMOD_EVENT_MEMBITS_EVENTINSTANCEPOOL     : c_uint = 0x02000000;  /* Event instance pool data */
+pub static FMOD_EVENT_MEMBITS_ALL                   : c_uint = 0xffffffff;  /* All memory used by FMOD Event System */
+
+/* All event instance memory */
+pub static FMOD_EVENT_MEMBITS_EVENTINSTANCE_GROUP   : c_uint = FMOD_EVENT_MEMBITS_EVENTINSTANCE | FMOD_EVENT_MEMBITS_EVENTINSTANCE_COMPLEX | FMOD_EVENT_MEMBITS_EVENTINSTANCE_SIMPLE | FMOD_EVENT_MEMBITS_EVENTINSTANCE_LAYER | FMOD_EVENT_MEMBITS_EVENTINSTANCE_SOUND;
+
+/* All sound definition memory */
+pub static FMOD_EVENT_MEMBITS_SOUNDDEF_GROUP        : c_uint = FMOD_EVENT_MEMBITS_SOUNDDEFCLASS | FMOD_EVENT_MEMBITS_SOUNDDEFDEFCLASS | FMOD_EVENT_MEMBITS_SOUNDDEFPOOL;
