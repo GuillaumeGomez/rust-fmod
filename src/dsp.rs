@@ -28,6 +28,7 @@ use enums::*;
 use dsp_connection;
 use fmod_sys;
 use fmod_sys::FmodMemoryUsageDetails;
+use std::mem::transmute;
 
 pub fn from_ptr(dsp: ffi::FMOD_DSP) -> Dsp {
     Dsp{dsp: dsp}
@@ -276,6 +277,23 @@ impl Dsp {
         match unsafe { ffi::FMOD_DSP_GetMemoryInfo(self.dsp, memory_bits, event_memory_bits, &memory_used, &details) } {
             fmod::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
             e => Err(e)
+        }
+    }
+
+    /* to test ! */
+    pub fn set_user_data<T>(&self, user_data: T) -> fmod::Result {
+        unsafe { ffi::FMOD_DSP_SetUserData(self.dsp, transmute(user_data)) }
+    }
+
+    /* to test ! */
+    pub fn get_user_data<T>(&self) -> Result<T, fmod::Result> {
+        unsafe {
+            let user_data = ::std::ptr::null();
+
+            match ffi::FMOD_DSP_GetUserData(self.dsp, &user_data) {
+                fmod::Ok => Ok(transmute(user_data)),
+                e => Err(e)
+            }
         }
     }
 }

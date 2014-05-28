@@ -250,11 +250,8 @@ extern "C" {
     pub fn FMOD_Sound_SetMusicSpeed(sound: FMOD_SOUND, speed: c_float) -> fmod::Result;
     pub fn FMOD_Sound_GetMusicSpeed(sound: FMOD_SOUND, speed: *c_float) -> fmod::Result;
     /* Userdata set/get. */
-    /* I'll bind it later */
     pub fn FMOD_Sound_SetUserData(sound: FMOD_SOUND, user_data: *c_void) -> fmod::Result;
-    /* I'll bind it later */
     pub fn FMOD_Sound_GetUserData(sound: FMOD_SOUND, user_data: **c_void) -> fmod::Result;
-    /* I'll bind it later */
     pub fn FMOD_Sound_GetMemoryInfo(sound: FMOD_SOUND, memory_bits: c_uint, event_memory_bits: c_uint, memory_used: *c_uint,
         memory_used_details: *FMOD_MEMORY_USAGE_DETAILS) -> fmod::Result;
 
@@ -336,9 +333,7 @@ extern "C" {
         window_type: fmod::DSP_FFT_Window) -> fmod::Result;
     pub fn FMOD_ChannelGroup_GetWaveData(channel_group: FMOD_CHANNELGROUP, wave_array: *c_float, num_values: c_int, channel_offset: c_int) -> fmod::Result;
     /* Userdata set/get. */
-    /* I'll bind it later */
     pub fn FMOD_ChannelGroup_SetUserData(channel_group: FMOD_CHANNELGROUP, user_data: *c_void) -> fmod::Result;
-    /* I'll bind it latter */
     pub fn FMOD_ChannelGroup_GetUserData(channel_group: FMOD_CHANNELGROUP, user_data: **c_void) -> fmod::Result;
     pub fn FMOD_ChannelGroup_GetMemoryInfo(channel_group: FMOD_CHANNELGROUP, memory_bits: c_uint, event_memory_bits: c_uint, memory_used: *c_uint,
         memoryused_details: *FMOD_MEMORY_USAGE_DETAILS) -> fmod::Result;
@@ -362,9 +357,7 @@ extern "C" {
     pub fn FMOD_SoundGroup_GetSound(sound_group: FMOD_SOUNDGROUP, index: c_int, sound: *FMOD_SOUND) -> fmod::Result;
     pub fn FMOD_SoundGroup_GetNumPlaying(sound_group: FMOD_SOUNDGROUP, num_playing: *c_int) -> fmod::Result;
     /* Userdata set/get. */
-    /* I'll bind it later */
     pub fn FMOD_SoundGroup_SetUserData(sound_group: FMOD_SOUNDGROUP, user_data: *c_void) -> fmod::Result;
-    /* I'll bind it later */
     pub fn FMOD_SoundGroup_GetUserData(sound_group: FMOD_SOUNDGROUP, user_data: **c_void) -> fmod::Result;
     pub fn FMOD_SoundGroup_GetMemoryInfo(sound_group: FMOD_SOUNDGROUP, memory_bits: c_uint, event_memory_bits: c_uint, memory_used: *c_uint,
         memoryused_details: *FMOD_MEMORY_USAGE_DETAILS) -> fmod::Result;
@@ -404,9 +397,7 @@ extern "C" {
     pub fn FMOD_DSP_SetDefaults(dsp: FMOD_DSP, frequency: c_float, volume: c_float, pan: c_float, priority: c_int) -> fmod::Result;
     pub fn FMOD_DSP_GetDefaults(dsp: FMOD_DSP, frequency: *c_float, volume: *c_float, pan: *c_float, priority: *c_int) -> fmod::Result;
     /* Userdata set/get. */
-    /* I'll bind it later */
     pub fn FMOD_DSP_SetUserData(dsp: FMOD_DSP, user_data: *c_void) -> fmod::Result;
-    /* I'll bind it later */
     pub fn FMOD_DSP_GetUserData(dsp: FMOD_DSP, user_data: **c_void) -> fmod::Result;
     pub fn FMOD_DSP_GetMemoryInfo(dsp: FMOD_DSP, memory_bits: c_uint, event_memory_bits: c_uint, memory_used: *c_uint,
         memory_used_details: *FMOD_MEMORY_USAGE_DETAILS) -> fmod::Result;
@@ -420,9 +411,7 @@ extern "C" {
     pub fn FMOD_DSPConnection_SetLevels(dsp_connection: FMOD_DSPCONNECTION, speaker: fmod::Speaker, levels: *c_float, num_levels: c_int) -> fmod::Result;
     pub fn FMOD_DSPConnection_GetLevels(dsp_connection: FMOD_DSPCONNECTION, speaker: fmod::Speaker, levels: *c_float, num_levels: c_int) -> fmod::Result;
     /* Userdata set/get. */
-    /* I'll bind it later */
     pub fn FMOD_DSPCONNECTION_SetUserData(dsp_connection: FMOD_DSPCONNECTION, user_data: *c_void) -> fmod::Result;
-    /* I'll bind it later */
     pub fn FMOD_DSPCONNECTION_GetUserData(dsp_connection: FMOD_DSPCONNECTION, user_data: **c_void) -> fmod::Result;
     pub fn FMOD_DSPCONNECTION_GetMemoryInfo(dsp_connection: FMOD_DSPCONNECTION, memory_bits: c_uint, event_memory_bits: c_uint, memory_used: *c_uint,
         memory_used_details: *FMOD_MEMORY_USAGE_DETAILS) -> fmod::Result;
@@ -454,9 +443,7 @@ extern "C" {
     /* I'll bind it later */
     pub fn FMOD_Geometry_Save(geometry: FMOD_GEOMETRY, data: *c_void, data_size: c_int) -> fmod::Result;
     /* Userdata set/get. */
-    /* I'll bind it later */
     pub fn FMOD_Geometry_SetUserData(geometry: FMOD_GEOMETRY, user_data: *c_void) -> fmod::Result;
-    /* I'll bind it later */
     pub fn FMOD_Geometry_GetUserData(geometry: FMOD_GEOMETRY, user_data: **c_void) -> fmod::Result;
     pub fn FMOD_Geometry_GetMemoryInfo(geometry: FMOD_GEOMETRY, memory_bits: c_uint, event_memory_bits: c_uint, memory_used: *c_uint,
         memory_used_details: *FMOD_MEMORY_USAGE_DETAILS) -> fmod::Result;
@@ -469,10 +456,9 @@ extern "C" {
     pub fn FMOD_Reverb_SetProperties(reverb: FMOD_REVERB, properties: *FMOD_REVERB_PROPERTIES) -> fmod::Result;
     pub fn FMOD_Reverb_GetProperties(reverb: FMOD_REVERB, properties: *FMOD_REVERB_PROPERTIES) -> fmod::Result;
     pub fn FMOD_Reverb_SetActive(reverb: FMOD_REVERB, active: FMOD_BOOL) -> fmod::Result;
-    pub fn FMOD_Reverb_GetActive(reverb: FMOD_REVERB, active: *FMOD_BOOL) -> fmod::Result;/* Userdata set/get. */
-    /* I'll bind it later */
+    pub fn FMOD_Reverb_GetActive(reverb: FMOD_REVERB, active: *FMOD_BOOL) -> fmod::Result;
+    /* Userdata set/get. */
     pub fn FMOD_Reverb_SetUserData(reverb: FMOD_REVERB, user_data: *c_void) -> fmod::Result;
-    /* I'll bind it later */
     pub fn FMOD_Reverb_GetUserData(reverb: FMOD_REVERB, user_data: **c_void) -> fmod::Result;
     pub fn FMOD_Reverb_GetMemoryInfo(reverb: FMOD_REVERB, memory_bits: c_uint, event_memory_bits: c_uint, memory_used: *c_uint,
         memory_used_details: *FMOD_MEMORY_USAGE_DETAILS) -> fmod::Result;

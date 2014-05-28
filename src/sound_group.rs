@@ -30,6 +30,7 @@ use fmod_sys;
 use libc::{c_int};
 use fmod_sys;
 use fmod_sys::FmodMemoryUsageDetails;
+use std::mem::transmute;
 
 pub struct SoundGroup {
     sound_group: ffi::FMOD_SOUNDGROUP,
@@ -166,6 +167,23 @@ impl SoundGroup {
         match unsafe { ffi::FMOD_SoundGroup_GetMemoryInfo(self.sound_group, memory_bits, event_memory_bits, &memory_used, &details) } {
             fmod::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
             e => Err(e)
+        }
+    }
+
+    /* to test ! */
+    pub fn set_user_data<T>(&self, user_data: T) -> fmod::Result {
+        unsafe { ffi::FMOD_SoundGroup_SetUserData(self.sound_group, transmute(user_data)) }
+    }
+
+    /* to test ! */
+    pub fn get_user_data<T>(&self) -> Result<T, fmod::Result> {
+        unsafe {
+            let user_data = ::std::ptr::null();
+
+            match ffi::FMOD_SoundGroup_GetUserData(self.sound_group, &user_data) {
+                fmod::Ok => Ok(transmute(user_data)),
+                e => Err(e)
+            }
         }
     }
 }

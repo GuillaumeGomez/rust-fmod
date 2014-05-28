@@ -33,6 +33,7 @@ use libc::{c_int};
 use vector;
 use fmod_sys;
 use fmod_sys::FmodMemoryUsageDetails;
+use std::mem::transmute;
 
 pub struct ChannelGroup {
     channel_group: ffi::FMOD_CHANNELGROUP,
@@ -297,6 +298,23 @@ impl ChannelGroup {
         match unsafe { ffi::FMOD_ChannelGroup_GetMemoryInfo(self.channel_group, memory_bits, event_memory_bits, &memory_used, &details) } {
             fmod::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
             e => Err(e)
+        }
+    }
+
+    /* to test ! */
+    pub fn set_user_data<T>(&self, user_data: T) -> fmod::Result {
+        unsafe { ffi::FMOD_ChannelGroup_SetUserData(self.channel_group, transmute(user_data)) }
+    }
+
+    /* to test ! */
+    pub fn get_user_data<T>(&self) -> Result<T, fmod::Result> {
+        unsafe {
+            let user_data = ::std::ptr::null();
+
+            match ffi::FMOD_ChannelGroup_GetUserData(self.channel_group, &user_data) {
+                fmod::Ok => Ok(transmute(user_data)),
+                e => Err(e)
+            }
         }
     }
 }

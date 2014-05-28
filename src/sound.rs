@@ -32,6 +32,9 @@ use sound_group;
 use fmod_sys;
 use std::io::timer::sleep;
 use vector;
+use fmod_sys;
+use fmod_sys::FmodMemoryUsageDetails;
+use std::mem::transmute;
 
 pub struct FmodSyncPoint {
     sync_point: ffi::FMOD_SYNCPOINT
@@ -506,5 +509,33 @@ impl Sound {
 
     pub fn seek_data(&self, pcm: u32) -> fmod::Result {
         unsafe { ffi::FMOD_Sound_SeekData(self.sound, pcm) }
+    }
+
+    pub fn get_memory_info(&self, FmodMemoryBits(memory_bits): FmodMemoryBits,
+        FmodEventMemoryBits(event_memory_bits): FmodEventMemoryBits) -> Result<(u32, FmodMemoryUsageDetails), fmod::Result> {
+        let details = fmod_sys::get_memory_usage_details_ffi(FmodMemoryUsageDetails::new());
+        let memory_used = 0u32;
+
+        match unsafe { ffi::FMOD_Sound_GetMemoryInfo(self.sound, memory_bits, event_memory_bits, &memory_used, &details) } {
+            fmod::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
+            e => Err(e)
+        }
+    }
+
+    /* to test ! */
+    pub fn set_user_data<T>(&self, user_data: T) -> fmod::Result {
+        unsafe { ffi::FMOD_Sound_SetUserData(self.sound, transmute(user_data)) }
+    }
+
+    /* to test ! */
+    pub fn get_user_data<T>(&self) -> Result<T, fmod::Result> {
+        unsafe {
+            let user_data = ::std::ptr::null();
+
+            match ffi::FMOD_Sound_GetUserData(self.sound, &user_data) {
+                fmod::Ok => Ok(transmute(user_data)),
+                e => Err(e)
+            }
+        }
     }
 }
