@@ -14,7 +14,7 @@ fn play_to_the_end(sound: Sound, len: uint) -> fmod::Result {
 	let mut old_position = 100u;
 
     match sound.play() {
-        Ok(mut chan) => {
+        Ok(chan) => {
             loop {
                 match chan.is_playing() {
                     Ok(b) => {
@@ -33,7 +33,6 @@ fn play_to_the_end(sound: Sound, len: uint) -> fmod::Result {
                     Err(e) => return e,
                 }
             }
-            chan.release();
             fmod::Ok
         }
         Err(err) => err,

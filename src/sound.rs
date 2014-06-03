@@ -24,7 +24,7 @@
 
 use enums::*;
 use types::*;
-use libc::{c_int, c_void, c_uint};
+use libc::{c_int, c_void, c_uint, c_char, c_ushort, c_void};
 use ffi;
 use channel;
 use channel::Channel;
@@ -35,6 +35,34 @@ use vector;
 use fmod_sys;
 use fmod_sys::FmodMemoryUsageDetails;
 use std::mem::transmute;
+use std::io::File;
+use std::mem;
+use std::io::BufferedWriter;
+use std::slice;
+
+struct RiffChunk {
+    id: [c_char, ..4],
+    size: c_int
+}
+
+struct FmtChunk {
+    chunk: RiffChunk,
+    w_format_tag: c_ushort,     /* format type  */
+    n_channels: c_ushort,       /* number of channels (i.e. mono, stereo...)  */
+    n_samples_per_sec: c_uint,  /* sample rate  */
+    n_avg_bytes_per_sec: c_uint,/* for buffer estimation  */
+    n_block_align: c_ushort,    /* block size of data  */
+    w_bits_per_sample: c_ushort /* number of bits per sample of mono data */
+}
+
+struct DataChunk {
+    chunk: RiffChunk
+}
+
+struct WavHeader {
+    chunk: RiffChunk,
+    riff_type: [c_char, ..4]
+}
 
 pub struct FmodSyncPoint {
     sync_point: ffi::FMOD_SYNCPOINT
@@ -537,5 +565,125 @@ impl Sound {
                 e => Err(e)
             }
         }
+    }
+
+    pub fn lock(&self, offset: u32, length: u32) -> Result<(Vec<u8>, Vec<u8>), fmod::Result> {
+        let len1 = 0u32;
+        let len2 = 0u32;
+        let ptr1 = ::std::ptr::null();
+        let ptr2 = ::std::ptr::null();
+
+        match unsafe { ffi::FMOD_Sound_Lock(self.sound, offset, length, &ptr1, &ptr2, &len1, &len2) } {
+            fmod::Ok => {
+                let mut v_ptr1 = Vec::new();
+                let mut v_ptr2 = Vec::new();
+
+                unsafe { slice::raw::buf_as_slice(ptr1 as *u8, len1 as uint, |b| {
+                   v_ptr1 = Vec::from_slice(b).clone();
+                }); }
+                unsafe { slice::raw::buf_as_slice(ptr2 as *u8, len2 as uint, |b| {
+                   v_ptr2 = Vec::from_slice(b).clone();
+                }); }
+                Ok((v_ptr1, v_ptr2))
+            }
+            e => Err(e)
+        }
+    }
+
+    pub fn unlock(&self, v_ptr1: Vec<u8>, v_ptr2: Vec<u8>) -> fmod::Result {
+        unsafe { ffi::FMOD_Sound_Unlock(self.sound, v_ptr1.as_ptr() as *c_void, v_ptr2.as_ptr() as *c_void, v_ptr1.len() as c_uint,
+            v_ptr2.len() as c_uint) }
+    }
+
+    pub fn save_to_wav(&self, file_name: &String) -> Result<bool, String> {
+        unsafe {
+            let channels = 0i32;
+            let bits = 0i32;
+            let rate = 0f32;
+            let len_bytes = match self.get_length(FMOD_TIMEUNIT_PCMBYTES) {
+                Ok(l) => l,
+                Err(e) => return Err(format!("{}", e))
+            };
+            let len1 = 0u32;
+            let len2 = 0u32;
+            let ptr1 : *c_void = ::std::ptr::null();
+            let ptr2 : *c_void = ::std::ptr::null();
+
+            match ffi::FMOD_Sound_GetFormat(self.sound, ::std::ptr::null(), ::std::ptr::null(), &channels, &bits) {
+                fmod::Ok => match ffi::FMOD_Sound_GetDefaults(self.sound, &rate, ::std::ptr::null(), ::std::ptr::null(), ::std::ptr::null()) {
+                    fmod::Ok => {}
+                    e => return Err(format!("{}", e))
+                },
+                e => return Err(format!("{}", e))
+            };
+            let fmt_chunk = FmtChunk {
+                chunk: RiffChunk {
+                    id: ['f' as i8, 'm' as i8, 't' as i8, ' ' as i8],
+                    size: mem::size_of::<FmtChunk>() as i32 - mem::size_of::<RiffChunk>() as i32
+                },
+                w_format_tag: 1,
+                n_channels: channels as u16,
+                n_samples_per_sec: rate as u32,
+                n_avg_bytes_per_sec: rate as u32 * channels as u32 * bits as u32 / 8u32,
+                n_block_align: 1u16 * channels as u16 * bits as u16 / 8u16,
+                w_bits_per_sample: bits as u16
+            };
+            let data_chunk = DataChunk {
+                chunk: RiffChunk {
+                    id: ['d' as i8, 'a' as i8, 't' as i8, 'a' as i8],
+                    size: len_bytes as i32
+                }
+            };
+            let wav_header = WavHeader {
+                chunk: RiffChunk {
+                    id: ['R' as i8, 'I' as i8, 'F' as i8, 'F' as i8],
+                    size: mem::size_of::<FmtChunk>() as i32 + mem::size_of::<RiffChunk>() as i32 + len_bytes as i32
+                },
+                riff_type: ['W' as i8, 'A' as i8, 'V' as i8, 'E' as i8]
+            };
+
+            let file = match File::create(&Path::new(file_name.as_slice())) {
+                Ok(f) => f,
+                Err(e) => return Err(format!("{}", e))
+            };
+            let mut buf: BufferedWriter<File> = BufferedWriter::new(file);
+
+            /* wav header */
+            for it in range(0, 4) {
+                buf.write_i8(wav_header.chunk.id[it as uint]).unwrap();
+            }
+            buf.write_le_i32(wav_header.chunk.size).unwrap();
+            for it in range(0, 4) {
+                buf.write_i8(wav_header.riff_type[it as uint]).unwrap();
+            }
+
+            /* wav chunk */
+            for it in range(0, 4) {
+                buf.write_i8(fmt_chunk.chunk.id[it as uint]).unwrap();
+            }
+            buf.write_le_i32(fmt_chunk.chunk.size).unwrap();
+            buf.write_le_i16(fmt_chunk.w_format_tag as i16).unwrap();
+            buf.write_le_i16(fmt_chunk.n_channels as i16).unwrap();
+            buf.write_le_i32(fmt_chunk.n_samples_per_sec as i32).unwrap();
+            buf.write_le_i32(fmt_chunk.n_avg_bytes_per_sec as i32).unwrap();
+
+            buf.write_le_i16(fmt_chunk.n_block_align as i16).unwrap();
+            buf.write_le_i16(fmt_chunk.w_bits_per_sample as i16).unwrap();
+
+            /* wav data chunk */
+            for it in range(0, 4) {
+                buf.write_i8(data_chunk.chunk.id[it as uint]).unwrap();
+            }
+            buf.write_le_i32(data_chunk.chunk.size).unwrap();
+
+            ffi::FMOD_Sound_Lock(self.sound, 0, len_bytes, &ptr1, &ptr2, &len1, &len2);
+
+            slice::raw::buf_as_slice(ptr1 as *u8, len_bytes as uint, |b| {
+               buf.write(b).unwrap();
+            });
+
+            ffi::FMOD_Sound_Unlock(self.sound, ptr1, ptr2, len1, len2);
+        }
+        Ok(true)
     }
 }

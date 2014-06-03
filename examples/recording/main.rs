@@ -19,9 +19,7 @@ fn get_key() -> u8 {
         Ok(nb) => nb,
         Err(_) => 0u8
     }
-    //::std::from_str<uint>(nb)
 }
-
 
 fn main() {
     let fmod = match FmodSys::new() {
@@ -119,8 +117,9 @@ fn main() {
     println!("\n=========================");
     println!("=== Recording example ===");
     println!("=========================\n");
-    println!("Press '0' to record a {} second segment of audio.", secs);
-    println!("Press '1' to play the {} second segment of audio.", secs);
+    println!("Press '0' to record a {} seconds segment of audio.", secs);
+    println!("Press '1' to play the {} seconds segment of audio.", secs);
+    println!("Press '2' to record the {} seconds segment of audio.", secs);
 
     let record_driver = 0;
     
@@ -151,6 +150,30 @@ fn main() {
                         Some(fmod::Ok)
                     }
                     Err(e) => Some(e)
+                }
+            }
+            '2' => {
+                print!("Please enter the output file name : ");
+                let mut reader = std::io::stdio::stdin();
+
+                match reader.read_line() {
+                    Ok(mut name) => {
+                        name.pop_char().unwrap();
+                        match sound.save_to_wav(&name) {
+                            Ok(b) => if b {
+                                println!("export succeeded");
+                                None
+                            } else {
+                                println!("export failed");
+                                None
+                            },
+                            Err(e) => {
+                                println!("save_to_wav error: {}", e);
+                                None
+                            }
+                        }
+                    },
+                    Err(_) => None
                 }
             }
             c if c == 27u8 as char => break,

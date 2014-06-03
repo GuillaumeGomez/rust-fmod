@@ -202,6 +202,8 @@ extern "C" {
         channel : *FMOD_CHANNEL) -> fmod::Result;
     pub fn FMOD_Sound_Release(sound: FMOD_SOUND) -> fmod::Result;
     /* Standard sound manipulation functions. */
+    pub fn FMOD_Sound_Lock(sound: FMOD_SOUND, offset: c_uint, length: c_uint, ptr1: **c_void, ptr2: **c_void, len1: *c_uint, len2: *c_uint) -> fmod::Result;
+    pub fn FMOD_Sound_Unlock(sound: FMOD_SOUND, ptr1: *c_void, ptr2: *c_void, len1: c_uint, len2: c_uint) -> fmod::Result;
     pub fn FMOD_Sound_GetSystemObject(sound: FMOD_SOUND, system: *FMOD_SYSTEM) -> fmod::Result;
     pub fn FMOD_Sound_SetDefaults(sound: FMOD_SOUND, frequency: c_float, volume: c_float, pan: c_float, priority: c_int) -> fmod::Result;
     pub fn FMOD_Sound_GetDefaults(sound: FMOD_SOUND, frequency: *c_float, volume: *c_float, pan: *c_float, priority: *c_int) -> fmod::Result;
