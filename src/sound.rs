@@ -662,13 +662,12 @@ impl Sound {
                 buf.write_i8(fmt_chunk.chunk.id[it as uint]).unwrap();
             }
             buf.write_le_i32(fmt_chunk.chunk.size).unwrap();
-            buf.write_le_i16(fmt_chunk.w_format_tag as i16).unwrap();
-            buf.write_le_i16(fmt_chunk.n_channels as i16).unwrap();
-            buf.write_le_i32(fmt_chunk.n_samples_per_sec as i32).unwrap();
-            buf.write_le_i32(fmt_chunk.n_avg_bytes_per_sec as i32).unwrap();
-
-            buf.write_le_i16(fmt_chunk.n_block_align as i16).unwrap();
-            buf.write_le_i16(fmt_chunk.w_bits_per_sample as i16).unwrap();
+            buf.write_le_u16(fmt_chunk.w_format_tag).unwrap();
+            buf.write_le_u16(fmt_chunk.n_channels).unwrap();
+            buf.write_le_u32(fmt_chunk.n_samples_per_sec).unwrap();
+            buf.write_le_u32(fmt_chunk.n_avg_bytes_per_sec).unwrap();
+            buf.write_le_u16(fmt_chunk.n_block_align).unwrap();
+            buf.write_le_u16(fmt_chunk.w_bits_per_sample).unwrap();
 
             /* wav data chunk */
             for it in range(0, 4) {
