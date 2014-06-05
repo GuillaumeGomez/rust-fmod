@@ -68,6 +68,8 @@ fn main() {
 }
 ```
 
+For a more complete example : https://github.com/GuillaumeGomez/rust-music-player
+
 ##License
 
     Copyright (c) 2014 Guillaume Gomez
