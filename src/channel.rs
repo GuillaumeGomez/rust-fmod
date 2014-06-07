@@ -88,18 +88,9 @@ impl Channel {
         self.channel = ::std::ptr::null();
     }
 
-    pub fn get_spectrum(&self, spectrum_size : uint, options : Option<FmodSpectrumOptions>) -> Result<Vec<f32>, fmod::Result> {
+    pub fn get_spectrum(&self, spectrum_size : uint, channel_offset: i32, window_type: fmod::DSP_FFT_Window) -> Result<Vec<f32>, fmod::Result> {
         let ptr = Vec::from_elem(spectrum_size, 0f32);
-        let mut window_type = fmod::DSP_FFT_WindowRect;
-        let mut channel_offset = 0;
 
-        match options {
-            Some(v) => {
-                window_type = v.window_type;
-                channel_offset = v.channel_offset;
-            }
-            None => {}
-        };
         match unsafe { ffi::FMOD_Channel_GetSpectrum(self.channel, ptr.as_ptr(), spectrum_size as c_int, channel_offset, window_type) } {
             fmod::Ok => Ok(ptr),
             e => Err(e),
