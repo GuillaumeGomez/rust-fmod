@@ -28,6 +28,7 @@
 #![crate_type = "dylib"]
 
 #![allow(non_camel_case_types)]
+#![allow(non_snake_case_functions)]
 #![allow(unused_imports)]
 #![allow(dead_code)]
 #![allow(uppercase_variables)]

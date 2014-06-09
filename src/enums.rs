@@ -26,7 +26,7 @@ use libc::{c_void, c_uint, c_int, c_char, c_float};
 use types::{FmodTimeUnit, FmodMemoryBits};
 
 pub mod fmod {
-    #[deriving(Eq, Ord, Show)]
+    #[deriving(PartialEq, PartialOrd, Show)]
     #[repr(C)]
     pub enum Result
     {
@@ -132,7 +132,7 @@ pub mod fmod {
         ResultForceINT = 65536      /* Makes sure this enum is signed 32bit. */
     }
 
-    #[deriving(Eq, Ord, Show)]
+    #[deriving(PartialEq, PartialOrd, Show)]
     #[repr(C)]
     pub enum SpeakerMapType
     {
@@ -142,7 +142,7 @@ pub mod fmod {
         SpeakerMapType51ProTools    /* Map a 5.1 sound to use protools L C R Ls Rs LFE mapping.  Will return an error if not a 6 channel sound. */
     }
 
-    #[deriving(Eq, Ord, Show)]
+    #[deriving(PartialEq, PartialOrd, Show)]
     #[repr(C)]
     pub enum SoundFormat
     {
@@ -167,7 +167,7 @@ pub mod fmod {
         SoundFormatForceInt = 65536  /* Makes sure this enum is signed 32bit. */
     }
 
-    #[deriving(Eq, Ord, Show)]
+    #[deriving(PartialEq, PartialOrd, Show)]
     #[repr(C)]
     pub enum SoundType
     {
@@ -205,7 +205,7 @@ pub mod fmod {
         SoundTypeForceInt = 65536 /* Makes sure this enum is signed 32bit. */
     }
 
-    #[deriving(Eq, Ord, Show)]
+    #[deriving(PartialEq, PartialOrd, Show)]
     #[repr(C)]
     pub enum TagType
     {
@@ -225,7 +225,7 @@ pub mod fmod {
         TagTypeForceInt = 65536   /* Makes sure this enum is signed 32bit. */
     }
 
-    #[deriving(Eq, Ord, Show)]
+    #[deriving(PartialEq, PartialOrd, Show)]
     #[repr(C)]
     pub enum TagDataType
     {
@@ -242,7 +242,7 @@ pub mod fmod {
         TagDataTypeForceInt = 65536   /* Makes sure this enum is signed 32bit. */
     }
 
-    #[deriving(Eq, Ord, Show)]
+    #[deriving(PartialEq, PartialOrd, Show)]
     #[repr(C)]
     pub enum ChannelIndex
     {
@@ -250,7 +250,7 @@ pub mod fmod {
         ChannelReUse = -2,      /* For a channel index, re-use the channel handle that was passed in. */
     }
 
-    #[deriving(Eq, Ord, Show)]
+    #[deriving(PartialEq, PartialOrd, Show)]
     #[repr(C)]
     pub enum DSP_FFT_Window
     {
@@ -265,7 +265,7 @@ pub mod fmod {
         DSP_FFT_WindowForceInt = 65536 /* Makes sure this enum is signed 32bit. */
     }
 
-    #[deriving(Eq, Ord, Show)]
+    #[deriving(PartialEq, PartialOrd, Show)]
     #[repr(C)]
     pub enum DelayType
     {
@@ -278,7 +278,7 @@ pub mod fmod {
         DelayTypeForceInt = 65536    /* Makes sure this enum is signed 32bit. */
     }
 
-    #[deriving(Eq, Ord, Show)]
+    #[deriving(PartialEq, PartialOrd, Show)]
     #[repr(C)]
     pub enum OutputType
     {
@@ -317,7 +317,7 @@ pub mod fmod {
         OutputTypeForceInt = 65536 /* Makes sure this enum is signed 32bit. */
     }
 
-    #[deriving(Eq, Ord, Show)]
+    #[deriving(PartialOrd, Show, PartialEq)]
     #[repr(C)]
     // I need to find a solution for this enum...
     pub enum Speaker
@@ -331,15 +331,15 @@ pub mod fmod {
         SpeakerSideLeft,
         SpeakerSideRight,
         
-        SpeakerMax,                                       /* Maximum number of speaker types supported. */
-        //fmod::Speaker_MONO        = fmod::Speaker_FRONT_LEFT,     /* For use with fmod::SpeakerMODE_MONO and Channel::SetSpeakerLevels.  Mapped to same value as fmod::Speaker_FRONT_LEFT. */
-        SpeakerNull        = 65535,                       /* A non speaker.  Use this with ASIO mapping to ignore a speaker. */
-        //fmod::Speaker_SBL         = fmod::Speaker_SIDE_LEFT,      /* For use with fmod::SpeakerMODE_7POINT1 on PS3 where the extra speakers are surround back inside of side speakers. */
-        //fmod::Speaker_SBR         = fmod::Speaker_SIDE_RIGHT,     /* For use with fmod::SpeakerMODE_7POINT1 on PS3 where the extra speakers are surround back inside of side speakers. */
-        SpeakerForceInt    = 65536                        /* Makes sure this enum is signed 32bit. */
+        SpeakerMax,                 /* Maximum number of speaker types supported. */
+        //SpeakerMono        = 0,     /* For use with fmod::SpeakerMODE_MONO and Channel::SetSpeakerLevels.  Mapped to same value as fmod::Speaker_FRONT_LEFT. */
+        SpeakerNull        = 65535, /* A non speaker.  Use this with ASIO mapping to ignore a speaker. */
+        //SpeakerSBL         = 6,     /* For use with fmod::SpeakerMODE_7POINT1 on PS3 where the extra speakers are surround back inside of side speakers. */
+        //SpeakerSBR         = 7,     /* For use with fmod::SpeakerMODE_7POINT1 on PS3 where the extra speakers are surround back inside of side speakers. */
+        SpeakerForceInt    = 65536  /* Makes sure this enum is signed 32bit. */
     }
 
-    #[deriving(Eq, Ord, Show)]
+    #[deriving(PartialEq, PartialOrd, Show)]
     #[repr(C)]
     pub enum SpeakerMode
     {
@@ -359,7 +359,7 @@ pub mod fmod {
         SpeakerModeForceInt = 65536  /* Makes sure this enum is signed 32bit. */
     }
 
-    #[deriving(Eq, Ord, Show)]
+    #[deriving(PartialEq, PartialOrd, Show)]
     #[repr(C)]
     pub enum DSPResampler
     {
@@ -372,7 +372,7 @@ pub mod fmod {
         DSPResamplerForceInt = 65536 /* Makes sure this enum is signed 32bit. */
     }
 
-    #[deriving(Eq, Ord, Show)]
+    #[deriving(PartialEq, PartialOrd, Show)]
     #[repr(C)]
     pub enum PluginType
     {
@@ -384,7 +384,7 @@ pub mod fmod {
         PluginTypeForceInt = 65536 /* Makes sure this enum is signed 32bit. */
     }
 
-    #[deriving(Eq, Ord, Show)]
+    #[deriving(PartialEq, PartialOrd, Show)]
     #[repr(C)]
     pub enum OpenState
     {
@@ -401,7 +401,7 @@ pub mod fmod {
         OpenStateForceInt = 65536 /* Makes sure this enum is signed 32bit. */
     }
 
-    #[deriving(Eq, Ord, Show)]
+    #[deriving(PartialEq, PartialOrd, Show)]
     #[repr(C)]
     pub enum SystemCallbackType
     {
@@ -417,7 +417,7 @@ pub mod fmod {
         SystemCallbackTypeForceInt = 65536           /* Makes sure this enum is signed 32bit. */
     }
 
-    #[deriving(Eq, Ord, Show)]
+    #[deriving(PartialEq, PartialOrd, Show)]
     #[repr(C)]
     pub enum SoundGroupBehavior
     {

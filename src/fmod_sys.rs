@@ -174,8 +174,8 @@ impl FmodCreateSoundexInfo {
             pcmreadcallback: self.pcmreadcallback,
             pcmsetposcallback: self.pcmsetposcallback,
             nonblockcallback: self.nonblockcallback,
-            dlsname: self.dlsname.clone().into_owned().with_c_str(|c_str|{c_str}),
-            encryptionkey: self.encryptionkey.clone().into_owned().with_c_str(|c_str|{c_str}),
+            dlsname: self.dlsname.clone().with_c_str(|c_str|{c_str}),
+            encryptionkey: self.encryptionkey.clone().with_c_str(|c_str|{c_str}),
             maxpolyphony: self.maxpolyphony,
             userdata: self.userdata,
             suggestedsoundtype: self.suggestedsoundtype,
@@ -215,12 +215,12 @@ impl FmodCreateSoundexInfo {
             pcmsetposcallback: ptr.pcmsetposcallback,
             nonblockcallback: ptr.nonblockcallback,
             dlsname: if ptr.dlsname != ::std::ptr::null() {
-                    String::from_owned_str(unsafe { ::std::str::raw::from_c_str(ptr.dlsname) }).clone()
+                    unsafe { ::std::str::raw::from_c_str(ptr.dlsname).clone() }
                 } else {
                     String::new()
                 },
             encryptionkey: if ptr.encryptionkey != ::std::ptr::null() {
-                    String::from_owned_str(unsafe { ::std::str::raw::from_c_str(ptr.encryptionkey) }).clone()
+                    unsafe { ::std::str::raw::from_c_str(ptr.encryptionkey).clone() }
                 } else {
                     String::new()
                 },
@@ -531,7 +531,7 @@ impl FmodSys {
     }
 
     pub fn create_sound(&self, music : String, options: Option<FmodMode>, exinfo: Option<FmodCreateSoundexInfo>) -> Result<Sound, fmod::Result> {
-        let tmp_v = music.clone().into_owned();
+        let tmp_v = music.clone();
         let sound = ::std::ptr::null();
         let op = match options {
             Some(FmodMode(t)) => t,
@@ -555,7 +555,7 @@ impl FmodSys {
     }
 
     pub fn create_stream(&self, music : String, options: Option<FmodMode>) -> Result<Sound, fmod::Result> {
-        let tmp_v = music.clone().into_owned();
+        let tmp_v = music.clone();
         let sound = ::std::ptr::null();
         let op = match options {
             Some(FmodMode(t)) => t,
@@ -571,7 +571,7 @@ impl FmodSys {
     }
 
     pub fn create_channel_group(&self, group_name : String) -> Result<channel_group::ChannelGroup, fmod::Result> {
-        let t_group_name = group_name.clone().into_owned();
+        let t_group_name = group_name.clone();
         let channel_group = ::std::ptr::null();
 
         t_group_name.with_c_str(|c_str|{
@@ -583,7 +583,7 @@ impl FmodSys {
     }
 
     pub fn create_sound_group(&self, group_name : String) -> Result<sound_group::SoundGroup, fmod::Result> {
-        let t_group_name = group_name.clone().into_owned();
+        let t_group_name = group_name.clone();
         let sound_group = ::std::ptr::null();
 
         t_group_name.with_c_str(|c_str|{
@@ -617,13 +617,13 @@ impl FmodSys {
     }
 
     pub fn get_driver_info(&self, id: i32, name_len: uint) -> Result<(FmodGuid, String), fmod::Result> {
-        let tmp_v = String::with_capacity(name_len).into_owned();
+        let tmp_v = String::with_capacity(name_len);
         let guid = ffi::FMOD_GUID{Data1: 0, Data2: 0, Data3: 0, Data4: [0, 0, 0, 0, 0, 0, 0, 0]};
 
         tmp_v.with_c_str(|c_str|{
             match unsafe { ffi::FMOD_System_GetDriverInfo(self.system, id, c_str, name_len as i32, &guid) } {
                 fmod::Ok => Ok((FmodGuid{data1: guid.Data1, data2: guid.Data2, data3: guid.Data3, data4: guid.Data4},
-                    String::from_owned_str(unsafe { ::std::str::raw::from_c_str(c_str) }).clone())),
+                    unsafe { ::std::str::raw::from_c_str(c_str).clone() })),
                 e => Err(e)
             }
         })
@@ -712,9 +712,9 @@ impl FmodSys {
 
     pub fn set_advanced_settings(&self, settings: FmodAdvancedSettings) -> fmod::Result {
         let converted_c_char = Vec::from_fn(settings.ASIO_channel_list.len(), |pos| {
-            settings.ASIO_channel_list.get(pos).clone().into_owned().with_c_str(|c_str| c_str)
+            settings.ASIO_channel_list.get(pos).clone().with_c_str(|c_str| c_str)
         });
-        let deb_log_filename = settings.debug_log_filename.clone().into_owned();
+        let deb_log_filename = settings.debug_log_filename.clone();
         let advanced_settings = ffi::FMOD_ADVANCEDSETTINGS{
             cbsize: mem::size_of::<ffi::FMOD_ADVANCEDSETTINGS>() as i32,
             maxMPEGcodecs: settings.max_MPEG_codecs,
@@ -786,7 +786,7 @@ impl FmodSys {
 
                 if advanced_settings.ASIOChannelList != ::std::ptr::null() {
                     unsafe {::std::ptr::array_each(advanced_settings.ASIOChannelList, |c_str| {
-                        converted_ASIO_channel_vec.push(String::from_owned_str(::std::str::raw::from_c_str(c_str)))
+                        converted_ASIO_channel_vec.push(::std::str::raw::from_c_str(c_str)).clone()
                     })};
                 }
                 if advanced_settings.ASIOSpeakerList != ::std::ptr::null() {
@@ -818,7 +818,7 @@ impl FmodSys {
                     default_decode_buffer_size: advanced_settings.defaultDecodeBufferSize,
                     debug_log_filename: {
                         if advanced_settings.debugLogFilename != ::std::ptr::null() {
-                            String::from_owned_str(unsafe { ::std::str::raw::from_c_str(advanced_settings.debugLogFilename) }).clone()
+                            unsafe { ::std::str::raw::from_c_str(advanced_settings.debugLogFilename).clone() }
                         } else {
                             String::new()
                         }
@@ -851,7 +851,7 @@ impl FmodSys {
     }
 
     pub fn set_plugin_path(&self, path: String) -> fmod::Result {
-        let tmp_v = path.clone().into_owned();
+        let tmp_v = path.clone();
 
         tmp_v.with_c_str(|c_str|{
             unsafe { ffi::FMOD_System_SetPluginPath(self.system, c_str) }
@@ -859,7 +859,7 @@ impl FmodSys {
     }
 
     pub fn load_plugin(&self, filename: String, priority: u32) -> Result<FmodPluginHandle, fmod::Result> {
-        let tmp_v = filename.clone().into_owned();
+        let tmp_v = filename.clone();
         let handle = 0u32;
 
         tmp_v.with_c_str(|c_str|{
@@ -893,13 +893,13 @@ impl FmodSys {
     }
 
     pub fn get_plugin_info(&self, FmodPluginHandle(handle): FmodPluginHandle, name_len: u32) -> Result<(String, fmod::PluginType, u32), fmod::Result> {
-        let name = String::with_capacity(name_len as uint).into_owned();
+        let name = String::with_capacity(name_len as uint);
         let plugin_type = fmod::PluginTypeOutput;
         let version = 0u32;
 
         name.with_c_str(|c_str|{
             match unsafe { ffi::FMOD_System_GetPluginInfo(self.system, handle, &plugin_type, c_str, name_len as i32, &version) } {
-                fmod::Ok => Ok((String::from_owned_str(unsafe { ::std::str::raw::from_c_str(c_str) }).clone(), plugin_type, version)),
+                fmod::Ok => Ok((unsafe { ::std::str::raw::from_c_str(c_str).clone() }, plugin_type, version)),
                 e => Err(e)
             }
         })
@@ -1074,18 +1074,18 @@ impl FmodSys {
     }
 
     pub fn get_CDROM_drive_name(&self, drive: i32, drive_name_len: u32, scsi_name_len: u32, device_name_len: u32) -> Result<(String, String, String), fmod::Result> {
-        let drive_name = String::with_capacity(drive_name_len as uint).into_owned();
-        let scsi_name = String::with_capacity(scsi_name_len as uint).into_owned();
-        let device_name = String::with_capacity(device_name_len as uint).into_owned();
+        let drive_name = String::with_capacity(drive_name_len as uint);
+        let scsi_name = String::with_capacity(scsi_name_len as uint);
+        let device_name = String::with_capacity(device_name_len as uint);
 
         drive_name.with_c_str(|c_drive_name|{
             scsi_name.with_c_str(|c_scsi_name|{
                 device_name.with_c_str(|c_device_name|{
                     match unsafe { ffi::FMOD_System_GetCDROMDriveName(self.system, drive, c_drive_name, drive_name_len as i32, c_scsi_name, scsi_name_len as i32,
                         c_device_name, device_name_len as i32) } {
-                        fmod::Ok => Ok((String::from_owned_str(unsafe { ::std::str::raw::from_c_str(c_drive_name) }).clone(),
-                                        String::from_owned_str(unsafe { ::std::str::raw::from_c_str(c_scsi_name) }).clone(),
-                                        String::from_owned_str(unsafe { ::std::str::raw::from_c_str(c_device_name) }).clone())),
+                        fmod::Ok => Ok((unsafe { ::std::str::raw::from_c_str(c_drive_name).clone() },
+                                        unsafe { ::std::str::raw::from_c_str(c_scsi_name).clone() },
+                                        unsafe { ::std::str::raw::from_c_str(c_device_name).clone() })),
                         e => Err(e)
                     }
                 })
@@ -1214,13 +1214,13 @@ impl FmodSys {
     }
 
     pub fn get_record_driver_info(&self, id: i32, name_len: uint) -> Result<(FmodGuid, String), fmod::Result> {
-        let tmp_v = String::with_capacity(name_len).into_owned();
+        let tmp_v = String::with_capacity(name_len);
         let guid = ffi::FMOD_GUID{Data1: 0, Data2: 0, Data3: 0, Data4: [0, 0, 0, 0, 0, 0, 0, 0]};
 
         tmp_v.with_c_str(|c_str|{
             match unsafe { ffi::FMOD_System_GetRecordDriverInfo(self.system, id, c_str, name_len as i32, &guid) } {
                 fmod::Ok => Ok((FmodGuid{data1: guid.Data1, data2: guid.Data2, data3: guid.Data3, data4: guid.Data4},
-                    String::from_owned_str(unsafe { ::std::str::raw::from_c_str(c_str) }).clone())),
+                    unsafe { ::std::str::raw::from_c_str(c_str).clone() })),
                 e => Err(e)
             }
         })

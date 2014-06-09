@@ -90,7 +90,7 @@ impl FmodTag {
             data_type: pointer.datatype,
             name: {
                 if pointer.name != ::std::ptr::null() {
-                    String::from_owned_str(unsafe { ::std::str::raw::from_c_str(pointer.name) }).clone()
+                    unsafe { ::std::str::raw::from_c_str(pointer.name).clone() }
                 } else {
                     String::new()
                 }
@@ -106,12 +106,12 @@ impl FmodTag {
     }
 
     fn convert_to_c(&self) -> ffi::FMOD_TAG {
-        let tmp = self.name.clone().into_owned();
+        let tmp = self.name.clone();
 
         ffi::FMOD_TAG{
             _type: self._type,
             datatype: self.data_type,
-            name: tmp.into_owned().with_c_str(|c_name|{c_name}),
+            name: tmp.with_c_str(|c_name|{c_name}),
             data: self.data,
             datalen: self.data_len,
             updated: {
@@ -318,11 +318,11 @@ impl Sound {
     }
 
     pub fn get_name(&self, name_len: u32) -> Result<String, fmod::Result> {
-        let name = String::with_capacity(name_len as uint).into_owned();
+        let name = String::with_capacity(name_len as uint).into_string();
 
         name.with_c_str(|c_name|{
             match unsafe { ffi::FMOD_Sound_GetName(self.sound, c_name, name_len as i32) } {
-                fmod::Ok => Ok(String::from_owned_str(unsafe { ::std::str::raw::from_c_str(c_name) }).clone()),
+                fmod::Ok => Ok(unsafe { ::std::str::raw::from_c_str(c_name).clone() }),
                 e => Err(e)
             }
         })
@@ -373,7 +373,7 @@ impl Sound {
         let tag = ffi::FMOD_TAG{_type: fmod::TagTypeUnknown, datatype: fmod::TagDataTypeBinary, name: ::std::ptr::null(),
             data: ::std::ptr::null(), datalen: 0, updated: 0};
 
-        match unsafe { ffi::FMOD_Sound_GetTag(self.sound, name.into_owned().with_c_str(|c_name|{c_name}), index, &tag) } {
+        match unsafe { ffi::FMOD_Sound_GetTag(self.sound, name.into_string().with_c_str(|c_name|{c_name}), index, &tag) } {
             fmod::Ok => Ok(FmodTag::from_ptr(tag)),
             e => Err(e)
         }
@@ -431,11 +431,11 @@ impl Sound {
     }
 
     pub fn get_sync_point_info(&self, sync_point: FmodSyncPoint, name_len: u32, FmodTimeUnit(offset_type): FmodTimeUnit) -> Result<(String, u32), fmod::Result> {
-        let name = String::with_capacity(name_len as uint).into_owned();
+        let name = String::with_capacity(name_len as uint).into_string();
         let offset = 0u32;
 
         match unsafe { ffi::FMOD_Sound_GetSyncPointInfo(self.sound, sync_point.sync_point, name.with_c_str(|c_name|{c_name}), name_len as i32, &offset, offset_type) } {
-            fmod::Ok => Ok((String::from_owned_str(name), offset)),
+            fmod::Ok => Ok((name.clone(), offset)),
             e => Err(e)
         }
     }
@@ -443,7 +443,7 @@ impl Sound {
     pub fn add_sync_point(&self, offset: u32, FmodTimeUnit(offset_type): FmodTimeUnit, name: String) -> Result<FmodSyncPoint, fmod::Result> {
         let sync_point = ::std::ptr::null();
 
-        match unsafe { ffi::FMOD_Sound_AddSyncPoint(self.sound, offset, offset_type, name.into_owned().with_c_str(|c_name|{c_name}), &sync_point) } {
+        match unsafe { ffi::FMOD_Sound_AddSyncPoint(self.sound, offset, offset_type, name.into_string().with_c_str(|c_name|{c_name}), &sync_point) } {
             fmod::Ok => Ok(FmodSyncPoint::from_ptr(sync_point)),
             e => Err(e)
         }
