@@ -33,7 +33,7 @@ use fmod_sys;
 use std::io::timer::sleep;
 use vector;
 use fmod_sys;
-use fmod_sys::FmodMemoryUsageDetails;
+use fmod_sys::{FmodMemoryUsageDetails, FmodSys};
 use std::mem::transmute;
 use std::io::File;
 use std::mem;
@@ -75,12 +75,12 @@ impl FmodSyncPoint {
 }
 
 pub struct FmodTag {
-    pub _type     : fmod::TagType,        /* [r] The type of this tag. */
-    pub data_type : fmod::TagDataType,    /* [r] The type of data that this tag contains */
-    pub name      : String,              /* [r] The name of this tag i.e. "TITLE", "ARTIST" etc. */
-    data          : *c_void,             /* [r] Pointer to the tag data - its format is determined by the datatype member */
-    data_len      : c_uint,              /* [r] Length of the data contained in this tag */
-    pub updated   : bool                 /* [r] True if this tag has been updated since last being accessed with Sound::getTag */
+    pub _type    : fmod::TagType,        /* [r] The type of this tag. */
+    pub data_type: fmod::TagDataType,    /* [r] The type of data that this tag contains */
+    pub name     : String,              /* [r] The name of this tag i.e. "TITLE", "ARTIST" etc. */
+    data         : *c_void,             /* [r] Pointer to the tag data - its format is determined by the datatype member */
+    data_len     : c_uint,              /* [r] Length of the data contained in this tag */
+    pub updated  : bool                 /* [r] True if this tag has been updated since last being accessed with Sound::getTag */
 }
 
 impl FmodTag {
@@ -89,8 +89,8 @@ impl FmodTag {
             _type: pointer._type,
             data_type: pointer.datatype,
             name: {
-                if pointer.name != ::std::ptr::null() {
-                    unsafe { ::std::str::raw::from_c_str(pointer.name).clone() }
+                if pointer.name !=::std::ptr::null() {
+                    unsafe {::std::str::raw::from_c_str(pointer.name).clone() }
                 } else {
                     String::new()
                 }
@@ -126,7 +126,8 @@ impl FmodTag {
 }
 
 pub struct Sound {
-    sound : ffi::FMOD_SOUND
+    sound: ffi::FMOD_SOUND,
+    can_be_deleted: bool
 }
 
 pub fn get_ffi(sound: &Sound) -> ffi::FMOD_SOUND {
@@ -134,7 +135,11 @@ pub fn get_ffi(sound: &Sound) -> ffi::FMOD_SOUND {
 }
 
 pub fn from_ptr(sound: ffi::FMOD_SOUND) -> Sound {
-    Sound{sound: sound}
+    Sound{sound: sound, can_be_deleted: false}
+}
+
+pub fn from_ptr_first(sound: ffi::FMOD_SOUND) -> Sound {
+    Sound{sound: sound, can_be_deleted: true}
 }
 
 impl Drop for Sound {
@@ -144,20 +149,20 @@ impl Drop for Sound {
 }
 
 impl Sound {
-    fn get_system(&self) -> Result<ffi::FMOD_SYSTEM, fmod::Result> {
-        let system = ::std::ptr::null();
+    pub fn get_system_object(&self) -> Result<FmodSys, fmod::Result> {
+        let system =::std::ptr::null();
 
         match unsafe { ffi::FMOD_Sound_GetSystemObject(self.sound, &system) } {
-            fmod::Ok => Ok(system),
+            fmod::Ok => Ok(fmod_sys::from_ptr(system)),
             e => Err(e)
         }
     }
 
     pub fn release(&mut self) -> fmod::Result {
-        if self.sound != ::std::ptr::null() {
+        if self.can_be_deleted && self.sound !=::std::ptr::null() {
             match unsafe { ffi::FMOD_Sound_Release(self.sound) } {
                 fmod::Ok => {
-                    self.sound = ::std::ptr::null();
+                    self.sound =::std::ptr::null();
                     fmod::Ok
                 }
                 e => e
@@ -168,11 +173,11 @@ impl Sound {
     }
 
     pub fn play(&self) -> Result<channel::Channel, fmod::Result> {
-        let channel = ::std::ptr::null();
+        let channel =::std::ptr::null();
 
-        match match self.get_system() {
+        match match self.get_system_object() {
             Ok(s) => { 
-                unsafe { ffi::FMOD_System_PlaySound(s, fmod::ChannelFree, self.sound, 0, &channel) }
+                unsafe { ffi::FMOD_System_PlaySound(fmod_sys::get_ffi(&s), fmod::ChannelFree, self.sound, 0, &channel) }
             }
             Err(e) => e
         } {
@@ -182,11 +187,11 @@ impl Sound {
     }
 
     pub fn play_with_parameters(&self, channel_id: fmod::ChannelIndex) -> Result<channel::Channel, fmod::Result> {
-        let channel = ::std::ptr::null();
+        let channel =::std::ptr::null();
         
-        match match self.get_system() {
+        match match self.get_system_object() {
             Ok(s) => { 
-                unsafe { ffi::FMOD_System_PlaySound(s, channel_id, self.sound, 0, &channel) }
+                unsafe { ffi::FMOD_System_PlaySound(fmod_sys::get_ffi(&s), channel_id, self.sound, 0, &channel) }
             }
             Err(e) => e
         } {
@@ -309,7 +314,7 @@ impl Sound {
     }
 
     pub fn get_sub_sound(&self, index: i32) -> Result<Sound, fmod::Result> {
-        let sub_sound = ::std::ptr::null();
+        let sub_sound =::std::ptr::null();
 
         match unsafe { ffi::FMOD_Sound_GetSubSound(self.sound, index, &sub_sound) } {
             fmod::Ok => Ok(from_ptr(sub_sound)),
@@ -322,7 +327,7 @@ impl Sound {
 
         name.with_c_str(|c_name|{
             match unsafe { ffi::FMOD_Sound_GetName(self.sound, c_name, name_len as i32) } {
-                fmod::Ok => Ok(unsafe { ::std::str::raw::from_c_str(c_name).clone() }),
+                fmod::Ok => Ok(unsafe {::std::str::raw::from_c_str(c_name).clone() }),
                 e => Err(e)
             }
         })
@@ -392,9 +397,9 @@ impl Sound {
                                 false
                             }, if disk_busy == 1 {
                                 true
-                                } else {
-                                    false
-                                })),
+                            } else {
+                                false
+                            })),
             e => Err(e)
         }
     }
@@ -404,7 +409,7 @@ impl Sound {
     }
 
     pub fn get_sound_group(&self) -> Result<sound_group::SoundGroup, fmod::Result> {
-        let sound_group = ::std::ptr::null();
+        let sound_group =::std::ptr::null();
 
         match unsafe { ffi::FMOD_Sound_GetSoundGroup(self.sound, &sound_group) } {
             fmod::Ok => Ok(sound_group::from_ptr(sound_group)),
@@ -422,7 +427,7 @@ impl Sound {
     }
 
     pub fn get_sync_point(&self, index: i32) -> Result<FmodSyncPoint, fmod::Result> {
-        let sync_point = ::std::ptr::null();
+        let sync_point =::std::ptr::null();
 
         match unsafe { ffi::FMOD_Sound_GetSyncPoint(self.sound, index, &sync_point) } {
             fmod::Ok => Ok(FmodSyncPoint::from_ptr(sync_point)),
@@ -441,7 +446,7 @@ impl Sound {
     }
 
     pub fn add_sync_point(&self, offset: u32, FmodTimeUnit(offset_type): FmodTimeUnit, name: String) -> Result<FmodSyncPoint, fmod::Result> {
-        let sync_point = ::std::ptr::null();
+        let sync_point =::std::ptr::null();
 
         match unsafe { ffi::FMOD_Sound_AddSyncPoint(self.sound, offset, offset_type, name.into_string().with_c_str(|c_name|{c_name}), &sync_point) } {
             fmod::Ok => Ok(FmodSyncPoint::from_ptr(sync_point)),
@@ -503,12 +508,12 @@ impl Sound {
         }
     }
 
-    // TODO : see how to replace i32 channel by Channel struct
+    // TODO: see how to replace i32 channel by Channel struct
     pub fn set_music_channel_volume(&self, channel: i32, volume: f32) -> fmod::Result {
         unsafe { ffi::FMOD_Sound_SetMusicChannelVolume(self.sound, channel, volume) }
     }
 
-    // TODO : see how to replace i32 channel by Channel struct
+    // TODO: see how to replace i32 channel by Channel struct
     pub fn get_music_channel_volume(&self, channel: i32) -> Result<f32, fmod::Result> {
         let volume = 0f32;
 
@@ -558,7 +563,7 @@ impl Sound {
     /* to test ! */
     pub fn get_user_data<T>(&self) -> Result<T, fmod::Result> {
         unsafe {
-            let user_data = ::std::ptr::null();
+            let user_data =::std::ptr::null();
 
             match ffi::FMOD_Sound_GetUserData(self.sound, &user_data) {
                 fmod::Ok => Ok(transmute(user_data)),
@@ -570,8 +575,8 @@ impl Sound {
     pub fn lock(&self, offset: u32, length: u32) -> Result<(Vec<u8>, Vec<u8>), fmod::Result> {
         let len1 = 0u32;
         let len2 = 0u32;
-        let ptr1 = ::std::ptr::null();
-        let ptr2 = ::std::ptr::null();
+        let ptr1 =::std::ptr::null();
+        let ptr2 =::std::ptr::null();
 
         match unsafe { ffi::FMOD_Sound_Lock(self.sound, offset, length, &ptr1, &ptr2, &len1, &len2) } {
             fmod::Ok => {
@@ -606,11 +611,11 @@ impl Sound {
             };
             let len1 = 0u32;
             let len2 = 0u32;
-            let ptr1 : *c_void = ::std::ptr::null();
-            let ptr2 : *c_void = ::std::ptr::null();
+            let ptr1: *c_void =::std::ptr::null();
+            let ptr2: *c_void =::std::ptr::null();
 
-            match ffi::FMOD_Sound_GetFormat(self.sound, ::std::ptr::null(), ::std::ptr::null(), &channels, &bits) {
-                fmod::Ok => match ffi::FMOD_Sound_GetDefaults(self.sound, &rate, ::std::ptr::null(), ::std::ptr::null(), ::std::ptr::null()) {
+            match ffi::FMOD_Sound_GetFormat(self.sound,::std::ptr::null(),::std::ptr::null(), &channels, &bits) {
+                fmod::Ok => match ffi::FMOD_Sound_GetDefaults(self.sound, &rate,::std::ptr::null(),::std::ptr::null(),::std::ptr::null()) {
                     fmod::Ok => {}
                     e => return Err(format!("{}", e))
                 },

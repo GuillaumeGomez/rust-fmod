@@ -36,11 +36,11 @@ pub struct SoundGroup {
     sound_group: ffi::FMOD_SOUNDGROUP,
 }
 
-pub fn get_ffi(sound_group : &SoundGroup) -> ffi::FMOD_SOUNDGROUP {
+pub fn get_ffi(sound_group: &SoundGroup) -> ffi::FMOD_SOUNDGROUP {
     sound_group.sound_group
 }
 
-pub fn from_ptr(sound_group : ffi::FMOD_SOUNDGROUP) -> SoundGroup {
+pub fn from_ptr(sound_group: ffi::FMOD_SOUNDGROUP) -> SoundGroup {
     SoundGroup{sound_group: sound_group}
 }
 
@@ -52,10 +52,10 @@ impl Drop for SoundGroup {
 
 impl SoundGroup {
     pub fn release(&mut self) -> fmod::Result {
-        if self.sound_group != ::std::ptr::null() {
+        if self.sound_group !=::std::ptr::null() {
             match unsafe { ffi::FMOD_SoundGroup_Release(self.sound_group) } {
                 fmod::Ok => {
-                    self.sound_group = ::std::ptr::null();
+                    self.sound_group =::std::ptr::null();
                     fmod::Ok
                 }
                 e => e
@@ -126,7 +126,7 @@ impl SoundGroup {
 
         name.with_c_str(|c_name|{
             match unsafe { ffi::FMOD_SoundGroup_GetName(self.sound_group, c_name, name_len as i32) } {
-                fmod::Ok => Ok(unsafe { ::std::str::raw::from_c_str(c_name).clone() }),
+                fmod::Ok => Ok(unsafe {::std::str::raw::from_c_str(c_name).clone() }),
                 e => Err(e)
             }
         })
@@ -142,7 +142,7 @@ impl SoundGroup {
     }
 
     pub fn get_sound(&self, index: i32) -> Result<sound::Sound, fmod::Result> {
-        let sound = ::std::ptr::null();
+        let sound =::std::ptr::null();
 
         match unsafe { ffi::FMOD_SoundGroup_GetSound(self.sound_group, index, &sound) } {
             fmod::Ok => Ok(sound::from_ptr(sound)),
@@ -178,7 +178,7 @@ impl SoundGroup {
     /* to test ! */
     pub fn get_user_data<T>(&self) -> Result<T, fmod::Result> {
         unsafe {
-            let user_data = ::std::ptr::null();
+            let user_data =::std::ptr::null();
 
             match ffi::FMOD_SoundGroup_GetUserData(self.sound_group, &user_data) {
                 fmod::Ok => Ok(transmute(user_data)),

@@ -51,10 +51,10 @@ impl Drop for Reverb {
 
 impl Reverb {
     pub fn release(&mut self) -> fmod::Result {
-        if self.reverb != ::std::ptr::null() {
+        if self.reverb !=::std::ptr::null() {
             match unsafe { ffi::FMOD_Reverb_Release(self.reverb) } {
                 fmod::Ok => {
-                    self.reverb = ::std::ptr::null();
+                    self.reverb =::std::ptr::null();
                     fmod::Ok
                 }
                 e => e
@@ -134,7 +134,7 @@ impl Reverb {
     /* to test ! */
     pub fn get_user_data<T>(&self) -> Result<T, fmod::Result> {
         unsafe {
-            let user_data = ::std::ptr::null();
+            let user_data =::std::ptr::null();
 
             match ffi::FMOD_Reverb_GetUserData(self.reverb, &user_data) {
                 fmod::Ok => Ok(transmute(user_data)),

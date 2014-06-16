@@ -33,6 +33,7 @@ use std::mem;
 use channel_group;
 use channel;
 use dsp;
+use dsp::Dsp;
 use vector;
 use reverb_properties;
 use geometry;
@@ -47,12 +48,12 @@ pub struct FmodGuid
 
 pub struct FmodSoftwareFormat
 {
-    pub sample_rate         : i32,
-    pub format              : fmod::SoundFormat,
-    pub num_output_channels : i32,
-    pub max_input_channels  : i32,
-    pub resample_method     : fmod::DSPResampler,
-    pub bits                : i32
+    pub sample_rate        : i32,
+    pub format             : fmod::SoundFormat,
+    pub num_output_channels: i32,
+    pub max_input_channels : i32,
+    pub resample_method    : fmod::DSPResampler,
+    pub bits               : i32
 }
 
 pub struct FmodAdvancedSettings
@@ -87,38 +88,38 @@ pub struct FmodAdvancedSettings
 
 pub struct FmodCreateSoundexInfo
 {
-    pub length              : u32,                               /* [w] Optional. Specify 0 to ignore. Size in bytes of file to load, or sound to create (in this case only if FMOD_OPENUSER is used).  Required if loading from memory.  If 0 is specified, then it will use the size of the file (unless loading from memory then an error will be returned). */
-    pub fileoffset          : u32,                               /* [w] Optional. Specify 0 to ignore. Offset from start of the file to start loading from.  This is useful for loading files from inside big data files. */
-    pub numchannels         : i32,                               /* [w] Optional. Specify 0 to ignore. Number of channels in a sound mandatory if FMOD_OPENUSER or FMOD_OPENRAW is used. */
-    pub defaultfrequency    : i32,                               /* [w] Optional. Specify 0 to ignore. Default frequency of sound in a sound mandatory if FMOD_OPENUSER or FMOD_OPENRAW is used.  Other formats use the frequency determined by the file format. */
-    pub format              : fmod::SoundFormat,                 /* [w] Optional. Specify 0 or fmod::SoundFormatNone to ignore. Format of the sound mandatory if FMOD_OPENUSER or FMOD_OPENRAW is used.  Other formats use the format determined by the file format.   */
-    pub decodebuffersize    : u32,                               /* [w] Optional. Specify 0 to ignore. For streams.  This determines the size of the double buffer (in PCM samples) that a stream uses.  Use this for user created streams if you want to determine the size of the callback buffer passed to you.  Specify 0 to use FMOD's default size which is currently equivalent to 400ms of the sound format created/loaded. */
-    pub initialsubsound     : i32,                               /* [w] Optional. Specify 0 to ignore. In a multi-sample file format such as .FSB/.DLS/.SF2, specify the initial subsound to seek to, only if FMOD_CREATESTREAM is used. */
-    pub numsubsounds        : i32,                               /* [w] Optional. Specify 0 to ignore or have no subsounds.  In a sound created with FMOD_OPENUSER, specify the number of subsounds that are accessable with Sound::getSubSound.  If not created with FMOD_OPENUSER, this will limit the number of subsounds loaded within a multi-subsound file.  If using FSB, then if FMOD_CREATESOUNDEXINFO::inclusionlist is used, this will shuffle subsounds down so that there are not any gaps.  It will mean that the indices of the sounds will be different. */
-    pub inclusionlist       : Vec<i32>,                          /* [w] Optional. Specify 0 to ignore. In a multi-sample format such as .FSB/.DLS/.SF2 it may be desirable to specify only a subset of sounds to be loaded out of the whole file.  This is an array of subsound indices to load into memory when created. */
-    pub pcmreadcallback     : ffi::FMOD_SOUND_PCMREADCALLBACK,   /* [w] Optional. Specify 0 to ignore. Callback to 'piggyback' on FMOD's read functions and accept or even write PCM data while FMOD is opening the sound.  Used for user sounds created with FMOD_OPENUSER or for capturing decoded data as FMOD reads it. */
-    pub pcmsetposcallback   : ffi::FMOD_SOUND_PCMSETPOSCALLBACK, /* [w] Optional. Specify 0 to ignore. Callback for when the user calls a seeking function such as Channel::setTime or Channel::setPosition within a multi-sample sound, and for when it is opened.*/
-    pub nonblockcallback    : ffi::FMOD_SOUND_NONBLOCKCALLBACK,  /* [w] Optional. Specify 0 to ignore. Callback for successful completion, or error while loading a sound that used the FMOD_NONBLOCKING flag.  Also called duing seeking, when setPosition is called or a stream is restarted. */
-    pub dlsname             : String,                            /* [w] Optional. Specify 0 to ignore. Filename for a DLS or SF2 sample set when loading a MIDI file. If not specified, on Windows it will attempt to open /windows/system32/drivers/gm.dls or /windows/system32/drivers/etc/gm.dls, on Mac it will attempt to load /System/Library/Components/CoreAudio.component/Contents/Resources/gs_instruments.dls, otherwise the MIDI will fail to open. Current DLS support is for level 1 of the specification. */
-    pub encryptionkey       : String,                            /* [w] Optional. Specify 0 to ignore. Key for encrypted FSB file.  Without this key an encrypted FSB file will not load. */
-    pub maxpolyphony        : i32,                               /* [w] Optional. Specify 0 to ignore. For sequenced formats with dynamic channel allocation such as .MID and .IT, this specifies the maximum voice count allowed while playing.  .IT defaults to 64.  .MID defaults to 32. */
-    userdata                : *c_void,                           /* [w] Optional. Specify 0 to ignore. This is user data to be attached to the sound during creation.  Access via Sound::getUserData.  Note: This is not passed to FMOD_FILE_OPENCALLBACK, that is a different userdata that is file specific. */
-    pub suggestedsoundtype  : fmod::SoundType,                   /* [w] Optional. Specify 0 or fmod::SoundTypeUnknown to ignore.  Instead of scanning all codec types, use this to speed up loading by making it jump straight to this codec. */
-    pub useropen            : ffi::FMOD_FILE_OPENCALLBACK,       /* [w] Optional. Specify 0 to ignore. Callback for opening this file. */
-    pub userclose           : ffi::FMOD_FILE_CLOSECALLBACK,      /* [w] Optional. Specify 0 to ignore. Callback for closing this file. */
-    pub userread            : ffi::FMOD_FILE_READCALLBACK,       /* [w] Optional. Specify 0 to ignore. Callback for reading from this file. */
-    pub userseek            : ffi::FMOD_FILE_SEEKCALLBACK,       /* [w] Optional. Specify 0 to ignore. Callback for seeking within this file. */
-    pub userasyncread       : ffi::FMOD_FILE_ASYNCREADCALLBACK,  /* [w] Optional. Specify 0 to ignore. Callback for seeking within this file. */
-    pub userasynccancel     : ffi::FMOD_FILE_ASYNCCANCELCALLBACK,/* [w] Optional. Specify 0 to ignore. Callback for seeking within this file. */
-    pub speakermap          : fmod::SpeakerMapType,              /* [w] Optional. Specify 0 to ignore. Use this to differ the way fmod maps multichannel sounds to speakers.  See fmod::SpeakerMapType for more. */
-    pub initialsoundgroup   : sound_group::SoundGroup,           /* [w] Optional. Specify 0 to ignore. Specify a sound group if required, to put sound in as it is created. */
-    pub initialseekposition : u32,                               /* [w] Optional. Specify 0 to ignore. For streams. Specify an initial position to seek the stream to. */
-    pub initialseekpostype  : FmodTimeUnit,                      /* [w] Optional. Specify 0 to ignore. For streams. Specify the time unit for the position set in initialseekposition. */
-    pub ignoresetfilesystem : i32,                               /* [w] Optional. Specify 0 to ignore. Set to 1 to use fmod's built in file system. Ignores setFileSystem callbacks and also FMOD_CREATESOUNEXINFO file callbacks.  Useful for specific cases where you don't want to use your own file system but want to use fmod's file system (ie net streaming). */
-    pub cddaforceaspi       : i32,                               /* [w] Optional. Specify 0 to ignore. For CDDA sounds only - if non-zero use ASPI instead of NTSCSI to access the specified CD/DVD device. */
-    pub audioqueuepolicy    : u32,                               /* [w] Optional. Specify 0 or FMOD_AUDIOQUEUE_CODECPOLICY_DEFAULT to ignore. Policy used to determine whether hardware or software is used for decoding, see FMOD_AUDIOQUEUE_CODECPOLICY for options (iOS >= 3.0 required, otherwise only hardware is available) */ 
-    pub minmidigranularity  : u32,                               /* [w] Optional. Specify 0 to ignore. Allows you to set a minimum desired MIDI mixer granularity. Values smaller than 512 give greater than default accuracy at the cost of more CPU and vice versa. Specify 0 for default (512 samples). */
-    pub nonblockthreadid    : i32                                /* [w] Optional. Specify 0 to ignore. Specifies a thread index to execute non blocking load on.  Allows for up to 5 threads to be used for loading at once.  This is to avoid one load blocking another.  Maximum value = 4. */
+    pub length             : u32,                               /* [w] Optional. Specify 0 to ignore. Size in bytes of file to load, or sound to create (in this case only if FMOD_OPENUSER is used).  Required if loading from memory.  If 0 is specified, then it will use the size of the file (unless loading from memory then an error will be returned). */
+    pub fileoffset         : u32,                               /* [w] Optional. Specify 0 to ignore. Offset from start of the file to start loading from.  This is useful for loading files from inside big data files. */
+    pub numchannels        : i32,                               /* [w] Optional. Specify 0 to ignore. Number of channels in a sound mandatory if FMOD_OPENUSER or FMOD_OPENRAW is used. */
+    pub defaultfrequency   : i32,                               /* [w] Optional. Specify 0 to ignore. Default frequency of sound in a sound mandatory if FMOD_OPENUSER or FMOD_OPENRAW is used.  Other formats use the frequency determined by the file format. */
+    pub format             : fmod::SoundFormat,                 /* [w] Optional. Specify 0 or fmod::SoundFormatNone to ignore. Format of the sound mandatory if FMOD_OPENUSER or FMOD_OPENRAW is used.  Other formats use the format determined by the file format.   */
+    pub decodebuffersize   : u32,                               /* [w] Optional. Specify 0 to ignore. For streams.  This determines the size of the double buffer (in PCM samples) that a stream uses.  Use this for user created streams if you want to determine the size of the callback buffer passed to you.  Specify 0 to use FMOD's default size which is currently equivalent to 400ms of the sound format created/loaded. */
+    pub initialsubsound    : i32,                               /* [w] Optional. Specify 0 to ignore. In a multi-sample file format such as .FSB/.DLS/.SF2, specify the initial subsound to seek to, only if FMOD_CREATESTREAM is used. */
+    pub numsubsounds       : i32,                               /* [w] Optional. Specify 0 to ignore or have no subsounds.  In a sound created with FMOD_OPENUSER, specify the number of subsounds that are accessable with Sound::getSubSound.  If not created with FMOD_OPENUSER, this will limit the number of subsounds loaded within a multi-subsound file.  If using FSB, then if FMOD_CREATESOUNDEXINFO::inclusionlist is used, this will shuffle subsounds down so that there are not any gaps.  It will mean that the indices of the sounds will be different. */
+    pub inclusionlist      : Vec<i32>,                          /* [w] Optional. Specify 0 to ignore. In a multi-sample format such as .FSB/.DLS/.SF2 it may be desirable to specify only a subset of sounds to be loaded out of the whole file.  This is an array of subsound indices to load into memory when created. */
+    pub pcmreadcallback    : ffi::FMOD_SOUND_PCMREADCALLBACK,   /* [w] Optional. Specify 0 to ignore. Callback to 'piggyback' on FMOD's read functions and accept or even write PCM data while FMOD is opening the sound.  Used for user sounds created with FMOD_OPENUSER or for capturing decoded data as FMOD reads it. */
+    pub pcmsetposcallback  : ffi::FMOD_SOUND_PCMSETPOSCALLBACK, /* [w] Optional. Specify 0 to ignore. Callback for when the user calls a seeking function such as Channel::setTime or Channel::setPosition within a multi-sample sound, and for when it is opened.*/
+    pub nonblockcallback   : ffi::FMOD_SOUND_NONBLOCKCALLBACK,  /* [w] Optional. Specify 0 to ignore. Callback for successful completion, or error while loading a sound that used the FMOD_NONBLOCKING flag.  Also called duing seeking, when setPosition is called or a stream is restarted. */
+    pub dlsname            : String,                            /* [w] Optional. Specify 0 to ignore. Filename for a DLS or SF2 sample set when loading a MIDI file. If not specified, on Windows it will attempt to open /windows/system32/drivers/gm.dls or /windows/system32/drivers/etc/gm.dls, on Mac it will attempt to load /System/Library/Components/CoreAudio.component/Contents/Resources/gs_instruments.dls, otherwise the MIDI will fail to open. Current DLS support is for level 1 of the specification. */
+    pub encryptionkey      : String,                            /* [w] Optional. Specify 0 to ignore. Key for encrypted FSB file.  Without this key an encrypted FSB file will not load. */
+    pub maxpolyphony       : i32,                               /* [w] Optional. Specify 0 to ignore. For sequenced formats with dynamic channel allocation such as .MID and .IT, this specifies the maximum voice count allowed while playing.  .IT defaults to 64.  .MID defaults to 32. */
+    userdata               : *c_void,                           /* [w] Optional. Specify 0 to ignore. This is user data to be attached to the sound during creation.  Access via Sound::getUserData.  Note: This is not passed to FMOD_FILE_OPENCALLBACK, that is a different userdata that is file specific. */
+    pub suggestedsoundtype : fmod::SoundType,                   /* [w] Optional. Specify 0 or fmod::SoundTypeUnknown to ignore.  Instead of scanning all codec types, use this to speed up loading by making it jump straight to this codec. */
+    pub useropen           : ffi::FMOD_FILE_OPENCALLBACK,       /* [w] Optional. Specify 0 to ignore. Callback for opening this file. */
+    pub userclose          : ffi::FMOD_FILE_CLOSECALLBACK,      /* [w] Optional. Specify 0 to ignore. Callback for closing this file. */
+    pub userread           : ffi::FMOD_FILE_READCALLBACK,       /* [w] Optional. Specify 0 to ignore. Callback for reading from this file. */
+    pub userseek           : ffi::FMOD_FILE_SEEKCALLBACK,       /* [w] Optional. Specify 0 to ignore. Callback for seeking within this file. */
+    pub userasyncread      : ffi::FMOD_FILE_ASYNCREADCALLBACK,  /* [w] Optional. Specify 0 to ignore. Callback for seeking within this file. */
+    pub userasynccancel    : ffi::FMOD_FILE_ASYNCCANCELCALLBACK,/* [w] Optional. Specify 0 to ignore. Callback for seeking within this file. */
+    pub speakermap         : fmod::SpeakerMapType,              /* [w] Optional. Specify 0 to ignore. Use this to differ the way fmod maps multichannel sounds to speakers.  See fmod::SpeakerMapType for more. */
+    pub initialsoundgroup  : sound_group::SoundGroup,           /* [w] Optional. Specify 0 to ignore. Specify a sound group if required, to put sound in as it is created. */
+    pub initialseekposition: u32,                               /* [w] Optional. Specify 0 to ignore. For streams. Specify an initial position to seek the stream to. */
+    pub initialseekpostype : FmodTimeUnit,                      /* [w] Optional. Specify 0 to ignore. For streams. Specify the time unit for the position set in initialseekposition. */
+    pub ignoresetfilesystem: i32,                               /* [w] Optional. Specify 0 to ignore. Set to 1 to use fmod's built in file system. Ignores setFileSystem callbacks and also FMOD_CREATESOUNEXINFO file callbacks.  Useful for specific cases where you don't want to use your own file system but want to use fmod's file system (ie net streaming). */
+    pub cddaforceaspi      : i32,                               /* [w] Optional. Specify 0 to ignore. For CDDA sounds only - if non-zero use ASPI instead of NTSCSI to access the specified CD/DVD device. */
+    pub audioqueuepolicy   : u32,                               /* [w] Optional. Specify 0 or FMOD_AUDIOQUEUE_CODECPOLICY_DEFAULT to ignore. Policy used to determine whether hardware or software is used for decoding, see FMOD_AUDIOQUEUE_CODECPOLICY for options (iOS >= 3.0 required, otherwise only hardware is available) */ 
+    pub minmidigranularity : u32,                               /* [w] Optional. Specify 0 to ignore. Allows you to set a minimum desired MIDI mixer granularity. Values smaller than 512 give greater than default accuracy at the cost of more CPU and vice versa. Specify 0 for default (512 samples). */
+    pub nonblockthreadid   : i32                                /* [w] Optional. Specify 0 to ignore. Specifies a thread index to execute non blocking load on.  Allows for up to 5 threads to be used for loading at once.  This is to avoid one load blocking another.  Maximum value = 4. */
 }
 
 impl FmodCreateSoundexInfo {
@@ -199,7 +200,7 @@ impl FmodCreateSoundexInfo {
     }
 
     fn from_ptr(ptr: ffi::FMOD_CREATESOUNDEXINFO) -> FmodCreateSoundexInfo {
-        let inc : *mut i32 = ptr.inclusionlist as *mut i32;
+        let inc: *mut i32 = ptr.inclusionlist as *mut i32;
 
         FmodCreateSoundexInfo{
             length: ptr.length,
@@ -215,12 +216,12 @@ impl FmodCreateSoundexInfo {
             pcmsetposcallback: ptr.pcmsetposcallback,
             nonblockcallback: ptr.nonblockcallback,
             dlsname: if ptr.dlsname != ::std::ptr::null() {
-                    unsafe { ::std::str::raw::from_c_str(ptr.dlsname).clone() }
+                    unsafe {::std::str::raw::from_c_str(ptr.dlsname).clone() }
                 } else {
                     String::new()
                 },
             encryptionkey: if ptr.encryptionkey != ::std::ptr::null() {
-                    unsafe { ::std::str::raw::from_c_str(ptr.encryptionkey).clone() }
+                    unsafe {::std::str::raw::from_c_str(ptr.encryptionkey).clone() }
                 } else {
                     String::new()
                 },
@@ -247,18 +248,18 @@ impl FmodCreateSoundexInfo {
 }
 
 pub struct FmodCodecDescription {
-    pub name            : String,                             /* [in] Name of the codec. */
-    pub version         : u32,                                /* [in] Plugin writer's version number. */
-    pub defaultasstream : i32,                                /* [in] Tells FMOD to open the file as a stream when calling System::createSound, and not a static sample.  Should normally be 0 (FALSE), because generally the user wants to decode the file into memory when using System::createSound.   Mainly used for formats that decode for a very long time, or could use large amounts of memory when decoded.  Usually sequenced formats such as mod/s3m/xm/it/midi fall into this category.   It is mainly to stop users that don't know what they're doing from getting FMOD_ERR_MEMORY returned from createSound when they should have in fact called System::createStream or used FMOD_CREATESTREAM in System::createSound. */
-    pub timeunits       : FmodTimeUnit,                       /* [in] When setposition codec is called, only these time formats will be passed to the codec. Use bitwise OR to accumulate different types. */
-    pub open            : ffi::FMOD_CODEC_OPENCALLBACK,       /* [in] Open callback for the codec for when FMOD tries to open a sound using this codec. */
-    pub close           : ffi::FMOD_CODEC_CLOSECALLBACK,      /* [in] Close callback for the codec for when FMOD tries to close a sound using this codec.  */
-    pub read            : ffi::FMOD_CODEC_READCALLBACK,       /* [in] Read callback for the codec for when FMOD tries to read some data from the file to the destination format (specified in the open callback). */
-    pub getlength       : ffi::FMOD_CODEC_GETLENGTHCALLBACK,  /* [in] Callback to return the length of the song in whatever format required when Sound::getLength is called. */
-    pub setposition     : ffi::FMOD_CODEC_SETPOSITIONCALLBACK,/* [in] Seek callback for the codec for when FMOD tries to seek within the file with Channel::setPosition. */
-    pub getposition     : ffi::FMOD_CODEC_GETPOSITIONCALLBACK,/* [in] Tell callback for the codec for when FMOD tries to get the current position within the with Channel::getPosition. */
-    pub soundcreate     : ffi::FMOD_CODEC_SOUNDCREATECALLBACK,/* [in] Sound creation callback for the codec when FMOD finishes creating the sound.  (So the codec can set more parameters for the related created sound, ie loop points/mode or 3D attributes etc). */
-    pub getwaveformat   : ffi::FMOD_CODEC_GETWAVEFORMAT       /* [in] Callback to tell FMOD about the waveformat of a particular subsound.  This is to save memory, rather than saving 1000 FMOD_CODEC_WAVEFORMAT structures in the codec, the codec might have a more optimal way of storing this information. */
+    pub name           : String,                             /* [in] Name of the codec. */
+    pub version        : u32,                                /* [in] Plugin writer's version number. */
+    pub defaultasstream: i32,                                /* [in] Tells FMOD to open the file as a stream when calling System::createSound, and not a static sample.  Should normally be 0 (FALSE), because generally the user wants to decode the file into memory when using System::createSound.   Mainly used for formats that decode for a very long time, or could use large amounts of memory when decoded.  Usually sequenced formats such as mod/s3m/xm/it/midi fall into this category.   It is mainly to stop users that don't know what they're doing from getting FMOD_ERR_MEMORY returned from createSound when they should have in fact called System::createStream or used FMOD_CREATESTREAM in System::createSound. */
+    pub timeunits      : FmodTimeUnit,                       /* [in] When setposition codec is called, only these time formats will be passed to the codec. Use bitwise OR to accumulate different types. */
+    pub open           : ffi::FMOD_CODEC_OPENCALLBACK,       /* [in] Open callback for the codec for when FMOD tries to open a sound using this codec. */
+    pub close          : ffi::FMOD_CODEC_CLOSECALLBACK,      /* [in] Close callback for the codec for when FMOD tries to close a sound using this codec.  */
+    pub read           : ffi::FMOD_CODEC_READCALLBACK,       /* [in] Read callback for the codec for when FMOD tries to read some data from the file to the destination format (specified in the open callback). */
+    pub getlength      : ffi::FMOD_CODEC_GETLENGTHCALLBACK,  /* [in] Callback to return the length of the song in whatever format required when Sound::getLength is called. */
+    pub setposition    : ffi::FMOD_CODEC_SETPOSITIONCALLBACK,/* [in] Seek callback for the codec for when FMOD tries to seek within the file with Channel::setPosition. */
+    pub getposition    : ffi::FMOD_CODEC_GETPOSITIONCALLBACK,/* [in] Tell callback for the codec for when FMOD tries to get the current position within the with Channel::getPosition. */
+    pub soundcreate    : ffi::FMOD_CODEC_SOUNDCREATECALLBACK,/* [in] Sound creation callback for the codec when FMOD finishes creating the sound.  (So the codec can set more parameters for the related created sound, ie loop points/mode or 3D attributes etc). */
+    pub getwaveformat  : ffi::FMOD_CODEC_GETWAVEFORMAT       /* [in] Callback to tell FMOD about the waveformat of a particular subsound.  This is to save memory, rather than saving 1000 FMOD_CODEC_WAVEFORMAT structures in the codec, the codec might have a more optimal way of storing this information. */
 }
 
 pub struct FmodOutputHandle {
@@ -267,54 +268,54 @@ pub struct FmodOutputHandle {
 
 pub struct FmodMemoryUsageDetails
 {
-    pub other                   : u32, /* [out] Memory not accounted for by other types */
-    pub string                  : u32, /* [out] String data */
-    pub system                  : u32, /* [out] System object and various internals */
-    pub plugins                 : u32, /* [out] Plugin objects and internals */
-    pub output                  : u32, /* [out] Output module object and internals */
-    pub channel                 : u32, /* [out] Channel related memory */
-    pub channel_group           : u32, /* [out] ChannelGroup objects and internals */
-    pub codec                   : u32, /* [out] Codecs allocated for streaming */
-    pub file                    : u32, /* [out] File buffers and structures */
-    pub sound                   : u32, /* [out] Sound objects and internals */
-    pub secondary_ram           : u32, /* [out] Sound data stored in secondary RAM */
-    pub sound_group             : u32, /* [out] SoundGroup objects and internals */
-    pub stream_buffer           : u32, /* [out] Stream buffer memory */
-    pub dsp_connection          : u32, /* [out] DSPConnection objects and internals */
-    pub dsp                     : u32, /* [out] DSP implementation objects */
-    pub dsp_codec               : u32, /* [out] Realtime file format decoding DSP objects */
-    pub profile                 : u32, /* [out] Profiler memory footprint. */
-    pub record_buffer           : u32, /* [out] Buffer used to store recorded data from microphone */
-    pub reverb                  : u32, /* [out] Reverb implementation objects */
-    pub reverb_channel_props    : u32, /* [out] Reverb channel properties structs */
-    pub geometry                : u32, /* [out] Geometry objects and internals */
-    pub sync_point              : u32, /* [out] Sync point memory. */
-    pub event_system            : u32, /* [out] EventSystem and various internals */
-    pub music_system            : u32, /* [out] MusicSystem and various internals */
-    pub fev                     : u32, /* [out] Definition of objects contained in all loaded projects e.g. events, groups, categories */
-    pub memory_fsb              : u32, /* [out] Data loaded with preloadFSB */
-    pub event_project           : u32, /* [out] EventProject objects and internals */
-    pub event_group_i           : u32, /* [out] EventGroup objects and internals */
-    pub sound_bank_class        : u32, /* [out] Objects used to manage wave banks */
-    pub sound_bank_list         : u32, /* [out] Data used to manage lists of wave bank usage */
-    pub stream_instance         : u32, /* [out] Stream objects and internals */
-    pub sound_def_class         : u32, /* [out] Sound definition objects */
-    pub sound_def_def_class     : u32, /* [out] Sound definition static data objects */
-    pub sound_def_pool          : u32, /* [out] Sound definition pool data */
-    pub reverb_def              : u32, /* [out] Reverb definition objects */
-    pub event_reverb            : u32, /* [out] Reverb objects */
-    pub user_property           : u32, /* [out] User property objects */
-    pub event_instance          : u32, /* [out] Event instance base objects */
-    pub event_instance_complex  : u32, /* [out] Complex event instance objects */
-    pub event_instance_simple   : u32, /* [out] Simple event instance objects */
-    pub event_instance_layer    : u32, /* [out] Event layer instance objects */
-    pub event_instance_sound    : u32, /* [out] Event sound instance objects */
-    pub event_envelope          : u32, /* [out] Event envelope objects */
-    pub event_envelope_def      : u32, /* [out] Event envelope definition objects */
-    pub event_parameter         : u32, /* [out] Event parameter objects */
-    pub event_category          : u32, /* [out] Event category objects */
-    pub event_envelope_point    : u32, /* [out] Event envelope point objects */
-    pub event_instance_pool     : u32  /* [out] Event instance pool memory */
+    pub other                  : u32, /* [out] Memory not accounted for by other types */
+    pub string                 : u32, /* [out] String data */
+    pub system                 : u32, /* [out] System object and various internals */
+    pub plugins                : u32, /* [out] Plugin objects and internals */
+    pub output                 : u32, /* [out] Output module object and internals */
+    pub channel                : u32, /* [out] Channel related memory */
+    pub channel_group          : u32, /* [out] ChannelGroup objects and internals */
+    pub codec                  : u32, /* [out] Codecs allocated for streaming */
+    pub file                   : u32, /* [out] File buffers and structures */
+    pub sound                  : u32, /* [out] Sound objects and internals */
+    pub secondary_ram          : u32, /* [out] Sound data stored in secondary RAM */
+    pub sound_group            : u32, /* [out] SoundGroup objects and internals */
+    pub stream_buffer          : u32, /* [out] Stream buffer memory */
+    pub dsp_connection         : u32, /* [out] DSPConnection objects and internals */
+    pub dsp                    : u32, /* [out] DSP implementation objects */
+    pub dsp_codec              : u32, /* [out] Realtime file format decoding DSP objects */
+    pub profile                : u32, /* [out] Profiler memory footprint. */
+    pub record_buffer          : u32, /* [out] Buffer used to store recorded data from microphone */
+    pub reverb                 : u32, /* [out] Reverb implementation objects */
+    pub reverb_channel_props   : u32, /* [out] Reverb channel properties structs */
+    pub geometry               : u32, /* [out] Geometry objects and internals */
+    pub sync_point             : u32, /* [out] Sync point memory. */
+    pub event_system           : u32, /* [out] EventSystem and various internals */
+    pub music_system           : u32, /* [out] MusicSystem and various internals */
+    pub fev                    : u32, /* [out] Definition of objects contained in all loaded projects e.g. events, groups, categories */
+    pub memory_fsb             : u32, /* [out] Data loaded with preloadFSB */
+    pub event_project          : u32, /* [out] EventProject objects and internals */
+    pub event_group_i          : u32, /* [out] EventGroup objects and internals */
+    pub sound_bank_class       : u32, /* [out] Objects used to manage wave banks */
+    pub sound_bank_list        : u32, /* [out] Data used to manage lists of wave bank usage */
+    pub stream_instance        : u32, /* [out] Stream objects and internals */
+    pub sound_def_class        : u32, /* [out] Sound definition objects */
+    pub sound_def_def_class    : u32, /* [out] Sound definition static data objects */
+    pub sound_def_pool         : u32, /* [out] Sound definition pool data */
+    pub reverb_def             : u32, /* [out] Reverb definition objects */
+    pub event_reverb           : u32, /* [out] Reverb objects */
+    pub user_property          : u32, /* [out] User property objects */
+    pub event_instance         : u32, /* [out] Event instance base objects */
+    pub event_instance_complex : u32, /* [out] Complex event instance objects */
+    pub event_instance_simple  : u32, /* [out] Simple event instance objects */
+    pub event_instance_layer   : u32, /* [out] Event layer instance objects */
+    pub event_instance_sound   : u32, /* [out] Event sound instance objects */
+    pub event_envelope         : u32, /* [out] Event envelope objects */
+    pub event_envelope_def     : u32, /* [out] Event envelope definition objects */
+    pub event_parameter        : u32, /* [out] Event parameter objects */
+    pub event_category         : u32, /* [out] Event category objects */
+    pub event_envelope_point   : u32, /* [out] Event envelope point objects */
+    pub event_instance_pool    : u32  /* [out] Event instance pool memory */
 }
 
 impl FmodMemoryUsageDetails {
@@ -478,8 +479,17 @@ pub fn from_memory_usage_details_ptr(details: ffi::FMOD_MEMORY_USAGE_DETAILS) ->
     }
 }
 
+pub fn from_ptr(system: ffi::FMOD_SYSTEM) -> FmodSys {
+    FmodSys{system: system, is_first: false}
+}
+
+pub fn get_ffi(system: &FmodSys) -> ffi::FMOD_SYSTEM {
+    system.system
+}
+
 pub struct FmodSys {
-    system : ffi::FMOD_SYSTEM
+    system: ffi::FMOD_SYSTEM,
+    is_first: bool
 }
 
 impl Drop for FmodSys {
@@ -489,11 +499,12 @@ impl Drop for FmodSys {
 }
 
 impl FmodSys {
+    /* the first one created has to be the last one released */
     pub fn new() -> Result<FmodSys, fmod::Result> {
         let tmp = ::std::ptr::null();
 
         match unsafe { ffi::FMOD_System_Create(&tmp) } {
-            fmod::Ok => Ok(FmodSys{system : tmp}),
+            fmod::Ok => Ok(FmodSys{system: tmp, is_first: true}),
             err => Err(err)
         }
     }
@@ -502,7 +513,7 @@ impl FmodSys {
         unsafe { ffi::FMOD_System_Init(self.system, 1, FMOD_INIT_NORMAL, ::std::ptr::null()) }
     }
 
-    pub fn init_with_parameters(&self, max_channels: i32, FmodInitFlag(flag) : FmodInitFlag) -> fmod::Result {
+    pub fn init_with_parameters(&self, max_channels: i32, FmodInitFlag(flag): FmodInitFlag) -> fmod::Result {
         unsafe { ffi::FMOD_System_Init(self.system, max_channels, flag, ::std::ptr::null()) }
     }
 
@@ -511,7 +522,7 @@ impl FmodSys {
     }
 
     pub fn release(&mut self) -> fmod::Result {
-        if self.system != ::std::ptr::null() {
+        if self.is_first && self.system != ::std::ptr::null() {
             unsafe {
                 match match ffi::FMOD_System_Close(self.system) {
                     fmod::Ok => ffi::FMOD_System_Release(self.system),
@@ -530,7 +541,7 @@ impl FmodSys {
         }
     }
 
-    pub fn create_sound(&self, music : String, options: Option<FmodMode>, exinfo: Option<FmodCreateSoundexInfo>) -> Result<Sound, fmod::Result> {
+    pub fn create_sound(&self, music: String, options: Option<FmodMode>, exinfo: Option<FmodCreateSoundexInfo>) -> Result<Sound, fmod::Result> {
         let tmp_v = music.clone();
         let sound = ::std::ptr::null();
         let op = match options {
@@ -548,13 +559,13 @@ impl FmodSys {
                 } else {
                     ::std::ptr::null()
                 }, op, ex, &sound) } {
-                fmod::Ok => {Ok(sound::from_ptr(sound))},
+                fmod::Ok => {Ok(sound::from_ptr_first(sound))},
                 err => Err(err)
             }
         })
     }
 
-    pub fn create_stream(&self, music : String, options: Option<FmodMode>) -> Result<Sound, fmod::Result> {
+    pub fn create_stream(&self, music: String, options: Option<FmodMode>) -> Result<Sound, fmod::Result> {
         let tmp_v = music.clone();
         let sound = ::std::ptr::null();
         let op = match options {
@@ -564,13 +575,13 @@ impl FmodSys {
 
         tmp_v.with_c_str(|c_str|{
             match unsafe { ffi::FMOD_System_CreateStream(self.system, c_str, op, ::std::ptr::null(), &sound) } {
-                fmod::Ok => {Ok(sound::from_ptr(sound))},
+                fmod::Ok => {Ok(sound::from_ptr_first(sound))},
                 err => Err(err)
             }
         })
     }
 
-    pub fn create_channel_group(&self, group_name : String) -> Result<channel_group::ChannelGroup, fmod::Result> {
+    pub fn create_channel_group(&self, group_name: String) -> Result<channel_group::ChannelGroup, fmod::Result> {
         let t_group_name = group_name.clone();
         let channel_group = ::std::ptr::null();
 
@@ -582,7 +593,7 @@ impl FmodSys {
         })
     }
 
-    pub fn create_sound_group(&self, group_name : String) -> Result<sound_group::SoundGroup, fmod::Result> {
+    pub fn create_sound_group(&self, group_name: String) -> Result<sound_group::SoundGroup, fmod::Result> {
         let t_group_name = group_name.clone();
         let sound_group = ::std::ptr::null();
 
@@ -623,7 +634,7 @@ impl FmodSys {
         tmp_v.with_c_str(|c_str|{
             match unsafe { ffi::FMOD_System_GetDriverInfo(self.system, id, c_str, name_len as i32, &guid) } {
                 fmod::Ok => Ok((FmodGuid{data1: guid.Data1, data2: guid.Data2, data3: guid.Data3, data4: guid.Data4},
-                    unsafe { ::std::str::raw::from_c_str(c_str).clone() })),
+                    unsafe {::std::str::raw::from_c_str(c_str).clone() })),
                 e => Err(e)
             }
         })
@@ -784,19 +795,40 @@ impl FmodSys {
                 let mut converted_ASIO_channel_vec = Vec::new();
                 let mut converted_ASIO_speaker_vec = Vec::new();
 
-                if advanced_settings.ASIOChannelList != ::std::ptr::null() {
-                    unsafe {::std::ptr::array_each(advanced_settings.ASIOChannelList, |c_str| {
-                        converted_ASIO_channel_vec.push(::std::str::raw::from_c_str(c_str)).clone()
-                    })};
-                }
-                if advanced_settings.ASIOSpeakerList != ::std::ptr::null() {
-                    // TODO : I need to check if that closure can segfault !
-                    unsafe {::std::ptr::position(advanced_settings.ASIOSpeakerList, |elem| {
-                        if elem != &fmod::SpeakerNull {
-                            converted_ASIO_speaker_vec.push(*elem);
+                unsafe {
+                    if advanced_settings.ASIOChannelList != ::std::ptr::null() {
+                        /*unsafe {::std::ptr::array_each(advanced_settings.ASIOChannelList, |c_str| {
+                            converted_ASIO_channel_vec.push(::std::str::raw::from_c_str(c_str)).clone()
+                        })};*/
+                        let mut it = 0;
+                        loop {
+                            let tmp = advanced_settings.ASIOChannelList.offset(it);
+
+                            if tmp == ::std::ptr::null() {
+                                break;
+                            }
+                            converted_ASIO_channel_vec.push(::std::str::raw::from_c_str(*tmp));
+                            it += 1;
                         }
-                        elem != &fmod::SpeakerNull
-                    })};
+                    }
+                    if advanced_settings.ASIOSpeakerList != ::std::ptr::null() {
+                        /*unsafe {::std::ptr::position(advanced_settings.ASIOSpeakerList, |elem| {
+                            if elem != &fmod::SpeakerNull {
+                                converted_ASIO_speaker_vec.push(*elem);
+                            }
+                            elem != &fmod::SpeakerNull
+                        })};*/
+                        let mut it = 0;
+                        loop {
+                            let tmp = advanced_settings.ASIOSpeakerList.offset(it);
+
+                            if *tmp == fmod::SpeakerNull {
+                                break;
+                            }
+                            converted_ASIO_speaker_vec.push(*tmp);
+                            it += 1;
+                        }
+                    }
                 }
                 Ok(FmodAdvancedSettings{
                     max_MPEG_codecs: advanced_settings.maxMPEGcodecs,
@@ -818,7 +850,7 @@ impl FmodSys {
                     default_decode_buffer_size: advanced_settings.defaultDecodeBufferSize,
                     debug_log_filename: {
                         if advanced_settings.debugLogFilename != ::std::ptr::null() {
-                            unsafe { ::std::str::raw::from_c_str(advanced_settings.debugLogFilename).clone() }
+                            unsafe {::std::str::raw::from_c_str(advanced_settings.debugLogFilename).clone() }
                         } else {
                             String::new()
                         }
@@ -899,7 +931,7 @@ impl FmodSys {
 
         name.with_c_str(|c_str|{
             match unsafe { ffi::FMOD_System_GetPluginInfo(self.system, handle, &plugin_type, c_str, name_len as i32, &version) } {
-                fmod::Ok => Ok((unsafe { ::std::str::raw::from_c_str(c_str).clone() }, plugin_type, version)),
+                fmod::Ok => Ok((unsafe {::std::str::raw::from_c_str(c_str).clone() }, plugin_type, version)),
                 e => Err(e)
             }
         })
@@ -918,16 +950,16 @@ impl FmodSys {
         }
     }
 
-    pub fn create_DSP_by_plugin(&self, FmodPluginHandle(handle): FmodPluginHandle) -> Result<dsp::Dsp, fmod::Result> {
+    pub fn create_DSP_by_plugin(&self, FmodPluginHandle(handle): FmodPluginHandle) -> Result<Dsp, fmod::Result> {
         let dsp = ::std::ptr::null();
 
         match unsafe { ffi::FMOD_System_CreateDSPByPlugin(self.system, handle, &dsp) } {
-            fmod::Ok => Ok(dsp::from_ptr(dsp)),
+            fmod::Ok => Ok(dsp::from_ptr_first(dsp)),
             e => Err(e)
         }
     }
 
-    pub fn set_3D_num_listeners(&self, num_listeners : i32) -> fmod::Result {
+    pub fn set_3D_num_listeners(&self, num_listeners: i32) -> fmod::Result {
         unsafe { ffi::FMOD_System_Set3DNumListeners(self.system, num_listeners) }
     }
 
@@ -1083,9 +1115,9 @@ impl FmodSys {
                 device_name.with_c_str(|c_device_name|{
                     match unsafe { ffi::FMOD_System_GetCDROMDriveName(self.system, drive, c_drive_name, drive_name_len as i32, c_scsi_name, scsi_name_len as i32,
                         c_device_name, device_name_len as i32) } {
-                        fmod::Ok => Ok((unsafe { ::std::str::raw::from_c_str(c_drive_name).clone() },
-                                        unsafe { ::std::str::raw::from_c_str(c_scsi_name).clone() },
-                                        unsafe { ::std::str::raw::from_c_str(c_device_name).clone() })),
+                        fmod::Ok => Ok((unsafe {::std::str::raw::from_c_str(c_drive_name).clone() },
+                                        unsafe {::std::str::raw::from_c_str(c_scsi_name).clone() },
+                                        unsafe {::std::str::raw::from_c_str(c_device_name).clone() })),
                         e => Err(e)
                     }
                 })
@@ -1093,7 +1125,7 @@ impl FmodSys {
         })
     }
 
-    pub fn get_spectrum(&self, spectrum_size : uint, options : Option<channel::FmodSpectrumOptions>) -> Result<Vec<f32>, fmod::Result> {
+    pub fn get_spectrum(&self, spectrum_size: uint, options: Option<channel::FmodSpectrumOptions>) -> Result<Vec<f32>, fmod::Result> {
         let ptr = Vec::from_elem(spectrum_size, 0f32);
         let mut window_type = fmod::DSP_FFT_WindowRect;
         let mut channel_offset = 0;
@@ -1111,7 +1143,7 @@ impl FmodSys {
         }
     }
 
-    pub fn get_wave_data(&self, wave_size : uint, channel_offset : i32) -> Result<Vec<f32>, fmod::Result> {
+    pub fn get_wave_data(&self, wave_size: uint, channel_offset: i32) -> Result<Vec<f32>, fmod::Result> {
         let ptr = Vec::from_elem(wave_size, 0f32);
 
         match unsafe { ffi::FMOD_System_GetWaveData(self.system, ptr.as_ptr(), wave_size as c_int, channel_offset) } {
@@ -1177,7 +1209,7 @@ impl FmodSys {
         }
     }
 
-    pub fn get_DSP_head(&self) -> Result<dsp::Dsp, fmod::Result> {
+    pub fn get_DSP_head(&self) -> Result<Dsp, fmod::Result> {
         let head = ::std::ptr::null();
 
         match unsafe { ffi::FMOD_System_GetDSPHead(self.system, &head) } {
@@ -1220,7 +1252,7 @@ impl FmodSys {
         tmp_v.with_c_str(|c_str|{
             match unsafe { ffi::FMOD_System_GetRecordDriverInfo(self.system, id, c_str, name_len as i32, &guid) } {
                 fmod::Ok => Ok((FmodGuid{data1: guid.Data1, data2: guid.Data2, data3: guid.Data3, data4: guid.Data4},
-                    unsafe { ::std::str::raw::from_c_str(c_str).clone() })),
+                    unsafe {::std::str::raw::from_c_str(c_str).clone() })),
                 e => Err(e)
             }
         })

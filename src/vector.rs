@@ -24,7 +24,7 @@
 
 use ffi;
 
-pub fn from_ptr(vec : ffi::FMOD_VECTOR) -> FmodVector {
+pub fn from_ptr(vec: ffi::FMOD_VECTOR) -> FmodVector {
     FmodVector{x: vec.x, y: vec.y, z: vec.z}
 }
 
@@ -36,6 +36,7 @@ pub fn new() -> FmodVector {
     FmodVector{x: 0f32, y: 0f32, z: 0f32}
 }
 
+#[deriving(Show)]
 pub struct FmodVector
 {
     pub x: f32, /* X co-ordinate in 3D space. */

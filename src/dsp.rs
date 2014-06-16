@@ -31,15 +31,20 @@ use fmod_sys::FmodMemoryUsageDetails;
 use std::mem::transmute;
 
 pub fn from_ptr(dsp: ffi::FMOD_DSP) -> Dsp {
-    Dsp{dsp: dsp}
+    Dsp{dsp: dsp, can_be_deleted: false}
 }
 
-pub fn get_ffi(dsp: Dsp) -> ffi::FMOD_DSP {
+pub fn from_ptr_first(dsp: ffi::FMOD_DSP) -> Dsp {
+    Dsp{dsp: dsp, can_be_deleted: true}
+}
+
+pub fn get_ffi(dsp: &Dsp) -> ffi::FMOD_DSP {
     dsp.dsp
 }
 
 pub struct Dsp {
-    dsp: ffi::FMOD_DSP
+    dsp: ffi::FMOD_DSP,
+    can_be_deleted: bool
 }
 
 impl Drop for Dsp {
@@ -50,10 +55,10 @@ impl Drop for Dsp {
 
 impl Dsp {
     pub fn release(&mut self) -> fmod::Result {
-        if self.dsp != ::std::ptr::null() {
+        if self.can_be_deleted && self.dsp !=::std::ptr::null() {
             match unsafe { ffi::FMOD_DSP_Release(self.dsp) } {
                 fmod::Ok => {
-                    self.dsp = ::std::ptr::null();
+                    self.dsp =::std::ptr::null();
                     fmod::Ok
                 }
                 e => e
@@ -64,7 +69,7 @@ impl Dsp {
     }
 
     pub fn add_input(&self, target: Dsp) -> Result<dsp_connection::DspConnection, fmod::Result> {
-        let connection = ::std::ptr::null();
+        let connection =::std::ptr::null();
 
         match unsafe { ffi::FMOD_DSP_AddInput(self.dsp, target.dsp, &connection) } {
             fmod::Ok => Ok(dsp_connection::from_ptr(connection)),
@@ -114,8 +119,8 @@ impl Dsp {
     }
 
     pub fn get_input(&self, index: i32) -> Result<(Dsp, dsp_connection::DspConnection), fmod::Result> {
-        let input = ::std::ptr::null();
-        let input_connection = ::std::ptr::null();
+        let input =::std::ptr::null();
+        let input_connection =::std::ptr::null();
 
         match unsafe { ffi::FMOD_DSP_GetInput(self.dsp, index, &input, &input_connection) } {
             fmod::Ok => Ok((from_ptr(input), dsp_connection::from_ptr(input_connection))),
@@ -124,8 +129,8 @@ impl Dsp {
     }
 
     pub fn get_output(&self, index: i32) -> Result<(Dsp, dsp_connection::DspConnection), fmod::Result> {
-        let output = ::std::ptr::null();
-        let output_connection = ::std::ptr::null();
+        let output =::std::ptr::null();
+        let output_connection =::std::ptr::null();
 
         match unsafe { ffi::FMOD_DSP_GetOutput(self.dsp, index, &output, &output_connection) } {
             fmod::Ok => Ok((from_ptr(output), dsp_connection::from_ptr(output_connection))),
@@ -204,7 +209,7 @@ impl Dsp {
 
         tmp_v.with_c_str(|c_str|{
             match unsafe { ffi::FMOD_DSP_GetParameter(self.dsp, index, &value, c_str, value_str_len as i32) } {
-                fmod::Ok => Ok((value, unsafe { ::std::str::raw::from_c_str(c_str).clone() })),
+                fmod::Ok => Ok((value, unsafe {::std::str::raw::from_c_str(c_str).clone() })),
                 e => Err(e)
             }
         })
@@ -230,7 +235,7 @@ impl Dsp {
             t_name.with_c_str(|c_name| {
                 t_label.with_c_str(|c_label|{
                     match unsafe { ffi::FMOD_DSP_GetParameterInfo(self.dsp, index, c_name, c_label, c_description, description_len as i32, &min, &max) } {
-                        fmod::Ok => Ok((unsafe { ::std::str::raw::from_c_str(c_description).clone() }, min, max)),
+                        fmod::Ok => Ok((unsafe {::std::str::raw::from_c_str(c_description).clone() }, min, max)),
                         e => Err(e)
                     }
                 })
@@ -288,7 +293,7 @@ impl Dsp {
     /* to test ! */
     pub fn get_user_data<T>(&self) -> Result<T, fmod::Result> {
         unsafe {
-            let user_data = ::std::ptr::null();
+            let user_data =::std::ptr::null();
 
             match ffi::FMOD_DSP_GetUserData(self.dsp, &user_data) {
                 fmod::Ok => Ok(transmute(user_data)),

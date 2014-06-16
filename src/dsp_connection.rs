@@ -51,11 +51,11 @@ impl Drop for DspConnection {
 
 impl DspConnection {
     pub fn release(&mut self) {
-        self.dsp_connection = ::std::ptr::null();
+        self.dsp_connection =::std::ptr::null();
     }
 
     pub fn get_input(&self) -> Result<dsp::Dsp, fmod::Result> {
-        let input = ::std::ptr::null();
+        let input =::std::ptr::null();
 
         match unsafe { ffi::FMOD_DSPConnection_GetInput(self.dsp_connection, &input) } {
             fmod::Ok => Ok(dsp::from_ptr(input)),
@@ -64,7 +64,7 @@ impl DspConnection {
     }
 
     pub fn get_output(&self) -> Result<dsp::Dsp, fmod::Result> {
-        let output = ::std::ptr::null();
+        let output =::std::ptr::null();
 
         match unsafe { ffi::FMOD_DSPConnection_GetOutput(self.dsp_connection, &output) } {
             fmod::Ok => Ok(dsp::from_ptr(output)),
@@ -117,7 +117,7 @@ impl DspConnection {
     /* to test ! */
     pub fn get_user_data<T>(&self) -> Result<T, fmod::Result> {
         unsafe {
-            let user_data = ::std::ptr::null();
+            let user_data =::std::ptr::null();
 
             match ffi::FMOD_DSPCONNECTION_GetUserData(self.dsp_connection, &user_data) {
                 fmod::Ok => Ok(transmute(user_data)),

@@ -39,11 +39,11 @@ pub struct ChannelGroup {
     channel_group: ffi::FMOD_CHANNELGROUP,
 }
 
-pub fn get_ffi(channel_group : ChannelGroup) -> ffi::FMOD_CHANNELGROUP {
+pub fn get_ffi(channel_group: ChannelGroup) -> ffi::FMOD_CHANNELGROUP {
     channel_group.channel_group
 }
 
-pub fn from_ptr(channel_group : ffi::FMOD_CHANNELGROUP) -> ChannelGroup {
+pub fn from_ptr(channel_group: ffi::FMOD_CHANNELGROUP) -> ChannelGroup {
     ChannelGroup{channel_group: channel_group}
 }
 
@@ -55,10 +55,10 @@ impl Drop for ChannelGroup {
 
 impl ChannelGroup {
     pub fn release(&mut self) -> fmod::Result {
-        if self.channel_group != ::std::ptr::null() {
+        if self.channel_group !=::std::ptr::null() {
             match unsafe { ffi::FMOD_ChannelGroup_Release(self.channel_group) } {
                 fmod::Ok => {
-                    self.channel_group = ::std::ptr::null();
+                    self.channel_group =::std::ptr::null();
                     fmod::Ok
                 }
                 e => e
@@ -168,7 +168,7 @@ impl ChannelGroup {
 
     pub fn override_reverb_properties(&self, properties: channel::FmodReverbChannelProperties) -> fmod::Result {
         let prop = ffi::FMOD_REVERB_CHANNELPROPERTIES {Direct: properties.direct, Room: properties.room, Flags: properties.flags,
-            ConnectionPoint: dsp::get_ffi(properties.connection_point)};
+            ConnectionPoint: dsp::get_ffi(&properties.connection_point)};
 
         unsafe { ffi::FMOD_ChannelGroup_OverrideReverbProperties(self.channel_group, &prop) }
     }
@@ -199,7 +199,7 @@ impl ChannelGroup {
     }
 
     pub fn get_group(&self, index: i32) -> Result<ChannelGroup, fmod::Result> {
-        let group = ::std::ptr::null();
+        let group =::std::ptr::null();
 
         match unsafe { ffi::FMOD_ChannelGroup_GetGroup(self.channel_group, index, &group) } {
             fmod::Ok => Ok(ChannelGroup{channel_group: group}),
@@ -208,7 +208,7 @@ impl ChannelGroup {
     }
 
     pub fn get_parent_group(&self) -> Result<ChannelGroup, fmod::Result> {
-        let parent_group = ::std::ptr::null();
+        let parent_group =::std::ptr::null();
 
         match unsafe { ffi::FMOD_ChannelGroup_GetParentGroup(self.channel_group, &parent_group) } {
             fmod::Ok => Ok(ChannelGroup{channel_group: parent_group}),
@@ -217,7 +217,7 @@ impl ChannelGroup {
     }
 
     pub fn get_DSP_head(&self) -> Result<dsp::Dsp, fmod::Result> {
-        let dsp = ::std::ptr::null();
+        let dsp =::std::ptr::null();
 
         match unsafe { ffi::FMOD_ChannelGroup_GetDSPHead(self.channel_group, &dsp) } {
             fmod::Ok => Ok(dsp::from_ptr(dsp)),
@@ -226,9 +226,9 @@ impl ChannelGroup {
     }
 
     pub fn add_DSP(&self, dsp: dsp::Dsp) -> Result<dsp_connection::DspConnection, fmod::Result> {
-        let dsp_connection = ::std::ptr::null();
+        let dsp_connection =::std::ptr::null();
 
-        match unsafe { ffi::FMOD_ChannelGroup_AddDSP(self.channel_group, dsp::get_ffi(dsp), &dsp_connection) } {
+        match unsafe { ffi::FMOD_ChannelGroup_AddDSP(self.channel_group, dsp::get_ffi(&dsp), &dsp_connection) } {
             fmod::Ok => Ok(dsp_connection::from_ptr(dsp_connection)),
             e => Err(e)
         }
@@ -239,7 +239,7 @@ impl ChannelGroup {
 
         name.with_c_str(|c_name|{
             match unsafe { ffi::FMOD_ChannelGroup_GetName(self.channel_group, c_name, name_len as i32) } {
-                fmod::Ok => Ok(unsafe { ::std::str::raw::from_c_str(c_name).clone() }),
+                fmod::Ok => Ok(unsafe {::std::str::raw::from_c_str(c_name).clone() }),
                 e => Err(e)
             }
         })
@@ -255,7 +255,7 @@ impl ChannelGroup {
     }
 
     pub fn get_channel(&self, index: i32) -> Result<channel::Channel, fmod::Result> {
-        let channel = ::std::ptr::null();
+        let channel =::std::ptr::null();
 
         match unsafe { ffi::FMOD_ChannelGroup_GetChannel(self.channel_group, index, &channel) } {
             fmod::Ok => Ok(channel::from_ptr(channel)),
@@ -263,7 +263,7 @@ impl ChannelGroup {
         }
     }
 
-    pub fn get_spectrum(&self, spectrum_size : uint, options : Option<channel::FmodSpectrumOptions>) -> Result<Vec<f32>, fmod::Result> {
+    pub fn get_spectrum(&self, spectrum_size: uint, options: Option<channel::FmodSpectrumOptions>) -> Result<Vec<f32>, fmod::Result> {
         let ptr = Vec::from_elem(spectrum_size, 0f32);
         let mut window_type = fmod::DSP_FFT_WindowRect;
         let mut channel_offset = 0;
@@ -281,7 +281,7 @@ impl ChannelGroup {
         }
     }
 
-    pub fn get_wave_data(&self, wave_size : uint, channel_offset : i32) -> Result<Vec<f32>, fmod::Result> {
+    pub fn get_wave_data(&self, wave_size: uint, channel_offset: i32) -> Result<Vec<f32>, fmod::Result> {
         let ptr = Vec::from_elem(wave_size, 0f32);
 
         match unsafe { ffi::FMOD_ChannelGroup_GetWaveData(self.channel_group, ptr.as_ptr(), wave_size as c_int, channel_offset) } {
@@ -309,7 +309,7 @@ impl ChannelGroup {
     /* to test ! */
     pub fn get_user_data<T>(&self) -> Result<T, fmod::Result> {
         unsafe {
-            let user_data = ::std::ptr::null();
+            let user_data =::std::ptr::null();
 
             match ffi::FMOD_ChannelGroup_GetUserData(self.channel_group, &user_data) {
                 fmod::Ok => Ok(transmute(user_data)),
