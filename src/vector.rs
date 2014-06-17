@@ -43,3 +43,9 @@ pub struct FmodVector
     pub y: f32, /* Y co-ordinate in 3D space. */
     pub z: f32  /* Z co-ordinate in 3D space. */
 }
+
+impl FmodVector {
+    pub fn new() -> FmodVector {
+        FmodVector{x: 0f32, y: 0f32, z: 0f32}
+    }
+}
