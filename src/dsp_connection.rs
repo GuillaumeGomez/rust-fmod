@@ -110,12 +110,12 @@ impl DspConnection {
     }
 
     /* to test ! */
-    pub fn set_user_data<T>(&self, user_data: T) -> fmod::Result {
+    /*pub fn set_user_data<T>(&self, user_data: T) -> fmod::Result {
         unsafe { ffi::FMOD_DSPCONNECTION_SetUserData(self.dsp_connection, transmute(user_data)) }
-    }
+    }*/
 
     /* to test ! */
-    pub fn get_user_data<T>(&self) -> Result<T, fmod::Result> {
+    /*pub fn get_user_data<T>(&self) -> Result<T, fmod::Result> {
         unsafe {
             let user_data =::std::ptr::null();
 
@@ -124,5 +124,5 @@ impl DspConnection {
                 e => Err(e)
             }
         }
-    }
+    }*/
 }

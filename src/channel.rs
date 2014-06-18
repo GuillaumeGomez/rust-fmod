@@ -610,12 +610,12 @@ impl Channel {
     }
 
     /* to test ! */
-    pub fn set_user_data<T>(&self, user_data: T) -> fmod::Result {
+    /*pub fn set_user_data<T>(&self, user_data: T) -> fmod::Result {
         unsafe { ffi::FMOD_Channel_SetUserData(self.channel, transmute(user_data)) }
-    }
+    }*/
 
     /* to test ! */
-    pub fn get_user_data<T>(&self) -> Result<T, fmod::Result> {
+    /*pub fn get_user_data<T>(&self) -> Result<T, fmod::Result> {
         unsafe {
             let user_data =::std::ptr::null();
 
@@ -624,7 +624,7 @@ impl Channel {
                 e => Err(e)
             }
         }
-    }
+    }*/
 
     pub fn get_memory_info(&self, FmodMemoryBits(memory_bits): FmodMemoryBits,
         FmodEventMemoryBits(event_memory_bits): FmodEventMemoryBits) -> Result<(u32, FmodMemoryUsageDetails), fmod::Result> {

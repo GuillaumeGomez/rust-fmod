@@ -127,12 +127,12 @@ impl Reverb {
     }
 
     /* to test ! */
-    pub fn set_user_data<T>(&self, user_data: T) -> fmod::Result {
+    /*pub fn set_user_data<T>(&self, user_data: T) -> fmod::Result {
         unsafe { ffi::FMOD_Reverb_SetUserData(self.reverb, transmute(user_data)) }
-    }
+    }*/
 
     /* to test ! */
-    pub fn get_user_data<T>(&self) -> Result<T, fmod::Result> {
+    /*pub fn get_user_data<T>(&self) -> Result<T, fmod::Result> {
         unsafe {
             let user_data =::std::ptr::null();
 
@@ -141,5 +141,5 @@ impl Reverb {
                 e => Err(e)
             }
         }
-    }
+    }*/
 }

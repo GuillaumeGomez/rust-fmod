@@ -556,12 +556,12 @@ impl Sound {
     }
 
     /* to test ! */
-    pub fn set_user_data<T>(&self, user_data: T) -> fmod::Result {
+    /*pub fn set_user_data<T>(&self, user_data: T) -> fmod::Result {
         unsafe { ffi::FMOD_Sound_SetUserData(self.sound, transmute(user_data)) }
-    }
+    }*/
 
     /* to test ! */
-    pub fn get_user_data<T>(&self) -> Result<T, fmod::Result> {
+    /*pub fn get_user_data<T>(&self) -> Result<T, fmod::Result> {
         unsafe {
             let user_data =::std::ptr::null();
 
@@ -570,7 +570,7 @@ impl Sound {
                 e => Err(e)
             }
         }
-    }
+    }*/
 
     pub fn lock(&self, offset: u32, length: u32) -> Result<(Vec<u8>, Vec<u8>), fmod::Result> {
         let len1 = 0u32;
