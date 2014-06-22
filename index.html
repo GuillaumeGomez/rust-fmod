@@ -31,37 +31,84 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
-        <h3>
-<a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>Welcome to GitHub Pages.</h3>
+        <h1>
+<a name="rust-fmod" class="anchor" href="#rust-fmod"><span class="octicon octicon-link"></span></a>rust-fmod</h1>
 
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
+<p>This is a rust binding for FMOD, developped by FIRELIGHT TECHNOLOGIES.</p>
 
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
+<p>FMOD website : <a href="http://www.fmod.org">www.fmod.org</a></p>
+
+<h2>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<p>You must install on your computer the FMOD library which is used for the binding.</p>
+
+<p>To build it, please use :</p>
+
+<pre lang="Shell"><code>&gt; make
 </code></pre>
 
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
+<p>This command build rfmod, the examples, and the documentation.</p>
 
-<h3>
-<a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Designer Templates</h3>
+<p>You can build them separatly too.</p>
 
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
+<pre lang="Shell"><code>&gt; make rfmod
+&gt; make examples
+&gt; make docs
+</code></pre>
 
-<h3>
-<a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>Rather Drive Stick?</h3>
+<h2>
+<a name="short-example" class="anchor" href="#short-example"><span class="octicon octicon-link"></span></a>Short example</h2>
 
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
+<p>Here is a short example on how to create a file and to play it :</p>
 
-<h3>
-<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
+<div class="highlight highlight-Rust"><pre><span class="err">#</span><span class="o">!</span><span class="p">[</span><span class="n">feature</span><span class="p">(</span><span class="n">globs</span><span class="p">)]</span>
 
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
+<span class="k">extern</span> <span class="n">crate</span> <span class="n">libc</span><span class="p">;</span>
+<span class="k">extern</span> <span class="n">crate</span> <span class="n">rfmod</span><span class="p">;</span>
 
-<h3>
-<a name="support-or-contact" class="anchor" href="#support-or-contact"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
+<span class="kn">use</span> <span class="n">rfmod</span><span class="o">::</span><span class="n">enums</span><span class="o">::*</span><span class="p">;</span>
+<span class="kn">use</span> <span class="n">rfmod</span><span class="o">::*</span><span class="p">;</span>
+<span class="kn">use</span> <span class="n">std</span><span class="o">::</span><span class="n">os</span><span class="p">;</span>
 
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
+<span class="k">fn</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">let</span> <span class="n">fmod</span> <span class="o">=</span> <span class="k">match</span> <span class="n">FmodSys</span><span class="o">::</span><span class="n">new</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nb">Ok</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="n">f</span><span class="p">,</span>
+        <span class="nb">Err</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+            <span class="n">fail</span><span class="o">!</span><span class="p">(</span><span class="s">"Error code : {}"</span><span class="p">,</span> <span class="n">e</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">};</span>
+
+    <span class="k">match</span> <span class="n">fmod</span><span class="p">.</span><span class="n">init</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">fmod</span><span class="o">::</span><span class="nb">Ok</span> <span class="o">=&gt;</span> <span class="p">{}</span>
+        <span class="n">e</span> <span class="o">=&gt;</span> <span class="p">{</span>
+            <span class="n">fmod</span><span class="p">.</span><span class="n">release</span><span class="p">();</span>
+            <span class="n">fail</span><span class="o">!</span><span class="p">(</span><span class="s">"FmodSys.init failed : {}"</span><span class="p">,</span> <span class="n">e</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">};</span>
+
+    <span class="kd">let</span> <span class="k">mut</span> <span class="n">sound</span> <span class="o">=</span> <span class="k">match</span> <span class="n">fmod</span><span class="p">.</span><span class="n">create_sound</span><span class="p">(</span><span class="n">StrBuf</span><span class="o">::</span><span class="nb">from_str</span><span class="p">(</span><span class="s">"music.mp3"</span><span class="p">),</span> <span class="nb">None</span><span class="p">,</span> <span class="nb">None</span><span class="p">)</span> <span class="p">{</span>
+                      <span class="nb">Ok</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="n">s</span><span class="p">,</span>
+                      <span class="nb">Err</span><span class="p">(</span><span class="n">err</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span><span class="n">fail</span><span class="o">!</span><span class="p">(</span><span class="s">"Error code : {}"</span><span class="p">,</span> <span class="n">err</span><span class="p">);},</span>
+                    <span class="p">};</span>
+
+    <span class="k">match</span> <span class="n">sound</span><span class="p">.</span><span class="n">play_to_the_end</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">fmod</span><span class="o">::</span><span class="nb">Ok</span> <span class="o">=&gt;</span> <span class="p">{</span><span class="nb">println</span><span class="o">!</span><span class="p">(</span><span class="s">"Ok !"</span><span class="p">);}</span>
+        <span class="n">err</span> <span class="o">=&gt;</span> <span class="p">{</span><span class="n">fail</span><span class="o">!</span><span class="p">(</span><span class="s">"Error code : {}"</span><span class="p">,</span> <span class="n">err</span><span class="p">);}</span>
+    <span class="p">};</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>For a more complete example : <a href="https://github.com/GuillaumeGomez/rust-music-player">https://github.com/GuillaumeGomez/rust-music-player</a></p>
+
+<h2>
+<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h2>
+
+<pre><code>Copyright (c) 2014 Guillaume Gomez
+
+The license of this project is the same of the FMOD non-commercial use. 
+Please refer to it. Here is the website for FMOD : http://www.fmod.org/
+</code></pre>
       </section>
     </div>
 
