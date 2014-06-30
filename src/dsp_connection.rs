@@ -26,7 +26,7 @@ use ffi;
 use types::*;
 use enums::*;
 use dsp;
-use libc::c_int;
+use libc::{c_int, c_void};
 use fmod_sys;
 use fmod_sys::FmodMemoryUsageDetails;
 use std::mem::transmute;
@@ -51,22 +51,22 @@ impl Drop for DspConnection {
 
 impl DspConnection {
     pub fn release(&mut self) {
-        self.dsp_connection =::std::ptr::null();
+        self.dsp_connection = ::std::ptr::mut_null();
     }
 
     pub fn get_input(&self) -> Result<dsp::Dsp, fmod::Result> {
-        let input =::std::ptr::null();
+        let mut input = ::std::ptr::mut_null();
 
-        match unsafe { ffi::FMOD_DSPConnection_GetInput(self.dsp_connection, &input) } {
+        match unsafe { ffi::FMOD_DSPConnection_GetInput(self.dsp_connection, &mut input) } {
             fmod::Ok => Ok(dsp::from_ptr(input)),
             e => Err(e)
         }
     }
 
     pub fn get_output(&self) -> Result<dsp::Dsp, fmod::Result> {
-        let output =::std::ptr::null();
+        let mut output = ::std::ptr::mut_null();
 
-        match unsafe { ffi::FMOD_DSPConnection_GetOutput(self.dsp_connection, &output) } {
+        match unsafe { ffi::FMOD_DSPConnection_GetOutput(self.dsp_connection, &mut output) } {
             fmod::Ok => Ok(dsp::from_ptr(output)),
             e => Err(e)
         }
@@ -77,22 +77,22 @@ impl DspConnection {
     }
 
     pub fn get_mix(&self) -> Result<f32, fmod::Result> {
-        let volume = 0f32;
+        let mut volume = 0f32;
 
-        match unsafe { ffi::FMOD_DSPConnection_GetMix(self.dsp_connection, &volume) } {
+        match unsafe { ffi::FMOD_DSPConnection_GetMix(self.dsp_connection, &mut volume) } {
             fmod::Ok => Ok(volume),
             e => Err(e)
         }
     }
 
-    pub fn set_levels(&self, speaker: fmod::Speaker, levels: Vec<f32>) -> fmod::Result {
-        unsafe { ffi::FMOD_DSPConnection_SetLevels(self.dsp_connection, speaker, levels.as_ptr(), levels.len() as c_int) }
+    pub fn set_levels(&self, speaker: fmod::Speaker, levels: &mut Vec<f32>) -> fmod::Result {
+        unsafe { ffi::FMOD_DSPConnection_SetLevels(self.dsp_connection, speaker, levels.as_mut_ptr(), levels.len() as c_int) }
     }
 
     pub fn get_levels(&self, speaker: fmod::Speaker, num_levels: uint) -> Result<Vec<f32>, fmod::Result> {
-        let levels = Vec::from_elem(num_levels, 0f32);
+        let mut levels = Vec::from_elem(num_levels, 0f32);
 
-        match unsafe { ffi::FMOD_DSPConnection_GetLevels(self.dsp_connection, speaker, levels.as_ptr(), levels.len() as c_int) } {
+        match unsafe { ffi::FMOD_DSPConnection_GetLevels(self.dsp_connection, speaker, levels.as_mut_ptr(), levels.len() as c_int) } {
             fmod::Ok => Ok(levels),
             e => Err(e)
         }
@@ -100,10 +100,10 @@ impl DspConnection {
 
     pub fn get_memory_info(&self, FmodMemoryBits(memory_bits): FmodMemoryBits,
         FmodEventMemoryBits(event_memory_bits): FmodEventMemoryBits) -> Result<(u32, FmodMemoryUsageDetails), fmod::Result> {
-        let details = fmod_sys::get_memory_usage_details_ffi(FmodMemoryUsageDetails::new());
-        let memory_used = 0u32;
+        let mut details = fmod_sys::get_memory_usage_details_ffi(FmodMemoryUsageDetails::new());
+        let mut memory_used = 0u32;
 
-        match unsafe { ffi::FMOD_DSPCONNECTION_GetMemoryInfo(self.dsp_connection, memory_bits, event_memory_bits, &memory_used, &details) } {
+        match unsafe { ffi::FMOD_DSPCONNECTION_GetMemoryInfo(self.dsp_connection, memory_bits, event_memory_bits, &mut memory_used, &mut details) } {
             fmod::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
             e => Err(e)
         }

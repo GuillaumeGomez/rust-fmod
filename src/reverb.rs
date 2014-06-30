@@ -51,10 +51,10 @@ impl Drop for Reverb {
 
 impl Reverb {
     pub fn release(&mut self) -> fmod::Result {
-        if self.reverb !=::std::ptr::null() {
+        if self.reverb !=::std::ptr::mut_null() {
             match unsafe { ffi::FMOD_Reverb_Release(self.reverb) } {
                 fmod::Ok => {
-                    self.reverb =::std::ptr::null();
+                    self.reverb = ::std::ptr::mut_null();
                     fmod::Ok
                 }
                 e => e
@@ -71,11 +71,11 @@ impl Reverb {
     }
 
     pub fn get_3D_attributes(&self) -> Result<(vector::FmodVector, f32, f32), fmod::Result> {
-        let position = vector::get_ffi(&vector::new());
-        let min_distance = 0f32;
-        let max_distance = 0f32;
+        let mut position = vector::get_ffi(&vector::new());
+        let mut min_distance = 0f32;
+        let mut max_distance = 0f32;
 
-        match unsafe { ffi::FMOD_Reverb_Get3DAttributes(self.reverb, &position, &min_distance, &max_distance) } {
+        match unsafe { ffi::FMOD_Reverb_Get3DAttributes(self.reverb, &mut position, &mut min_distance, &mut max_distance) } {
             fmod::Ok => Ok((vector::from_ptr(position), min_distance, max_distance)),
             e => Err(e)
         }
@@ -88,9 +88,9 @@ impl Reverb {
     }
 
     pub fn get_properties(&self, reverb_properties: reverb_properties::ReverbProperties) -> Result<reverb_properties::ReverbProperties, fmod::Result> {
-        let t_reverb_properties = reverb_properties::get_ffi(reverb_properties);
+        let mut t_reverb_properties = reverb_properties::get_ffi(reverb_properties);
 
-        match unsafe { ffi::FMOD_Reverb_GetProperties(self.reverb, &t_reverb_properties) } {
+        match unsafe { ffi::FMOD_Reverb_GetProperties(self.reverb, &mut t_reverb_properties) } {
             fmod::Ok => Ok(reverb_properties::from_ptr(t_reverb_properties)),
             e => Err(e)
         }
@@ -107,9 +107,9 @@ impl Reverb {
     }
 
     pub fn get_active(&self) -> Result<bool, fmod::Result> {
-        let active = 0i32;
+        let mut active = 0i32;
 
-        match unsafe { ffi::FMOD_Reverb_GetActive(self.reverb, &active) } {
+        match unsafe { ffi::FMOD_Reverb_GetActive(self.reverb, &mut active) } {
             fmod::Ok => Ok(active == 1),
             e => Err(e)
         }
@@ -117,10 +117,10 @@ impl Reverb {
 
     pub fn get_memory_info(&self, FmodMemoryBits(memory_bits): FmodMemoryBits,
         FmodEventMemoryBits(event_memory_bits): FmodEventMemoryBits) -> Result<(u32, FmodMemoryUsageDetails), fmod::Result> {
-        let details = fmod_sys::get_memory_usage_details_ffi(FmodMemoryUsageDetails::new());
-        let memory_used = 0u32;
+        let mut details = fmod_sys::get_memory_usage_details_ffi(FmodMemoryUsageDetails::new());
+        let mut memory_used = 0u32;
 
-        match unsafe { ffi::FMOD_Reverb_GetMemoryInfo(self.reverb, memory_bits, event_memory_bits, &memory_used, &details) } {
+        match unsafe { ffi::FMOD_Reverb_GetMemoryInfo(self.reverb, memory_bits, event_memory_bits, &mut memory_used, &mut details) } {
             fmod::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
             e => Err(e)
         }

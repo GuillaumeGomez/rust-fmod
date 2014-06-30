@@ -51,10 +51,10 @@ impl Drop for Geometry {
 
 impl Geometry {
     pub fn release(&mut self) -> fmod::Result {
-        if self.geometry !=::std::ptr::null() {
+        if self.geometry !=::std::ptr::mut_null() {
             match unsafe { ffi::FMOD_Geometry_Release(self.geometry) } {
                 fmod::Ok => {
-                    self.geometry =::std::ptr::null();
+                    self.geometry =::std::ptr::mut_null();
                     fmod::Ok
                 }
                 e => e
@@ -70,7 +70,7 @@ impl Geometry {
         } else {
             0
         };
-        let index = 0i32;
+        let mut index = 0i32;
         let t_vertices = Vec::with_capacity(vertices.len());
 
         for tmp in vertices.iter() {
@@ -78,35 +78,35 @@ impl Geometry {
         }
 
         match unsafe { ffi::FMOD_Geometry_AddPolygon(self.geometry, direct_occlusion, reverb_occlusion, t_double_sided, vertices.len() as c_int,
-            t_vertices.as_ptr(), &index) } {
+            t_vertices.as_ptr(), &mut index) } {
             fmod::Ok => Ok(index),
             e => Err(e)
         }
     }
 
     pub fn get_num_polygons(&self) -> Result<i32, fmod::Result> {
-        let num = 0i32;
+        let mut num = 0i32;
 
-        match unsafe { ffi::FMOD_Geometry_GetNumPolygons(self.geometry, &num) } {
+        match unsafe { ffi::FMOD_Geometry_GetNumPolygons(self.geometry, &mut num) } {
             fmod::Ok => Ok(num),
             e => Err(e)
         }
     }
 
     pub fn get_max_polygons(&self) -> Result<(i32, i32), fmod::Result> {
-        let max_polygons = 0i32;
-        let max_vertices = 0i32;
+        let mut max_polygons = 0i32;
+        let mut max_vertices = 0i32;
 
-        match unsafe { ffi::FMOD_Geometry_GetMaxPolygons(self.geometry, &max_polygons, &max_vertices) } {
+        match unsafe { ffi::FMOD_Geometry_GetMaxPolygons(self.geometry, &mut max_polygons, &mut max_vertices) } {
             fmod::Ok => Ok((max_polygons, max_vertices)),
             e => Err(e)
         }
     }
 
     pub fn get_polygon_num_vertices(&self, index: i32) -> Result<i32, fmod::Result> {
-        let num = 0i32;
+        let mut num = 0i32;
 
-        match unsafe { ffi::FMOD_Geometry_GetPolygonNumVertices(self.geometry, index, &num) } {
+        match unsafe { ffi::FMOD_Geometry_GetPolygonNumVertices(self.geometry, index, &mut num) } {
             fmod::Ok => Ok(num),
             e => Err(e)
         }
@@ -119,9 +119,9 @@ impl Geometry {
     }
 
     pub fn get_polygon_vertex(&self, index: i32, vertex_index: i32) -> Result<vector::FmodVector, fmod::Result> {
-        let vertex = vector::get_ffi(&vector::new());
+        let mut vertex = vector::get_ffi(&vector::new());
 
-        match unsafe { ffi::FMOD_Geometry_GetPolygonVertex(self.geometry, index, vertex_index, &vertex) } {
+        match unsafe { ffi::FMOD_Geometry_GetPolygonVertex(self.geometry, index, vertex_index, &mut vertex) } {
             fmod::Ok => Ok(vector::from_ptr(vertex)),
             e => Err(e)
         }
@@ -138,11 +138,11 @@ impl Geometry {
     }
 
     pub fn get_polygon_attributes(&self, index: i32) -> Result<(f32, f32, bool), fmod::Result> {
-        let direct_occlusion = 0f32;
-        let reverb_occlusion = 0f32;
-        let double_sided = 0;
+        let mut direct_occlusion = 0f32;
+        let mut reverb_occlusion = 0f32;
+        let mut double_sided = 0;
 
-        match unsafe { ffi::FMOD_Geometry_GetPolygonAttributes(self.geometry, index, &direct_occlusion, &reverb_occlusion, &double_sided) } {
+        match unsafe { ffi::FMOD_Geometry_GetPolygonAttributes(self.geometry, index, &mut direct_occlusion, &mut reverb_occlusion, &mut double_sided) } {
             fmod::Ok => Ok((direct_occlusion, reverb_occlusion, double_sided == 1)),
             e => Err(e)
         }
@@ -159,9 +159,9 @@ impl Geometry {
     }
 
     pub fn get_active(&self) -> Result<bool, fmod::Result> {
-        let active = 0;
+        let mut active = 0;
 
-        match unsafe { ffi::FMOD_Geometry_GetActive(self.geometry, &active) } {
+        match unsafe { ffi::FMOD_Geometry_GetActive(self.geometry, &mut active) } {
             fmod::Ok => Ok(active == 1),
             e => Err(e)
         }
@@ -175,10 +175,10 @@ impl Geometry {
     }
 
     pub fn get_rotation(&self) -> Result<(vector::FmodVector, vector::FmodVector), fmod::Result> {
-        let forward = vector::get_ffi(&vector::new());
-        let up = vector::get_ffi(&vector::new());
+        let mut forward = vector::get_ffi(&vector::new());
+        let mut up = vector::get_ffi(&vector::new());
 
-        match unsafe { ffi::FMOD_Geometry_GetRotation(self.geometry, &forward, &up) } {
+        match unsafe { ffi::FMOD_Geometry_GetRotation(self.geometry, &mut forward, &mut up) } {
             fmod::Ok => Ok((vector::from_ptr(forward), vector::from_ptr(up))),
             e => Err(e)
         }
@@ -191,9 +191,9 @@ impl Geometry {
     }
 
     pub fn get_position(&self) -> Result<vector::FmodVector, fmod::Result> {
-        let position = vector::get_ffi(&vector::new());
+        let mut position = vector::get_ffi(&vector::new());
 
-        match unsafe { ffi::FMOD_Geometry_GetPosition(self.geometry, &position) } {
+        match unsafe { ffi::FMOD_Geometry_GetPosition(self.geometry, &mut position) } {
             fmod::Ok => Ok(vector::from_ptr(position)),
             e => Err(e)
         }
@@ -206,9 +206,9 @@ impl Geometry {
     }
 
     pub fn get_scale(&self) -> Result<vector::FmodVector, fmod::Result> {
-        let scale = vector::get_ffi(&vector::new());
+        let mut scale = vector::get_ffi(&vector::new());
 
-        match unsafe { ffi::FMOD_Geometry_GetScale(self.geometry, &scale) } {
+        match unsafe { ffi::FMOD_Geometry_GetScale(self.geometry, &mut scale) } {
             fmod::Ok => Ok(vector::from_ptr(scale)),
             e => Err(e)
         }
@@ -216,10 +216,10 @@ impl Geometry {
 
     pub fn get_memory_info(&self, FmodMemoryBits(memory_bits): FmodMemoryBits,
         FmodEventMemoryBits(event_memory_bits): FmodEventMemoryBits) -> Result<(u32, FmodMemoryUsageDetails), fmod::Result> {
-        let details = fmod_sys::get_memory_usage_details_ffi(FmodMemoryUsageDetails::new());
-        let memory_used = 0u32;
+        let mut details = fmod_sys::get_memory_usage_details_ffi(FmodMemoryUsageDetails::new());
+        let mut memory_used = 0u32;
 
-        match unsafe { ffi::FMOD_Geometry_GetMemoryInfo(self.geometry, memory_bits, event_memory_bits, &memory_used, &details) } {
+        match unsafe { ffi::FMOD_Geometry_GetMemoryInfo(self.geometry, memory_bits, event_memory_bits, &mut memory_used, &mut details) } {
             fmod::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
             e => Err(e)
         }

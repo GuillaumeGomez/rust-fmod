@@ -31,6 +31,7 @@ use libc::{c_int};
 use fmod_sys;
 use fmod_sys::FmodMemoryUsageDetails;
 use std::mem::transmute;
+use libc::{c_char};
 
 pub struct SoundGroup {
     sound_group: ffi::FMOD_SOUNDGROUP,
@@ -52,10 +53,10 @@ impl Drop for SoundGroup {
 
 impl SoundGroup {
     pub fn release(&mut self) -> fmod::Result {
-        if self.sound_group !=::std::ptr::null() {
+        if self.sound_group.is_not_null() {
             match unsafe { ffi::FMOD_SoundGroup_Release(self.sound_group) } {
                 fmod::Ok => {
-                    self.sound_group =::std::ptr::null();
+                    self.sound_group =::std::ptr::mut_null();
                     fmod::Ok
                 }
                 e => e
@@ -70,9 +71,9 @@ impl SoundGroup {
     }
 
     pub fn get_max_audible(&self) -> Result<i32, fmod::Result> {
-        let max_audible = 0i32;
+        let mut max_audible = 0i32;
 
-        match unsafe { ffi::FMOD_SoundGroup_GetMaxAudible(self.sound_group, &max_audible) } {
+        match unsafe { ffi::FMOD_SoundGroup_GetMaxAudible(self.sound_group, &mut max_audible) } {
             fmod::Ok => Ok(max_audible),
             e => Err(e)
         }
@@ -83,9 +84,9 @@ impl SoundGroup {
     }
 
     pub fn get_max_audible_behavior(&self) -> Result<fmod::SoundGroupBehavior, fmod::Result> {
-        let max_audible_behavior = fmod::SoundGroupBehaviorFail;
+        let mut max_audible_behavior = fmod::SoundGroupBehaviorFail;
 
-        match unsafe { ffi::FMOD_SoundGroup_GetMaxAudibleBehavior(self.sound_group, &max_audible_behavior) } {
+        match unsafe { ffi::FMOD_SoundGroup_GetMaxAudibleBehavior(self.sound_group, &mut max_audible_behavior) } {
             fmod::Ok => Ok(max_audible_behavior),
             e => Err(e)
         }
@@ -96,9 +97,9 @@ impl SoundGroup {
     }
 
     pub fn get_mute_fade_speed(&self) -> Result<f32, fmod::Result> {
-        let speed = 0f32;
+        let mut speed = 0f32;
 
-        match unsafe { ffi::FMOD_SoundGroup_GetMuteFadeSpeed(self.sound_group, &speed) } {
+        match unsafe { ffi::FMOD_SoundGroup_GetMuteFadeSpeed(self.sound_group, &mut speed) } {
             fmod::Ok => Ok(speed),
             e => Err(e)
         }
@@ -109,9 +110,9 @@ impl SoundGroup {
     }
 
     pub fn get_volume(&self) -> Result<f32, fmod::Result> {
-        let volume = 0f32;
+        let mut volume = 0f32;
 
-        match unsafe { ffi::FMOD_SoundGroup_GetVolume(self.sound_group, &volume) } {
+        match unsafe { ffi::FMOD_SoundGroup_GetVolume(self.sound_group, &mut volume) } {
             fmod::Ok => Ok(volume),
             e => Err(e)
         }
@@ -125,7 +126,7 @@ impl SoundGroup {
         let name = String::with_capacity(name_len as uint);
 
         name.with_c_str(|c_name|{
-            match unsafe { ffi::FMOD_SoundGroup_GetName(self.sound_group, c_name, name_len as i32) } {
+            match unsafe { ffi::FMOD_SoundGroup_GetName(self.sound_group, c_name as *mut c_char, name_len as i32) } {
                 fmod::Ok => Ok(unsafe {::std::str::raw::from_c_str(c_name).clone() }),
                 e => Err(e)
             }
@@ -133,27 +134,27 @@ impl SoundGroup {
     }
 
     pub fn get_num_sounds(&self) -> Result<i32, fmod::Result> {
-        let num_sounds = 0i32;
+        let mut num_sounds = 0i32;
 
-        match unsafe { ffi::FMOD_SoundGroup_GetNumSounds(self.sound_group, &num_sounds) } {
+        match unsafe { ffi::FMOD_SoundGroup_GetNumSounds(self.sound_group, &mut num_sounds) } {
             fmod::Ok => Ok(num_sounds),
             e => Err(e)
         }
     }
 
     pub fn get_sound(&self, index: i32) -> Result<sound::Sound, fmod::Result> {
-        let sound =::std::ptr::null();
+        let mut sound = ::std::ptr::mut_null();
 
-        match unsafe { ffi::FMOD_SoundGroup_GetSound(self.sound_group, index, &sound) } {
+        match unsafe { ffi::FMOD_SoundGroup_GetSound(self.sound_group, index, &mut sound) } {
             fmod::Ok => Ok(sound::from_ptr(sound)),
             e => Err(e)
         }
     }
 
     pub fn get_num_playing(&self) -> Result<i32, fmod::Result> {
-        let num_playing = 0i32;
+        let mut num_playing = 0i32;
 
-        match unsafe { ffi::FMOD_SoundGroup_GetNumPlaying(self.sound_group, &num_playing) } {
+        match unsafe { ffi::FMOD_SoundGroup_GetNumPlaying(self.sound_group, &mut num_playing) } {
             fmod::Ok => Ok(num_playing),
             e => Err(e)
         }
@@ -161,10 +162,10 @@ impl SoundGroup {
 
     pub fn get_memory_info(&self, FmodMemoryBits(memory_bits): FmodMemoryBits,
         FmodEventMemoryBits(event_memory_bits): FmodEventMemoryBits) -> Result<(u32, FmodMemoryUsageDetails), fmod::Result> {
-        let details = fmod_sys::get_memory_usage_details_ffi(FmodMemoryUsageDetails::new());
-        let memory_used = 0u32;
+        let mut details = fmod_sys::get_memory_usage_details_ffi(FmodMemoryUsageDetails::new());
+        let mut memory_used = 0u32;
 
-        match unsafe { ffi::FMOD_SoundGroup_GetMemoryInfo(self.sound_group, memory_bits, event_memory_bits, &memory_used, &details) } {
+        match unsafe { ffi::FMOD_SoundGroup_GetMemoryInfo(self.sound_group, memory_bits, event_memory_bits, &mut memory_used, &mut details) } {
             fmod::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
             e => Err(e)
         }
