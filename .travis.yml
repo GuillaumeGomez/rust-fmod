@@ -1,0 +1,11 @@
+install:
+	- wget http://static.rust-lang.org/dist/rust-nightly-x86_64-unknown-linux-gnu.tar.gz
+	- tar xzf rust-nightly-x86_64-unknown-linux-gnu.tar.gz
+	- export PATH=$PATH:$(pwd)/rust-nightly-x86_64-unknown-linux-gnu/bin
+	- wget http://www.fmod.org/download/fmodex/api/Linux/fmodapi44438linux.tar.gz
+	- tar xvf fmodapi44438linux.tar.bz2
+	- sudo cp -r fmodapi44438linux/api/lib/* /usr/local/lib/.
+script:
+	- rustc --version
+after_script:
+	- curl http://www.rust-ci.org/artifacts/put?t=$RUSTCI_TOKEN | sh
