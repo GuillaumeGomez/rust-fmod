@@ -428,6 +428,37 @@ pub mod fmod {
         SoundGroupBehaviorMax,               /* Maximum number of open state types. */
         SoundGroupBehaviorForceInt = 65536   /* Makes sure this enum is signed 32bit. */
     }
+
+    #[deriving(PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    pub enum DspType
+    {
+        DspTypeUnknown,                 /* This unit was created via a non FMOD plugin so has an unknown purpose. */
+        DspTypeMixer,                   /* This unit does nothing but take inputs and mix them together then feed the result to the soundcard unit. */
+        DspTypeOscillator,              /* This unit generates sine/square/saw/triangle or noise tones. */
+        DspTypeLowPass,                 /* This unit filters sound using a high quality, resonant lowpass filter algorithm but consumes more CPU time. */
+        DspTypeITLowPass,               /* This unit filters sound using a resonant lowpass filter algorithm that is used in Impulse Tracker, but with limited cutoff range (0 to 8060hz). */
+        DspTypeHighPass,                /* This unit filters sound using a resonant highpass filter algorithm. */
+        DspTypeEcho,                    /* This unit produces an echo on the sound and fades out at the desired rate. */
+        DspTypeFlange,                  /* This unit produces a flange effect on the sound. */
+        DspTypeDistortion,              /* This unit distorts the sound. */
+        DspTypeNormalize,               /* This unit normalizes or amplifies the sound to a certain level. */
+        DspTypeParameq,                 /* This unit attenuates or amplifies a selected frequency range. */
+        DspTypePitchShift,              /* This unit bends the pitch of a sound without changing the speed of playback. */
+        DspTypeChorus,                  /* This unit produces a chorus effect on the sound. */
+        DspTypeVSTPlugin,               /* This unit allows the use of Steinberg VST plugins */
+        DspTypeWinampPlugin,            /* This unit allows the use of Nullsoft Winamp plugins */
+        DspTypeITEcho,                  /* This unit produces an echo on the sound and fades out at the desired rate as is used in Impulse Tracker. */
+        DspTypeCompressor,              /* This unit implements dynamic compression (linked multichannel, wideband) */
+        DspTypeSFXReverb,               /* This unit implements SFX reverb */
+        DspTypeLowPassSimple,           /* This unit filters sound using a simple lowpass with no resonance, but has flexible cutoff and is fast. */
+        DspTypeDelay,                   /* This unit produces different delays on individual channels of the sound. */
+        DspTypeTremolo,                 /* This unit produces a tremolo / chopper effect on the sound. */
+        DspTypeLADSPAPlugin,            /* This unit allows the use of LADSPA standard plugins. */
+        DspTypeHighPassSimple,          /* This unit filters sound using a simple highpass with no resonance, but has flexible cutoff and is fast. */
+        DspTypeHardware = 1000,         /* Offset that platform specific FMOD_HARDWARE DSPs will start at. */
+        DspTypeForceInt = 65536         /* Makes sure this enum is signed 32bit. */
+    }
 }
 
 pub static FMOD_DEFAULT                : c_uint = 0x00000000;  /* Default for all modes listed below. FMOD_LOOP_OFF, FMOD_2D, FMOD_HARDWARE */

@@ -42,7 +42,7 @@ pub use sound::{Sound, FmodTag, FmodSyncPoint};
 pub use fmod_sys::{FmodSys, FmodGuid, FmodSoftwareFormat, FmodAdvancedSettings, FmodOutputHandle, FmodCreateSoundexInfo, FmodMemoryUsageDetails};
 pub use channel_group::ChannelGroup;
 pub use sound_group::SoundGroup;
-pub use dsp::Dsp;
+pub use dsp::{Dsp, DspParameterDesc, DspDescription};
 pub use dsp_connection::DspConnection;
 pub use reverb::Reverb;
 pub use reverb_properties::ReverbProperties;

@@ -27,36 +27,46 @@ extern crate libc;
 use enums::*;
 use libc::{c_void, c_uint, c_int, c_char, c_float, c_ushort, c_uchar, c_short};
 
-pub type FMOD_FILE_OPENCALLBACK =::std::option::Option<extern "C" fn(name: *mut c_char, unicode: int, file_size: *mut c_uint, handle: *mut *mut c_void,
+pub type FMOD_FILE_OPENCALLBACK = ::std::option::Option<extern "C" fn(name: *mut c_char, unicode: int, file_size: *mut c_uint, handle: *mut *mut c_void,
     user_data: *mut *mut c_void) -> fmod::Result>;
-pub type FMOD_FILE_CLOSECALLBACK =::std::option::Option<extern "C" fn(handle: *mut c_void, user_data: *mut c_void) -> fmod::Result>;
-pub type FMOD_FILE_READCALLBACK =::std::option::Option<extern "C" fn(handle: *mut c_void, buffer: *mut c_void, size_bytes: c_uint, bytes_read: *mut c_uint,
+pub type FMOD_FILE_CLOSECALLBACK = ::std::option::Option<extern "C" fn(handle: *mut c_void, user_data: *mut c_void) -> fmod::Result>;
+pub type FMOD_FILE_READCALLBACK = ::std::option::Option<extern "C" fn(handle: *mut c_void, buffer: *mut c_void, size_bytes: c_uint, bytes_read: *mut c_uint,
     user_data: *mut c_void) -> fmod::Result>;
-pub type FMOD_FILE_SEEKCALLBACK =::std::option::Option<extern "C" fn(handle: *mut c_void, pos: c_uint, user_data: *mut c_void) -> fmod::Result>;
-pub type FMOD_FILE_ASYNCREADCALLBACK =::std::option::Option<extern "C" fn(arg1: *mut FMOD_ASYNCREADINFO, arg2: *mut c_void) -> fmod::Result>;
-pub type FMOD_FILE_ASYNCCANCELCALLBACK =::std::option::Option<extern "C" fn(arg1: *mut c_void, arg2: *mut c_void, arg3: c_uint) -> fmod::Result>;
+pub type FMOD_FILE_SEEKCALLBACK = ::std::option::Option<extern "C" fn(handle: *mut c_void, pos: c_uint, user_data: *mut c_void) -> fmod::Result>;
+pub type FMOD_FILE_ASYNCREADCALLBACK = ::std::option::Option<extern "C" fn(arg1: *mut FMOD_ASYNCREADINFO, arg2: *mut c_void) -> fmod::Result>;
+pub type FMOD_FILE_ASYNCCANCELCALLBACK = ::std::option::Option<extern "C" fn(arg1: *mut c_void, arg2: *mut c_void, arg3: c_uint) -> fmod::Result>;
 
-pub type FMOD_SOUND_NONBLOCKCALLBACK =::std::option::Option<extern "C" fn(sound: FMOD_SOUND, result: fmod::Result) -> fmod::Result>;
-pub type FMOD_SOUND_PCMREADCALLBACK =::std::option::Option<extern "C" fn(sound: FMOD_SOUND, data: *mut c_void, data_len: c_uint) -> fmod::Result>;
-pub type FMOD_SOUND_PCMSETPOSCALLBACK =::std::option::Option<extern "C" fn(sound: FMOD_SOUND, sub_sound: c_int, position: c_uint,
+pub type FMOD_SOUND_NONBLOCKCALLBACK = ::std::option::Option<extern "C" fn(sound: FMOD_SOUND, result: fmod::Result) -> fmod::Result>;
+pub type FMOD_SOUND_PCMREADCALLBACK = ::std::option::Option<extern "C" fn(sound: FMOD_SOUND, data: *mut c_void, data_len: c_uint) -> fmod::Result>;
+pub type FMOD_SOUND_PCMSETPOSCALLBACK = ::std::option::Option<extern "C" fn(sound: FMOD_SOUND, sub_sound: c_int, position: c_uint,
     postype: FMOD_TIMEUNIT) -> fmod::Result>;
 
-pub type FMOD_SYSTEM_CALLBACK =::std::option::Option<extern "C" fn(system: FMOD_SYSTEM, _type: fmod::SystemCallbackType, command_data1: *mut c_void,
+pub type FMOD_SYSTEM_CALLBACK = ::std::option::Option<extern "C" fn(system: FMOD_SYSTEM, _type: fmod::SystemCallbackType, command_data1: *mut c_void,
     command_data2: *mut c_void) -> fmod::Result>;
 
 /*  codec callbacks */
-pub type FMOD_CODEC_OPENCALLBACK =::std::option::Option<extern "C" fn(codec_state: *mut FMOD_CODEC_STATE, user_mode: FMOD_MODE, userexinfo: *mut FMOD_CREATESOUNDEXINFO) -> fmod::Result>;
-pub type FMOD_CODEC_CLOSECALLBACK =::std::option::Option<extern "C" fn(codec_state: *mut FMOD_CODEC_STATE) -> fmod::Result>;
-pub type FMOD_CODEC_READCALLBACK =::std::option::Option<extern "C" fn(codec_state: *mut FMOD_CODEC_STATE, buffer: *mut c_void, size_bytes: c_uint, bytes_read: *mut c_uint) -> fmod::Result>;
-pub type FMOD_CODEC_GETLENGTHCALLBACK =::std::option::Option<extern "C" fn(codec_state: *mut FMOD_CODEC_STATE, length: *mut c_uint, length_type: FMOD_TIMEUNIT) -> fmod::Result>;
-pub type FMOD_CODEC_SETPOSITIONCALLBACK =::std::option::Option<extern "C" fn(codec_state: *mut FMOD_CODEC_STATE, sub_sound: c_int, position: c_uint, postype: FMOD_TIMEUNIT) -> fmod::Result>;
-pub type FMOD_CODEC_GETPOSITIONCALLBACK =::std::option::Option<extern "C" fn(codec_state: *mut FMOD_CODEC_STATE, position: *mut c_uint, postype: FMOD_TIMEUNIT) -> fmod::Result>;
-pub type FMOD_CODEC_SOUNDCREATECALLBACK =::std::option::Option<extern "C" fn(codec_state: *mut FMOD_CODEC_STATE, sub_sound: c_int, sound: FMOD_SOUND) -> fmod::Result>;
-pub type FMOD_CODEC_METADATACALLBACK =::std::option::Option<extern "C" fn(codec_state: *mut FMOD_CODEC_STATE, tag_type: fmod::TagType, name: *mut c_char, data: *mut c_void,
+pub type FMOD_CODEC_OPENCALLBACK = ::std::option::Option<extern "C" fn(codec_state: *mut FMOD_CODEC_STATE, user_mode: FMOD_MODE, userexinfo: *mut FMOD_CREATESOUNDEXINFO) -> fmod::Result>;
+pub type FMOD_CODEC_CLOSECALLBACK = ::std::option::Option<extern "C" fn(codec_state: *mut FMOD_CODEC_STATE) -> fmod::Result>;
+pub type FMOD_CODEC_READCALLBACK = ::std::option::Option<extern "C" fn(codec_state: *mut FMOD_CODEC_STATE, buffer: *mut c_void, size_bytes: c_uint, bytes_read: *mut c_uint) -> fmod::Result>;
+pub type FMOD_CODEC_GETLENGTHCALLBACK = ::std::option::Option<extern "C" fn(codec_state: *mut FMOD_CODEC_STATE, length: *mut c_uint, length_type: FMOD_TIMEUNIT) -> fmod::Result>;
+pub type FMOD_CODEC_SETPOSITIONCALLBACK = ::std::option::Option<extern "C" fn(codec_state: *mut FMOD_CODEC_STATE, sub_sound: c_int, position: c_uint, postype: FMOD_TIMEUNIT) -> fmod::Result>;
+pub type FMOD_CODEC_GETPOSITIONCALLBACK = ::std::option::Option<extern "C" fn(codec_state: *mut FMOD_CODEC_STATE, position: *mut c_uint, postype: FMOD_TIMEUNIT) -> fmod::Result>;
+pub type FMOD_CODEC_SOUNDCREATECALLBACK = ::std::option::Option<extern "C" fn(codec_state: *mut FMOD_CODEC_STATE, sub_sound: c_int, sound: FMOD_SOUND) -> fmod::Result>;
+pub type FMOD_CODEC_METADATACALLBACK = ::std::option::Option<extern "C" fn(codec_state: *mut FMOD_CODEC_STATE, tag_type: fmod::TagType, name: *mut c_char, data: *mut c_void,
     data_len: c_uint, data_type: fmod::TagDataType, unique: c_int) -> fmod::Result>;
-pub type FMOD_CODEC_GETWAVEFORMAT =::std::option::Option<extern "C" fn(codec_state: *mut FMOD_CODEC_STATE, index: c_int, wave_format: *mut FMOD_CODEC_WAVEFORMAT) -> fmod::Result>;
-pub type FMOD_3D_ROLLOFFCALLBACK =::std::option::Option<extern "C" fn(channel: FMOD_CHANNEL, distance: c_float) -> fmod::Result>;
+pub type FMOD_CODEC_GETWAVEFORMAT = ::std::option::Option<extern "C" fn(codec_state: *mut FMOD_CODEC_STATE, index: c_int, wave_format: *mut FMOD_CODEC_WAVEFORMAT) -> fmod::Result>;
+pub type FMOD_3D_ROLLOFFCALLBACK = ::std::option::Option<extern "C" fn(channel: FMOD_CHANNEL, distance: c_float) -> fmod::Result>;
 
+/*  DSP callbacks */
+pub type FMOD_DSP_CREATECALLBACK = ::std::option::Option<extern "C" fn(dsp_state: *mut FMOD_DSP_STATE) -> fmod::Result>;
+pub type FMOD_DSP_RELEASECALLBACK = ::std::option::Option<extern "C" fn(dsp_state: *mut FMOD_DSP_STATE) -> fmod::Result>;
+pub type FMOD_DSP_RESETCALLBACK = ::std::option::Option<extern "C" fn(dsp_state: *mut FMOD_DSP_STATE) -> fmod::Result>;
+pub type FMOD_DSP_READCALLBACK = ::std::option::Option<extern "C" fn(dsp_state: *mut FMOD_DSP_STATE, in_buffer: *mut c_float, outbuffer: *mut c_float, length: c_uint,
+    in_channels: c_int, out_channels: c_int) -> fmod::Result>;
+pub type FMOD_DSP_SETPOSITIONCALLBACK = ::std::option::Option<extern "C" fn(dsp_state: *mut FMOD_DSP_STATE, pos: c_uint) -> fmod::Result>;
+pub type FMOD_DSP_SETPARAMCALLBACK = ::std::option::Option<extern "C" fn(dsp_state: *mut FMOD_DSP_STATE, index: c_int, value: c_float) -> fmod::Result>;
+pub type FMOD_DSP_GETPARAMCALLBACK = ::std::option::Option<extern "C" fn(dsp_state: *mut FMOD_DSP_STATE, index: c_int, value: *mut c_float, value_str: *mut c_char) -> fmod::Result>;
+pub type FMOD_DSP_DIALOGCALLBACK = ::std::option::Option<extern "C" fn(dsp_state: *mut FMOD_DSP_STATE, hwnd: *mut c_void, show: c_int) -> fmod::Result>;
 
 pub type FMOD_BOOL = c_int;
 pub type FMOD_CAPS = c_uint;
@@ -64,8 +74,6 @@ pub type FMOD_CHANNEL = *mut c_void;
 pub type FMOD_CHANNELGROUP = *mut c_void;
 pub type FMOD_DSP = *mut c_void;
 pub type FMOD_DSPCONNECTION = *mut c_void;
-pub type FMOD_DSP_DESCRIPTION = c_void;
-pub type FMOD_DSP_TYPE = c_void;
 pub type FMOD_GEOMETRY = *mut c_void;
 pub type FMOD_INITFLAGS = c_uint;
 pub type FMOD_MODE = c_uint;
@@ -163,12 +171,10 @@ extern "C" {
         sound: *mut FMOD_SOUND) -> fmod::Result;
     pub fn FMOD_System_CreateStream(system: FMOD_SYSTEM, name_or_data: *const c_char, mode: FMOD_MODE, exinfo: *mut FMOD_CREATESOUNDEXINFO,
         sound: *mut FMOD_SOUND) -> fmod::Result;
-    //need to bind it
     pub fn FMOD_System_CreateReverb(system: FMOD_SYSTEM, reverb: *mut FMOD_REVERB) -> fmod::Result;
-    //need to bind it
     pub fn FMOD_System_CreateDSP(system: FMOD_SYSTEM, description: *mut FMOD_DSP_DESCRIPTION, dsp: *mut FMOD_DSP) -> fmod::Result;
     //need to bind it
-    pub fn FMOD_System_CreateDSPByType(system: FMOD_SYSTEM, _type: FMOD_DSP_TYPE, dsp: *mut FMOD_DSP) -> fmod::Result;
+    pub fn FMOD_System_CreateDSPByType(system: FMOD_SYSTEM, _type: fmod::DspType, dsp: *mut FMOD_DSP) -> fmod::Result;
     pub fn FMOD_System_CreateChannelGroup(system: FMOD_SYSTEM, name: *const c_char, channel_group: *mut FMOD_CHANNELGROUP) -> fmod::Result;
     pub fn FMOD_System_CreateSoundGroup(system: FMOD_SYSTEM, name: *const c_char, sound_group: *mut FMOD_SOUNDGROUP) -> fmod::Result;
     pub fn FMOD_System_GetChannel(system: FMOD_SYSTEM, channel_id: c_int, channel: *mut FMOD_CHANNEL) -> fmod::Result;
@@ -457,8 +463,7 @@ extern "C" {
     pub fn FMOD_DSP_ShowConfigDialog(dsp: FMOD_DSP, hwnd: *mut c_void, show: FMOD_BOOL) -> fmod::Result;
     /* DSP attributes. */
     pub fn FMOD_DSP_GetInfo(dsp: FMOD_DSP, name: *mut c_char, version: *mut c_uint, channels: *mut c_int, config_width: *mut c_int, config_height: *mut c_int) -> fmod::Result;
-    /* I'll bind it later */
-    pub fn FMOD_DSP_GetType(dsp: FMOD_DSP, _type: *mut FMOD_DSP_TYPE) -> fmod::Result;
+    pub fn FMOD_DSP_GetType(dsp: FMOD_DSP, _type: *mut fmod::DspType) -> fmod::Result;
     pub fn FMOD_DSP_SetDefaults(dsp: FMOD_DSP, frequency: c_float, volume: c_float, pan: c_float, priority: c_int) -> fmod::Result;
     pub fn FMOD_DSP_GetDefaults(dsp: FMOD_DSP, frequency: *mut c_float, volume: *mut c_float, pan: *mut c_float, priority: *mut c_int) -> fmod::Result;
     /* Userdata set/get. */
@@ -762,4 +767,41 @@ pub struct FMOD_MEMORY_USAGE_DETAILS
     pub event_category         : c_uint, /* [out] Event category objects */
     pub event_envelope_point   : c_uint, /* [out] Event envelope point objects */
     pub event_instance_pool    : c_uint  /* [out] Event instance pool memory */
+}
+
+pub struct FMOD_DSP_PARAMETERDESC
+{
+    pub min         : c_float,        /* [w] Minimum value of the parameter (ie 100.0). */
+    pub max         : c_float,        /* [w] Maximum value of the parameter (ie 22050.0). */
+    pub default_val : c_float,        /* [w] Default value of parameter. */
+    pub name        : *mut c_char,    /* [w] Name of the parameter to be displayed (ie "Cutoff frequency"). */
+    pub label       : *mut c_char,    /* [w] Short string to be put next to value to denote the unit type (ie "hz"). */
+    pub description : *const c_char   /* [w] Description of the parameter to be displayed as a help item / tooltip for this parameter. */
+}
+
+pub struct FMOD_DSP_DESCRIPTION
+{
+    pub name                    : *mut c_char,                  /* [w] Name of the unit to be displayed in the network. */
+    pub version                 : c_uint,                       /* [w] Plugin writer's version number. */
+    pub channels                : c_int,                        /* [w] Number of channels.  Use 0 to process whatever number of channels is currently in the network.  >0 would be mostly used if the unit is a unit that only generates sound. */
+    pub create                  : FMOD_DSP_CREATECALLBACK,      /* [w] Create callback.  This is called when DSP unit is created.  Can be null. */
+    pub release                 : FMOD_DSP_RELEASECALLBACK,     /* [w] Release callback.  This is called just before the unit is freed so the user can do any cleanup needed for the unit.  Can be null. */
+    pub reset                   : FMOD_DSP_RESETCALLBACK,       /* [w] Reset callback.  This is called by the user to reset any history buffers that may need resetting for a filter, when it is to be used or re-used for the first time to its initial clean state.  Use to avoid clicks or artifacts. */
+    pub read                    : FMOD_DSP_READCALLBACK,        /* [w] Read callback.  Processing is done here.  Can be null. */
+    pub set_position            : FMOD_DSP_SETPOSITIONCALLBACK, /* [w] Set position callback.  This is called if the unit wants to update its position info but not process data, or reset a cursor position internally if it is reading data from a certain source.  Can be null. */
+    pub num_parameters          : c_int,                        /* [w] Number of parameters used in this filter.  The user finds this with DSP::getNumParameters */
+    pub param_desc              : FMOD_DSP_PARAMETERDESC,       /* [w] Variable number of parameter structures. */
+    pub set_parameter           : FMOD_DSP_SETPARAMCALLBACK,    /* [w] This is called when the user calls DSP::setParameter.  Can be null. */
+    pub get_parameter           : FMOD_DSP_GETPARAMCALLBACK,    /* [w] This is called when the user calls DSP::getParameter.  Can be null. */
+    pub config                  : FMOD_DSP_DIALOGCALLBACK,      /* [w] This is called when the user calls DSP::showConfigDialog.  Can be used to display a dialog to configure the filter.  Can be null. */
+    pub config_width            : c_int,                        /* [w] Width of config dialog graphic if there is one.  0 otherwise.*/
+    pub config_height           : c_int,                        /* [w] Height of config dialog graphic if there is one.  0 otherwise.*/
+    pub user_data               : *mut c_void                   /* [w] Optional. Specify 0 to ignore. This is user data to be attached to the DSP unit during creation.  Access via DSP::getUserData. */
+}
+
+pub struct FMOD_DSP_STATE
+{
+    pub instance: *mut FMOD_DSP,    /* [r] Handle to the DSP hand the user created.  Not to be modified.  C++ users cast to FMOD::DSP to use.  */
+    pub plugin_data: *mut c_void,   /* [w] Plugin writer created data the output author wants to attach to this object. */
+    pub speaker_mask: c_ushort      /* [w] Specifies which speakers the DSP effect is active on */
 }

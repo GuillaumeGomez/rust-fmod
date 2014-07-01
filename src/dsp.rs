@@ -29,7 +29,8 @@ use dsp_connection;
 use fmod_sys;
 use fmod_sys::FmodMemoryUsageDetails;
 use std::mem::transmute;
-use libc::{c_char};
+use libc::{c_char, c_void};
+use std;
 
 pub fn from_ptr(dsp: ffi::FMOD_DSP) -> Dsp {
     Dsp{dsp: dsp, can_be_deleted: false}
@@ -41,6 +42,151 @@ pub fn from_ptr_first(dsp: ffi::FMOD_DSP) -> Dsp {
 
 pub fn get_ffi(dsp: &Dsp) -> ffi::FMOD_DSP {
     dsp.dsp
+}
+
+pub struct DspParameterDesc
+{
+    pub min         : f32,          /* [w] Minimum value of the parameter (ie 100.0). */
+    pub max         : f32,          /* [w] Maximum value of the parameter (ie 22050.0). */
+    pub default_val : f32,          /* [w] Default value of parameter. */
+    pub name        : String,       /* [w] Name of the parameter to be displayed (ie "Cutoff frequency"). */
+    pub label       : String,       /* [w] Short string to be put next to value to denote the unit type (ie "hz"). */
+    pub description : String        /* [w] Description of the parameter to be displayed as a help item / tooltip for this parameter. */
+}
+
+pub fn from_parameter_ptr(dsp_parameter: &ffi::FMOD_DSP_PARAMETERDESC) -> DspParameterDesc {
+    DspParameterDesc {
+        min: dsp_parameter.min,
+        max: dsp_parameter.max,
+        default_val: dsp_parameter.default_val,
+        name: unsafe { ::std::str::raw::from_c_str(dsp_parameter.name.clone() as *const c_char) },
+        label: unsafe { ::std::str::raw::from_c_str(dsp_parameter.label.clone() as *const c_char) },
+        description: unsafe { ::std::str::raw::from_c_str(dsp_parameter.description.clone()) }
+    }
+}
+
+pub fn get_parameter_ffi(dsp_parameter: &DspParameterDesc) -> ffi::FMOD_DSP_PARAMETERDESC {
+    let mut tmp_name = Vec::from_slice(dsp_parameter.name.as_bytes());
+    let mut tmp_label = Vec::from_slice(dsp_parameter.label.as_bytes());
+
+    tmp_name.truncate(16);
+    tmp_label.truncate(16);
+    tmp_name.reserve_exact(16);
+    tmp_label.reserve_exact(16);
+    tmp_name.as_slice().with_c_str(|c_name| {
+        tmp_label.as_slice().with_c_str(|c_label| {
+            dsp_parameter.description.as_slice().with_c_str(|c_description| {
+                ffi::FMOD_DSP_PARAMETERDESC {
+                    min: dsp_parameter.min,
+                    max: dsp_parameter.max,
+                    default_val: dsp_parameter.default_val,
+                    name: c_name as *mut c_char,
+                    label: c_label as *mut c_char,
+                    description: c_description
+                }
+            })
+        })
+    })
+}
+
+pub fn new_parameter() -> DspParameterDesc {
+    DspParameterDesc {
+        min: 0f32,
+        max: 0f32,
+        default_val: 0f32,
+        name: String::new(),
+        label: String::new(),
+        description: String::new()
+    }
+}
+
+pub struct DspDescription
+{
+    pub name                : String,                            /* [w] Name of the unit to be displayed in the network. */
+    pub version             : u32,                               /* [w] Plugin writer's version number. */
+    pub channels            : i32,                               /* [w] Number of channels.  Use 0 to process whatever number of channels is currently in the network.  >0 would be mostly used if the unit is a unit that only generates sound. */
+    create                  : ffi::FMOD_DSP_CREATECALLBACK,      /* [w] Create callback.  This is called when DSP unit is created.  Can be null. */
+    release                 : ffi::FMOD_DSP_RELEASECALLBACK,     /* [w] Release callback.  This is called just before the unit is freed so the user can do any cleanup needed for the unit.  Can be null. */
+    reset                   : ffi::FMOD_DSP_RESETCALLBACK,       /* [w] Reset callback.  This is called by the user to reset any history buffers that may need resetting for a filter, when it is to be used or re-used for the first time to its initial clean state.  Use to avoid clicks or artifacts. */
+    read                    : ffi::FMOD_DSP_READCALLBACK,        /* [w] Read callback.  Processing is done here.  Can be null. */
+    set_position            : ffi::FMOD_DSP_SETPOSITIONCALLBACK, /* [w] Set position callback.  This is called if the unit wants to update its position info but not process data, or reset a cursor position internally if it is reading data from a certain source.  Can be null. */
+    pub num_parameters      : i32,                               /* [w] Number of parameters used in this filter.  The user finds this with DSP::getNumParameters */
+    pub param_desc          : DspParameterDesc,                  /* [w] Variable number of parameter structures. */
+    set_parameter           : ffi::FMOD_DSP_SETPARAMCALLBACK,    /* [w] This is called when the user calls DSP::setParameter.  Can be null. */
+    get_parameter           : ffi::FMOD_DSP_GETPARAMCALLBACK,    /* [w] This is called when the user calls DSP::getParameter.  Can be null. */
+    config                  : ffi::FMOD_DSP_DIALOGCALLBACK,      /* [w] This is called when the user calls DSP::showConfigDialog.  Can be used to display a dialog to configure the filter.  Can be null. */
+    pub config_width        : i32,                               /* [w] Width of config dialog graphic if there is one.  0 otherwise.*/
+    pub config_height       : i32,                               /* [w] Height of config dialog graphic if there is one.  0 otherwise.*/
+    user_data               : *mut c_void                        /* [w] Optional. Specify 0 to ignore. This is user data to be attached to the DSP unit during creation.  Access via DSP::getUserData. */
+}
+
+pub fn new_description() -> DspDescription {
+    DspDescription {
+        name: String::new(),
+        version: 0u32,
+        channels: 0i32,
+        create: None,
+        release: None,
+        reset: None,
+        read: None,
+        set_position: None,
+        num_parameters: 0i32,
+        param_desc: new_parameter(),
+        set_parameter: None,
+        get_parameter: None,
+        config: None,
+        config_width: 0i32,
+        config_height: 0i32,
+        user_data: std::ptr::mut_null()
+    }
+}
+
+pub fn from_description_ptr(dsp_description: &ffi::FMOD_DSP_DESCRIPTION) -> DspDescription {
+    DspDescription {
+        name: unsafe { ::std::str::raw::from_c_str(dsp_description.name.clone() as *const c_char) },
+        version: dsp_description.version,
+        channels: dsp_description.channels,
+        create: dsp_description.create,
+        release: dsp_description.release,
+        reset: dsp_description.reset,
+        read: dsp_description.read,
+        set_position: dsp_description.set_position,
+        num_parameters: dsp_description.num_parameters,
+        param_desc: from_parameter_ptr(&dsp_description.param_desc),
+        set_parameter: dsp_description.set_parameter,
+        get_parameter: dsp_description.get_parameter,
+        config: dsp_description.config,
+        config_height: dsp_description.config_height,
+        config_width: dsp_description.config_width,
+        user_data: dsp_description.user_data
+    }
+}
+
+pub fn get_description_ffi(dsp_description: &DspDescription) -> ffi::FMOD_DSP_DESCRIPTION {
+    let mut tmp_s = Vec::from_slice(dsp_description.name.as_bytes());
+
+    tmp_s.truncate(32);
+    tmp_s.reserve_exact(32);
+    tmp_s.as_slice().with_c_str(|c_str| {
+        ffi::FMOD_DSP_DESCRIPTION {
+            name: c_str as *mut c_char,
+            version: dsp_description.version,
+            channels: dsp_description.channels,
+            create: dsp_description.create,
+            release: dsp_description.release,
+            reset: dsp_description.reset,
+            read: dsp_description.read,
+            set_position: dsp_description.set_position,
+            num_parameters: dsp_description.num_parameters,
+            param_desc: get_parameter_ffi(&dsp_description.param_desc),
+            set_parameter: dsp_description.set_parameter,
+            get_parameter: dsp_description.get_parameter,
+            config: dsp_description.config,
+            config_height: dsp_description.config_height,
+            config_width: dsp_description.config_width,
+            user_data: dsp_description.user_data
+        }
+    })
 }
 
 pub struct Dsp {
@@ -262,6 +408,15 @@ impl Dsp {
 
     pub fn set_defaults(&self, frequency: f32, volume: f32, pan: f32, priority: i32) -> fmod::Result {
         unsafe { ffi::FMOD_DSP_SetDefaults(self.dsp, frequency, volume, pan, priority) }
+    }
+
+    pub fn get_type(&self) -> Result<fmod::DspType, fmod::Result> {
+        let mut _type = fmod::DspTypeUnknown;
+
+        match unsafe { ffi::FMOD_DSP_GetType(self.dsp, &mut _type) } {
+            fmod::Ok => Ok(_type),
+            e => Err(e)
+        }
     }
 
     pub fn get_defaults(&self) -> Result<(f32, f32, f32, i32), fmod::Result> {

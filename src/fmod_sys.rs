@@ -37,6 +37,7 @@ use dsp::Dsp;
 use vector;
 use reverb_properties;
 use geometry;
+use reverb;
 
 pub struct FmodGuid
 {
@@ -604,6 +605,43 @@ impl FmodSys {
                 e => Err(e)
             }
         })
+    }
+
+    pub fn create_reverb(&self) -> Result<reverb::Reverb, fmod::Result>{
+        let mut t_reverb = ::std::ptr::mut_null();
+
+        match unsafe { ffi::FMOD_System_CreateReverb(self.system, &mut t_reverb) } {
+            fmod::Ok => Ok(reverb::from_ptr(t_reverb)),
+            e => Err(e)
+        }
+    }
+
+    pub fn create_DSP(&self) -> Result<dsp::Dsp, fmod::Result> {
+        let mut t_dsp = ::std::ptr::mut_null();
+
+        match unsafe { ffi::FMOD_System_CreateDSP(self.system, ::std::ptr::mut_null(), &mut t_dsp) } {
+            fmod::Ok => Ok(dsp::from_ptr(t_dsp)),
+            e => Err(e)
+        }
+    }
+
+    pub fn create_DSP_and_description(&self) -> Result<(dsp::Dsp, dsp::DspDescription), fmod::Result> {
+        let mut t_dsp = ::std::ptr::mut_null();
+        let mut t_description = dsp::get_description_ffi(&dsp::new_description());
+
+        match unsafe { ffi::FMOD_System_CreateDSP(self.system, &mut t_description, &mut t_dsp) } {
+            fmod::Ok => Ok((dsp::from_ptr(t_dsp), dsp::from_description_ptr(&t_description))),
+            e => Err(e)
+        }
+    }
+
+    pub fn create_DSP_by_type(&self, _type: fmod::DspType) -> Result<dsp::Dsp, fmod::Result> {
+        let mut t_dsp = ::std::ptr::mut_null();
+
+        match unsafe { ffi::FMOD_System_CreateDSPByType(self.system, _type, &mut t_dsp) } {
+            fmod::Ok => Ok(dsp::from_ptr(t_dsp)),
+            e => Err(e)
+        }
     }
 
     pub fn set_output(&self, output_type: fmod::OutputType) -> fmod::Result {
