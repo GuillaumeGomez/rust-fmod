@@ -24,7 +24,7 @@ all: rfmod examples docs
 
 rfmod:
 	mkdir -p lib
-	rustc --out-dir=lib src/lib.rs
+	rustc --out-dir=lib src/rfmod.rs
 
 examples: rfmod
 	  mkdir -p bin
@@ -32,7 +32,7 @@ examples: rfmod
 	  rustc -o bin/recording -L ./lib examples/recording/main.rs
 
 docs:
-	rustdoc -o doc src/lib.rs
+	rustdoc -o doc src/rfmod.rs
 
 clean:
 	rm -rf lib
