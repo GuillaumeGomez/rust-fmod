@@ -1,4 +1,8 @@
+before_install:
+  - yes | sudo add-apt-repository ppa:cmrx64/cargo
+  - sudo apt-get update
 install:
+  - sudo apt-get install cargo
   - wget http://static.rust-lang.org/dist/rust-nightly-x86_64-unknown-linux-gnu.tar.gz
   - tar xzf rust-nightly-x86_64-unknown-linux-gnu.tar.gz
   - export PATH=$PATH:$(pwd)/rust-nightly-x86_64-unknown-linux-gnu/bin
@@ -7,5 +11,7 @@ install:
   - sudo cp -r fmodapi44438linux/api/lib/* /usr/local/lib/.
 script:
   - rustc --version
+  - cargo build
+  - rustdoc -o doc src/lib.rs
 after_script:
   - curl http://www.rust-ci.org/artifacts/put?t=$RUSTCI_TOKEN | sh

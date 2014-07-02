@@ -28,7 +28,7 @@ rfmod:
 
 examples: rfmod
 	  mkdir -p bin
-	  rustc -o bin/simple_music_reader -L ./lib examples/simple_music_reader/main.rs
+	  rustc -o bin/simple_music_player -L ./lib examples/simple_music_player/main.rs
 	  rustc -o bin/recording -L ./lib examples/recording/main.rs
 
 docs:
@@ -36,7 +36,7 @@ docs:
 
 clean:
 	rm -rf lib
-	rm -rf bin/simple_music_reader
+	rm -rf bin/simple_music_player
 	rm -rf bin/recording
 
 re: clean all

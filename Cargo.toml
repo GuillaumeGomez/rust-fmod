@@ -1,0 +1,20 @@
+[package]
+
+name = "rust-fmod"
+version = "0.8.0"
+authors = ["Guillaume Gomez <guillaume1.gomez@gmail.com>"]
+
+[[lib]]
+
+name = "rfmod"
+crate-type = ["dylib", "rlib"]
+
+[[bin]]
+
+name = "recording"
+path = "examples/recording/main.rs"
+
+[[bin]]
+
+name = "simple_music_player"
+path = "examples/simple_music_player/main.rs"
