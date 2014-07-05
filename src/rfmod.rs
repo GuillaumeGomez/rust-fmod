@@ -42,7 +42,7 @@ pub use sound::{Sound, FmodTag, FmodSyncPoint};
 pub use fmod_sys::{FmodSys, FmodGuid, FmodSoftwareFormat, FmodAdvancedSettings, FmodOutputHandle, FmodCreateSoundexInfo, FmodMemoryUsageDetails};
 pub use channel_group::ChannelGroup;
 pub use sound_group::SoundGroup;
-pub use dsp::{Dsp, DspParameterDesc, DspDescription};
+pub use dsp::{Dsp, DspParameterDesc, DspDescription, DspState};
 pub use dsp_connection::DspConnection;
 pub use reverb::Reverb;
 pub use reverb_properties::ReverbProperties;
@@ -63,6 +63,7 @@ mod reverb;
 mod reverb_properties;
 pub mod types;
 pub mod enums;
+pub mod callbacks;
 
 #[cfg(target_arch="x86")]
 #[link(name = "fmodex")] extern{}

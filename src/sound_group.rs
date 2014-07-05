@@ -34,14 +34,14 @@ use std::mem::transmute;
 use libc::{c_char};
 
 pub struct SoundGroup {
-    sound_group: ffi::FMOD_SOUNDGROUP,
+    sound_group: *mut ffi::FMOD_SOUNDGROUP,
 }
 
-pub fn get_ffi(sound_group: &SoundGroup) -> ffi::FMOD_SOUNDGROUP {
+pub fn get_ffi(sound_group: &SoundGroup) -> *mut ffi::FMOD_SOUNDGROUP {
     sound_group.sound_group
 }
 
-pub fn from_ptr(sound_group: ffi::FMOD_SOUNDGROUP) -> SoundGroup {
+pub fn from_ptr(sound_group: *mut ffi::FMOD_SOUNDGROUP) -> SoundGroup {
     SoundGroup{sound_group: sound_group}
 }
 

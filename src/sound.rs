@@ -65,11 +65,11 @@ struct WavHeader {
 }
 
 pub struct FmodSyncPoint {
-    sync_point: ffi::FMOD_SYNCPOINT
+    sync_point: *mut ffi::FMOD_SYNCPOINT
 }
 
 impl FmodSyncPoint {
-    fn from_ptr(pointer: ffi::FMOD_SYNCPOINT) -> FmodSyncPoint {
+    fn from_ptr(pointer: *mut ffi::FMOD_SYNCPOINT) -> FmodSyncPoint {
         FmodSyncPoint{sync_point: pointer}
     }
 }
@@ -126,19 +126,19 @@ impl FmodTag {
 }
 
 pub struct Sound {
-    sound: ffi::FMOD_SOUND,
+    sound: *mut ffi::FMOD_SOUND,
     can_be_deleted: bool
 }
 
-pub fn get_ffi(sound: &Sound) -> ffi::FMOD_SOUND {
+pub fn get_ffi(sound: &Sound) -> *mut ffi::FMOD_SOUND {
     sound.sound
 }
 
-pub fn from_ptr(sound: ffi::FMOD_SOUND) -> Sound {
+pub fn from_ptr(sound: *mut ffi::FMOD_SOUND) -> Sound {
     Sound{sound: sound, can_be_deleted: false}
 }
 
-pub fn from_ptr_first(sound: ffi::FMOD_SOUND) -> Sound {
+pub fn from_ptr_first(sound: *mut ffi::FMOD_SOUND) -> Sound {
     Sound{sound: sound, can_be_deleted: true}
 }
 

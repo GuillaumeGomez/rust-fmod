@@ -31,16 +31,16 @@ use fmod_sys;
 use fmod_sys::FmodMemoryUsageDetails;
 use std::mem::transmute;
 
-pub fn from_ptr(geometry: ffi::FMOD_GEOMETRY) -> Geometry {
+pub fn from_ptr(geometry: *mut ffi::FMOD_GEOMETRY) -> Geometry {
     Geometry{geometry: geometry}
 }
 
-pub fn get_ffi(geometry: Geometry) -> ffi::FMOD_GEOMETRY {
+pub fn get_ffi(geometry: Geometry) -> *mut ffi::FMOD_GEOMETRY {
     geometry.geometry
 }
 
 pub struct Geometry {
-    geometry: ffi::FMOD_GEOMETRY
+    geometry: *mut ffi::FMOD_GEOMETRY
 }
 
 impl Drop for Geometry {

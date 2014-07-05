@@ -37,14 +37,14 @@ use std::mem::transmute;
 use libc::{c_char};
 
 pub struct ChannelGroup {
-    channel_group: ffi::FMOD_CHANNELGROUP,
+    channel_group: *mut ffi::FMOD_CHANNELGROUP,
 }
 
-pub fn get_ffi(channel_group: ChannelGroup) -> ffi::FMOD_CHANNELGROUP {
+pub fn get_ffi(channel_group: ChannelGroup) -> *mut ffi::FMOD_CHANNELGROUP {
     channel_group.channel_group
 }
 
-pub fn from_ptr(channel_group: ffi::FMOD_CHANNELGROUP) -> ChannelGroup {
+pub fn from_ptr(channel_group: *mut ffi::FMOD_CHANNELGROUP) -> ChannelGroup {
     ChannelGroup{channel_group: channel_group}
 }
 
@@ -168,10 +168,10 @@ impl ChannelGroup {
     }
 
     pub fn override_reverb_properties(&self, properties: channel::FmodReverbChannelProperties) -> fmod::Result {
-        let mut prop = ffi::FMOD_REVERB_CHANNELPROPERTIES {Direct: properties.direct, Room: properties.room, Flags: properties.flags,
+        let prop = ffi::FMOD_REVERB_CHANNELPROPERTIES {Direct: properties.direct, Room: properties.room, Flags: properties.flags,
             ConnectionPoint: dsp::get_ffi(&properties.connection_point)};
 
-        unsafe { ffi::FMOD_ChannelGroup_OverrideReverbProperties(self.channel_group, &mut prop) }
+        unsafe { ffi::FMOD_ChannelGroup_OverrideReverbProperties(self.channel_group, &prop) }
     }
 
     pub fn override_3D_attributes(&self, pos: vector::FmodVector, vel: vector::FmodVector) -> fmod::Result {

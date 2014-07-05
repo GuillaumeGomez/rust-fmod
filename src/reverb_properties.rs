@@ -123,5 +123,5 @@ pub struct ReverbProperties
     pub LF_reference    : f32,     /* [r/w] 20.0   1000.0  250.0   Reference low frequency (hz)                                          (SUPPORTED:SFX) */
     pub diffusion       : f32,     /* [r/w] 0.0    100.0   100.0   Value that controls the echo density in the late reverberation decay. (SUPPORTED:SFX) */
     pub density         : f32,     /* [r/w] 0.0    100.0   100.0   Value that controls the modal density in the late reverberation decay (SUPPORTED:SFX) */
-    pub flags           : u32      /* [r/w] FMOD_REVERB_FLAGS - modifies the behavior of above properties                                (SUPPORTED:WII) */
+    pub flags           : u32      /* [r/w] *mut FMOD_REVERB_FLAGS - modifies the behavior of above properties                                (SUPPORTED:WII) */
 }

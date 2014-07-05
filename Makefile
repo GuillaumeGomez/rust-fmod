@@ -23,13 +23,14 @@
 all: rfmod examples docs
 
 rfmod:
-	mkdir -p lib
+	mkdir -p target
 	rustc --out-dir=lib src/rfmod.rs
 
 examples: rfmod
 	  mkdir -p bin
 	  rustc -o bin/simple_music_player -L ./lib examples/simple_music_player/main.rs
 	  rustc -o bin/recording -L ./lib examples/recording/main.rs
+	  rustc -o bin/dsp_custom -L ./lib examples/dsp_custom/main.rs
 
 docs:
 	rustdoc -o doc src/rfmod.rs
@@ -38,5 +39,6 @@ clean:
 	rm -rf lib
 	rm -rf bin/simple_music_player
 	rm -rf bin/recording
+	rm -rf bin/dsp_custom
 
 re: clean all

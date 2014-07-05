@@ -69,19 +69,19 @@ pub struct FmodReverbChannelProperties {
 }
 
 pub fn get_ffi(channel: &mut Channel) -> *mut ffi::FMOD_CHANNEL {
-    &mut channel.channel as *mut ffi::FMOD_CHANNEL
+    channel.channel
 }
 
 pub fn new() -> Channel {
     Channel{channel: ::std::ptr::mut_null()}
 }
 
-pub fn from_ptr(channel: ffi::FMOD_CHANNEL) -> Channel {
+pub fn from_ptr(channel: *mut ffi::FMOD_CHANNEL) -> Channel {
     Channel{channel: channel}
 }
 
 pub struct Channel {
-    channel: ffi::FMOD_CHANNEL
+    channel: *mut ffi::FMOD_CHANNEL
 }
 
 impl Drop for Channel {
@@ -340,7 +340,7 @@ impl Channel {
         }
     }
 
-    pub fn set_reverb_properties(&self, prop: FmodReverbChannelProperties) -> fmod::Result {
+    pub fn set_reverb_properties(&self, prop: &FmodReverbChannelProperties) -> fmod::Result {
         let t = ffi::FMOD_REVERB_CHANNELPROPERTIES{Direct: prop.direct, Room: prop.room, Flags: prop.flags, ConnectionPoint: ::std::ptr::mut_null()};
 
         unsafe { ffi::FMOD_Channel_SetReverbProperties(self.channel, &t) }

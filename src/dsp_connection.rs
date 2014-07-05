@@ -31,16 +31,16 @@ use fmod_sys;
 use fmod_sys::FmodMemoryUsageDetails;
 use std::mem::transmute;
 
-pub fn from_ptr(dsp_connection: ffi::FMOD_DSPCONNECTION) -> DspConnection {
+pub fn from_ptr(dsp_connection: *mut ffi::FMOD_DSPCONNECTION) -> DspConnection {
     DspConnection{dsp_connection: dsp_connection}
 }
 
-pub fn get_ffi(dsp_connection: DspConnection) -> ffi::FMOD_DSPCONNECTION {
+pub fn get_ffi(dsp_connection: DspConnection) -> *mut ffi::FMOD_DSPCONNECTION {
     dsp_connection.dsp_connection
 }
 
 pub struct DspConnection {
-    dsp_connection: ffi::FMOD_DSPCONNECTION
+    dsp_connection: *mut ffi::FMOD_DSPCONNECTION
 }
 
 impl Drop for DspConnection {
@@ -103,7 +103,7 @@ impl DspConnection {
         let mut details = fmod_sys::get_memory_usage_details_ffi(FmodMemoryUsageDetails::new());
         let mut memory_used = 0u32;
 
-        match unsafe { ffi::FMOD_DSPCONNECTION_GetMemoryInfo(self.dsp_connection, memory_bits, event_memory_bits, &mut memory_used, &mut details) } {
+        match unsafe { ffi::FMOD_DSPConnection_GetMemoryInfo(self.dsp_connection, memory_bits, event_memory_bits, &mut memory_used, &mut details) } {
             fmod::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
             e => Err(e)
         }
@@ -111,7 +111,7 @@ impl DspConnection {
 
     /* to test ! */
     /*pub fn set_user_data<T>(&self, user_data: T) -> fmod::Result {
-        unsafe { ffi::FMOD_DSPCONNECTION_SetUserData(self.dsp_connection, transmute(user_data)) }
+        unsafe { ffi::FMOD_DSPConnection_SetUserData(self.dsp_connection, transmute(user_data)) }
     }*/
 
     /* to test ! */
@@ -119,7 +119,7 @@ impl DspConnection {
         unsafe {
             let user_data =::std::ptr::null();
 
-            match ffi::FMOD_DSPCONNECTION_GetUserData(self.dsp_connection, &user_data) {
+            match ffi::FMOD_DSPConnection_GetUserData(self.dsp_connection, &user_data) {
                 fmod::Ok => Ok(transmute(user_data)),
                 e => Err(e)
             }

@@ -18,3 +18,8 @@ path = "examples/recording/main.rs"
 
 name = "simple_music_player"
 path = "examples/simple_music_player/main.rs"
+
+[[bin]]
+
+name = "dsp_custom"
+path = "examples/dsp_custom/main.rs"

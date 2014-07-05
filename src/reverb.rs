@@ -31,16 +31,16 @@ use fmod_sys;
 use fmod_sys::FmodMemoryUsageDetails;
 use std::mem::transmute;
 
-pub fn from_ptr(reverb: ffi::FMOD_REVERB) -> Reverb {
+pub fn from_ptr(reverb: *mut ffi::FMOD_REVERB) -> Reverb {
     Reverb{reverb: reverb}
 }
 
-pub fn get_ffi(reverb: Reverb) -> ffi::FMOD_REVERB {
+pub fn get_ffi(reverb: Reverb) -> *mut ffi::FMOD_REVERB {
     reverb.reverb
 }
 
 pub struct Reverb {
-    reverb: ffi::FMOD_GEOMETRY
+    reverb: *mut ffi::FMOD_REVERB
 }
 
 impl Drop for Reverb {

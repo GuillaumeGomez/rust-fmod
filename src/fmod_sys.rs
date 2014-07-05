@@ -38,6 +38,7 @@ use vector;
 use reverb_properties;
 use geometry;
 use reverb;
+use dsp_connection;
 
 pub struct FmodGuid
 {
@@ -481,16 +482,16 @@ pub fn from_memory_usage_details_ptr(details: ffi::FMOD_MEMORY_USAGE_DETAILS) ->
     }
 }
 
-pub fn from_ptr(system: ffi::FMOD_SYSTEM) -> FmodSys {
+pub fn from_ptr(system: *mut ffi::FMOD_SYSTEM) -> FmodSys {
     FmodSys{system: system, is_first: false}
 }
 
-pub fn get_ffi(system: &FmodSys) -> ffi::FMOD_SYSTEM {
+pub fn get_ffi(system: &FmodSys) -> *mut ffi::FMOD_SYSTEM {
     system.system
 }
 
 pub struct FmodSys {
-    system: ffi::FMOD_SYSTEM,
+    system: *mut ffi::FMOD_SYSTEM,
     is_first: bool
 }
 
@@ -620,17 +621,17 @@ impl FmodSys {
         let mut t_dsp = ::std::ptr::mut_null();
 
         match unsafe { ffi::FMOD_System_CreateDSP(self.system, ::std::ptr::mut_null(), &mut t_dsp) } {
-            fmod::Ok => Ok(dsp::from_ptr(t_dsp)),
+            fmod::Ok => Ok(dsp::from_ptr_first(t_dsp)),
             e => Err(e)
         }
     }
 
-    pub fn create_DSP_and_description(&self) -> Result<(dsp::Dsp, dsp::DspDescription), fmod::Result> {
+    pub fn create_DSP_with_description(&self, description: &dsp::DspDescription) -> Result<dsp::Dsp, fmod::Result> {
         let mut t_dsp = ::std::ptr::mut_null();
-        let mut t_description = dsp::get_description_ffi(&dsp::new_description());
+        let mut t_description = dsp::get_description_ffi(description);
 
         match unsafe { ffi::FMOD_System_CreateDSP(self.system, &mut t_description, &mut t_dsp) } {
-            fmod::Ok => Ok((dsp::from_ptr(t_dsp), dsp::from_description_ptr(&t_description))),
+            fmod::Ok => Ok(dsp::from_ptr_with_description(t_dsp, description, true)),
             e => Err(e)
         }
     }
@@ -1257,6 +1258,15 @@ impl FmodSys {
         }
     }
 
+    pub fn add_DSP(&self, dsp: &dsp::Dsp) -> Result<dsp_connection::DspConnection, fmod::Result> {
+        let mut t_connection = ::std::ptr::mut_null();
+
+        match unsafe { ffi::FMOD_System_AddDSP(self.system, dsp::get_ffi(dsp), &mut t_connection) } {
+            fmod::Ok => Ok(dsp_connection::from_ptr(t_connection)),
+            e => Err(e)
+        }
+    }
+
     pub fn lock_DSP(&self) -> fmod::Result {
         unsafe { ffi::FMOD_System_LockDSP(self.system) }
     }
@@ -1383,4 +1393,19 @@ impl FmodSys {
             e => Err(e)
         }
     }
+
+    /*pub fn set_file_system(&self, user_open: ffi::FMOD_FILE_OPENCALLBACK, user_close: ffi::FMOD_FILE_CLOSECALLBACK,
+        user_read: ffi::FMOD_FILE_READCALLBACK, user_seek: ffi::FMOD_FILE_SEEKCALLBACK,
+        user_async_read: ffi::FMOD_FILE_ASYNCREADCALLBACK, user_async_cancel: ffi::FMOD_FILE_ASYNCCANCELCALLBACK,
+        block_align: i32) -> fmod::Result {
+        unsafe { ffi::FMOD_System_SetFileSystem(self.system,
+            user_open,
+            user_close,
+            user_read,
+            user_seek,
+            user_async_read,
+            user_async_cancel,
+            block_align)
+        }
+    }*/
 }
