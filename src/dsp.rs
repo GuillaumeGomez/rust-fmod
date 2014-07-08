@@ -33,72 +33,229 @@ use std::mem::transmute;
 use channel;
 use libc::{c_char, c_void, c_uint, c_int, c_float, c_ushort};
 use std;
+use std::collections::hashmap::HashMap;
+use std::c_str::CString;
 
-pub fn from_ptr(dsp: *mut ffi::FMOD_DSP) -> Dsp {
-    Dsp {
-        dsp: dsp,
-        can_be_deleted: false,
-        create_callback: None,
-        release_callback: None,
-        reset_callback: None,
-        read_callback: None,
-        set_pos_callback: None,
-        set_param_callback: None,
-        get_param_callback: None
+fn get_callbacks() -> HashMap<*mut ffi::FMOD_DSP, DspCallbacks> {
+    local_data_key!(key: HashMap<*mut ffi::FMOD_DSP, DspCallbacks>);
+    if key.get().is_none() {
+        let map : HashMap<*mut ffi::FMOD_DSP, DspCallbacks> = HashMap::new();
+
+        key.replace(Some(map.clone()));
+        map.clone()
+    } else {
+        match key.get() {
+            Some(p) => p.clone(),
+            None => {
+                let map : HashMap<*mut ffi::FMOD_DSP, DspCallbacks> = HashMap::new();
+
+                map
+            }
+        }
     }
 }
 
-pub fn from_ptr_first(dsp: *mut ffi::FMOD_DSP) -> Dsp {
-    Dsp {
-        dsp: dsp,
-        can_be_deleted: true,
-        create_callback: None,
-        release_callback: None,
-        reset_callback: None,
-        read_callback: None,
-        set_pos_callback: None,
-        set_param_callback: None,
-        get_param_callback: None
-    }
-}
-
-pub fn from_ptr_with_description(dsp: *mut ffi::FMOD_DSP, description: &DspDescription, is_first: bool) -> Dsp {
-    Dsp {
-        dsp: dsp,
-        can_be_deleted: is_first,
-        create_callback: match description.create {
-            Some(p) => Some(p),
-            None => None
-        },
-        release_callback: match description.release {
-            Some(p) => Some(p),
-            None => None
-        },
-        reset_callback: match description.reset {
-            Some(p) => Some(p),
-            None => None
-        },
-        read_callback: match description.read {
-            Some(p) => Some(p),
-            None => None
-        },
-        set_pos_callback: match description.set_position {
-            Some(p) => Some(p),
-            None => None
-        },
-        set_param_callback: match description.set_parameter {
-            Some(p) => Some(p),
-            None => None
-        },
-        get_param_callback: match description.get_parameter {
-            Some(p) => Some(p),
+fn get_callback_by_id(id: *mut ffi::FMOD_DSP) -> Option<DspCallbacks> {
+    local_data_key!(key: HashMap<*mut ffi::FMOD_DSP, DspCallbacks>);
+    if key.get().is_none() {
+        None
+    } else {
+        match (*key.get().unwrap()).find(&id) {
+            Some(calls) => {
+                Some(*calls)
+            },
             None => None
         }
     }
 }
 
-pub fn get_ffi(dsp: &Dsp) -> *mut ffi::FMOD_DSP {
-    dsp.dsp
+fn remove_callback(map: HashMap<*mut ffi::FMOD_DSP, DspCallbacks>) {
+    local_data_key!(key: HashMap<*mut ffi::FMOD_DSP, DspCallbacks>);
+    key.replace(Some(map));
+}
+
+fn register_callbacks(map: &mut HashMap<*mut ffi::FMOD_DSP, DspCallbacks>, ptr: *mut ffi::FMOD_DSP, callbacks: DspCallbacks) {
+    println!("register");
+    match get_callback_by_id(ptr) {
+        Some(_) => {}
+        None => {
+            local_data_key!(key: HashMap<*mut ffi::FMOD_DSP, DspCallbacks>);
+            if key.get().is_none() {
+                let mut t_map = HashMap::new();
+
+                t_map.insert(ptr, callbacks);
+                key.replace(Some(t_map));
+            } else {
+                map.insert(ptr, callbacks);
+                key.replace(Some(map.clone()));
+            }
+        }
+    }
+}
+
+extern "C" fn create_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> fmod::Result {
+    unsafe {
+        match get_callback_by_id((*dsp_state).instance) {
+            Some(c) => match c.create_callback {
+                Some(p) => p(&from_state_ptr(*dsp_state)),
+                None => fmod::Ok
+            },
+            None => fmod::Ok
+        }
+    }
+}
+
+extern "C" fn release_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> fmod::Result {
+    unsafe {
+        match get_callback_by_id((*dsp_state).instance) {
+            Some(c) => match c.release_callback {
+                Some(p) => p(&from_state_ptr(*dsp_state)),
+                None => fmod::Ok
+            },
+            None => fmod::Ok
+        }
+    }
+}
+
+extern "C" fn reset_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> fmod::Result {
+    unsafe {
+        match get_callback_by_id((*dsp_state).instance) {
+            Some(c) => match c.reset_callback { 
+                Some(p) => p(&from_state_ptr(*dsp_state)),
+                None => fmod::Ok
+            },
+            None => fmod::Ok
+        }
+    }
+}
+
+extern "C" fn read_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, in_buffer: *mut c_float, out_buffer: *mut c_float, length: c_uint,
+    in_channels: c_int, out_channels: c_int) -> fmod::Result {
+    if dsp_state.is_not_null() {
+        unsafe {
+            println!("go");
+            match get_callback_by_id((*dsp_state).instance) {
+                Some(c) => {
+                    println!("go !");
+                    let mut v_in_buffer = Vec::new();
+                    let mut v_out_buffer = Vec::new();
+
+                    for count in range(0i32, length as i32) {
+                        for count2 in range(0i32, out_channels) {
+                            v_in_buffer.push(*in_buffer.offset((count * in_channels) as int + count2 as int));
+                            v_out_buffer.push(*out_buffer.offset((count * out_channels) as int + count2 as int));
+                        }
+                    }
+                    //let mut v_in_buffer = Vec::from_slice(std::c_vec::CVec::new(in_buffer, length as uint * in_channels as uint + out_channels as uint).as_slice());
+                    //let mut v_out_buffer = Vec::from_slice(std::c_vec::CVec::new(out_buffer, length as uint * out_channels as uint + out_channels as uint).as_slice());
+                    let ret = match c.read_callback {
+                        Some(p) => p(&from_state_ptr(*dsp_state), &mut v_in_buffer, &mut v_out_buffer, length as u32, in_channels as i32, out_channels as i32),
+                        None => fmod::Ok
+                    };
+                    let mut it = 0;
+                    for count in range(0i32, length as i32) {
+                        for count2 in range(0i32, out_channels) {
+                            *in_buffer.offset((count * in_channels) as int + count2 as int) = *v_in_buffer.get(it);
+                            *out_buffer.offset((count * out_channels) as int + count2 as int) = *v_out_buffer.get(it);
+                            it += 1;
+                        }
+                    }
+                    ret
+                }
+                None => fmod::Ok
+            }
+        }
+    } else {
+        fmod::Ok
+    }
+}
+
+extern "C" fn set_position_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, pos: c_uint) -> fmod::Result {
+    unsafe {
+        match get_callback_by_id((*dsp_state).instance) {
+            Some(c) => match c.set_pos_callback {
+                Some(p) => p(&from_state_ptr(*dsp_state), pos as u32),
+                None => fmod::Ok
+            },
+            None => fmod::Ok
+        }
+    }
+}
+
+extern "C" fn set_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index: c_int, value: c_float) -> fmod::Result {
+    unsafe {
+        match get_callback_by_id((*dsp_state).instance) {
+            Some(c) => match c.set_param_callback {
+                Some(p) => p(&from_state_ptr(*dsp_state), index as i32, value),
+                None => fmod::Ok
+            },
+            None => fmod::Ok
+        }
+    }
+}
+
+extern "C" fn get_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index: c_int, value: *mut c_float, value_str: *mut c_char) -> fmod::Result {
+    unsafe {
+        match get_callback_by_id((*dsp_state).instance) {
+            Some(c) => match c.get_param_callback {
+                Some(p) => {
+                    let mut t_value = *value;
+
+                    let ret = p(&from_state_ptr(*dsp_state),
+                        index as i32,
+                        &mut t_value,
+                        ::std::str::raw::from_c_str(value_str as *const c_char).as_slice());
+                    *value = t_value;
+                    ret
+                },
+                None => fmod::Ok
+            },
+            None => fmod::Ok
+        }
+    }
+}
+
+#[allow(unused_variable)]
+extern "C" fn config_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, hwnd: *mut c_void, show: c_int) -> fmod::Result {
+    fmod::Ok
+}
+
+struct DspCallbacks {
+    create_callback: DspCreateCallback,
+    release_callback: DspReleaseCallback,
+    reset_callback: DspResetCallback,
+    read_callback: DspReadCallback,
+    set_pos_callback: DspSetPositionCallback,
+    set_param_callback: DspSetParamCallback,
+    get_param_callback: DspGetParamCallback
+}
+
+impl DspCallbacks {
+    fn new() -> DspCallbacks {
+        DspCallbacks {
+            create_callback: None,
+            release_callback: None,
+            reset_callback: None,
+            read_callback: None,
+            set_pos_callback: None,
+            set_param_callback: None,
+            get_param_callback: None
+        }
+    }
+}
+
+impl Clone for DspCallbacks {
+    fn clone(&self) -> DspCallbacks {
+        DspCallbacks {
+            create_callback: self.create_callback,
+            release_callback: self.release_callback,
+            reset_callback: self.reset_callback,
+            read_callback: self.read_callback,
+            set_pos_callback: self.set_pos_callback,
+            set_param_callback: self.set_param_callback,
+            get_param_callback: self.get_param_callback
+        }
+    }
 }
 
 pub struct DspParameterDesc
@@ -118,8 +275,14 @@ pub fn from_parameter_ptr(dsp_parameter: *mut ffi::FMOD_DSP_PARAMETERDESC) -> Ds
                 min: (*dsp_parameter).min,
                 max: (*dsp_parameter).max,
                 default_val: (*dsp_parameter).default_val,
-                name: ::std::str::raw::from_c_str((*dsp_parameter).name.clone() as *const c_char),
-                label: ::std::str::raw::from_c_str((*dsp_parameter).label.clone() as *const c_char),
+                name: match CString::new((*dsp_parameter).name.as_ptr(), true).as_str() {
+                    Some(s) => s.to_string(),
+                    None => "".to_string()
+                },
+                label: match CString::new((*dsp_parameter).label.as_ptr(), true).as_str() {
+                    Some(s) => s.to_string(),
+                    None => "".to_string()
+                },
                 description: ::std::str::raw::from_c_str((*dsp_parameter).description.clone())
             }
         }
@@ -136,19 +299,33 @@ pub fn get_parameter_ffi(dsp_parameter: &DspParameterDesc) -> ffi::FMOD_DSP_PARA
     tmp_label.truncate(16);
     tmp_name.reserve_exact(16);
     tmp_label.reserve_exact(16);
-    tmp_name.as_slice().with_c_str(|c_name| {
-        tmp_label.as_slice().with_c_str(|c_label| {
-            dsp_parameter.description.as_slice().with_c_str(|c_description| {
-                ffi::FMOD_DSP_PARAMETERDESC {
-                    min: dsp_parameter.min,
-                    max: dsp_parameter.max,
-                    default_val: dsp_parameter.default_val,
-                    name: c_name as *mut c_char,
-                    label: c_label as *mut c_char,
-                    description: c_description
+    dsp_parameter.description.as_slice().with_c_str(|c_description| {
+        ffi::FMOD_DSP_PARAMETERDESC {
+            min: dsp_parameter.min,
+            max: dsp_parameter.max,
+            default_val: dsp_parameter.default_val,
+            name: {
+                let mut slice : [i8, ..16] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+                let mut it = 0;
+
+                for tmp in tmp_name.iter() {
+                    slice[it] = *tmp as i8;
+                    it += 1;
                 }
-            })
-        })
+                slice
+            },
+            label: {
+                let mut slice : [i8, ..16] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+                let mut it = 0;
+
+                for tmp in tmp_label.iter() {
+                    slice[it] = *tmp as i8;
+                    it += 1;
+                }
+                slice
+            },
+            description: c_description
+        }
     })
 }
 
@@ -180,7 +357,7 @@ pub struct DspDescription
     config                  : DspDialogCallback,      /* [w] This is called when the user calls DSP::showConfigDialog.  Can be used to display a dialog to configure the filter.  Can be null. */
     pub config_width        : i32,                         /* [w] Width of config dialog graphic if there is one.  0 otherwise.*/
     pub config_height       : i32,                         /* [w] Height of config dialog graphic if there is one.  0 otherwise.*/
-    user_data               : *mut Dsp                  /* [w] Optional. Specify 0 to ignore. This is user data to be attached to the DSP unit during creation.  Access via DSP::getUserData. */
+    user_data               : *mut c_void             /* [w] Optional. Specify 0 to ignore. This is user data to be attached to the DSP unit during creation.  Access via DSP::getUserData. */
 }
 
 impl DspDescription {
@@ -208,7 +385,12 @@ impl DspDescription {
 
 pub fn from_description_ptr(dsp_description: &ffi::FMOD_DSP_DESCRIPTION) -> DspDescription {
     DspDescription {
-        name: unsafe { ::std::str::raw::from_c_str(dsp_description.name.clone() as *const c_char) },
+        name: unsafe {
+            match CString::new(dsp_description.name.as_ptr(), true).as_str() {
+                Some(s) => s.to_string(),
+                None => "".to_string()
+            }
+        },
         version: dsp_description.version,
         channels: dsp_description.channels,
         create: None,
@@ -232,50 +414,57 @@ pub fn get_description_ffi(dsp_description: &DspDescription) -> ffi::FMOD_DSP_DE
 
     tmp_s.truncate(32);
     tmp_s.reserve_exact(32);
-    tmp_s.as_slice().with_c_str(|c_str| {
-        ffi::FMOD_DSP_DESCRIPTION {
-            name: c_str as *mut c_char,
-            version: dsp_description.version,
-            channels: dsp_description.channels,
-            create: match dsp_description.create {
-                Some(_) => Some(create_callback),
-                None => None
-            },
-            release: match dsp_description.release {
-                Some(_) => Some(release_callback),
-                None => None
-            },
-            reset: match dsp_description.reset {
-                Some(_) => Some(reset_callback),
-                None => None
-            },
-            read: match dsp_description.read {
-                Some(_) => Some(read_callback),
-                None => None
-            },
-            set_position: match dsp_description.set_position {
-                Some(_) => Some(set_position_callback),
-                None => None
-            },
-            num_parameters: dsp_description.num_parameters,
-            param_desc: &mut get_parameter_ffi(&dsp_description.param_desc) as *mut ffi::FMOD_DSP_PARAMETERDESC,
-            set_parameter: match dsp_description.set_parameter {
-                Some(_) => Some(set_parameter_callback),
-                None => None
-            },
-            get_parameter: match dsp_description.get_parameter {
-                Some(_) => Some(get_parameter_callback),
-                None => None
-            },
-            config: match dsp_description.config {
-                Some(_) => Some(config_callback),
-                None => None
-            },
-            config_height: dsp_description.config_height,
-            config_width: dsp_description.config_width,
-            user_data: dsp_description.user_data
-        }
-    })
+    ffi::FMOD_DSP_DESCRIPTION {
+        name: {
+            let mut slice : [i8, ..32] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            let mut it = 0;
+
+            for tmp in tmp_s.iter() {
+                slice[it] = *tmp as i8;
+                it += 1;
+            }
+            slice
+        },
+        version: dsp_description.version,
+        channels: dsp_description.channels,
+        create: match dsp_description.create {
+            Some(_) => Some(create_callback),
+            None => None
+        },
+        release: match dsp_description.release {
+            Some(_) => Some(release_callback),
+            None => None
+        },
+        reset: match dsp_description.reset {
+            Some(_) => Some(reset_callback),
+            None => None
+        },
+        read: match dsp_description.read {
+            Some(_) => Some(read_callback),
+            None => None
+        },
+        set_position: match dsp_description.set_position {
+            Some(_) => Some(set_position_callback),
+            None => None
+        },
+        num_parameters: dsp_description.num_parameters,
+        param_desc: &mut get_parameter_ffi(&dsp_description.param_desc) as *mut ffi::FMOD_DSP_PARAMETERDESC,
+        set_parameter: match dsp_description.set_parameter {
+            Some(_) => Some(set_parameter_callback),
+            None => None
+        },
+        get_parameter: match dsp_description.get_parameter {
+            Some(_) => Some(get_parameter_callback),
+            None => None
+        },
+        config: match dsp_description.config {
+            Some(_) => Some(config_callback),
+            None => None
+        },
+        config_height: dsp_description.config_height,
+        config_width: dsp_description.config_width,
+        user_data: dsp_description.user_data
+    }
 }
 
 pub fn get_state_ffi(state: &DspState) -> ffi::FMOD_DSP_STATE {
@@ -297,100 +486,52 @@ pub fn from_state_ptr(state: ffi::FMOD_DSP_STATE) -> DspState {
 pub struct DspState
 {
     pub instance: Dsp,          /* [r] Handle to the DSP hand the user created.  Not to be modified.  C++ users cast to FMOD::DSP to use.  */
-    plugin_data: *mut Dsp,      /* [w] Plugin writer created data the output author wants to attach to this object. */
+    plugin_data: *mut c_void,   /* [w] Plugin writer created data the output author wants to attach to this object. */
     pub speaker_mask: u16       /* [w] Specifies which speakers the DSP effect is active on */
 }
 
-extern "C" fn create_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> fmod::Result {
-    unsafe {
-        match (*(*dsp_state).plugin_data).create_callback {
-            Some(p) => p(&from_state_ptr(*dsp_state)),
-            None => fmod::Ok
-        }
+pub fn from_ptr(dsp: *mut ffi::FMOD_DSP) -> Dsp {
+    let mut map = get_callbacks();
+    register_callbacks(&mut map, dsp, DspCallbacks::new());
+    Dsp {
+        dsp: dsp,
+        can_be_deleted: false
     }
 }
 
-extern "C" fn release_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> fmod::Result {
-    unsafe {
-        match (*(*dsp_state).plugin_data).release_callback {
-            Some(p) => p(&from_state_ptr(*dsp_state)),
-            None => fmod::Ok
-        }
+pub fn from_ptr_first(dsp: *mut ffi::FMOD_DSP) -> Dsp {
+    let mut map = get_callbacks();
+    register_callbacks(&mut map, dsp, DspCallbacks::new());
+    Dsp {
+        dsp: dsp,
+        can_be_deleted: true
     }
 }
 
-extern "C" fn reset_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> fmod::Result {
-    unsafe {
-        match (*(*dsp_state).plugin_data).reset_callback { 
-            Some(p) => p(&from_state_ptr(*dsp_state)),
-            None => fmod::Ok
-        }
+pub fn from_ptr_with_description(dsp: *mut ffi::FMOD_DSP, description: &DspDescription, is_first: bool) -> Dsp {
+    let mut map = get_callbacks();
+    register_callbacks(&mut map, dsp, DspCallbacks {
+        create_callback: description.create,
+        release_callback: description.release,
+        reset_callback: description.reset,
+        read_callback: description.read,
+        set_pos_callback: description.set_position,
+        set_param_callback: description.set_parameter,
+        get_param_callback: description.get_parameter
+    });
+    Dsp {
+        dsp: dsp,
+        can_be_deleted: is_first
     }
 }
 
-extern "C" fn read_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, in_buffer: *mut c_float, out_buffer: *mut c_float, length: c_uint,
-    in_channels: c_int, out_channels: c_int) -> fmod::Result {
-    let mut v_in_buffer = Vec::new();
-    let mut v_out_buffer = Vec::new();
-
-    unsafe {
-        for count in range(0i32, length as i32) {
-            for count2 in range(0i32, out_channels) {
-                v_in_buffer.push(*in_buffer.offset((count * in_channels) as int + count2 as int));
-                v_out_buffer.push(*out_buffer.offset((count * out_channels) as int + count2 as int));
-            }
-        }
-        match (*(*dsp_state).plugin_data).read_callback {
-            Some(p) => p(&from_state_ptr(*dsp_state), &v_in_buffer, &v_out_buffer),
-            None => fmod::Ok
-        }
-    }
-}
-
-extern "C" fn set_position_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, pos: c_uint) -> fmod::Result {
-    unsafe {
-        match (*(*dsp_state).plugin_data).set_pos_callback {
-            Some(p) => p(&from_state_ptr(*dsp_state), pos as u32),
-            None => fmod::Ok
-        }
-    }
-}
-
-extern "C" fn set_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index: c_int, value: c_float) -> fmod::Result {
-    unsafe {
-        match (*(*dsp_state).plugin_data).set_param_callback {
-            Some(p) => p(&from_state_ptr(*dsp_state), index as i32, value as f32),
-            None => fmod::Ok
-        }
-    }
-}
-
-extern "C" fn get_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index: c_int, value: *mut c_float, value_str: *mut c_char) -> fmod::Result {
-    unsafe {
-        match (*(*dsp_state).plugin_data).get_param_callback {
-            Some(p) => p(&from_state_ptr(*dsp_state),
-                index as i32,
-                value as f32,
-                ::std::str::raw::from_c_str(value_str as *const c_char).as_slice()),
-            None => fmod::Ok
-        }
-    }
-}
-
-extern "C" fn config_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, hwnd: *mut c_void, show: c_int) -> fmod::Result {
-    fmod::Ok
+pub fn get_ffi(dsp: &Dsp) -> *mut ffi::FMOD_DSP {
+    dsp.dsp
 }
 
 pub struct Dsp {
     dsp: *mut ffi::FMOD_DSP,
-    can_be_deleted: bool,
-    create_callback: DspCreateCallback,
-    release_callback: DspReleaseCallback,
-    reset_callback: DspResetCallback,
-    read_callback: DspReadCallback,
-    set_pos_callback: DspSetPositionCallback,
-    set_param_callback: DspSetParamCallback,
-    get_param_callback: DspGetParamCallback
+    can_be_deleted: bool
 }
 
 impl Drop for Dsp {
@@ -413,6 +554,10 @@ impl Dsp {
         if self.can_be_deleted && self.dsp.is_not_null() {
             match unsafe { ffi::FMOD_DSP_Release(self.dsp) } {
                 fmod::Ok => {
+                    let mut map = get_callbacks();
+
+                    map.pop_equiv(&(self.dsp as *const ffi::FMOD_DSP));
+                    remove_callback(map);
                     self.dsp =::std::ptr::mut_null();
                     fmod::Ok
                 }
@@ -542,9 +687,9 @@ impl Dsp {
 
     pub fn set_bypass(&self, bypass: bool) -> fmod::Result {
         let t_bypass = if bypass == true {
-            1
+            1i32
         } else {
-            0
+            0i32
         };
 
         unsafe { ffi::FMOD_DSP_SetBypass(self.dsp, t_bypass) }

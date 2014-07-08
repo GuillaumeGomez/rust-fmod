@@ -680,7 +680,7 @@ pub struct FMOD_CODEC_STATE
 }
 
 pub struct FMOD_REVERB_PROPERTIES
-{                                       /*       MIN    MAX     DEFAULT DESCRIPTION */
+{                                      /*       MIN    MAX     DEFAULT DESCRIPTION */
     pub Instance        : c_int,       /* [w]   0      3       0       Environment Instance.                                                 (SUPPORTED:SFX(4 instances) and Wii (3 instances)) */
     pub Environment     : c_int,       /* [r/w] -1     25      -1      Sets all listener properties.  -1 = OFF.                              (SUPPORTED:SFX(-1 only)/PSP) */
     pub EnvDiffusion    : c_float,     /* [r/w] 0.0    1.0     1.0     Environment diffusion                                                 (SUPPORTED:WII) */
@@ -777,14 +777,14 @@ pub struct FMOD_DSP_PARAMETERDESC
     pub min         : c_float,        /* [w] Minimum value of the parameter (ie 100.0). */
     pub max         : c_float,        /* [w] Maximum value of the parameter (ie 22050.0). */
     pub default_val : c_float,        /* [w] Default value of parameter. */
-    pub name        : *mut c_char,    /* [w] Name of the parameter to be displayed (ie "Cutoff frequency"). */
-    pub label       : *mut c_char,    /* [w] Short string to be put next to value to denote the unit type (ie "hz"). */
+    pub name        : [c_char, ..16], /* [w] Name of the parameter to be displayed (ie "Cutoff frequency"). */
+    pub label       : [c_char, ..16], /* [w] Short string to be put next to value to denote the unit type (ie "hz"). */
     pub description : *const c_char   /* [w] Description of the parameter to be displayed as a help item / tooltip for this parameter. */
 }
 
 pub struct FMOD_DSP_DESCRIPTION
 {
-    pub name                    : *mut c_char,                  /* [w] Name of the unit to be displayed in the network. */
+    pub name                    : [c_char, ..32],               /* [w] Name of the unit to be displayed in the network. */
     pub version                 : c_uint,                       /* [w] Plugin writer's version number. */
     pub channels                : c_int,                        /* [w] Number of channels.  Use 0 to process whatever number of channels is currently in the network.  >0 would be mostly used if the unit is a unit that only generates sound. */
     pub create                  : FMOD_DSP_CREATECALLBACK,      /* [w] Create callback.  This is called when DSP unit is created.  Can be null. */
@@ -799,14 +799,12 @@ pub struct FMOD_DSP_DESCRIPTION
     pub config                  : FMOD_DSP_DIALOGCALLBACK,      /* [w] This is called when the user calls DSP::showConfigDialog.  Can be used to display a dialog to configure the filter.  Can be null. */
     pub config_width            : c_int,                        /* [w] Width of config dialog graphic if there is one.  0 otherwise.*/
     pub config_height           : c_int,                        /* [w] Height of config dialog graphic if there is one.  0 otherwise.*/
-    //pub user_data               : *mut c_void                   /* [w] Optional. Specify 0 to ignore. This is user data to be attached to the DSP unit during creation.  Access via DSP::getUserData. */
-    pub user_data               : *mut dsp::Dsp
+    pub user_data               : *mut c_void                   /* [w] Optional. Specify 0 to ignore. This is user data to be attached to the DSP unit during creation.  Access via DSP::getUserData. */
 }
 
 pub struct FMOD_DSP_STATE
 {
     pub instance: *mut FMOD_DSP,    /* [r] Handle to the DSP hand the user created.  Not to be modified.  C++ users cast to FMOD::DSP to use.  */
-    //pub plugin_data: *mut c_void,   /* [w] Plugin writer created data the output author wants to attach to this object. */
-    pub plugin_data: *mut dsp::Dsp,
+    pub plugin_data: *mut c_void,   /* [w] Plugin writer created data the output author wants to attach to this object. */
     pub speaker_mask: c_ushort      /* [w] Specifies which speakers the DSP effect is active on */
 }

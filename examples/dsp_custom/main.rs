@@ -1,17 +1,15 @@
 #![feature(globs)]
+#![allow(non_snake_case_functions)]
 
 extern crate rfmod;
 
 use rfmod::enums::*;
-use rfmod::callbacks::*;
 use rfmod::*;
+use rfmod::types::FmodMode;
 use std::os;
-use std::io::timer::sleep;
 
 fn get_key() -> u8 {
     let mut reader = std::io::stdio::stdin();
-    
-    println!("\nPress a corresponding number or ESC to quit");
     print!("> ");
 
     match reader.read_byte() {
@@ -20,8 +18,13 @@ fn get_key() -> u8 {
     }
 }
 
-extern fn my_DSP_callback(dsp_state: DspState, float *inbuffer, float *outbuffer, unsigned int length, int inchannels, int outchannels) {
-    println!("I'm called from C with value {0}", a);
+#[allow(unused_variable)]
+fn my_DSP_callback(dsp_state: &DspState, inbuffer: &mut Vec<f32>, outbuffer: &mut Vec<f32>, length: u32, inchannels: i32, outchannels: i32) -> fmod::Result {
+    for it in range(0u, inbuffer.len() - 1u) {
+        *outbuffer.get_mut(it) = inbuffer.get(it) * 0.2f32;
+    }
+
+    fmod::Ok
 }
 
 fn main() {
@@ -55,16 +58,17 @@ fn main() {
     println!("============================");
     println!("======== Custom DSP ========");
     println!("============================\n");
-    println!("Press 'f' to activate / deactivate user filter");
-    println!("Press 'Esc' to quit");
+    println!("Enter 'f' to activate / deactivate user filter");
+    println!("Enter 'Esc' to quit");
 
     let channel = match sound.play() {
         Ok(c) => c,
         Err(e) => {fail!("Sound.play failed : {}", e);}
-    }
+    };
 
     let mut description = DspDescription::new();
     description.read = Some(my_DSP_callback);
+    description.name = String::from_str("test");
 
     let dsp = match fmod.create_DSP_with_description(&description) {
         Ok(dsp) => dsp,
@@ -72,7 +76,10 @@ fn main() {
     };
 
     dsp.set_bypass(true);
-    fmod.add_DSP(&dsp).unwrap();
+    let connection = match fmod.add_DSP(&dsp) {
+        Ok(c) => c,
+        Err(e) => {fail!("FmodSys.add_DSP failed : {}", e);}
+    };
 
     let mut active = false;
     loop {
@@ -83,7 +90,7 @@ fn main() {
                 fmod.update();
             }
             c if c == 27u8 as char => break,
-            _ => None
+            _ => {}
         }
     }
 }

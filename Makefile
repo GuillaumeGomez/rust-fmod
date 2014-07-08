@@ -23,7 +23,7 @@
 all: rfmod examples docs
 
 rfmod:
-	mkdir -p target
+	mkdir -p lib
 	rustc --out-dir=lib src/rfmod.rs
 
 examples: rfmod
