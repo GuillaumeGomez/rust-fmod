@@ -26,7 +26,7 @@ use ffi;
 use types::*;
 use enums::*;
 use vector;
-use libc::{c_int};
+use libc::{c_int, c_void};
 use fmod_sys;
 use fmod_sys::FmodMemoryUsageDetails;
 use std::mem::transmute;
@@ -225,20 +225,21 @@ impl Geometry {
         }
     }
 
-    /* to test ! */
-    /*pub fn set_user_data<T>(&self, user_data: T) -> fmod::Result {
+    pub fn set_user_data<T>(&self, user_data: &mut T) -> fmod::Result {
         unsafe { ffi::FMOD_Geometry_SetUserData(self.geometry, transmute(user_data)) }
-    }*/
+    }
 
-    /* to test ! */
-    /*pub fn get_user_data<T>(&self) -> Result<T, fmod::Result> {
+    fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, fmod::Result> {
         unsafe {
-            let user_data =::std::ptr::null();
+            let mut user_data : *mut c_void = ::std::ptr::mut_null();
 
-            match ffi::FMOD_Geometry_GetUserData(self.geometry, &user_data) {
-                fmod::Ok => Ok(transmute(user_data)),
+            match ffi::FMOD_Geometry_GetUserData(self.geometry, &mut user_data) {
+                fmod::Ok => {
+                    let tmp : &mut T = transmute::<*mut c_void, &mut T>(user_data);
+                    Ok(tmp)
+                },
                 e => Err(e)
             }
         }
-    }*/
+    }
 }

@@ -556,23 +556,6 @@ impl Sound {
         }
     }
 
-    /* to test ! */
-    /*pub fn set_user_data<T>(&self, user_data: T) -> fmod::Result {
-        unsafe { ffi::FMOD_Sound_SetUserData(self.sound, transmute(user_data)) }
-    }*/
-
-    /* to test ! */
-    /*pub fn get_user_data<T>(&self) -> Result<T, fmod::Result> {
-        unsafe {
-            let user_data =::std::ptr::null();
-
-            match ffi::FMOD_Sound_GetUserData(self.sound, &user_data) {
-                fmod::Ok => Ok(transmute(user_data)),
-                e => Err(e)
-            }
-        }
-    }*/
-
     pub fn lock(&self, offset: u32, length: u32) -> Result<(Vec<u8>, Vec<u8>), fmod::Result> {
         let mut len1 = 0u32;
         let mut len2 = 0u32;
@@ -599,6 +582,24 @@ impl Sound {
     pub fn unlock(&self, v_ptr1: Vec<u8>, v_ptr2: Vec<u8>) -> fmod::Result {
         unsafe { ffi::FMOD_Sound_Unlock(self.sound, v_ptr1.as_ptr() as *mut c_void, v_ptr2.as_ptr() as *mut c_void, v_ptr1.len() as c_uint,
             v_ptr2.len() as c_uint) }
+    }
+
+    pub fn set_user_data<T>(&self, user_data: &mut T) -> fmod::Result {
+        unsafe { ffi::FMOD_Sound_SetUserData(self.sound, transmute(user_data)) }
+    }
+
+    fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, fmod::Result> {
+        unsafe {
+            let mut user_data : *mut c_void = ::std::ptr::mut_null();
+
+            match ffi::FMOD_Sound_GetUserData(self.sound, &mut user_data) {
+                fmod::Ok => {
+                    let tmp : &mut T = transmute::<*mut c_void, &mut T>(user_data);
+                    Ok(tmp)
+                },
+                e => Err(e)
+            }
+        }
     }
 
     pub fn save_to_wav(&self, file_name: &String) -> Result<bool, String> {

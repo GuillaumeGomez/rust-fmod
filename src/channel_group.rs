@@ -29,7 +29,7 @@ use channel;
 use fmod_sys;
 use dsp;
 use dsp_connection;
-use libc::{c_int};
+use libc::{c_int, c_void};
 use vector;
 use fmod_sys;
 use fmod_sys::FmodMemoryUsageDetails;
@@ -302,20 +302,21 @@ impl ChannelGroup {
         }
     }
 
-    /* to test ! */
-    /*pub fn set_user_data<T>(&self, user_data: T) -> fmod::Result {
+    pub fn set_user_data<T>(&self, user_data: &mut T) -> fmod::Result {
         unsafe { ffi::FMOD_ChannelGroup_SetUserData(self.channel_group, transmute(user_data)) }
-    }*/
+    }
 
-    /* to test ! */
-    /*pub fn get_user_data<T>(&self) -> Result<T, fmod::Result> {
+    fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, fmod::Result> {
         unsafe {
-            let user_data =::std::ptr::null();
+            let mut user_data : *mut c_void = ::std::ptr::mut_null();
 
-            match ffi::FMOD_ChannelGroup_GetUserData(self.channel_group, &user_data) {
-                fmod::Ok => Ok(transmute(user_data)),
+            match ffi::FMOD_ChannelGroup_GetUserData(self.channel_group, &mut user_data) {
+                fmod::Ok => {
+                    let tmp : &mut T = transmute::<*mut c_void, &mut T>(user_data);
+                    Ok(tmp)
+                },
                 e => Err(e)
             }
         }
-    }*/
+    }
 }

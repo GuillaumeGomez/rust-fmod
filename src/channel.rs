@@ -24,7 +24,7 @@
 
 use enums::*;
 use types::*;
-use libc::{c_int, c_uint};
+use libc::{c_int, c_uint, c_void};
 use ffi;
 use dsp;
 use dsp::Dsp;
@@ -609,22 +609,23 @@ impl Channel {
         }
     }
 
-    /* to test ! */
-    /*pub fn set_user_data<T>(&self, user_data: T) -> fmod::Result {
+    pub fn set_user_data<T>(&self, user_data: &mut T) -> fmod::Result {
         unsafe { ffi::FMOD_Channel_SetUserData(self.channel, transmute(user_data)) }
-    }*/
+    }
 
-    /* to test ! */
-    /*pub fn get_user_data<T>(&self) -> Result<T, fmod::Result> {
+    fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, fmod::Result> {
         unsafe {
-            let user_data =::std::ptr::null();
+            let mut user_data : *mut c_void = ::std::ptr::mut_null();
 
-            match ffi::FMOD_Channel_GetUserData(self.channel, &user_data) {
-                fmod::Ok => Ok(transmute(user_data)),
+            match ffi::FMOD_Channel_GetUserData(self.channel, &mut user_data) {
+                fmod::Ok => {
+                    let tmp : &mut T = transmute::<*mut c_void, &mut T>(user_data);
+                    Ok(tmp)
+                },
                 e => Err(e)
             }
         }
-    }*/
+    }
 
     pub fn get_memory_info(&self, FmodMemoryBits(memory_bits): FmodMemoryBits,
         FmodEventMemoryBits(event_memory_bits): FmodEventMemoryBits) -> Result<(u32, FmodMemoryUsageDetails), fmod::Result> {

@@ -30,6 +30,7 @@ use reverb_properties;
 use fmod_sys;
 use fmod_sys::FmodMemoryUsageDetails;
 use std::mem::transmute;
+use libc::{c_void};
 
 pub fn from_ptr(reverb: *mut ffi::FMOD_REVERB) -> Reverb {
     Reverb{reverb: reverb}
@@ -126,20 +127,21 @@ impl Reverb {
         }
     }
 
-    /* to test ! */
-    /*pub fn set_user_data<T>(&self, user_data: T) -> fmod::Result {
+    pub fn set_user_data<T>(&self, user_data: &mut T) -> fmod::Result {
         unsafe { ffi::FMOD_Reverb_SetUserData(self.reverb, transmute(user_data)) }
-    }*/
+    }
 
-    /* to test ! */
-    /*pub fn get_user_data<T>(&self) -> Result<T, fmod::Result> {
+    fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, fmod::Result> {
         unsafe {
-            let user_data =::std::ptr::null();
+            let mut user_data : *mut c_void = ::std::ptr::mut_null();
 
-            match ffi::FMOD_Reverb_GetUserData(self.reverb, &user_data) {
-                fmod::Ok => Ok(transmute(user_data)),
+            match ffi::FMOD_Reverb_GetUserData(self.reverb, &mut user_data) {
+                fmod::Ok => {
+                    let tmp : &mut T = transmute::<*mut c_void, &mut T>(user_data);
+                    Ok(tmp)
+                },
                 e => Err(e)
             }
         }
-    }*/
+    }
 }

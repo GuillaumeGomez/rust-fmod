@@ -39,10 +39,18 @@ use std::c_str::CString;
 extern "C" fn create_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> fmod::Result {
     unsafe {
         if dsp_state.is_not_null() && (*dsp_state).instance.is_not_null() {
-            let callbacks : *mut DspCallbacks = transmute((*dsp_state).instance);
-            match (*callbacks).create_callback {
-                Some(p) => p(&from_state_ptr(*dsp_state)),
-                None => fmod::Ok
+            let mut tmp = ::std::ptr::mut_null();
+
+            ffi::FMOD_DSP_GetUserData((*dsp_state).instance, &mut tmp);
+            if tmp.is_not_null() {
+                let callbacks : &mut DspCallbacks = transmute(tmp);
+
+                match callbacks.create_callback {
+                    Some(p) => p(&from_state_ptr(*dsp_state)),
+                    None => fmod::Ok
+                }
+            } else {
+                fmod::Ok
             }
         } else {
             fmod::Ok
@@ -53,10 +61,18 @@ extern "C" fn create_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> fmod::Resu
 extern "C" fn release_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> fmod::Result {
     unsafe {
         if dsp_state.is_not_null() && (*dsp_state).instance.is_not_null() {
-            let callbacks : *mut DspCallbacks = transmute((*dsp_state).instance);
-            match (*callbacks).release_callback {
-                Some(p) => p(&from_state_ptr(*dsp_state)),
-                None => fmod::Ok
+            let mut tmp = ::std::ptr::mut_null();
+
+            ffi::FMOD_DSP_GetUserData((*dsp_state).instance, &mut tmp);
+            if tmp.is_not_null() {
+                let callbacks : &mut DspCallbacks = transmute(tmp);
+                
+                match callbacks.release_callback {
+                    Some(p) => p(&from_state_ptr(*dsp_state)),
+                    None => fmod::Ok
+                }
+            } else {
+                fmod::Ok
             }
         } else {
             fmod::Ok
@@ -67,10 +83,17 @@ extern "C" fn release_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> fmod::Res
 extern "C" fn reset_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> fmod::Result {
     unsafe {
         if dsp_state.is_not_null() && (*dsp_state).instance.is_not_null() {
-            let callbacks : *mut DspCallbacks = transmute((*dsp_state).instance);
-            match (*callbacks).reset_callback {
-                Some(p) => p(&from_state_ptr(*dsp_state)),
-                None => fmod::Ok
+            let mut tmp = ::std::ptr::mut_null();
+
+            ffi::FMOD_DSP_GetUserData((*dsp_state).instance, &mut tmp);
+            if tmp.is_not_null() {
+                let callbacks : &mut DspCallbacks = transmute(tmp);
+                match callbacks.reset_callback {
+                    Some(p) => p(&from_state_ptr(*dsp_state)),
+                    None => fmod::Ok
+                }
+            } else {
+                fmod::Ok
             }
         } else {
             fmod::Ok
@@ -124,10 +147,17 @@ extern "C" fn read_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, in_buffer: *mut
 extern "C" fn set_position_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, pos: c_uint) -> fmod::Result {
     unsafe {
         if dsp_state.is_not_null() && (*dsp_state).instance.is_not_null() {
-            let callbacks : *mut DspCallbacks = transmute((*dsp_state).instance);
-            match (*callbacks).set_pos_callback {
-                Some(p) => p(&from_state_ptr(*dsp_state), pos as u32),
-                None => fmod::Ok
+            let mut tmp = ::std::ptr::mut_null();
+
+            ffi::FMOD_DSP_GetUserData((*dsp_state).instance, &mut tmp);
+            if tmp.is_not_null() {
+                let callbacks : &mut DspCallbacks = transmute(tmp);
+                match callbacks.set_pos_callback {
+                    Some(p) => p(&from_state_ptr(*dsp_state), pos as u32),
+                    None => fmod::Ok
+                }
+            } else {
+                fmod::Ok
             }
         } else {
             fmod::Ok
@@ -138,10 +168,17 @@ extern "C" fn set_position_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, pos: c_
 extern "C" fn set_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index: c_int, value: c_float) -> fmod::Result {
     unsafe {
         if dsp_state.is_not_null() && (*dsp_state).instance.is_not_null() {
-            let callbacks : *mut DspCallbacks = transmute((*dsp_state).instance);
-            match (*callbacks).set_param_callback {
-                Some(p) => p(&from_state_ptr(*dsp_state), index as i32, value),
-                None => fmod::Ok
+            let mut tmp = ::std::ptr::mut_null();
+
+            ffi::FMOD_DSP_GetUserData((*dsp_state).instance, &mut tmp);
+            if tmp.is_not_null() {
+                let callbacks : &mut DspCallbacks = transmute(tmp);
+                match callbacks.set_param_callback {
+                    Some(p) => p(&from_state_ptr(*dsp_state), index as i32, value),
+                    None => fmod::Ok
+                }
+            } else {
+                fmod::Ok
             }
         } else {
             fmod::Ok
@@ -152,19 +189,26 @@ extern "C" fn set_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index:
 extern "C" fn get_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index: c_int, value: *mut c_float, value_str: *mut c_char) -> fmod::Result {
     unsafe {
         if dsp_state.is_not_null() && (*dsp_state).instance.is_not_null() {
-            let callbacks : *mut DspCallbacks = transmute((*dsp_state).instance);
-            match (*callbacks).get_param_callback {
-                Some(p) => {
-                    let mut t_value = *value;
+            let mut tmp = ::std::ptr::mut_null();
 
-                    let ret = p(&from_state_ptr(*dsp_state),
-                        index as i32,
-                        &mut t_value,
-                        ::std::str::raw::from_c_str(value_str as *const c_char).as_slice());
-                    *value = t_value;
-                    ret
-                },
-                None => fmod::Ok
+            ffi::FMOD_DSP_GetUserData((*dsp_state).instance, &mut tmp);
+            if tmp.is_not_null() {
+                let callbacks : &mut DspCallbacks = transmute(tmp);
+                match callbacks.get_param_callback {
+                    Some(p) => {
+                        let mut t_value = *value;
+
+                        let ret = p(&from_state_ptr(*dsp_state),
+                            index as i32,
+                            &mut t_value,
+                            ::std::str::raw::from_c_str(value_str as *const c_char).as_slice());
+                        *value = t_value;
+                        ret
+                    },
+                    None => fmod::Ok
+                }
+            } else {
+                fmod::Ok
             }
         } else {
             fmod::Ok
@@ -740,18 +784,21 @@ impl Dsp {
         }
     }
 
-    /*pub fn set_user_data<T>(&self, user_data: &mut T) -> fmod::Result {
+    pub fn set_user_data<T>(&self, user_data: &mut T) -> fmod::Result {
         unsafe { ffi::FMOD_DSP_SetUserData(self.dsp, transmute(user_data)) }
     }
 
-    pub fn get_user_data<T>(&self) -> Result<T, fmod::Result> {
+    fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, fmod::Result> {
         unsafe {
-            let mut user_data =::std::ptr::mut_null();
+            let mut user_data : *mut c_void = ::std::ptr::mut_null();
 
             match ffi::FMOD_DSP_GetUserData(self.dsp, &mut user_data) {
-                fmod::Ok => Ok(transmute(user_data)),
+                fmod::Ok => {
+                    let tmp : &mut T = transmute::<*mut c_void, &mut T>(user_data);
+                    Ok(tmp)
+                },
                 e => Err(e)
             }
         }
-    }*/
+    }
 }
