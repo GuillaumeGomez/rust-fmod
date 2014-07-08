@@ -626,12 +626,12 @@ impl FmodSys {
         }
     }
 
-    pub fn create_DSP_with_description(&self, description: &dsp::DspDescription) -> Result<dsp::Dsp, fmod::Result> {
+    pub fn create_DSP_with_description(&self, description: &mut dsp::DspDescription) -> Result<dsp::Dsp, fmod::Result> {
         let mut t_dsp = ::std::ptr::mut_null();
         let mut t_description = dsp::get_description_ffi(description);
 
         match unsafe { ffi::FMOD_System_CreateDSP(self.system, &mut t_description, &mut t_dsp) } {
-            fmod::Ok => Ok(dsp::from_ptr_with_description(t_dsp, description, true)),
+            fmod::Ok => Ok(dsp::from_ptr_first(t_dsp)),
             e => Err(e)
         }
     }
@@ -640,7 +640,7 @@ impl FmodSys {
         let mut t_dsp = ::std::ptr::mut_null();
 
         match unsafe { ffi::FMOD_System_CreateDSPByType(self.system, _type, &mut t_dsp) } {
-            fmod::Ok => Ok(dsp::from_ptr(t_dsp)),
+            fmod::Ok => Ok(dsp::from_ptr_first(t_dsp)),
             e => Err(e)
         }
     }

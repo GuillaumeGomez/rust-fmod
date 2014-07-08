@@ -1,5 +1,6 @@
 #![feature(globs)]
 #![allow(non_snake_case_functions)]
+#![allow(unused_variable)]
 
 extern crate rfmod;
 
@@ -70,7 +71,7 @@ fn main() {
     description.read = Some(my_DSP_callback);
     description.name = String::from_str("test");
 
-    let dsp = match fmod.create_DSP_with_description(&description) {
+    let dsp = match fmod.create_DSP_with_description(&mut description) {
         Ok(dsp) => dsp,
         Err(e) => {fail!("FmodSys.create_DSP_with_description failed : {}", e);}
     };

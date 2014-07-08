@@ -36,168 +36,124 @@ use std;
 use std::collections::hashmap::HashMap;
 use std::c_str::CString;
 
-fn get_callbacks() -> HashMap<*mut ffi::FMOD_DSP, DspCallbacks> {
-    local_data_key!(key: HashMap<*mut ffi::FMOD_DSP, DspCallbacks>);
-    if key.get().is_none() {
-        let map : HashMap<*mut ffi::FMOD_DSP, DspCallbacks> = HashMap::new();
-
-        key.replace(Some(map.clone()));
-        map.clone()
-    } else {
-        match key.get() {
-            Some(p) => p.clone(),
-            None => {
-                let map : HashMap<*mut ffi::FMOD_DSP, DspCallbacks> = HashMap::new();
-
-                map
-            }
-        }
-    }
-}
-
-fn get_callback_by_id(id: *mut ffi::FMOD_DSP) -> Option<DspCallbacks> {
-    local_data_key!(key: HashMap<*mut ffi::FMOD_DSP, DspCallbacks>);
-    if key.get().is_none() {
-        None
-    } else {
-        match (*key.get().unwrap()).find(&id) {
-            Some(calls) => {
-                Some(*calls)
-            },
-            None => None
-        }
-    }
-}
-
-fn remove_callback(map: HashMap<*mut ffi::FMOD_DSP, DspCallbacks>) {
-    local_data_key!(key: HashMap<*mut ffi::FMOD_DSP, DspCallbacks>);
-    key.replace(Some(map));
-}
-
-fn register_callbacks(map: &mut HashMap<*mut ffi::FMOD_DSP, DspCallbacks>, ptr: *mut ffi::FMOD_DSP, callbacks: DspCallbacks) {
-    println!("register");
-    match get_callback_by_id(ptr) {
-        Some(_) => {}
-        None => {
-            local_data_key!(key: HashMap<*mut ffi::FMOD_DSP, DspCallbacks>);
-            if key.get().is_none() {
-                let mut t_map = HashMap::new();
-
-                t_map.insert(ptr, callbacks);
-                key.replace(Some(t_map));
-            } else {
-                map.insert(ptr, callbacks);
-                key.replace(Some(map.clone()));
-            }
-        }
-    }
-}
-
 extern "C" fn create_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> fmod::Result {
     unsafe {
-        match get_callback_by_id((*dsp_state).instance) {
-            Some(c) => match c.create_callback {
+        if dsp_state.is_not_null() && (*dsp_state).instance.is_not_null() {
+            let callbacks : *mut DspCallbacks = transmute((*dsp_state).instance);
+            match (*callbacks).create_callback {
                 Some(p) => p(&from_state_ptr(*dsp_state)),
                 None => fmod::Ok
-            },
-            None => fmod::Ok
+            }
+        } else {
+            fmod::Ok
         }
     }
 }
 
 extern "C" fn release_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> fmod::Result {
     unsafe {
-        match get_callback_by_id((*dsp_state).instance) {
-            Some(c) => match c.release_callback {
+        if dsp_state.is_not_null() && (*dsp_state).instance.is_not_null() {
+            let callbacks : *mut DspCallbacks = transmute((*dsp_state).instance);
+            match (*callbacks).release_callback {
                 Some(p) => p(&from_state_ptr(*dsp_state)),
                 None => fmod::Ok
-            },
-            None => fmod::Ok
+            }
+        } else {
+            fmod::Ok
         }
     }
 }
 
 extern "C" fn reset_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> fmod::Result {
     unsafe {
-        match get_callback_by_id((*dsp_state).instance) {
-            Some(c) => match c.reset_callback { 
+        if dsp_state.is_not_null() && (*dsp_state).instance.is_not_null() {
+            let callbacks : *mut DspCallbacks = transmute((*dsp_state).instance);
+            match (*callbacks).reset_callback {
                 Some(p) => p(&from_state_ptr(*dsp_state)),
                 None => fmod::Ok
-            },
-            None => fmod::Ok
+            }
+        } else {
+            fmod::Ok
         }
     }
 }
 
 extern "C" fn read_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, in_buffer: *mut c_float, out_buffer: *mut c_float, length: c_uint,
     in_channels: c_int, out_channels: c_int) -> fmod::Result {
-    if dsp_state.is_not_null() {
-        unsafe {
-            println!("go");
-            match get_callback_by_id((*dsp_state).instance) {
-                Some(c) => {
-                    println!("go !");
-                    let mut v_in_buffer = Vec::new();
-                    let mut v_out_buffer = Vec::new();
+    unsafe {
+        if dsp_state.is_not_null() && (*dsp_state).instance.is_not_null() {
+            let mut tmp = ::std::ptr::mut_null();
 
-                    for count in range(0i32, length as i32) {
-                        for count2 in range(0i32, out_channels) {
-                            v_in_buffer.push(*in_buffer.offset((count * in_channels) as int + count2 as int));
-                            v_out_buffer.push(*out_buffer.offset((count * out_channels) as int + count2 as int));
+            ffi::FMOD_DSP_GetUserData((*dsp_state).instance, &mut tmp);
+            if tmp.is_not_null() {
+                let callbacks : &mut DspCallbacks = transmute(tmp);
+                match callbacks.read_callback {
+                    Some(p) => {
+                        let mut v_in_buffer = Vec::new();
+                        let mut v_out_buffer = Vec::new();
+
+                        for count in range(0i32, length as i32) {
+                            for count2 in range(0i32, out_channels) {
+                                v_in_buffer.push(*in_buffer.offset((count * in_channels) as int + count2 as int));
+                                v_out_buffer.push(*out_buffer.offset((count * out_channels) as int + count2 as int));
+                            }
                         }
-                    }
-                    //let mut v_in_buffer = Vec::from_slice(std::c_vec::CVec::new(in_buffer, length as uint * in_channels as uint + out_channels as uint).as_slice());
-                    //let mut v_out_buffer = Vec::from_slice(std::c_vec::CVec::new(out_buffer, length as uint * out_channels as uint + out_channels as uint).as_slice());
-                    let ret = match c.read_callback {
-                        Some(p) => p(&from_state_ptr(*dsp_state), &mut v_in_buffer, &mut v_out_buffer, length as u32, in_channels as i32, out_channels as i32),
-                        None => fmod::Ok
-                    };
-                    let mut it = 0;
-                    for count in range(0i32, length as i32) {
-                        for count2 in range(0i32, out_channels) {
-                            *in_buffer.offset((count * in_channels) as int + count2 as int) = *v_in_buffer.get(it);
-                            *out_buffer.offset((count * out_channels) as int + count2 as int) = *v_out_buffer.get(it);
-                            it += 1;
+                        let ret = p(&from_state_ptr(*dsp_state), &mut v_in_buffer, &mut v_out_buffer, length as u32, in_channels as i32, out_channels as i32);
+
+                        let mut it = 0;
+                        for count in range(0i32, length as i32) {
+                            for count2 in range(0i32, out_channels) {
+                                *in_buffer.offset((count * in_channels) as int + count2 as int) = *v_in_buffer.get(it);
+                                *out_buffer.offset((count * out_channels) as int + count2 as int) = *v_out_buffer.get(it);
+                                it += 1;
+                            }
                         }
-                    }
-                    ret
+                        ret
+                    },
+                    None => fmod::Ok
                 }
-                None => fmod::Ok
+            } else {
+                fmod::Ok
             }
+        } else {
+            fmod::Ok
         }
-    } else {
-        fmod::Ok
     }
 }
 
 extern "C" fn set_position_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, pos: c_uint) -> fmod::Result {
     unsafe {
-        match get_callback_by_id((*dsp_state).instance) {
-            Some(c) => match c.set_pos_callback {
+        if dsp_state.is_not_null() && (*dsp_state).instance.is_not_null() {
+            let callbacks : *mut DspCallbacks = transmute((*dsp_state).instance);
+            match (*callbacks).set_pos_callback {
                 Some(p) => p(&from_state_ptr(*dsp_state), pos as u32),
                 None => fmod::Ok
-            },
-            None => fmod::Ok
+            }
+        } else {
+            fmod::Ok
         }
     }
 }
 
 extern "C" fn set_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index: c_int, value: c_float) -> fmod::Result {
     unsafe {
-        match get_callback_by_id((*dsp_state).instance) {
-            Some(c) => match c.set_param_callback {
+        if dsp_state.is_not_null() && (*dsp_state).instance.is_not_null() {
+            let callbacks : *mut DspCallbacks = transmute((*dsp_state).instance);
+            match (*callbacks).set_param_callback {
                 Some(p) => p(&from_state_ptr(*dsp_state), index as i32, value),
                 None => fmod::Ok
-            },
-            None => fmod::Ok
+            }
+        } else {
+            fmod::Ok
         }
     }
 }
 
 extern "C" fn get_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index: c_int, value: *mut c_float, value_str: *mut c_char) -> fmod::Result {
     unsafe {
-        match get_callback_by_id((*dsp_state).instance) {
-            Some(c) => match c.get_param_callback {
+        if dsp_state.is_not_null() && (*dsp_state).instance.is_not_null() {
+            let callbacks : *mut DspCallbacks = transmute((*dsp_state).instance);
+            match (*callbacks).get_param_callback {
                 Some(p) => {
                     let mut t_value = *value;
 
@@ -209,8 +165,9 @@ extern "C" fn get_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index:
                     ret
                 },
                 None => fmod::Ok
-            },
-            None => fmod::Ok
+            }
+        } else {
+            fmod::Ok
         }
     }
 }
@@ -342,22 +299,22 @@ pub fn new_parameter() -> DspParameterDesc {
 
 pub struct DspDescription
 {
-    pub name                : String,                      /* [w] Name of the unit to be displayed in the network. */
-    pub version             : u32,                         /* [w] Plugin writer's version number. */
-    pub channels            : i32,                         /* [w] Number of channels.  Use 0 to process whatever number of channels is currently in the network.  >0 would be mostly used if the unit is a unit that only generates sound. */
-    pub create              : DspCreateCallback,      /* [w] Create callback.  This is called when DSP unit is created.  Can be null. */
-    pub release             : DspReleaseCallback,     /* [w] Release callback.  This is called just before the unit is freed so the user can do any cleanup needed for the unit.  Can be null. */
-    pub reset               : DspResetCallback,       /* [w] Reset callback.  This is called by the user to reset any history buffers that may need resetting for a filter, when it is to be used or re-used for the first time to its initial clean state.  Use to avoid clicks or artifacts. */
-    pub read                : DspReadCallback,        /* [w] Read callback.  Processing is done here.  Can be null. */
-    pub set_position        : DspSetPositionCallback, /* [w] Set position callback.  This is called if the unit wants to update its position info but not process data, or reset a cursor position internally if it is reading data from a certain source.  Can be null. */
-    pub num_parameters      : i32,                         /* [w] Number of parameters used in this filter.  The user finds this with DSP::getNumParameters */
-    pub param_desc          : DspParameterDesc,            /* [w] Variable number of parameter structures. */
-    pub set_parameter       : DspSetParamCallback,    /* [w] This is called when the user calls DSP::setParameter.  Can be null. */
-    pub get_parameter       : DspGetParamCallback,    /* [w] This is called when the user calls DSP::getParameter.  Can be null. */
-    config                  : DspDialogCallback,      /* [w] This is called when the user calls DSP::showConfigDialog.  Can be used to display a dialog to configure the filter.  Can be null. */
-    pub config_width        : i32,                         /* [w] Width of config dialog graphic if there is one.  0 otherwise.*/
-    pub config_height       : i32,                         /* [w] Height of config dialog graphic if there is one.  0 otherwise.*/
-    user_data               : *mut c_void             /* [w] Optional. Specify 0 to ignore. This is user data to be attached to the DSP unit during creation.  Access via DSP::getUserData. */
+    pub name                : String,                  /* [w] Name of the unit to be displayed in the network. */
+    pub version             : u32,                     /* [w] Plugin writer's version number. */
+    pub channels            : i32,                     /* [w] Number of channels.  Use 0 to process whatever number of channels is currently in the network.  >0 would be mostly used if the unit is a unit that only generates sound. */
+    pub create              : DspCreateCallback,       /* [w] Create callback.  This is called when DSP unit is created.  Can be null. */
+    pub release             : DspReleaseCallback,      /* [w] Release callback.  This is called just before the unit is freed so the user can do any cleanup needed for the unit.  Can be null. */
+    pub reset               : DspResetCallback,        /* [w] Reset callback.  This is called by the user to reset any history buffers that may need resetting for a filter, when it is to be used or re-used for the first time to its initial clean state.  Use to avoid clicks or artifacts. */
+    pub read                : DspReadCallback,         /* [w] Read callback.  Processing is done here.  Can be null. */
+    pub set_position        : DspSetPositionCallback,  /* [w] Set position callback.  This is called if the unit wants to update its position info but not process data, or reset a cursor position internally if it is reading data from a certain source.  Can be null. */
+    pub num_parameters      : i32,                     /* [w] Number of parameters used in this filter.  The user finds this with DSP::getNumParameters */
+    pub param_desc          : DspParameterDesc,        /* [w] Variable number of parameter structures. */
+    pub set_parameter       : DspSetParamCallback,     /* [w] This is called when the user calls DSP::setParameter.  Can be null. */
+    pub get_parameter       : DspGetParamCallback,     /* [w] This is called when the user calls DSP::getParameter.  Can be null. */
+    config                  : DspDialogCallback,       /* [w] This is called when the user calls DSP::showConfigDialog.  Can be used to display a dialog to configure the filter.  Can be null. */
+    pub config_width        : i32,                     /* [w] Width of config dialog graphic if there is one.  0 otherwise.*/
+    pub config_height       : i32,                     /* [w] Height of config dialog graphic if there is one.  0 otherwise.*/
+    user_data               : Box<DspCallbacks>        /* [w] Optional. Specify 0 to ignore. This is user data to be attached to the DSP unit during creation.  Access via DSP::getUserData. */
 }
 
 impl DspDescription {
@@ -378,38 +335,12 @@ impl DspDescription {
             config: None,
             config_width: 0i32,
             config_height: 0i32,
-            user_data: std::ptr::mut_null()
+            user_data: box DspCallbacks::new()
         }
     }
 }
 
-pub fn from_description_ptr(dsp_description: &ffi::FMOD_DSP_DESCRIPTION) -> DspDescription {
-    DspDescription {
-        name: unsafe {
-            match CString::new(dsp_description.name.as_ptr(), true).as_str() {
-                Some(s) => s.to_string(),
-                None => "".to_string()
-            }
-        },
-        version: dsp_description.version,
-        channels: dsp_description.channels,
-        create: None,
-        release: None,
-        reset: None,
-        read: None,
-        set_position: None,
-        num_parameters: dsp_description.num_parameters,
-        param_desc: from_parameter_ptr(dsp_description.param_desc),
-        set_parameter: None,
-        get_parameter: None,
-        config: None,
-        config_height: dsp_description.config_height,
-        config_width: dsp_description.config_width,
-        user_data: dsp_description.user_data
-    }
-}
-
-pub fn get_description_ffi(dsp_description: &DspDescription) -> ffi::FMOD_DSP_DESCRIPTION {
+pub fn get_description_ffi(dsp_description: &mut DspDescription) -> ffi::FMOD_DSP_DESCRIPTION {
     let mut tmp_s = Vec::from_slice(dsp_description.name.as_bytes());
 
     tmp_s.truncate(32);
@@ -463,7 +394,18 @@ pub fn get_description_ffi(dsp_description: &DspDescription) -> ffi::FMOD_DSP_DE
         },
         config_height: dsp_description.config_height,
         config_width: dsp_description.config_width,
-        user_data: dsp_description.user_data
+        user_data: {
+            dsp_description.user_data.create_callback = dsp_description.create;
+            dsp_description.user_data.release_callback = dsp_description.release;
+            dsp_description.user_data.reset_callback = dsp_description.reset;
+            dsp_description.user_data.read_callback = dsp_description.read;
+            dsp_description.user_data.set_pos_callback = dsp_description.set_position;
+            dsp_description.user_data.set_param_callback = dsp_description.set_parameter;
+            dsp_description.user_data.get_param_callback = dsp_description.get_parameter;
+            let ptr = unsafe { transmute::<&mut DspCallbacks, *mut c_void>(&mut *dsp_description.user_data) };
+
+            ptr
+        }
     }
 }
 
@@ -491,8 +433,6 @@ pub struct DspState
 }
 
 pub fn from_ptr(dsp: *mut ffi::FMOD_DSP) -> Dsp {
-    let mut map = get_callbacks();
-    register_callbacks(&mut map, dsp, DspCallbacks::new());
     Dsp {
         dsp: dsp,
         can_be_deleted: false
@@ -500,28 +440,9 @@ pub fn from_ptr(dsp: *mut ffi::FMOD_DSP) -> Dsp {
 }
 
 pub fn from_ptr_first(dsp: *mut ffi::FMOD_DSP) -> Dsp {
-    let mut map = get_callbacks();
-    register_callbacks(&mut map, dsp, DspCallbacks::new());
     Dsp {
         dsp: dsp,
         can_be_deleted: true
-    }
-}
-
-pub fn from_ptr_with_description(dsp: *mut ffi::FMOD_DSP, description: &DspDescription, is_first: bool) -> Dsp {
-    let mut map = get_callbacks();
-    register_callbacks(&mut map, dsp, DspCallbacks {
-        create_callback: description.create,
-        release_callback: description.release,
-        reset_callback: description.reset,
-        read_callback: description.read,
-        set_pos_callback: description.set_position,
-        set_param_callback: description.set_parameter,
-        get_param_callback: description.get_parameter
-    });
-    Dsp {
-        dsp: dsp,
-        can_be_deleted: is_first
     }
 }
 
@@ -554,10 +475,6 @@ impl Dsp {
         if self.can_be_deleted && self.dsp.is_not_null() {
             match unsafe { ffi::FMOD_DSP_Release(self.dsp) } {
                 fmod::Ok => {
-                    let mut map = get_callbacks();
-
-                    map.pop_equiv(&(self.dsp as *const ffi::FMOD_DSP));
-                    remove_callback(map);
                     self.dsp =::std::ptr::mut_null();
                     fmod::Ok
                 }
@@ -823,17 +740,15 @@ impl Dsp {
         }
     }
 
-    /* to test ! */
-    /*pub fn set_user_data<T>(&self, user_data: T) -> fmod::Result {
+    /*pub fn set_user_data<T>(&self, user_data: &mut T) -> fmod::Result {
         unsafe { ffi::FMOD_DSP_SetUserData(self.dsp, transmute(user_data)) }
-    }*/
+    }
 
-    /* to test ! */
-    /*pub fn get_user_data<T>(&self) -> Result<T, fmod::Result> {
+    pub fn get_user_data<T>(&self) -> Result<T, fmod::Result> {
         unsafe {
-            let user_data =::std::ptr::null();
+            let mut user_data =::std::ptr::mut_null();
 
-            match ffi::FMOD_DSP_GetUserData(self.dsp, &user_data) {
+            match ffi::FMOD_DSP_GetUserData(self.dsp, &mut user_data) {
                 fmod::Ok => Ok(transmute(user_data)),
                 e => Err(e)
             }
