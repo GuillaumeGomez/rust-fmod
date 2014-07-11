@@ -1,7 +1,7 @@
 rust-fmod [![Build Status](https://api.travis-ci.org/GuillaumeGomez/rust-fmod.png?branch=master)](https://travis-ci.org/GuillaumeGomez/rust-fmod)
 =========
 
-This is a rust binding for FMOD, developped by FIRELIGHT TECHNOLOGIES.
+This is a rust binding for FMOD, the library developped by FIRELIGHT TECHNOLOGIES.
 
 FMOD website : www.fmod.org
 
