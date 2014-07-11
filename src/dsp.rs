@@ -221,6 +221,11 @@ extern "C" fn config_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, hwnd: *mut c_
     fmod::Ok
 }
 
+struct UserData {
+    callbacks: DspCallbacks,
+    user_data: *mut c_void
+}
+
 struct DspCallbacks {
     create_callback: DspCreateCallback,
     release_callback: DspReleaseCallback,
@@ -479,14 +484,22 @@ pub struct DspState
 pub fn from_ptr(dsp: *mut ffi::FMOD_DSP) -> Dsp {
     Dsp {
         dsp: dsp,
-        can_be_deleted: false
+        can_be_deleted: false,
+        user_data: UserData {
+            callbacks: DspCallbacks::new(),
+            user_data: ::std::ptr::mut_null()
+        }
     }
 }
 
 pub fn from_ptr_first(dsp: *mut ffi::FMOD_DSP) -> Dsp {
     Dsp {
         dsp: dsp,
-        can_be_deleted: true
+        can_be_deleted: true,
+        user_data: UserData {
+            callbacks: DspCallbacks::new(),
+            user_data: ::std::ptr::mut_null()
+        }
     }
 }
 
@@ -496,7 +509,8 @@ pub fn get_ffi(dsp: &Dsp) -> *mut ffi::FMOD_DSP {
 
 pub struct Dsp {
     dsp: *mut ffi::FMOD_DSP,
-    can_be_deleted: bool
+    can_be_deleted: bool,
+    user_data: UserData
 }
 
 impl Drop for Dsp {
@@ -784,8 +798,30 @@ impl Dsp {
         }
     }
 
-    pub fn set_user_data<T>(&self, user_data: &mut T) -> fmod::Result {
-        unsafe { ffi::FMOD_DSP_SetUserData(self.dsp, transmute(user_data)) }
+    pub fn set_user_data<T>(&mut self, user_data: &mut T) -> fmod::Result {
+        let mut data : *mut c_void = ::std::ptr::mut_null();
+
+        unsafe {
+            match ffi::FMOD_DSP_GetUserData(self.dsp, &mut data) {
+                fmod::Ok => {
+                    if data.is_null() {
+                        self.user_data.user_data = transmute::<&mut T, *mut c_void>(user_data);
+
+                        ffi::FMOD_DSP_SetUserData(self.dsp, transmute(&mut self.user_data))
+                    } else {
+                        let tmp : &mut UserData = transmute::<*mut c_void, &mut UserData>(data);
+
+                        tmp.user_data = transmute::<&mut T, *mut c_void>(user_data);
+                        ffi::FMOD_DSP_SetUserData(self.dsp, transmute(tmp))
+                    }
+                }
+                _ => {
+                    self.user_data.user_data = transmute::<&mut T, *mut c_void>(user_data);
+
+                    ffi::FMOD_DSP_SetUserData(self.dsp, transmute(&mut self.user_data))
+                }
+            }
+        }
     }
 
     fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, fmod::Result> {
@@ -794,8 +830,13 @@ impl Dsp {
 
             match ffi::FMOD_DSP_GetUserData(self.dsp, &mut user_data) {
                 fmod::Ok => {
-                    let tmp : &mut T = transmute::<*mut c_void, &mut T>(user_data);
-                    Ok(tmp)
+                    if user_data.is_not_null() {
+                        let tmp : &mut UserData = transmute::<*mut c_void, &mut UserData>(user_data);
+                        let tmp2 : &mut T = transmute::<*mut c_void, &mut T>(tmp.user_data);
+                        Ok(tmp2)
+                    } else {
+                        Err(fmod::Ok)
+                    }
                 },
                 e => Err(e)
             }
