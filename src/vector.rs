@@ -49,3 +49,13 @@ impl FmodVector {
         FmodVector{x: 0f32, y: 0f32, z: 0f32}
     }
 }
+
+impl PartialEq for FmodVector {
+    fn eq(&self, other: &FmodVector) -> bool {
+        self.x == other.x && self.y == other.y && self.z == other.z
+    }
+
+    fn ne(&self, other: &FmodVector) -> bool {
+        !self.eq(other)
+    }
+}

@@ -186,12 +186,15 @@ impl Sound {
         }
     }
 
-    pub fn play_with_parameters(&self, channel_id: fmod::ChannelIndex) -> Result<channel::Channel, fmod::Result> {
+    pub fn play_with_parameters(&self, channel_id: fmod::ChannelIndex, paused: bool) -> Result<channel::Channel, fmod::Result> {
         let mut channel = ::std::ptr::mut_null();
         
         match match self.get_system_object() {
             Ok(s) => { 
-                unsafe { ffi::FMOD_System_PlaySound(fmod_sys::get_ffi(&s), channel_id, self.sound, 0, &mut channel) }
+                unsafe { ffi::FMOD_System_PlaySound(fmod_sys::get_ffi(&s), channel_id, self.sound, match paused {
+                    true => 1,
+                    false => 0
+                }, &mut channel) }
             }
             Err(e) => e
         } {

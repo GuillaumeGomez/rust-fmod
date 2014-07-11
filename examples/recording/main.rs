@@ -139,7 +139,7 @@ fn main() {
                 }
             },
             '1' => {
-                match sound.play_with_parameters(fmod::ChannelReUse) {
+                match sound.play_with_parameters(fmod::ChannelReUse, false) {
                     Ok(chan) => {
                         fmod.update();
                         while chan.is_playing().unwrap() == true {
