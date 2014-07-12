@@ -108,7 +108,9 @@ impl Channel {
         unsafe { ffi::FMOD_Channel_Stop(self.channel) }
     }
 
-    // channel_offset: 0 -> left channel, 1 -> right channel
+    // channel_offset:
+    // 0 -> left channel
+    // 1 -> right channel
     pub fn get_spectrum(&self, spectrum_size: uint, channel_offset: i32, window_type: fmod::DSP_FFT_Window) -> Result<Vec<f32>, fmod::Result> {
         let mut ptr = Vec::from_elem(spectrum_size, 0f32);
 
@@ -255,7 +257,7 @@ impl Channel {
         }
     }
 
-    pub fn set_delay(&self, d_o: FmodDelayOptions) -> fmod::Result {
+    pub fn set_delay(&self, d_o: &FmodDelayOptions) -> fmod::Result {
         unsafe { ffi::FMOD_Channel_SetDelay(self.channel, d_o.delaytype, d_o.delayhi as u32, d_o.delaylo as u32) }
     }
 
@@ -272,7 +274,7 @@ impl Channel {
         }
     }
 
-    pub fn set_speaker_mix(&self, smo: FmodSpeakerMixOptions) -> fmod::Result {
+    pub fn set_speaker_mix(&self, smo: &FmodSpeakerMixOptions) -> fmod::Result {
         unsafe { ffi::FMOD_Channel_SetSpeakerMix(self.channel, smo.front_left, smo.front_right, smo.center, smo.lfe,
                                             smo.back_left, smo.back_right, smo.side_left, smo.side_right) }
     }
@@ -372,7 +374,7 @@ impl Channel {
         }
     }
 
-    pub fn set_channel_group(&mut self, channel_group: ChannelGroup) -> fmod::Result {
+    pub fn set_channel_group(&mut self, channel_group: &ChannelGroup) -> fmod::Result {
         unsafe { ffi::FMOD_Channel_SetChannelGroup(self.channel, channel_group::get_ffi(channel_group)) }
     }
 
@@ -385,9 +387,9 @@ impl Channel {
         }
     }
 
-    pub fn set_3D_attributes(&self, position: vector::FmodVector, velocity: vector::FmodVector) -> fmod::Result {
-        let mut t_position = vector::get_ffi(&position);
-        let mut t_velocity = vector::get_ffi(&velocity);
+    pub fn set_3D_attributes(&self, position: &vector::FmodVector, velocity: &vector::FmodVector) -> fmod::Result {
+        let mut t_position = vector::get_ffi(position);
+        let mut t_velocity = vector::get_ffi(velocity);
 
         unsafe { ffi::FMOD_Channel_Set3DAttributes(self.channel, &mut t_position, &mut t_velocity) }
     }
@@ -431,8 +433,8 @@ impl Channel {
         }
     }
 
-    pub fn set_3D_cone_orientation(&self, orientation: vector::FmodVector) -> fmod::Result {
-        let mut t_orientation = vector::get_ffi(&orientation);
+    pub fn set_3D_cone_orientation(&self, orientation: &vector::FmodVector) -> fmod::Result {
+        let mut t_orientation = vector::get_ffi(orientation);
 
         unsafe { ffi::FMOD_Channel_Set3DConeOrientation(self.channel, &mut t_orientation) }
     }
@@ -446,7 +448,7 @@ impl Channel {
         }
     }
 
-    pub fn set_3D_custom_roll_off(&self, points: Vec<vector::FmodVector>) -> fmod::Result {
+    pub fn set_3D_custom_roll_off(&self, points: &Vec<vector::FmodVector>) -> fmod::Result {
         let mut t_points = Vec::new();
 
         for tmp in points.iter() {

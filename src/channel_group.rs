@@ -40,7 +40,7 @@ pub struct ChannelGroup {
     channel_group: *mut ffi::FMOD_CHANNELGROUP,
 }
 
-pub fn get_ffi(channel_group: ChannelGroup) -> *mut ffi::FMOD_CHANNELGROUP {
+pub fn get_ffi(channel_group: &ChannelGroup) -> *mut ffi::FMOD_CHANNELGROUP {
     channel_group.channel_group
 }
 
@@ -167,16 +167,20 @@ impl ChannelGroup {
         unsafe { ffi::FMOD_ChannelGroup_OverridePan(self.channel_group, pan) }
     }
 
-    pub fn override_reverb_properties(&self, properties: channel::FmodReverbChannelProperties) -> fmod::Result {
-        let prop = ffi::FMOD_REVERB_CHANNELPROPERTIES {Direct: properties.direct, Room: properties.room, Flags: properties.flags,
-            ConnectionPoint: dsp::get_ffi(&properties.connection_point)};
+    pub fn override_reverb_properties(&self, properties: &channel::FmodReverbChannelProperties) -> fmod::Result {
+        let prop = ffi::FMOD_REVERB_CHANNELPROPERTIES{
+            Direct: properties.direct,
+            Room: properties.room,
+            Flags: properties.flags,
+            ConnectionPoint: dsp::get_ffi(&properties.connection_point)
+        };
 
         unsafe { ffi::FMOD_ChannelGroup_OverrideReverbProperties(self.channel_group, &prop) }
     }
 
-    pub fn override_3D_attributes(&self, pos: vector::FmodVector, vel: vector::FmodVector) -> fmod::Result {
-        let mut t_pos = vector::get_ffi(&pos);
-        let mut t_vel = vector::get_ffi(&vel);
+    pub fn override_3D_attributes(&self, pos: &vector::FmodVector, vel: &vector::FmodVector) -> fmod::Result {
+        let mut t_pos = vector::get_ffi(pos);
+        let mut t_vel = vector::get_ffi(vel);
 
         unsafe { ffi::FMOD_ChannelGroup_Override3DAttributes(self.channel_group, &mut t_pos, &mut t_vel) }
     }
@@ -186,7 +190,7 @@ impl ChannelGroup {
         unsafe { ffi::FMOD_ChannelGroup_OverrideSpeakerMix(self.channel_group, front_left, front_right, center, lfe, back_left, back_right, side_left, side_right) }
     }
 
-    pub fn add_group(&self, group: ChannelGroup) -> fmod::Result {
+    pub fn add_group(&self, group: &ChannelGroup) -> fmod::Result {
         unsafe { ffi::FMOD_ChannelGroup_AddGroup(self.channel_group, group.channel_group) }
     }
 
@@ -226,10 +230,10 @@ impl ChannelGroup {
         }
     }
 
-    pub fn add_DSP(&self, dsp: dsp::Dsp) -> Result<dsp_connection::DspConnection, fmod::Result> {
+    pub fn add_DSP(&self, dsp: &dsp::Dsp) -> Result<dsp_connection::DspConnection, fmod::Result> {
         let mut dsp_connection = ::std::ptr::mut_null();
 
-        match unsafe { ffi::FMOD_ChannelGroup_AddDSP(self.channel_group, dsp::get_ffi(&dsp), &mut dsp_connection) } {
+        match unsafe { ffi::FMOD_ChannelGroup_AddDSP(self.channel_group, dsp::get_ffi(dsp), &mut dsp_connection) } {
             fmod::Ok => Ok(dsp_connection::from_ptr(dsp_connection)),
             e => Err(e)
         }
@@ -264,7 +268,7 @@ impl ChannelGroup {
         }
     }
 
-    pub fn get_spectrum(&self, spectrum_size: uint, options: Option<channel::FmodSpectrumOptions>) -> Result<Vec<f32>, fmod::Result> {
+    pub fn get_spectrum(&self, spectrum_size: uint, options: Option<&channel::FmodSpectrumOptions>) -> Result<Vec<f32>, fmod::Result> {
         let mut ptr = Vec::from_elem(spectrum_size, 0f32);
         let mut window_type = fmod::DSP_FFT_WindowRect;
         let mut channel_offset = 0;
