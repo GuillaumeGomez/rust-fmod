@@ -32,7 +32,7 @@ examples: rfmod
 	  rustc -o bin/recording -L ./lib examples/recording/main.rs
 	  rustc -o bin/dsp_custom -L ./lib examples/dsp_custom/main.rs
 
-docs:
+doc:
 	rustdoc -o doc src/rfmod.rs
 
 clean:

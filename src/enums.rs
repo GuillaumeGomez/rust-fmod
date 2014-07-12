@@ -28,185 +28,343 @@ use types::{FmodTimeUnit, FmodMemoryBits};
 pub mod fmod {
     #[deriving(PartialEq, PartialOrd, Show)]
     #[repr(C)]
+    /// error codes. Returned from every function.
     pub enum Result
     {
-        Ok,                         /* No errors. */
-        Err_AlreadyLocked,          /* Tried to call lock a second time before unlock was called. */
-        ErrBadCommand,              /* Tried to call a function on a data type that does not allow this type of functionality (ie calling Sound::lock on a streaming sound). */
-        ErrCDDADrivers,             /* Neither NTSCSI nor ASPI could be initialised. */
-        ErrCDDAInit,                /* An error occurred while initialising the CDDA subsystem. */
-        ErrCDDAInvalidDevice,       /* Couldn't find the specified device. */
-        ErrCDDANoAudio,             /* No audio tracks on the specified disc. */
-        ErrCDDANoDevices,           /* No CD/DVD devices were found. */ 
-        ErrCDDANoDisc,              /* No disc present in the specified drive. */
-        ErrCDDARead,                /* A CDDA read error occurred. */
-        ErrChannelAlloc,            /* Error trying to allocate a channel. */
-        ErrChannelStolen,           /* The specified channel has been reused to play another sound. */
-        ErrCOM,                     /* A Win32 COM related error occured. COM failed to initialize or a QueryInterface failed meaning a Windows codec or driver was not installed properly. */
-        ErrDMA,                     /* DMA Failure.  See debug output for more information. */
-        ErrDSPConnection,           /* DSP connection error.  Connection possibly caused a cyclic dependancy.  Or tried to connect a tree too many units deep (more than 128). */
-        ErrDSPFormat,               /* DSP Format error.  A DSP unit may have attempted to connect to this network with the wrong format. */
-        ErrDSPNotFound,             /* DSP connection error.  Couldn't find the DSP unit specified. */
-        ErrDSPRunning,              /* DSP error.  Cannot perform this operation while the network is in the middle of running.  This will most likely happen if a connection or disconnection is attempted in a DSP callback. */
-        ErrDSPTooManyConnections,   /* DSP connection error.  The unit being connected to or disconnected should only have 1 input or output. */
-        ErrFileBad,                 /* Error loading file. */
-        ErrFileCouldNotSeek,        /* Couldn't perform seek operation.  This is a limitation of the medium (ie netstreams) or the file format. */
-        ErrFileDiskEjected,         /* Media was ejected while reading. */
-        ErrFileEOF,                 /* End of file unexpectedly reached while trying to read essential data (truncated data?). */
-        ErrFileNotFound,            /* File not found. */
-        ErrFileUnwanted,            /* Unwanted file access occured. */
-        ErrFormat,                  /* Unsupported file or audio format. */
-        ErrHTTP,                    /* A HTTP error occurred. This is a catch-all for HTTP errors not listed elsewhere. */
-        ErrHTTPAccess,              /* The specified resource requires authentication or is forbidden. */
-        ErrHTTPProxyAuth,           /* Proxy authentication is required to access the specified resource. */
-        ErrHTTPServerError,         /* A HTTP server error occurred. */
-        ErrHTTPTimeout,             /* The HTTP request timed out. */
-        ErrInitialization,          /* FMOD was not initialized correctly to support this function. */
-        ErrInitialized,             /* Cannot call this command after System::init. */
-        ErrInternal,                /* An error occured that wasn't supposed to.  Contact support. */
-        ErrInvalidAddress,          /* On Xbox 360, this memory address passed to FMOD must be physical, (ie allocated with XPhysicalAlloc.) */
-        ErrInvalidFloat,            /* Value passed in was a NaN, Inf or denormalized float. */
-        ErrInvalidHandle,           /* An invalid object handle was used. */
-        ErrInvalidParam,            /* An invalid parameter was passed to this function. */
-        ErrInvalidPosition,         /* An invalid seek position was passed to this function. */
-        ErrInvalidSpeaker,          /* An invalid speaker was passed to this function based on the current speaker mode. */
-        ErrInvalidSyncPoint,        /* The syncpoint did not come from this sound handle. */
-        ErrInvalidVector,           /* The vectors passed in are not unit length, or perpendicular. */
-        ErrMaxAudible,              /* Reached maximum audible playback count for this sound's soundgroup. */
-        ErrMemory,                  /* Not enough memory or resources. */
-        ErrMemoryCantPoint,         /* Can't use FMOD_OPENMEMORY_POINT on non PCM source data, or non mp3/xma/adpcm data if FMOD_CREATECOMPRESSEDSAMPLE was used. */
-        ErrMemorySRam,              /* Not enough memory or resources on console sound ram. */
-        ErrNeeds2D,                 /* Tried to call a command on a 3d sound when the command was meant for 2d sound. */
-        ErrNeeds3D,                 /* Tried to call a command on a 2d sound when the command was meant for 3d sound. */
-        ErrNeedsHardware,           /* Tried to use a feature that requires hardware support.  (ie trying to play a GCADPCM compressed sound in software on Wii). */
-        ErrNeedsSoftware,           /* Tried to use a feature that requires the software engine.  Software engine has either been turned off, or command was executed on a hardware channel which does not support this feature. */
-        ErrNetConnect,              /* Couldn't connect to the specified host. */
-        ErrNetSocketError,          /* A socket error occurred.  This is a catch-all for socket-related errors not listed elsewhere. */
-        ErrNetURL,                  /* The specified URL couldn't be resolved. */
-        ErrNetWouldBlock,           /* Operation on a non-blocking socket could not complete immediately. */
-        ErrNotReady,                /* Operation could not be performed because specified sound/DSP connection is not ready. */
-        ErrOutputAllocated,         /* Error initializing output device, but more specifically, the output device is already in use and cannot be reused. */
-        ErrOutputCreateBuffer,      /* Error creating hardware sound buffer. */
-        ErrOutputDriverCall,        /* A call to a standard soundcard driver failed, which could possibly mean a bug in the driver or resources were missing or exhausted. */
-        ErrOutputEnumeration,       /* Error enumerating the available driver list. List may be inconsistent due to a recent device addition or removal. */
-        ErrOutputFormat,            /* Soundcard does not support the minimum features needed for this soundsystem (16bit stereo output). */
-        ErrOutputInit,              /* Error initializing output device. */
-        ErrOutputNoHardware,        /* FMOD_HARDWARE was specified but the sound card does not have the resources necessary to play it. */
-        ErrOutputNoSoftware,        /* Attempted to create a software sound but no software channels were specified in System::init. */
-        ErrPan,                     /* Panning only works with mono or stereo sound sources. */
-        ErrPlugin,                  /* An unspecified error has been returned from a 3rd party plugin. */
-        ErrPluginInstances,         /* The number of allowed instances of a plugin has been exceeded. */
-        ErrPluginMissing,           /* A requested output, dsp unit type or codec was not available. */
-        ErrPluginResource,          /* A resource that the plugin requires cannot be found. (ie the DLS file for MIDI playback or other DLLs that it needs to load) */
-        ErrPreloaded,               /* The specified sound is still in use by the event system, call EventSystem::unloadFSB before trying to release it. */
-        ErrProgrammerSound,         /* The specified sound is still in use by the event system, wait for the event which is using it finish with it. */
-        ErrRecord,                  /* An error occured trying to initialize the recording device. */
-        ErrReverbInstance,          /* Specified instance in FMOD_REVERB_PROPERTIES couldn't be set. Most likely because it is an invalid instance number or the reverb doesnt exist. */
-        ErrSubsoundAllocated,       /* This subsound is already being used by another sound, you cannot have more than one parent to a sound.  Null out the other parent's entry first. */
-        ErrSubsoundCantMove,        /* Shared subsounds cannot be replaced or moved from their parent stream, such as when the parent stream is an FSB file. */
-        ErrSubsoundMode,            /* The subsound's mode bits do not match with the parent sound's mode bits.  See documentation for function that it was called with. */
-        ErrSubsounds,               /* The error occured because the sound referenced contains subsounds when it shouldn't have, or it doesn't contain subsounds when it should have.  The operation may also not be able to be performed on a parent sound, or a parent sound was played without setting up a sentence first. */
-        ErrTagNotFound,             /* The specified tag could not be found or there are no tags. */
-        ErrTooManyChannels,         /* The sound created exceeds the allowable input channel count.  This can be increased using the maxinputchannels parameter in System::setSoftwareFormat. */
-        ErrUnimplemented,           /* Something in FMOD hasn't been implemented when it should be! contact support! */
-        ErrUnintialized,            /* This command failed because System::init or System::setDriver was not called. */
-        ErrUnsupported,             /* A command issued was not supported by this object.  Possibly a plugin without certain callbacks specified. */
-        ErrUpdate,                  /* An error caused by System::update occured. */
-        ErrVersion,                 /* The version number of this file format is not supported. */
+        /// No errors.
+        Ok,
+        /// Tried to call lock a second time before unlock was called.
+        Err_AlreadyLocked,
+        /// Tried to call a function on a data type that does not allow this type of functionality (ie calling Sound::lock on a streaming sound).
+        ErrBadCommand,
+        /// Neither NTSCSI nor ASPI could be initialised.
+        ErrCDDADrivers,
+        /// An error occurred while initialising the CDDA subsystem.
+        ErrCDDAInit,
+        /// Couldn't find the specified device.
+        ErrCDDAInvalidDevice,
+        /// No audio tracks on the specified disc.
+        ErrCDDANoAudio,
+        /// No CD/DVD devices were found.
+        ErrCDDANoDevices,
+        /// No disc present in the specified drive.
+        ErrCDDANoDisc,
+        /// A CDDA read error occurred.
+        ErrCDDARead,
+        /// Error trying to allocate a channel.
+        ErrChannelAlloc,
+        /// The specified channel has been reused to play another sound.
+        ErrChannelStolen,
+        /// A Win32 COM related error occured. COM failed to initialize or a QueryInterface failed meaning a Windows codec or driver was not installed properly.
+        ErrCOM,
+        /// DMA Failure.  See debug output for more information.
+        ErrDMA,
+        /// DSP connection error.  Connection possibly caused a cyclic dependancy.  Or tried to connect a tree too many units deep (more than 128).
+        ErrDSPConnection,
+        /// DSP Format error.  A DSP unit may have attempted to connect to this network with the wrong format.
+        ErrDSPFormat,
+        /// DSP connection error.  Couldn't find the DSP unit specified.
+        ErrDSPNotFound,
+        /// DSP error.  Cannot perform this operation while the network is in the middle of running.  This will most likely happen if a connection or disconnection is attempted in a DSP callback.
+        ErrDSPRunning,
+        /// DSP connection error.  The unit being connected to or disconnected should only have 1 input or output.
+        ErrDSPTooManyConnections,
+        /// Error loading file.
+        ErrFileBad,
+        /// Couldn't perform seek operation.  This is a limitation of the medium (ie netstreams) or the file format.
+        ErrFileCouldNotSeek,
+        /// Media was ejected while reading.
+        ErrFileDiskEjected,
+        /// End of file unexpectedly reached while trying to read essential data (truncated data ?).
+        ErrFileEOF,
+        /// File not found.
+        ErrFileNotFound,
+        /// Unwanted file access occured.
+        ErrFileUnwanted,
+        /// Unsupported file or audio format.
+        ErrFormat,
+        /// A HTTP error occurred. This is a catch-all for HTTP errors not listed elsewhere.
+        ErrHTTP,
+        /// The specified resource requires authentication or is forbidden.
+        ErrHTTPAccess,
+        /// Proxy authentication is required to access the specified resource.
+        ErrHTTPProxyAuth,
+        /// A HTTP server error occurred.
+        ErrHTTPServerError,
+        /// The HTTP request timed out.
+        ErrHTTPTimeout,
+        /// FMOD was not initialized correctly to support this function.
+        ErrInitialization,
+        /// Cannot call this command after System::init.
+        ErrInitialized,
+        /// An error occured that wasn't supposed to.  Contact support.
+        ErrInternal,
+        /// On Xbox 360, this memory address passed to FMOD must be physical, (ie allocated with XPhysicalAlloc.)
+        ErrInvalidAddress,
+        /// Value passed in was a NaN, Inf or denormalized float.
+        ErrInvalidFloat,
+        /// An invalid object handle was used.
+        ErrInvalidHandle,
+        /// An invalid parameter was passed to this function.
+        ErrInvalidParam,
+        /// An invalid seek position was passed to this function.
+        ErrInvalidPosition,
+        /// An invalid speaker was passed to this function based on the current speaker mode.
+        ErrInvalidSpeaker,
+        /// The syncpoint did not come from this sound handle.
+        ErrInvalidSyncPoint,
+        /// The vectors passed in are not unit length, or perpendicular.
+        ErrInvalidVector,
+        /// Reached maximum audible playback count for this sound's soundgroup.
+        ErrMaxAudible,
+        /// Not enough memory or resources.
+        ErrMemory,
+        /// Can't use FMOD_OPENMEMORY_POINT on non PCM source data, or non mp3/xma/adpcm data if FMOD_CREATECOMPRESSEDSAMPLE was used.
+        ErrMemoryCantPoint,
+        /// Not enough memory or resources on console sound ram.
+        ErrMemorySRam,
+        /// Tried to call a command on a 3d sound when the command was meant for 2d sound.
+        ErrNeeds2D,
+        /// Tried to call a command on a 2d sound when the command was meant for 3d sound.
+        ErrNeeds3D,
+        /// Tried to use a feature that requires hardware support.  (ie trying to play a GCADPCM compressed sound in software on Wii).
+        ErrNeedsHardware,
+        /// Tried to use a feature that requires the software engine.  Software engine has either been turned off, or command was executed on a hardware channel which does not support this feature.
+        ErrNeedsSoftware,
+        /// Couldn't connect to the specified host.
+        ErrNetConnect,
+        /// A socket error occurred.  This is a catch-all for socket-related errors not listed elsewhere.
+        ErrNetSocketError,
+        /// The specified URL couldn't be resolved.
+        ErrNetURL,
+        /// Operation on a non-blocking socket could not complete immediately.
+        ErrNetWouldBlock,
+        /// Operation could not be performed because specified sound/DSP connection is not ready.
+        ErrNotReady,
+        /// Error initializing output device, but more specifically, the output device is already in use and cannot be reused.
+        ErrOutputAllocated,
+        /// Error creating hardware sound buffer.
+        ErrOutputCreateBuffer,
+        /// A call to a standard soundcard driver failed, which could possibly mean a bug in the driver or resources were missing or exhausted.
+        ErrOutputDriverCall,
+        /// Error enumerating the available driver list. List may be inconsistent due to a recent device addition or removal.
+        ErrOutputEnumeration,
+        /// Soundcard does not support the minimum features needed for this soundsystem (16bit stereo output).
+        ErrOutputFormat,
+        /// Error initializing output device.
+        ErrOutputInit,
+        /// FMOD_HARDWARE was specified but the sound card does not have the resources necessary to play it.
+        ErrOutputNoHardware,
+        /// Attempted to create a software sound but no software channels were specified in System::init.
+        ErrOutputNoSoftware,
+        /// Panning only works with mono or stereo sound sources.
+        ErrPan,
+        /// An unspecified error has been returned from a 3rd party plugin.
+        ErrPlugin,
+        /// The number of allowed instances of a plugin has been exceeded.
+        ErrPluginInstances,
+        /// A requested output, dsp unit type or codec was not available.
+        ErrPluginMissing,
+        /// A resource that the plugin requires cannot be found. (ie the DLS file for MIDI playback or other DLLs that it needs to load)
+        ErrPluginResource,
+        /// The specified sound is still in use by the event system, call EventSystem::unloadFSB before trying to release it.
+        ErrPreloaded,
+        /// The specified sound is still in use by the event system, wait for the event which is using it finish with it.
+        ErrProgrammerSound,
+        /// An error occured trying to initialize the recording device.
+        ErrRecord,
+        /// Specified instance in FMOD_REVERB_PROPERTIES couldn't be set. Most likely because it is an invalid instance number or the reverb doesnt exist.
+        ErrReverbInstance,
+        /// This subsound is already being used by another sound, you cannot have more than one parent to a sound.  Null out the other parent's entry first.
+        ErrSubsoundAllocated,
+        /// Shared subsounds cannot be replaced or moved from their parent stream, such as when the parent stream is an FSB file.
+        ErrSubsoundCantMove,
+        /// The subsound's mode bits do not match with the parent sound's mode bits.  See documentation for function that it was called with.
+        ErrSubsoundMode,
+        /// The error occured because the sound referenced contains subsounds when it shouldn't have, or it doesn't contain subsounds when it should have.  The operation may also not be able to be performed on a parent sound, or a parent sound was played without setting up a sentence first.
+        ErrSubsounds,
+        /// The specified tag could not be found or there are no tags.
+        ErrTagNotFound,
+        /// The sound created exceeds the allowable input channel count.  This can be increased using the maxinputchannels parameter in System::setSoftwareFormat.
+        ErrTooManyChannels,
+        /// Something in FMOD hasn't been implemented when it should be ! contact support !
+        ErrUnimplemented,
+        /// This command failed because System::init or System::setDriver was not called.
+        ErrUnintialized,
+        /// A command issued was not supported by this object.  Possibly a plugin without certain callbacks specified.
+        ErrUnsupported,
+        /// An error caused by System::update occured.
+        ErrUpdate,
+        /// The version number of this file format is not supported.
+        ErrVersion,
 
-        ErrEventFailed,             /* An Event failed to be retrieved, most likely due to 'just fail' being specified as the max playbacks behavior. */
-        ErrEventINFOONLY,           /* Can't execute this command on an EVENT_INFOONLY event. */
-        ErrEventInternal,           /* An error occured that wasn't supposed to.  See debug log for reason. */
-        ErrEventMaxStreams,         /* Event failed because 'Max streams' was hit when FMOD_EVENT_INIT_FAIL_ON_MAXSTREAMS was specified. */
-        ErrEventMismatch,           /* FSB mismatches the FEV it was compiled with, the stream/sample mode it was meant to be created with was different, or the FEV was built for a different platform. */
-        ErrEventNameConflict,       /* A category with the same name already exists. */
-        ErrEventNotFound,           /* The requested event, event group, event category or event property could not be found. */
-        ErrEventNeedSimple,         /* Tried to call a function on a complex event that's only supported by simple events. */
-        ErrEventGuidConflict,       /* An event with the same GUID already exists. */
-        ErrEventAlreadyLoaded,      /* The specified project or bank has already been loaded. Having multiple copies of the same project loaded simultaneously is forbidden. */
+        /// An Event failed to be retrieved, most likely due to 'just fail' being specified as the max playbacks behavior.
+        ErrEventFailed,
+        /// Can't execute this command on an EVENT_INFOONLY event.
+        ErrEventINFOONLY,
+        /// An error occured that wasn't supposed to.  See debug log for reason.
+        ErrEventInternal,
+        /// Event failed because 'Max streams' was hit when FMOD_EVENT_INIT_FAIL_ON_MAXSTREAMS was specified.
+        ErrEventMaxStreams,
+        /// FSB mismatches the FEV it was compiled with, the stream/sample mode it was meant to be created with was different, or the FEV was built for a different platform.
+        ErrEventMismatch,
+        /// A category with the same name already exists.
+        ErrEventNameConflict,
+        /// The requested event, event group, event category or event property could not be found.
+        ErrEventNotFound,
+        /// Tried to call a function on a complex event that's only supported by simple events.
+        ErrEventNeedSimple,
+        /// An event with the same GUID already exists.
+        ErrEventGuidConflict,
+        /// The specified project or bank has already been loaded. Having multiple copies of the same project loaded simultaneously is forbidden.
+        ErrEventAlreadyLoaded,
 
-        ErrMusicUnintialized,       /* Music system is not initialized probably because no music data is loaded. */
-        ErrMusicNotFound,           /* The requested music entity could not be found. */
-        ErrMusicNoCallback,         /* The music callback is required, but it has not been set. */
+        /// Music system is not initialized probably because no music data is loaded.
+        ErrMusicUnintialized,
+        /// The requested music entity could not be found.
+        ErrMusicNotFound,
+        /// The music callback is required, but it has not been set.
+        ErrMusicNoCallback,
 
-        ResultForceINT = 65536      /* Makes sure this enum is signed 32bit. */
+        /// Makes sure this enum is signed 32bit.
+        ResultForceInt = 65536
     }
 
     #[deriving(PartialEq, PartialOrd, Show)]
     #[repr(C)]
+    /// When creating a multichannel sound, FMOD will pan them to their default speaker locations:
+    /// * For example a 6 channel sound will default to one channel per 5.1 output speaker.
+    /// * Another example is a stereo sound.  It will default to left = front left, right = front right.
+    /// * This is for sounds that are not 'default'.  For example you might have a sound that is 6 channels but actually made up of 3 stereo pairs, that should all be located in front left, front right only.
     pub enum SpeakerMapType
     {
-        SpeakerMapTypeDefault,      /* This is the default, and just means FMOD decides which speakers it puts the source channels. */
-        SpeakerMapTypeAllMono,      /* This means the sound is made up of all mono sounds.  All voices will be panned to the front center by default in this case.  */
-        SpeakerMapTypeAllStereo,    /* This means the sound is made up of all stereo sounds.  All voices will be panned to front left and front right alternating every second channel.  */
-        SpeakerMapType51ProTools    /* Map a 5.1 sound to use protools L C R Ls Rs LFE mapping.  Will return an error if not a 6 channel sound. */
+        /// This is the default, and just means FMOD decides which speakers it puts the source channels.
+        SpeakerMapTypeDefault,
+        /// This means the sound is made up of all mono sounds.  All voices will be panned to the front center by default in this case.
+        SpeakerMapTypeAllMono,
+        /// This means the sound is made up of all stereo sounds.  All voices will be panned to front left and front right alternating every second channel.
+        SpeakerMapTypeAllStereo,
+        /// Map a 5.1 sound to use protools L C R Ls Rs LFE mapping.  Will return an error if not a 6 channel sound.
+        SpeakerMapType51ProTools
     }
 
     #[deriving(PartialEq, PartialOrd, Show)]
     #[repr(C)]
+    /// These definitions describe the native format of the hardware or software buffer that will be used.
     pub enum SoundFormat
     {
-        SoundFormatNone,             /* Unitialized / unknown. */
-        SoundFormatPCM8,             /* 8bit integer PCM data. */
-        SoundFormatPCM16,            /* 16bit integer PCM data. */
-        SoundFormatPCM24,            /* 24bit integer PCM data. */
-        SoundFormatPCM32,            /* 32bit integer PCM data. */
-        SoundFormatPCMFloat,         /* 32bit floating point PCM data. */
-        SoundFormatGCADPCM,          /* Compressed Nintendo 3DS/Wii DSP data. */
-        SoundFormatIMAADPCM,         /* Compressed IMA ADPCM data. */
-        SoundFormatVAG,              /* Compressed PlayStation Portable ADPCM data. */
-        SoundFormatHEVAG,            /* Compressed PSVita ADPCM data. */
-        SoundFormatXMA,              /* Compressed Xbox360 XMA data. */
-        SoundFormatMPEG,             /* Compressed MPEG layer 2 or 3 data. */
-        SoundFormatCELT,             /* Compressed CELT data. */
-        SoundFormatAT9,              /* Compressed PSVita ATRAC9 data. */
-        SoundFormatXWMA,             /* Compressed Xbox360 xWMA data. */
-        SoundFormatVORBIS,           /* Compressed Vorbis data. */
+        /// Uninitialized / unknown.
+        SoundFormatNone,
+        /// 8bit integer PCM data.
+        SoundFormatPCM8,
+        /// 16bit integer PCM data.
+        SoundFormatPCM16,
+        /// 24bit integer PCM data.
+        SoundFormatPCM24,
+        /// 32bit integer PCM data.
+        SoundFormatPCM32,
+        /// 32bit floating point PCM data.
+        SoundFormatPCMFloat,
+        /// Compressed Nintendo 3DS/Wii DSP data.
+        SoundFormatGCADPCM,
+        /// Compressed IMA ADPCM data.
+        SoundFormatIMAADPCM,
+        /// Compressed PlayStation Portable ADPCM data.
+        SoundFormatVAG,
+        /// Compressed PSVita ADPCM data.
+        SoundFormatHEVAG,
+        /// Compressed Xbox360 XMA data.
+        SoundFormatXMA,
+        /// Compressed MPEG layer 2 or 3 data.
+        SoundFormatMPEG,
+        /// Compressed CELT data.
+        SoundFormatCELT,
+        /// Compressed PSVita ATRAC9 data.
+        SoundFormatAT9,
+        /// Compressed Xbox360 xWMA data.
+        SoundFormatXWMA,
+        /// Compressed Vorbis data.
+        SoundFormatVORBIS,
 
-        SoundFormatMax,              /* Maximum number of sound formats supported. */   
-        SoundFormatForceInt = 65536  /* Makes sure this enum is signed 32bit. */
+        /// Maximum number of sound formats supported.
+        SoundFormatMax,
+        /// Makes sure this enum is signed 32bit.
+        SoundFormatForceInt = 65536
     }
 
     #[deriving(PartialEq, PartialOrd, Show)]
     #[repr(C)]
+    /// These definitions describe the type of song being played.
     pub enum SoundType
     {
-        SoundTypeUnknown,         /* 3rd party / unknown plugin format. */
-        SoundTypeAIFF,            /* AIFF. */
-        SoundTypeASF,             /* Microsoft Advanced Systems Format (ie WMA/ASF/WMV). */
-        SoundTypeAT3,             /* Sony ATRAC 3 format */
-        SoundTypeCDDA,            /* Digital CD audio. */
-        SoundTypeDLS,             /* Sound font / downloadable sound bank. */
-        SoundTypeFLAC,            /* FLAC lossless codec. */
-        SoundTypeFSB,             /* FMOD Sample Bank. */
-        SoundTypeGCADPCM,         /* Nintendo GameCube/Wii ADPCM */
-        SoundTypeIT,              /* Impulse Tracker. */
-        SoundTypeMIDI,            /* MIDI. extracodecdata is a pointer to an FMOD_MIDI_EXTRACODECDATA structure. */
-        SoundTypeMOD,             /* Protracker / Fasttracker MOD. */
-        SoundTypeMPEG,            /* MP2/MP3 MPEG. */
-        SoundTypeOGGVORBIS,       /* Ogg vorbis. */
-        SoundTypePlaylist,        /* Information only from ASX/PLS/M3U/WAX playlists */
-        SoundTypeRaw,             /* Raw PCM data. */
-        SoundTypeS3M,             /* ScreamTracker 3. */
-        SoundTypeSF2,             /* Sound font 2 format. */
-        SoundTypeUser,            /* User created sound. */
-        SoundTypeWAV,             /* Microsoft WAV. */
-        SoundTypeXM,              /* FastTracker 2 XM. */
-        SoundTypeXMA,             /* Xbox360 XMA */
-        SoundTypeVAG,             /* PlayStation Portable ADPCM VAG format. */
-        SoundTypeAudioQueue,      /* iPhone hardware decoder, supports AAC, ALAC and MP3. extracodecdata is a pointer to an FMOD_AUDIOQUEUE_EXTRACODECDATA structure. */
-        SoundTypeXWMA,            /* Xbox360 XWMA */
-        SoundTypeBCWAV,           /* 3DS BCWAV container format for DSP ADPCM and PCM */
-        SoundTypeAT9,             /* NGP ATRAC 9 format */
-        SoundTypeVORBIS,          /* Raw vorbis */
-        SoundTypeMediaFoundation, /* Microsoft Media Foundation wrappers, supports ASF/WMA */
+        /// 3rd party / unknown plugin format.
+        SoundTypeUnknown,
+        /// AIFF.
+        SoundTypeAIFF,
+        /// Microsoft Advanced Systems Format (ie WMA/ASF/WMV).
+        SoundTypeASF,
+        /// Sony ATRAC 3 format
+        SoundTypeAT3,
+        /// Digital CD audio.
+        SoundTypeCDDA,
+        /// Sound font / downloadable sound bank.
+        SoundTypeDLS,
+        /// FLAC lossless codec.
+        SoundTypeFLAC,
+        /// FMOD Sample Bank.
+        SoundTypeFSB,
+        /// Nintendo GameCube/Wii ADPCM
+        SoundTypeGCADPCM,
+        /// Impulse Tracker.
+        SoundTypeIT,
+        /// MIDI. extracodecdata is a pointer to an FMOD_MIDI_EXTRACODECDATA structure.
+        SoundTypeMIDI,
+        /// Protracker / Fasttracker MOD.
+        SoundTypeMOD,
+        /// MP2/MP3 MPEG.
+        SoundTypeMPEG,
+        /// Ogg vorbis.
+        SoundTypeOGGVORBIS,
+        /// Information only from ASX/PLS/M3U/WAX playlists
+        SoundTypePlaylist,
+        /// Raw PCM data.
+        SoundTypeRaw,
+        /// ScreamTracker 3.
+        SoundTypeS3M,
+        /// Sound font 2 format.
+        SoundTypeSF2,
+        /// User created sound.
+        SoundTypeUser,
+        /// Microsoft WAV.
+        SoundTypeWAV,
+        /// FastTracker 2 XM.
+        SoundTypeXM,
+        /// Xbox360 XMA
+        SoundTypeXMA,
+        /// PlayStation Portable ADPCM VAG format.
+        SoundTypeVAG,
+        /// iPhone hardware decoder, supports AAC, ALAC and MP3. extracodecdata is a pointer to an FMOD_AUDIOQUEUE_EXTRACODECDATA structure.
+        SoundTypeAudioQueue,
+        /// Xbox360 XWMA
+        SoundTypeXWMA,
+        /// 3DS BCWAV container format for DSP ADPCM and PCM
+        SoundTypeBCWAV,
+        /// NGP ATRAC 9 format
+        SoundTypeAT9,
+        /// Raw vorbis
+        SoundTypeVORBIS,
+        /// Microsoft Media Foundation wrappers, supports ASF/WMA
+        SoundTypeMediaFoundation,
 
-        SoundTypeMax,             /* Maximum number of sound types supported. */
-        SoundTypeForceInt = 65536 /* Makes sure this enum is signed 32bit. */
+        /// Maximum number of sound types supported.
+        SoundTypeMax,
+        /// Makes sure this enum is signed 32bit.
+        SoundTypeForceInt = 65536
     }
 
     #[deriving(PartialEq, PartialOrd, Show)]
     #[repr(C)]
+    /// List of tag types that could be stored within a sound.  These include id3 tags, metadata from netstreams and vorbis/asf data.
     pub enum TagType
     {
         TagTypeUnknown = 0,
@@ -221,12 +379,15 @@ pub mod fmod {
         TagTypeFmod,
         TagTypeUser,
 
-        TagTypeMax,               /* Maximum number of tag types supported. */
-        TagTypeForceInt = 65536   /* Makes sure this enum is signed 32bit. */
+        /// Maximum number of tag types supported.
+        TagTypeMax,
+        /// Makes sure this enum is signed 32bit.
+        TagTypeForceInt = 65536
     }
 
     #[deriving(PartialEq, PartialOrd, Show)]
     #[repr(C)]
+    /// List of data types that can be returned by Sound::getTag
     pub enum TagDataType
     {
         TagDataTypeBinary = 0,
@@ -238,44 +399,67 @@ pub mod fmod {
         TagDataTypeStringUTF8,
         TagDataTypeCDTOC,
 
-        TagDataTypeMax,               /* Maximum number of tag datatypes supported. */
-        TagDataTypeForceInt = 65536   /* Makes sure this enum is signed 32bit. */
+        /// Maximum number of tag datatypes supported.
+        TagDataTypeMax,
+        /// Makes sure this enum is signed 32bit.
+        TagDataTypeForceInt = 65536
     }
 
     #[deriving(PartialEq, PartialOrd, Show)]
     #[repr(C)]
+    /// Special channel index values for FMOD functions.
     pub enum ChannelIndex
     {
-        ChannelFree  = -1,      /* For a channel index, FMOD chooses a free voice using the priority system. */
-        ChannelReUse = -2,      /* For a channel index, re-use the channel handle that was passed in. */
+        /// For a channel index, FMOD chooses a free voice using the priority system.
+        ChannelFree  = -1,
+        /// For a channel index, re-use the channel handle that was passed in.
+        ChannelReUse = -2,
     }
 
     #[deriving(PartialEq, PartialOrd, Show)]
     #[repr(C)]
+    /// * List of windowing methods used in spectrum analysis to reduce leakage / transient signals intefering with the analysis.
+    /// * This is a problem with analysis of continuous signals that only have a small portion of the signal sample (the fft window size).
+    /// * Windowing the signal with a curve or triangle tapers the sides of the fft window to help alleviate this problem.
     pub enum DSP_FFT_Window
     {
-        DSP_FFT_WindowRect,            /* w[n] = 1.0                                                                                            */
-        DSP_FFT_WindowTriangle,        /* w[n] = TRI(2n/N)                                                                                      */
-        DSP_FFT_WindowHamming,         /* w[n] = 0.54 - (0.46 * COS(n/N) )                                                                      */
-        DSP_FFT_WindowHanning,         /* w[n] = 0.5 *  (1.0  - COS(n/N) )                                                                      */
-        DSP_FFT_WindowBlackMan,        /* w[n] = 0.42 - (0.5  * COS(n/N) ) + (0.08 * COS(2.0 * n/N) )                                           */
-        DSP_FFT_WindowBlackManHarris,  /* w[n] = 0.35875 - (0.48829 * COS(1.0 * n/N)) + (0.14128 * COS(2.0 * n/N)) - (0.01168 * COS(3.0 * n/N)) */
-        
-        DSP_FFT_WindowMax,             /* Maximum number of FFT window types supported. */
-        DSP_FFT_WindowForceInt = 65536 /* Makes sure this enum is signed 32bit. */
+        /// w[n] = 1.0
+        DSP_FFT_WindowRect,
+        /// w[n] = TRI(2n/N)
+        DSP_FFT_WindowTriangle,
+        /// w[n] = 0.54 - (0.46 * COS(n/N) )
+        DSP_FFT_WindowHamming,
+        /// w[n] = 0.5 *  (1.0  - COS(n/N) )
+        DSP_FFT_WindowHanning,
+        /// w[n] = 0.42 - (0.5  * COS(n/N) ) + (0.08 * COS(2.0 * n/N) )
+        DSP_FFT_WindowBlackMan,
+        /// w[n] = 0.35875 - (0.48829 * COS(1.0 * n/N)) + (0.14128 * COS(2.0 * n/N)) - (0.01168 * COS(3.0 * n/N))
+        DSP_FFT_WindowBlackManHarris,
+
+        /// Maximum number of FFT window types supported.
+        DSP_FFT_WindowMax,
+        /// Makes sure this enum is signed 32bit.
+        DSP_FFT_WindowForceInt = 65536
     }
 
     #[deriving(PartialEq, PartialOrd, Show)]
     #[repr(C)]
+    /// Types of delay that can be used with [`Channel::set_delay`](/struct.Channel.html#method.set_delay) / [`Channel::get_delay`](struct.Channel.html#method.get_delay).
     pub enum DelayType
     {
-        DelayTypeEndMS,              /* Delay at the end of the sound in milliseconds.  Use delayhi only.   Channel::isPlaying will remain true until this delay has passed even though the sound itself has stopped playing.*/
-        DelayTypeDSPClockStart,      /* Time the sound started if Channel::getDelay is used, or if Channel::setDelay is used, the sound will delay playing until this exact tick. */
-        DelayTypeDSPClockEnd,        /* Time the sound should end. If this is non-zero, the channel will go silent at this exact tick. */
-        DelayTypeDSPClockPause,      /* Time the sound should pause. If this is non-zero, the channel will pause at this exact tick. */
+        /// Delay at the end of the sound in milliseconds.  Use delayhi only. [`Channel::is_playing`](struct.Channel.html#method.is_playing) will remain true until this delay has passed even though the sound itself has stopped playing.
+        DelayTypeEndMS,
+        /// Time the sound started if [`Channel::get_delay`](struct.Channel.html#method.get_delay) is used, or if [`Channel::set_delay`](struct.Channel.html#method.set_delay) is used, the sound will delay playing until this exact tick.
+        DelayTypeDSPClockStart,
+        /// Time the sound should end. If this is non-zero, the channel will go silent at this exact tick.
+        DelayTypeDSPClockEnd,
+        /// Time the sound should pause. If this is non-zero, the channel will pause at this exact tick.
+        DelayTypeDSPClockPause,
 
-        DelayTypeMax,                /* Maximum number of tag datatypes supported. */
-        DelayTypeForceInt = 65536    /* Makes sure this enum is signed 32bit. */
+        /// Maximum number of tag datatypes supported.
+        DelayTypeMax,
+        /// Makes sure this enum is signed 32bit.
+        DelayTypeForceInt = 65536
     }
 
     #[deriving(PartialEq, PartialOrd, Show)]
@@ -319,7 +503,7 @@ pub mod fmod {
 
     #[deriving(PartialOrd, Show, PartialEq)]
     #[repr(C)]
-    // I need to find a solution for this enum...
+    //FIXME
     pub enum Speaker
     {
         SpeakerFrontLeft,

@@ -1,14 +1,14 @@
 rust-fmod [![Build Status](https://api.travis-ci.org/GuillaumeGomez/rust-fmod.png?branch=master)](https://travis-ci.org/GuillaumeGomez/rust-fmod)
 =========
 
-This is a rust binding for FMOD, the library developped by FIRELIGHT TECHNOLOGIES.
+This is a rust binding for __FMOD__, the library developped by FIRELIGHT TECHNOLOGIES.
 
-FMOD website : www.fmod.org
+__FMOD__ website : www.fmod.org
 
 
 ##Installation
 
-You must install on your computer the FMOD library which is used for the binding.
+You must install on your computer the __FMOD__ library which is used for the binding.
 
 To build it, please use :
 
@@ -16,14 +16,14 @@ To build it, please use :
 > make
 ```
 
-This command build rfmod, the examples, and the documentation.
+This command build __rfmod__, the examples, and the documentation.
 
 You can build them separatly too.
 
 ```Shell
 > make rfmod
 > make examples
-> make docs
+> make doc
 ```
 
 ##Short example
@@ -44,7 +44,7 @@ fn main() {
     let fmod = match FmodSys::new() {
         Ok(f) => f,
         Err(e) => {
-       	    fail!("Error code : {}", e);
+            fail!("Error code : {}", e);
         }
     };
 
@@ -57,9 +57,9 @@ fn main() {
     };
 
     let mut sound = match fmod.create_sound(StrBuf::from_str("music.mp3"), None, None) {
-		              Ok(s) => s,
-		              Err(err) => {fail!("Error code : {}", err);},
-		            };
+                      Ok(s) => s,
+                      Err(err) => {fail!("Error code : {}", err);},
+                    };
 
     match sound.play_to_the_end() {
         fmod::Ok => {println!("Ok !");}

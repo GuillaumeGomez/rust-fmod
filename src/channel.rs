@@ -39,17 +39,8 @@ use sound;
 use sound::Sound;
 use std::mem::transmute;
 
-pub struct FmodSpectrumOptions {
-    pub window_type    : fmod::DSP_FFT_Window,
-    pub channel_offset : i32
-}
-
-pub struct FmodDelayOptions {
-    pub delaytype  : fmod::DelayType,
-    pub delayhi    : uint,
-    pub delaylo    : uint
-}
-
+/// Struct which contains data for [`set_speaker_mix`](struct.Channel.html#method.set_speaker_mix) and [`get_speaker_mix`](struct.Channel.html#method.get_speaker_mix)
+#[deriving(Show, PartialEq, PartialOrd, Clone)]
 pub struct FmodSpeakerMixOptions {
     pub front_left : f32,
     pub front_right: f32,
@@ -61,10 +52,15 @@ pub struct FmodSpeakerMixOptions {
     pub side_right : f32
 }
 
+/// Structure defining the properties for a reverb source, related to a FMOD channel.
 pub struct FmodReverbChannelProperties {
+    /// [r/w] MIN: -10000 MAX: 1000 DEFAULT: 0 - Direct path level
     pub direct          : c_int,
+    /// [r/w] MIN: -10000 MAX: 1000 DEFAULT: 0 - Room effect level
     pub room            : c_int,
+    /// [r/w] FMOD_REVERB_CHANNELFLAGS         - modifies the behavior of properties
     pub flags           : c_uint,
+    /// [r/w] See remarks.                     - DSP network location to connect reverb for this channel.
     pub connection_point: Dsp
 }
 
@@ -108,13 +104,19 @@ impl Channel {
         unsafe { ffi::FMOD_Channel_Stop(self.channel) }
     }
 
-    // channel_offset:
-    // 0 -> left channel
-    // 1 -> right channel
-    pub fn get_spectrum(&self, spectrum_size: uint, channel_offset: i32, window_type: fmod::DSP_FFT_Window) -> Result<Vec<f32>, fmod::Result> {
+    /// channel_offset:  0/1 -> left channel/right channel
+    pub fn get_spectrum(&self, spectrum_size: uint, channel_offset: Option<i32>, window_type: Option<fmod::DSP_FFT_Window>) -> Result<Vec<f32>, fmod::Result> {
         let mut ptr = Vec::from_elem(spectrum_size, 0f32);
+        let c_window_type = match window_type {
+            Some(wt) => wt,
+            None => fmod::DSP_FFT_WindowRect
+        };
+        let c_channel_offset = match channel_offset {
+            Some(co) => co,
+            None => 0i32
+        };
 
-        match unsafe { ffi::FMOD_Channel_GetSpectrum(self.channel, ptr.as_mut_ptr(), spectrum_size as c_int, channel_offset, window_type) } {
+        match unsafe { ffi::FMOD_Channel_GetSpectrum(self.channel, ptr.as_mut_ptr(), spectrum_size as c_int, c_channel_offset, c_window_type) } {
             fmod::Ok => Ok(ptr),
             e => Err(e),
         }
@@ -257,19 +259,16 @@ impl Channel {
         }
     }
 
-    pub fn set_delay(&self, d_o: &FmodDelayOptions) -> fmod::Result {
-        unsafe { ffi::FMOD_Channel_SetDelay(self.channel, d_o.delaytype, d_o.delayhi as u32, d_o.delaylo as u32) }
+    pub fn set_delay(&self, delay_type: fmod::DelayType, delay_hi: uint, delay_lo: uint) -> fmod::Result {
+        unsafe { ffi::FMOD_Channel_SetDelay(self.channel, delay_type, delay_hi as u32, delay_lo as u32) }
     }
 
-    pub fn get_delay(&self, delaytype: fmod::DelayType) -> Result<FmodDelayOptions, fmod::Result> {
+    pub fn get_delay(&self, delaytype: fmod::DelayType) -> Result<(fmod::DelayType, uint, uint), fmod::Result> {
         let mut delaylo = 0u32;
         let mut delayhi = 0u32;
 
         match unsafe { ffi::FMOD_Channel_GetDelay(self.channel, delaytype, &mut delayhi, &mut delaylo) } {
-            fmod::Ok => Ok(FmodDelayOptions{
-                delaytype: delaytype,
-                delayhi: delayhi as uint,
-                delaylo: delaylo as uint}),
+            fmod::Ok => Ok((delaytype, delayhi as uint, delaylo as uint)),
             e => Err(e),
         }
     }

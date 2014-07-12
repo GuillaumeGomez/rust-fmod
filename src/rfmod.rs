@@ -22,6 +22,96 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
+/*!
+rust-fmod
+=========
+
+This is a rust binding for __FMOD__, the library developped by FIRELIGHT TECHNOLOGIES.
+
+__FMOD__ website : www.fmod.org
+
+
+##Installation
+
+You must install on your computer the __FMOD__ library which is used for the binding.
+
+To build it, please use :
+
+```Shell
+> make
+```
+
+This command build __rfmod__, the examples, and the documentation.
+
+You can build them separatly too.
+
+```Shell
+> make rfmod
+> make examples
+> make doc
+```
+
+##Short example
+
+Here is a short example on how to create a file and to play it :
+
+```Rust
+#![feature(globs)]
+
+extern crate libc;
+extern crate rfmod;
+
+use rfmod::enums::*;
+use rfmod::*;
+use std::os;
+
+fn main() {
+    let fmod = match FmodSys::new() {
+        Ok(f) => f,
+        Err(e) => {
+            fail!("Error code : {}", e);
+        }
+    };
+
+    match fmod.init() {
+        fmod::Ok => {}
+        e => {
+            fmod.release();
+            fail!("FmodSys.init failed : {}", e);
+        }
+    };
+
+    let mut sound = match fmod.create_sound(StrBuf::from_str("music.mp3"), None, None) {
+                      Ok(s) => s,
+                      Err(err) => {fail!("Error code : {}", err);},
+                    };
+
+    match sound.play_to_the_end() {
+        fmod::Ok => {println!("Ok !");}
+        err => {fail!("Error code : {}", err);}
+    };
+}
+```
+
+For a more complete example : https://github.com/GuillaumeGomez/rust-music-player
+
+##License
+
+    Copyright (c) 2014 Guillaume Gomez
+    
+    The license of this project is the same of the FMOD non-commercial use. 
+    Please refer to it. Here is the website for FMOD : http://www.fmod.org/
+
+#Notes
+
+ * Members marked with [r] mean the variable is modified by FMOD and is for reading purposes only. Do not change this value.
+ * Members marked with [w] mean the variable can be written to.  The user can set the value.
+
+# Modules
+
+Here is the list of all modules :
+!*/
+
 #![crate_name = "rfmod"]
 #![desc = "Rust binding for FMOD"]
 #![crate_type = "rlib"]
@@ -37,10 +127,10 @@
 
 extern crate libc;
 
-pub use channel::{Channel, FmodSpectrumOptions, FmodDelayOptions, FmodSpeakerMixOptions, FmodReverbChannelProperties};
+pub use channel::{Channel, FmodSpeakerMixOptions, FmodReverbChannelProperties};
 pub use sound::{Sound, FmodTag, FmodSyncPoint};
 pub use fmod_sys::{FmodSys, FmodGuid, FmodSoftwareFormat, FmodAdvancedSettings, FmodOutputHandle, FmodCreateSoundexInfo, FmodMemoryUsageDetails};
-pub use channel_group::ChannelGroup;
+pub use channel_group::{ChannelGroup};
 pub use sound_group::SoundGroup;
 pub use dsp::{Dsp, DspParameterDesc, DspDescription, DspState};
 pub use dsp_connection::DspConnection;

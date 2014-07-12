@@ -264,14 +264,22 @@ impl Clone for DspCallbacks {
     }
 }
 
+/// Structure to define a parameter for a DSP unit.
+#[deriving(Show, PartialEq, Clone)]
 pub struct DspParameterDesc
 {
-    pub min         : f32,          /* [w] Minimum value of the parameter (ie 100.0). */
-    pub max         : f32,          /* [w] Maximum value of the parameter (ie 22050.0). */
-    pub default_val : f32,          /* [w] Default value of parameter. */
-    pub name        : String,       /* [w] Name of the parameter to be displayed (ie "Cutoff frequency"). */
-    pub label       : String,       /* [w] Short string to be put next to value to denote the unit type (ie "hz"). */
-    pub description : String        /* [w] Description of the parameter to be displayed as a help item / tooltip for this parameter. */
+    /// [w] Minimum value of the parameter (ie 100.0)
+    pub min         : f32,
+    /// [w] Maximum value of the parameter (ie 22050.0)
+    pub max         : f32,
+    /// [w] Default value of parameter
+    pub default_val : f32,
+    /// [w] Name of the parameter to be displayed (ie "Cutoff frequency")
+    pub name        : String,
+    /// [w] Short string to be put next to value to denote the unit type (ie "hz")
+    pub label       : String,
+    /// [w] Description of the parameter to be displayed as a help item / tooltip for this parameter
+    pub description : String
 }
 
 pub fn from_parameter_ptr(dsp_parameter: *mut ffi::FMOD_DSP_PARAMETERDESC) -> DspParameterDesc {
@@ -346,24 +354,41 @@ pub fn new_parameter() -> DspParameterDesc {
     }
 }
 
+/// When creating a DSP unit, declare one of these and provide the relevant callbacks and name for FMOD to use when it creates and uses a DSP unit of this type.
 pub struct DspDescription
 {
-    pub name                : String,                  /* [w] Name of the unit to be displayed in the network. */
-    pub version             : u32,                     /* [w] Plugin writer's version number. */
-    pub channels            : i32,                     /* [w] Number of channels.  Use 0 to process whatever number of channels is currently in the network.  >0 would be mostly used if the unit is a unit that only generates sound. */
-    pub create              : DspCreateCallback,       /* [w] Create callback.  This is called when DSP unit is created.  Can be null. */
-    pub release             : DspReleaseCallback,      /* [w] Release callback.  This is called just before the unit is freed so the user can do any cleanup needed for the unit.  Can be null. */
-    pub reset               : DspResetCallback,        /* [w] Reset callback.  This is called by the user to reset any history buffers that may need resetting for a filter, when it is to be used or re-used for the first time to its initial clean state.  Use to avoid clicks or artifacts. */
-    pub read                : DspReadCallback,         /* [w] Read callback.  Processing is done here.  Can be null. */
-    pub set_position        : DspSetPositionCallback,  /* [w] Set position callback.  This is called if the unit wants to update its position info but not process data, or reset a cursor position internally if it is reading data from a certain source.  Can be null. */
-    pub num_parameters      : i32,                     /* [w] Number of parameters used in this filter.  The user finds this with DSP::getNumParameters */
-    pub param_desc          : DspParameterDesc,        /* [w] Variable number of parameter structures. */
-    pub set_parameter       : DspSetParamCallback,     /* [w] This is called when the user calls DSP::setParameter.  Can be null. */
-    pub get_parameter       : DspGetParamCallback,     /* [w] This is called when the user calls DSP::getParameter.  Can be null. */
-    config                  : DspDialogCallback,       /* [w] This is called when the user calls DSP::showConfigDialog.  Can be used to display a dialog to configure the filter.  Can be null. */
-    pub config_width        : i32,                     /* [w] Width of config dialog graphic if there is one.  0 otherwise.*/
-    pub config_height       : i32,                     /* [w] Height of config dialog graphic if there is one.  0 otherwise.*/
-    user_data               : Box<DspCallbacks>        /* [w] Optional. Specify 0 to ignore. This is user data to be attached to the DSP unit during creation.  Access via DSP::getUserData. */
+    /// [w] Name of the unit to be displayed in the network.
+    pub name                : String,
+    /// [w] Plugin writer's version number.
+    pub version             : u32,
+    /// [w] Number of channels.  Use 0 to process whatever number of channels is currently in the network.  >0 would be mostly used if the unit is a unit that only generates sound.
+    pub channels            : i32,
+    /// [w] Create callback.  This is called when DSP unit is created.  Can be null.
+    pub create              : DspCreateCallback,
+    /// [w] Release callback.  This is called just before the unit is freed so the user can do any cleanup needed for the unit.  Can be null.
+    pub release             : DspReleaseCallback,
+    /// [w] Reset callback.  This is called by the user to reset any history buffers that may need resetting for a filter, when it is to be used or re-used for the first time to its initial clean state.  Use to avoid clicks or artifacts.
+    pub reset               : DspResetCallback,
+    /// [w] Read callback.  Processing is done here.  Can be null.
+    pub read                : DspReadCallback,
+    /// [w] Set position callback.  This is called if the unit wants to update its position info but not process data, or reset a cursor position internally if it is reading data from a certain source.  Can be null.
+    pub set_position        : DspSetPositionCallback,
+    /// [w] Number of parameters used in this filter.  The user finds this with DSP::getNumParameters
+    pub num_parameters      : i32,
+    /// [w] Variable number of parameter structures.
+    pub param_desc          : DspParameterDesc,
+    /// [w] This is called when the user calls DSP::setParameter.  Can be null.
+    pub set_parameter       : DspSetParamCallback,
+    /// [w] This is called when the user calls DSP::getParameter.  Can be null.
+    pub get_parameter       : DspGetParamCallback,
+    /// [w] This is called when the user calls DSP::showConfigDialog.  Can be used to display a dialog to configure the filter.  Can be null.
+    config                  : DspDialogCallback,
+    /// [w] Width of config dialog graphic if there is one.  0 otherwise.
+    pub config_width        : i32,
+    /// [w] Height of config dialog graphic if there is one.  0 otherwise.
+    pub config_height       : i32,
+    /// [w] Optional. Specify 0 to ignore. This is user data to be attached to the DSP unit during creation.  Access via DSP::getUserData.
+    user_data               : Box<DspCallbacks>
 }
 
 impl DspDescription {
@@ -474,11 +499,15 @@ pub fn from_state_ptr(state: ffi::FMOD_DSP_STATE) -> DspState {
     }
 }
 
+/// DSP plugin structure that is passed into each callback.
 pub struct DspState
 {
-    pub instance: Dsp,          /* [r] Handle to the DSP hand the user created.  Not to be modified.  C++ users cast to FMOD::DSP to use.  */
-    plugin_data: *mut c_void,   /* [w] Plugin writer created data the output author wants to attach to this object. */
-    pub speaker_mask: u16       /* [w] Specifies which speakers the DSP effect is active on */
+    /// [r] Handle to the DSP hand the user created.  Not to be modified.  C++ users cast to FMOD::DSP to use.
+    pub instance: Dsp,
+    /// [w] Plugin writer created data the output author wants to attach to this object.
+    plugin_data: *mut c_void,
+    /// [w] Specifies which speakers the DSP effect is active on
+    pub speaker_mask: u16
 }
 
 pub fn from_ptr(dsp: *mut ffi::FMOD_DSP) -> Dsp {

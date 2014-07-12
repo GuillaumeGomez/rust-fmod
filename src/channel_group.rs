@@ -268,19 +268,18 @@ impl ChannelGroup {
         }
     }
 
-    pub fn get_spectrum(&self, spectrum_size: uint, options: Option<&channel::FmodSpectrumOptions>) -> Result<Vec<f32>, fmod::Result> {
+    pub fn get_spectrum(&self, spectrum_size: uint, channel_offset: Option<i32>, window_type: Option<fmod::DSP_FFT_Window>) -> Result<Vec<f32>, fmod::Result> {
         let mut ptr = Vec::from_elem(spectrum_size, 0f32);
-        let mut window_type = fmod::DSP_FFT_WindowRect;
-        let mut channel_offset = 0;
-
-        match options {
-            Some(v) => {
-                window_type = v.window_type;
-                channel_offset = v.channel_offset;
-            }
-            None => {}
+        let c_window_type = match window_type {
+            Some(wt) => wt,
+            None => fmod::DSP_FFT_WindowRect
         };
-        match unsafe { ffi::FMOD_ChannelGroup_GetSpectrum(self.channel_group, ptr.as_mut_ptr(), spectrum_size as c_int, channel_offset, window_type) } {
+        let c_channel_offset = match channel_offset {
+            Some(co) => co,
+            None => 0i32
+        };
+
+        match unsafe { ffi::FMOD_ChannelGroup_GetSpectrum(self.channel_group, ptr.as_mut_ptr(), spectrum_size as c_int, c_channel_offset, c_window_type) } {
             fmod::Ok => Ok(ptr),
             e => Err(e),
         }

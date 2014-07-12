@@ -589,11 +589,11 @@ pub struct FMOD_CREATESOUNDEXINFO
 }
 
 pub struct FMOD_REVERB_CHANNELPROPERTIES
-{                                           /*       MIN    MAX  DEFAULT  DESCRIPTION */
+{                                          /*       MIN    MAX  DEFAULT  DESCRIPTION */
     pub Direct         : c_int,            /* [r/w] -10000 1000 0        Direct path level                                        (SUPPORTED:SFX) */
     pub Room           : c_int,            /* [r/w] -10000 1000 0        Room effect level                                        (SUPPORTED:SFX) */
-    pub Flags          : c_uint,           /* [r/w] *mut FMOD_REVERB_CHANNELFLAGS - modifies the behavior of properties                (SUPPORTED:SFX) */
-    pub ConnectionPoint: *mut FMOD_DSP          /* [r/w] See remarks.         DSP network location to connect reverb for this channel. (SUPPORTED:SFX).*/
+    pub Flags          : c_uint,           /* [r/w] *mut FMOD_REVERB_CHANNELFLAGS - modifies the behavior of properties           (SUPPORTED:SFX) */
+    pub ConnectionPoint: *mut FMOD_DSP     /* [r/w] See remarks.         DSP network location to connect reverb for this channel. (SUPPORTED:SFX).*/
 }
 
 pub struct FMOD_GUID

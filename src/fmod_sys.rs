@@ -89,6 +89,16 @@ pub struct FmodAdvancedSettings
 }
 
 #[allow(visible_private_types)]
+/// Use this structure with System::createSound when more control is needed over loading.
+/// The possible reasons to use this with System::createSound are:
+/// * Loading a file from memory.
+/// * Loading a file from within another larger (possibly wad/pak) file, by giving the loader an offset and length.
+/// * To create a user created / non file based sound.
+/// * To specify a starting subsound to seek to within a multi-sample sounds (ie FSB/DLS/SF2) when created as a stream.
+/// * To specify which subsounds to load for multi-sample sounds (ie FSB/DLS/SF2) so that memory is saved and only a subset is actually loaded/read from disk.
+/// * To specify 'piggyback' read and seek callbacks for capture of sound data as fmod reads and decodes it.  Useful for ripping decoded PCM data from sounds as they are loaded / played.
+/// * To specify a MIDI DLS/SF2 sample set file to load when opening a MIDI file.
+/// See below on what members to fill for each of the above types of sound you want to create.
 pub struct FmodCreateSoundexInfo
 {
     pub length             : u32,                               /* [w] Optional. Specify 0 to ignore. Size in bytes of file to load, or sound to create (in this case only if FMOD_OPENUSER is used).  Required if loading from memory.  If 0 is specified, then it will use the size of the file (unless loading from memory then an error will be returned). */
@@ -1165,19 +1175,18 @@ impl FmodSys {
         })
     }
 
-    pub fn get_spectrum(&self, spectrum_size: uint, options: Option<channel::FmodSpectrumOptions>) -> Result<Vec<f32>, fmod::Result> {
+    pub fn get_spectrum(&self, spectrum_size: uint, channel_offset: Option<i32>, window_type: Option<fmod::DSP_FFT_Window>) -> Result<Vec<f32>, fmod::Result> {
         let mut ptr = Vec::from_elem(spectrum_size, 0f32);
-        let mut window_type = fmod::DSP_FFT_WindowRect;
-        let mut channel_offset = 0;
-
-        match options {
-            Some(v) => {
-                window_type = v.window_type;
-                channel_offset = v.channel_offset;
-            }
-            None => {}
+        let c_window_type = match window_type {
+            Some(wt) => wt,
+            None => fmod::DSP_FFT_WindowRect
         };
-        match unsafe { ffi::FMOD_System_GetSpectrum(self.system, ptr.as_mut_ptr(), spectrum_size as c_int, channel_offset, window_type) } {
+        let c_channel_offset = match channel_offset {
+            Some(co) => co,
+            None => 0i32
+        };
+
+        match unsafe { ffi::FMOD_System_GetSpectrum(self.system, ptr.as_mut_ptr(), spectrum_size as c_int, c_channel_offset, c_window_type) } {
             fmod::Ok => Ok(ptr),
             e => Err(e),
         }
