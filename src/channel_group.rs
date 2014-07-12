@@ -36,6 +36,7 @@ use fmod_sys::FmodMemoryUsageDetails;
 use std::mem::transmute;
 use libc::{c_char};
 
+/// ChannelGroup object
 pub struct ChannelGroup {
     channel_group: *mut ffi::FMOD_CHANNELGROUP,
 }

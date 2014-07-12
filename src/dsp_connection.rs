@@ -39,6 +39,7 @@ pub fn get_ffi(dsp_connection: DspConnection) -> *mut ffi::FMOD_DSPCONNECTION {
     dsp_connection.dsp_connection
 }
 
+/// DspConnection object
 pub struct DspConnection {
     dsp_connection: *mut ffi::FMOD_DSPCONNECTION
 }

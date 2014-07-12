@@ -107,7 +107,6 @@ For a more complete example : https://github.com/GuillaumeGomez/rust-music-playe
  * Members marked with [r] mean the variable is modified by FMOD and is for reading purposes only. Do not change this value.
  * Members marked with [w] mean the variable can be written to.  The user can set the value.
 
-# Modules
 
 Here is the list of all modules :
 !*/

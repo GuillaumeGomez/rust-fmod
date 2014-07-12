@@ -76,6 +76,7 @@ pub fn from_ptr(channel: *mut ffi::FMOD_CHANNEL) -> Channel {
     Channel{channel: channel}
 }
 
+/// Channel Object
 pub struct Channel {
     channel: *mut ffi::FMOD_CHANNEL
 }

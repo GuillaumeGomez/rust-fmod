@@ -264,8 +264,8 @@ impl Clone for DspCallbacks {
     }
 }
 
-/// Structure to define a parameter for a DSP unit.
 #[deriving(Show, PartialEq, Clone)]
+/// Structure to define a parameter for a DSP unit.
 pub struct DspParameterDesc
 {
     /// [w] Minimum value of the parameter (ie 100.0)
@@ -536,6 +536,7 @@ pub fn get_ffi(dsp: &Dsp) -> *mut ffi::FMOD_DSP {
     dsp.dsp
 }
 
+/// Dsp object
 pub struct Dsp {
     dsp: *mut ffi::FMOD_DSP,
     can_be_deleted: bool,
