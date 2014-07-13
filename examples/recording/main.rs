@@ -101,13 +101,13 @@ fn main() {
     };
 
     let mut exinfo = FmodCreateSoundexInfo::new();
-    let secs = 5;
+    let secs = 5i32;
 
-    //exinfo.cbsize           = mem::size_of::<FMOD_CREATESOUNDEXINFO>() as i32;
-    exinfo.numchannels      = 2;
-    exinfo.format           = fmod::SoundFormatPCM16;
-    exinfo.defaultfrequency = 44100;
-    exinfo.length           = (exinfo.defaultfrequency * mem::size_of::<i16>() as i32 * exinfo.numchannels * secs) as u32;
+    //exinfo.cbsize            = mem::size_of::<FMOD_CREATESOUNDEXINFO>() as i32;
+    exinfo.num_channels      = 2;
+    exinfo.format            = fmod::SoundFormatPCM16;
+    exinfo.default_frequency = 44100;
+    exinfo.length            = (exinfo.default_frequency * mem::size_of::<i16>() as i32 * exinfo.num_channels * secs) as u32;
 
     let sound = match fmod.create_sound(String::new(), Some(FmodMode(FMOD_2D | FMOD_SOFTWARE | FMOD_OPENUSER)), Some(&mut exinfo)) {
         Ok(s) => s,

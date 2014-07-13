@@ -64,6 +64,7 @@ struct WavHeader {
     riff_type: [c_char, ..4]
 }
 
+/// Wrapper for SyncPoint object
 pub struct FmodSyncPoint {
     sync_point: *mut ffi::FMOD_SYNCPOINT
 }
@@ -74,16 +75,34 @@ impl FmodSyncPoint {
     }
 }
 
+/// Structure describing a piece of tag data.
 pub struct FmodTag {
-    pub _type    : fmod::TagType,       /* [r] The type of this tag. */
-    pub data_type: fmod::TagDataType,   /* [r] The type of data that this tag contains */
-    pub name     : String,              /* [r] The name of this tag i.e. "TITLE", "ARTIST" etc. */
-    data         : *mut c_void,         /* [r] Pointer to the tag data - its format is determined by the datatype member */
-    data_len     : c_uint,              /* [r] Length of the data contained in this tag */
-    pub updated  : bool                 /* [r] True if this tag has been updated since last being accessed with Sound::getTag */
+    /// [r] The type of this tag.
+    pub _type    : fmod::TagType,
+    /// [r] The type of data that this tag contains
+    pub data_type: fmod::TagDataType,
+    /// [r] The name of this tag i.e. "TITLE", "ARTIST" etc.
+    pub name     : String,
+    /// [r] Pointer to the tag data - its format is determined by the datatype member
+    data         : *mut c_void,
+    /// [r] Length of the data contained in this tag
+    data_len     : c_uint,
+    /// [r] True if this tag has been updated since last being accessed with [`Sound::get_tag`](struct.Sound.html#method.get_tag)
+    pub updated  : bool
 }
 
 impl FmodTag {
+    pub fn new() -> FmodTag {
+        FmodTag {
+            _type: fmod::TagTypeUnknown,
+            data_type: fmod::TagDataTypeBinary,
+            name: String::new(),
+            data: ::std::ptr::mut_null(),
+            data_len: 0u32,
+            updated: false
+        }
+    }
+
     fn from_ptr(pointer: ffi::FMOD_TAG) -> FmodTag {
         FmodTag{
             _type: pointer._type,
@@ -125,6 +144,7 @@ impl FmodTag {
     }
 }
 
+/// Sound object
 pub struct Sound {
     sound: *mut ffi::FMOD_SOUND,
     can_be_deleted: bool

@@ -40,6 +40,7 @@ pub fn get_ffi(reverb: Reverb) -> *mut ffi::FMOD_REVERB {
     reverb.reverb
 }
 
+/// Reverb object
 pub struct Reverb {
     reverb: *mut ffi::FMOD_REVERB
 }

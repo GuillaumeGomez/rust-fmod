@@ -37,11 +37,15 @@ pub fn new() -> FmodVector {
 }
 
 #[deriving(Show)]
+/// Structure describing a point in 3D space.
 pub struct FmodVector
 {
-    pub x: f32, /* X co-ordinate in 3D space. */
-    pub y: f32, /* Y co-ordinate in 3D space. */
-    pub z: f32  /* Z co-ordinate in 3D space. */
+    /// X co-ordinate in 3D space.
+    pub x: f32,
+    /// Y co-ordinate in 3D space.
+    pub y: f32,
+    /// Z co-ordinate in 3D space.
+    pub z: f32
 }
 
 impl FmodVector {

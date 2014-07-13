@@ -387,7 +387,7 @@ pub mod fmod {
 
     #[deriving(PartialEq, PartialOrd, Show)]
     #[repr(C)]
-    /// List of data types that can be returned by Sound::getTag
+    /// List of data types that can be returned by [`Sound::get_tag`](struct.Sound.html#method.get_tag)
     pub enum TagDataType
     {
         TagDataTypeBinary = 0,
@@ -825,8 +825,6 @@ pub static FMOD_LOADSECONDARYRAM       : c_uint = 0x20000000;
 /// For sounds that start virtual (due to being quiet or low importance), instead of swapping back to audible, and playing at the correct offset according to time, this flag makes the sound play from the start.
 pub static FMOD_VIRTUAL_PLAYFROMSTART  : c_uint = 0x80000000;
 
-///##FMOD_INITFLAGS values list
-///
 /// All platforms - Initialize normally
 pub static FMOD_INIT_NORMAL                    : c_uint = 0x00000000;
 /// All platforms - No stream thread is created internally. Streams are driven from [`FmodSys::update`](/doc/rfmod/struct.FmodSys.html#method.update). Mainly used with non-realtime outputs.

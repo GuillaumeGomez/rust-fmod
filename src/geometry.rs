@@ -39,6 +39,7 @@ pub fn get_ffi(geometry: Geometry) -> *mut ffi::FMOD_GEOMETRY {
     geometry.geometry
 }
 
+/// Geometry object
 pub struct Geometry {
     geometry: *mut ffi::FMOD_GEOMETRY
 }

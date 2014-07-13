@@ -33,6 +33,7 @@ use fmod_sys::FmodMemoryUsageDetails;
 use std::mem::transmute;
 use libc::{c_char};
 
+/// SoundGroup object
 pub struct SoundGroup {
     sound_group: *mut ffi::FMOD_SOUNDGROUP,
 }
