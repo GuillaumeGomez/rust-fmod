@@ -760,16 +760,20 @@ impl FmodSys {
             None => ::std::ptr::mut_null()
         };
 
-        tmp_v.with_c_str(|c_str|{
-            match unsafe { ffi::FMOD_System_CreateSound(self.system, if tmp_v.len() > 0 {
-                    c_str
-                } else {
-                    ::std::ptr::null()
-                }, op, ex, &mut sound) } {
+        if tmp_v.len() > 0 {
+            tmp_v.with_c_str(|c_str|{
+                match unsafe { ffi::FMOD_System_CreateSound(self.system, c_str, op, ex, &mut sound) } {
+                    fmod::Ok => {Ok(sound::from_ptr_first(sound))},
+                    err => Err(err)
+                }
+            })
+        } else {
+            match unsafe { ffi::FMOD_System_CreateSound(self.system, ::std::ptr::null(), op, ex, &mut sound) } {
                 fmod::Ok => {Ok(sound::from_ptr_first(sound))},
                 err => Err(err)
             }
-        })
+        }
+        
     }
 
     pub fn create_stream(&self, music: String, options: Option<FmodMode>) -> Result<Sound, fmod::Result> {
