@@ -9,15 +9,23 @@ use rfmod::*;
 use std::io::timer::sleep;
 use std::mem;
 
-fn get_key() -> u8 {
+fn get_key() -> Result<int, std::io::IoError> {
     let mut reader = std::io::stdio::stdin();
     
-    println!("\nPress a corresponding number or ESC to quit");
+    println!("\nEnter a corresponding number or \"ESC\" to quit:");
     print!("> ");
 
-    match reader.read_byte() {
-        Ok(nb) => nb,
-        Err(_) => 0u8
+    match reader.read_line() {
+        Ok(mut line) => {
+            let length = line.len() - 1;
+            line.truncate(length);
+            if line.as_slice() == "ESC" {
+                Ok(-1)
+            } else {
+                Ok(from_str(line.as_slice()).unwrap())
+            }
+        }
+        Err(e) => Err(e)
     }
 }
 
@@ -41,19 +49,25 @@ fn main() {
     let mut done = false;
 
     while done == false {
-        match match get_key() as char {
-            '1' => Some(fmod.set_output(fmod::OutputTypeOSS)),
-            '2' => Some(fmod.set_output(fmod::OutputTypeALSA)),
-            '3' => Some(fmod.set_output(fmod::OutputTypeESD)),
-            '4' => Some(fmod.set_output(fmod::OutputTypePulseAudio)),
-            c if c == 27u8 as char => return,
-            _ => None
-        } {
-            Some(fmod::Ok) => {
-                done = true
-            },
-            Some(e) => fail!("Output type error: {}", e),
-            _ => {}
+        match get_key() {
+            Ok(n) => {
+                match match n {
+                    1 => Some(fmod.set_output(fmod::OutputTypeOSS)),
+                    2 => Some(fmod.set_output(fmod::OutputTypeALSA)),
+                    3 => Some(fmod.set_output(fmod::OutputTypeESD)),
+                    4 => Some(fmod.set_output(fmod::OutputTypePulseAudio)),
+                    -1 => {
+                        return;
+                    }
+                    _ => None
+                } {
+                    Some(_) => {
+                        done = true;
+                    }
+                    _ => {}
+                }
+            }
+            Err(e) => fail!("Input type error: {}", e),
         }
     }
 
@@ -76,20 +90,23 @@ fn main() {
         it = it + 1;
     }
 
-    let tmp_c = if num_drivers > 9 {
-            9u8 + 48u8
-        } else {
-            num_drivers as u8 + 48u8
-        };
-
     loop {
         match get_key() {
-            27u8 => return,
-            key if key < tmp_c => {
-                fmod.set_driver((key - 48) as i32);
-                break;
+            Ok(nb) => {
+                match nb {
+                    -1 => return,
+                    nb if nb < num_drivers as int => {
+                        fmod.set_driver(nb as i32);
+                        break;
+                    }
+                    _ => {
+                        print!("\nPlease press a corresponding number or ESC to quit\n> ");
+                    }
+                }
             }
-            _ => print!("\nPlease press a corresponding number or ESC to quit\n> "),
+            Err(e) => {
+                fail!("Input type error: {}", e);
+            }
         }
     }
 
@@ -119,72 +136,79 @@ fn main() {
     println!("=========================\n");
     println!("Press '0' to record a {} seconds segment of audio.", secs);
     println!("Press '1' to play the {} seconds segment of audio.", secs);
-    println!("Press '2' to record the {} seconds segment of audio.", secs);
+    println!("Press '2' to save the {} seconds segment of audio into a file.", secs);
 
     let record_driver = 0;
     
     loop {
-        match match get_key() as char {
-            '0' => {
-                match fmod.start_record(record_driver, &sound, false) {
-                    fmod::Ok => {
-                        while fmod.is_recording(record_driver).unwrap() == true {
-                            print!("\rRecording : {}", fmod.get_record_position(record_driver).unwrap());
-                            fmod.update();
-                            sleep(15);
-                        }
-                        Some(fmod::Ok)
-                    }
-                    e => Some(e)
-                }
-            },
-            '1' => {
-                match sound.play_with_parameters(fmod::ChannelReUse, false, None) {
-                    Ok(chan) => {
-                        fmod.update();
-                        while chan.is_playing().unwrap() == true {
-                            print!("\rPlaying : {} / {}", chan.get_position(FMOD_TIMEUNIT_MS).unwrap(), sound.get_length(FMOD_TIMEUNIT_MS).unwrap());
-                            fmod.update();
-                            sleep(15);
-                        }
-                        Some(fmod::Ok)
-                    }
-                    Err(e) => Some(e)
-                }
-            }
-            '2' => {
-                print!("Please enter the output file name : ");
-                let mut reader = std::io::stdio::stdin();
-
-                match reader.read_line() {
-                    Ok(mut name) => {
-                        name.pop_char().unwrap();
-                        match sound.save_to_wav(&name) {
-                            Ok(b) => if b {
-                                println!("export succeeded");
-                                None
-                            } else {
-                                println!("export failed");
-                                None
-                            },
-                            Err(e) => {
-                                println!("save_to_wav error: {}", e);
-                                None
+        match get_key() {
+            Ok(nb) => {
+                match match nb {
+                    0 => {
+                        match fmod.start_record(record_driver, &sound, false) {
+                            fmod::Ok => {
+                                while fmod.is_recording(record_driver).unwrap() == true {
+                                    print!("\rRecording : {}", fmod.get_record_position(record_driver).unwrap());
+                                    fmod.update();
+                                    sleep(15);
+                                }
+                                Some(fmod::Ok)
                             }
+                            e => Some(e)
                         }
                     },
-                    Err(_) => None
+                    1 => {
+                        match sound.play() {
+                            Ok(chan) => {
+                                fmod.update();
+                                while chan.is_playing().unwrap() == true {
+                                    print!("\rPlaying : {} / {}", chan.get_position(FMOD_TIMEUNIT_MS).unwrap(), sound.get_length(FMOD_TIMEUNIT_MS).unwrap());
+                                    fmod.update();
+                                    sleep(15);
+                                }
+                                Some(fmod::Ok)
+                            }
+                            Err(e) => Some(e)
+                        }
+                    },
+                    2 => {
+                        print!("Please enter the output file name : ");
+                        let mut reader = std::io::stdio::stdin();
+
+                        match reader.read_line() {
+                            Ok(mut name) => {
+                                name.pop_char().unwrap();
+                                match sound.save_to_wav(&name) {
+                                    Ok(b) => if b {
+                                        println!("export succeeded");
+                                        None
+                                    } else {
+                                        println!("export failed");
+                                        None
+                                    },
+                                    Err(e) => {
+                                        println!("save_to_wav error: {}", e);
+                                        None
+                                    }
+                                }
+                            },
+                            Err(_) => None
+                        }
+                    },
+                    -1 => break,
+                    _ => None
+                } {
+                    Some(r) if r == fmod::Ok => {}
+                    Some(e) => {
+                        println!("Error : {}", e);
+                        break;
+                    }
+                    None => {}
                 }
             }
-            c if c == 27u8 as char => break,
-            _ => None
-        } {
-            Some(r) if r == fmod::Ok => {}
-            Some(e) => {
-                println!("Error : {}", e);
-                break;
+            Err(e) => {
+                fail!("Input type error: {}", e)
             }
-            None => {}
         }
     }
 }

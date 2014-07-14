@@ -206,23 +206,17 @@ impl Sound {
         }
     }
 
-    pub fn play_with_parameters(&self, channel_id: fmod::ChannelIndex, paused: bool, channel: Option<&mut channel::Channel>) -> Result<channel::Channel, fmod::Result> {
-        let mut chan = match channel {
-            Some(c) => channel::get_ffi(c),
-            None => ::std::ptr::mut_null()
-        };
+    pub fn play_with_parameters(&self, paused: bool, channel: &mut channel::Channel) -> fmod::Result {
+        let mut chan = channel::get_ffi(channel);
         
-        match match self.get_system_object() {
+        match self.get_system_object() {
             Ok(s) => { 
-                unsafe { ffi::FMOD_System_PlaySound(fmod_sys::get_ffi(&s), channel_id, self.sound, match paused {
+                unsafe { ffi::FMOD_System_PlaySound(fmod_sys::get_ffi(&s), fmod::ChannelReUse, self.sound, match paused {
                     true => 1,
                     false => 0
                 }, &mut chan) }
             }
             Err(e) => e
-        } {
-            fmod::Ok => Ok(channel::from_ptr(chan)),
-            e => Err(e)
         }
     }
 
