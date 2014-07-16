@@ -387,7 +387,7 @@ pub mod fmod {
 
     #[deriving(PartialEq, PartialOrd, Show)]
     #[repr(C)]
-    /// List of data types that can be returned by [`Sound::get_tag`](struct.Sound.html#method.get_tag)
+    /// List of data types that can be returned by [`Sound::get_tag`](../../struct.Sound.html#method.get_tag)
     pub enum TagDataType
     {
         TagDataTypeBinary = 0,
@@ -444,12 +444,12 @@ pub mod fmod {
 
     #[deriving(PartialEq, PartialOrd, Show)]
     #[repr(C)]
-    /// Types of delay that can be used with [`Channel::set_delay`](doc/rfmod/struct.Channel.html#method.set_delay) / [`Channel::get_delay`](struct.Channel.html#method.get_delay).
+    /// Types of delay that can be used with [`Channel::set_delay`](../../struct.Channel.html#method.set_delay) / [`Channel::get_delay`](../../struct.Channel.html#method.get_delay).
     pub enum DelayType
     {
-        /// Delay at the end of the sound in milliseconds. Use delayhi only. [`Channel::is_playing`](struct.Channel.html#method.is_playing) will remain true until this delay has passed even though the sound itself has stopped playing.
+        /// Delay at the end of the sound in milliseconds. Use delayhi only. [`Channel::is_playing`](../../struct.Channel.html#method.is_playing) will remain true until this delay has passed even though the sound itself has stopped playing.
         DelayTypeEndMS,
-        /// Time the sound started if [`Channel::get_delay`](struct.Channel.html#method.get_delay) is used, or if [`Channel::set_delay`](struct.Channel.html#method.set_delay) is used, the sound will delay playing until this exact tick.
+        /// Time the sound started if [`Channel::get_delay`](../../struct.Channel.html#method.get_delay) is used, or if [`Channel::set_delay`](../../struct.Channel.html#method.set_delay) is used, the sound will delay playing until this exact tick.
         DelayTypeDSPClockStart,
         /// Time the sound should end. If this is non-zero, the channel will go silent at this exact tick.
         DelayTypeDSPClockEnd,
@@ -464,21 +464,21 @@ pub mod fmod {
 
     #[deriving(PartialEq, PartialOrd, Show)]
     #[repr(C)]
-    /// These output types are used with [`FmodSys::set_output`](/doc/rfmod/struct.FmodSys.html#method.set_output) / [`FmodSys::get_output`](/doc/rfmod/struct.FmodSys.html#method.get_output), to choose which output method to use.
+    /// These output types are used with [`FmodSys::set_output`](../../struct.FmodSys.html#method.set_output) / [`FmodSys::get_output`](../../struct.FmodSys.html#method.get_output), to choose which output method to use.
     pub enum OutputType
     {
         /// Picks the best output mode for the platform. This is the default.
         OutputTypeAutoDetect,
 
-        /// All             - 3rd party plugin, unknown. This is for use with [`FmodSys::get_output`](/doc/rfmod/struct.FmodSys.html#method.get_output) only.
+        /// All             - 3rd party plugin, unknown. This is for use with [`FmodSys::get_output`](../../struct.FmodSys.html#method.get_output) only.
         OutputTypeUnknown,
         /// All             - All calls in this mode succeed but make no sound.
         OutputTypeNoSound,
-        /// All             - Writes output to fmodoutput.wav by default. Use the 'extradriverdata' parameter in [`FmodSys::init`](/doc/rfmod/struct.FmodSys.html#method.init), by simply passing the filename as a string, to set the wav filename.
+        /// All             - Writes output to fmodoutput.wav by default. Use the 'extradriverdata' parameter in [`FmodSys::init`](../../struct.FmodSys.html#method.init), by simply passing the filename as a string, to set the wav filename.
         OutputTypeWAVWriter,
-        /// All             - Non-realtime version of FMOD_OUTPUTTYPE_NOSOUND. User can drive mixer with [`FmodSys::update`](/doc/rfmod/struct.FmodSys.html#method.update) at whatever rate they want.
+        /// All             - Non-realtime version of FMOD_OUTPUTTYPE_NOSOUND. User can drive mixer with [`FmodSys::update`](../../struct.FmodSys.html#method.update) at whatever rate they want.
         OutputTypeNoSoundNRT,
-        /// All             - Non-realtime version of FMOD_OUTPUTTYPE_WAVWRITER. User can drive mixer with [`FmodSys::update`](/doc/rfmod/struct.FmodSys.html#method.update) at whatever rate they want.
+        /// All             - Non-realtime version of FMOD_OUTPUTTYPE_WAVWRITER. User can drive mixer with [`FmodSys::update`](../../struct.FmodSys.html#method.update) at whatever rate they want.
         OutputTypeWAVWriterNRT,
 
         /// Win32/Win64     - DirectSound output.                      (Default on Windows XP and below)
@@ -535,8 +535,8 @@ pub mod fmod {
     #[deriving(PartialOrd, Show, PartialEq)]
     #[repr(C)]
     //FIXME
-    /// These are speaker types defined for use with the [`Channel::set_speaker_levels`](/doc/rfmod/struct.Channel.html#method.set_speaker_levels) command.
-    /// It can also be used for speaker placement in the [`FmodSys::set_3D_speaker_position`](/doc/rfmod/struct.FmodSys.html#method.set_3D_speaker_position) command.
+    /// These are speaker types defined for use with the [`Channel::set_speaker_level`](../../struct.Channel.html#method.set_speaker_level) command.
+    /// It can also be used for speaker placement in the [`FmodSys::set_3D_speaker_position`](../../struct.FmodSys.html#method.set_3D_speaker_position) command.
     pub enum Speaker
     {
         SpeakerFrontLeft,
@@ -561,10 +561,10 @@ pub mod fmod {
 
     #[deriving(PartialEq, PartialOrd, Show)]
     #[repr(C)]
-    /// These are speaker types defined for use with the [`FmodSys::set_speaker_mode`](/doc/rfmod/struct.FmodSys.html#method.set_speaker_mode) or [`FmodSys::get_speaker_mode`](/doc/rfmod/struct.FmodSys.html#method.get_speaker_mode) command.
+    /// These are speaker types defined for use with the [`FmodSys::set_speaker_mode`](../../struct.FmodSys.html#method.set_speaker_mode) or [`FmodSys::get_speaker_mode`](../../struct.FmodSys.html#method.get_speaker_mode) command.
     pub enum SpeakerMode
     {
-        /// There is no specific speakermode. Sound channels are mapped in order of input to output. Use [`FmodSys::set_software_format`](/doc/rfmod/struct.FmodSys.html#method.set_software_format) to specify speaker count. See remarks for more information.
+        /// There is no specific speakermode. Sound channels are mapped in order of input to output. Use [`FmodSys::set_software_format`](../../struct.FmodSys.html#method.set_software_format) to specify speaker count. See remarks for more information.
         SpeakerModeRaw,
         /// The speakers are monaural.
         SpeakerModeMono,
@@ -614,7 +614,7 @@ pub mod fmod {
 
     #[deriving(PartialEq, PartialOrd, Show)]
     #[repr(C)]
-    /// These are plugin types defined for use with the [`FmodSys::get_num_plugins`](/doc/rfmod/struct.FmodSys.html#method.get_num_plugins), [`FmodSys::get_plugin_info`](/doc/rfmod/struct.FmodSys.html#method.get_plugin_info) and [`FmodSys::unload_plugin`](/doc/rfmod/struct.FmodSys.html#method.unload_plugin) functions.
+    /// These are plugin types defined for use with the [`FmodSys::get_num_plugins`](../../struct.FmodSys.html#method.get_num_plugins), [`FmodSys::get_plugin_info`](../../struct.FmodSys.html#method.get_plugin_info) and [`FmodSys::unload_plugin`](../../struct.FmodSys.html#method.unload_plugin) functions.
     pub enum PluginType
     {
         /// The plugin type is an output module. FMOD mixed audio will play through one of these devices
@@ -639,7 +639,7 @@ pub mod fmod {
         OpenStateReady = 0,
         /// Initial load in progress.
         OpenStateLoading,
-        /// Failed to open - file not found, out of memory etc. See return value of [`Sound::get_open_state`](/doc/rfmod/struct.Sound.html#method.get_open_state) for what happened.
+        /// Failed to open - file not found, out of memory etc. See return value of [`Sound::get_open_state`](../../struct.Sound.html#method.get_open_state) for what happened.
         OpenStateError,
         /// Connecting to remote host (internet sounds only).
         OpenStateConnecting,
@@ -660,18 +660,18 @@ pub mod fmod {
 
     #[deriving(PartialEq, PartialOrd, Show)]
     #[repr(C)]
-    /// These callback types are used with [`Channel::set_callback`](/doc/rfmod/struct.Channel.html#method.set_callback).
+    /// These callback types are used with [`Channel::set_callback`](../../struct.Channel.html#method.set_callback).
     pub enum SystemCallbackType
     {
-        /// Called from [`FmodSys::update`](/doc/rfmod/struct.FmodSys.html#method.update) when the enumerated list of devices has changed.
+        /// Called from [`FmodSys::update`](../../struct.FmodSys.html#method.update) when the enumerated list of devices has changed.
         SystemCallbackTypeDeviceListChanged,
-        /// Called from [`FmodSys::update`](/doc/rfmod/struct.FmodSys.html#method.update) when an output device has been lost due to control panel parameter changes and FMOD cannot automatically recover.
+        /// Called from [`FmodSys::update`](../../struct.FmodSys.html#method.update) when an output device has been lost due to control panel parameter changes and FMOD cannot automatically recover.
         SystemCallbackTypeDeviceLost,
         /// Called directly when a memory allocation fails somewhere in FMOD. (NOTE - 'system' will be NULL in this callback type.)
         SystemCallbackTypeMemoryAllocationFailed,
         /// Called directly when a thread is created.
         SystemCallbackTypeThreadCreated,
-        /// Called when a bad connection was made with [`Dsp::add_input`](/doc/rfmod/struct.Dsp.html#method.add_input). Usually called from mixer thread because that is where the connections are made.
+        /// Called when a bad connection was made with [`Dsp::add_input`](../../struct.Dsp.html#method.add_input). Usually called from mixer thread because that is where the connections are made.
         SystemCallbackTypeBadDSPConnection,
         /// Called when too many effects were added exceeding the maximum tree depth of 128. This is most likely caused by accidentally adding too many DSP effects. Usually called from mixer thread because that is where the connections are made.
         SystemCallbackTypeBadDSPLevel,
@@ -686,14 +686,14 @@ pub mod fmod {
 
     #[deriving(PartialEq, PartialOrd, Show)]
     #[repr(C)]
-    /// These flags are used with [`SoundGroup::set_max_audible_behavior`](/doc/rfmod/struct.SoundGroup.html#method.set_max_audible_behavior) to determine what happens when more sounds are played than are specified with [`SoundGroup::set_max_audible`](/doc/rfmod/struct.SoundGroup.html#method.set_max_audible).
+    /// These flags are used with [`SoundGroup::set_max_audible_behavior`](../../struct.SoundGroup.html#method.set_max_audible_behavior) to determine what happens when more sounds are played than are specified with [`SoundGroup::set_max_audible`](../../struct.SoundGroup.html#method.set_max_audible).
     pub enum SoundGroupBehavior
     {
-        /// Any sound played that puts the sound count over the [`SoundGroup::set_max_audible`](/doc/rfmod/struct.SoundGroup.html#method.set_max_audible) setting, will simply fail during [`Sound::play`](/doc/rfmod/struct.Sound.html#method.play).
+        /// Any sound played that puts the sound count over the [`SoundGroup::set_max_audible`](../../struct.SoundGroup.html#method.set_max_audible) setting, will simply fail during [`Sound::play`](../../struct.Sound.html#method.play).
         SoundGroupBehaviorFail,
-        /// Any sound played that puts the sound count over the [`SoundGroup::set_max_audible`](/doc/rfmod/struct.SoundGroup.html#method.set_max_audible) setting, will be silent, then if another sound in the group stops the sound that was silent before becomes audible again.
+        /// Any sound played that puts the sound count over the [`SoundGroup::set_max_audible`](../../struct.SoundGroup.html#method.set_max_audible) setting, will be silent, then if another sound in the group stops the sound that was silent before becomes audible again.
         SoundGroupBehaviorMute,
-        /// Any sound played that puts the sound count over the [`SoundGroup::set_max_audible`](/doc/rfmod/struct.SoundGroup.html#method.set_max_audible) setting, will steal the quietest / least important sound playing in the group.
+        /// Any sound played that puts the sound count over the [`SoundGroup::set_max_audible`](../../struct.SoundGroup.html#method.set_max_audible) setting, will steal the quietest / least important sound playing in the group.
         SoundGroupBehaviorStealLowest,
 
         /// Maximum number of open state types.
@@ -782,21 +782,21 @@ pub static FMOD_CREATESTREAM           : c_uint = 0x00000080;
 pub static FMOD_CREATESAMPLE           : c_uint = 0x00000100;
 /// Load MP2/MP3/IMAADPCM/CELT/Vorbis/AT9 or XMA into memory and leave it compressed. CELT/Vorbis/AT9 encoding only supported in the FSB file format. During playback the FMOD software mixer will decode it in realtime as a 'compressed sample'. Can only be used in combination with FMOD_SOFTWARE. Overrides FMOD_CREATESAMPLE. If the sound data is not one of the supported formats, it will behave as if it was created with FMOD_CREATESAMPLE and decode the sound into PCM.
 pub static FMOD_CREATECOMPRESSEDSAMPLE : c_uint = 0x00000200;
-/// Opens a user created static sample or stream. Use FMOD_CREATESOUNDEXINFO to specify format and/or read callbacks. If a user created 'sample' is created with no read callback, the sample will be empty. Use [`Sound::lock`](/doc/rfmod/struct.Sound.html#method.lock) and [`Sound::unlock`](/doc/rfmod/struct.Sound.html#method.unlock) to place sound data into the sound if this is the case.
+/// Opens a user created static sample or stream. Use FMOD_CREATESOUNDEXINFO to specify format and/or read callbacks. If a user created 'sample' is created with no read callback, the sample will be empty. Use [`Sound::lock`](../struct.Sound.html#method.lock) and [`Sound::unlock`](../struct.Sound.html#method.unlock) to place sound data into the sound if this is the case.
 pub static FMOD_OPENUSER               : c_uint = 0x00000400;
 /// "name_or_data" will be interpreted as a pointer to memory instead of filename for creating sounds. Use FMOD_CREATESOUNDEXINFO to specify length. If used with FMOD_CREATESAMPLE or FMOD_CREATECOMPRESSEDSAMPLE, FMOD duplicates the memory into its own buffers. Your own buffer can be freed after open. If used with FMOD_CREATESTREAM, FMOD will stream out of the buffer whose pointer you passed in. In this case, your own buffer should not be freed until you have finished with and released the stream.
 pub static FMOD_OPENMEMORY             : c_uint = 0x00000800;
-/// "name_or_data" will be interpreted as a pointer to memory instead of filename for creating sounds. Use FMOD_CREATESOUNDEXINFO to specify length. This differs to FMOD_OPENMEMORY in that it uses the memory as is, without duplicating the memory into its own buffers. For Wii/PSP FMOD_HARDWARE supports this flag for the GCADPCM/VAG formats. On other platforms FMOD_SOFTWARE must be used, as sound hardware on the other platforms (ie PC) cannot access main ram. Cannot be freed after open, only after [`Sound::release`](/doc/rfmod/struct.Sound.html#method.release). Will not work if the data is compressed and FMOD_CREATECOMPRESSEDSAMPLE is not used.
+/// "name_or_data" will be interpreted as a pointer to memory instead of filename for creating sounds. Use FMOD_CREATESOUNDEXINFO to specify length. This differs to FMOD_OPENMEMORY in that it uses the memory as is, without duplicating the memory into its own buffers. For Wii/PSP FMOD_HARDWARE supports this flag for the GCADPCM/VAG formats. On other platforms FMOD_SOFTWARE must be used, as sound hardware on the other platforms (ie PC) cannot access main ram. Cannot be freed after open, only after [`Sound::release`](../struct.Sound.html#method.release). Will not work if the data is compressed and FMOD_CREATECOMPRESSEDSAMPLE is not used.
 pub static FMOD_OPENMEMORY_POINT       : c_uint = 0x10000000;
 /// Will ignore file format and treat as raw pcm. Use FMOD_CREATESOUNDEXINFO to specify format. Requires at least defaultfrequency, numchannels and format to be specified before it will open. Must be little endian data.
 pub static FMOD_OPENRAW                : c_uint = 0x00001000;
 /// Just open the file, dont prebuffer or read. Good for fast opens for info, or when sound::readData is to be used.
 pub static FMOD_OPENONLY               : c_uint = 0x00002000;
-/// For [`FmodSys::create_sound`](/doc/rfmod/struct.FmodSys.html#method.create_sound) - for accurate [`Sound::get_length`](/doc/rfmod/struct.Sound.html#method.get_length)/[`Channel::set_position`](/doc/rfmod/struct.Channel.html#method.set_position) on VBR MP3, and MOD/S3M/XM/IT/MIDI files. Scans file first, so takes longer to open. FMOD_OPENONLY does not affect this.
+/// For [`FmodSys::create_sound`](../struct.FmodSys.html#method.create_sound) - for accurate [`Sound::get_length`](../struct.Sound.html#method.get_length) / [`Channel::set_position`](../struct.Channel.html#method.set_position) on VBR MP3, and MOD/S3M/XM/IT/MIDI files. Scans file first, so takes longer to open. FMOD_OPENONLY does not affect this.
 pub static FMOD_ACCURATETIME           : c_uint = 0x00004000;
 /// For corrupted / bad MP3 files. This will search all the way through the file until it hits a valid MPEG header. Normally only searches for 4k.
 pub static FMOD_MPEGSEARCH             : c_uint = 0x00008000;
-/// For opening sounds and getting streamed subsounds (seeking) asyncronously. Use [`Sound::get_open_state`](/doc/rfmod/struct.Sound.html#method.get_open_state) to poll the state of the sound as it opens or retrieves the subsound in the background.
+/// For opening sounds and getting streamed subsounds (seeking) asyncronously. Use [`Sound::get_open_state`](../struct.Sound.html#method.get_open_state) to poll the state of the sound as it opens or retrieves the subsound in the background.
 pub static FMOD_NONBLOCKING            : c_uint = 0x00010000;
 /// Unique sound, can only be played one at a time
 pub static FMOD_UNIQUE                 : c_uint = 0x00020000;
@@ -810,15 +810,15 @@ pub static FMOD_3D_INVERSEROLLOFF      : c_uint = 0x00100000;
 pub static FMOD_3D_LINEARROLLOFF       : c_uint = 0x00200000;
 /// This sound will follow a linear-square rolloff model where mindistance = full volume, maxdistance = silence. Rolloffscale is ignored.
 pub static FMOD_3D_LINEARSQUAREROLLOFF : c_uint = 0x00400000;
-/// This sound will follow a rolloff model defined by [`Sound::set_3D_custom_rolloff`](/doc/rfmod/struct.Sound.html#method.set_3D_custom_rolloff) / [`Channel::set_3D_custom_rolloff`](/doc/rfmod/struct.Channel.html#method.set_3D_custom_rolloff).
+/// This sound will follow a rolloff model defined by [`Sound::set_3D_custom_rolloff`](../struct.Sound.html#method.set_3D_custom_rolloff) / [`Channel::set_3D_custom_rolloff`](../struct.Channel.html#method.set_3D_custom_rolloff).
 pub static FMOD_3D_CUSTOMROLLOFF       : c_uint = 0x04000000;
-/// Is not affect by geometry occlusion. If not specified in [`Sound::set_mode`](/doc/rfmod/struct.Sound.html#method.set_mode), or [`Channel::set_mode`](/doc/rfmod/struct.Channel.html#method.set_mode), the flag is cleared and it is affected by geometry again.
+/// Is not affect by geometry occlusion. If not specified in [`Sound::set_mode`](../struct.Sound.html#method.set_mode), or [`Channel::set_mode`](../struct.Channel.html#method.set_mode), the flag is cleared and it is affected by geometry again.
 pub static FMOD_3D_IGNOREGEOMETRY      : c_uint = 0x40000000;
 /// Filename is double-byte unicode.
 pub static FMOD_UNICODE                : c_uint = 0x01000000;
 /// Skips id3v2/asf/etc tag checks when opening a sound, to reduce seek/read overhead when opening files (helps with CD performance).
 pub static FMOD_IGNORETAGS             : c_uint = 0x02000000;
-/// Removes some features from samples to give a lower memory overhead, like [`Sound::get_name`](/doc/rfmod/struct.Sound.html#method.get_name). See remarks.
+/// Removes some features from samples to give a lower memory overhead, like [`Sound::get_name`](../struct.Sound.html#method.get_name). See remarks.
 pub static FMOD_LOWMEM                 : c_uint = 0x08000000;
 /// Load sound into the secondary RAM of supported platform. On PS3, sounds will be loaded into RSX/VRAM.
 pub static FMOD_LOADSECONDARYRAM       : c_uint = 0x20000000;
@@ -827,23 +827,23 @@ pub static FMOD_VIRTUAL_PLAYFROMSTART  : c_uint = 0x80000000;
 
 /// All platforms - Initialize normally
 pub static FMOD_INIT_NORMAL                    : c_uint = 0x00000000;
-/// All platforms - No stream thread is created internally. Streams are driven from [`FmodSys::update`](/doc/rfmod/struct.FmodSys.html#method.update). Mainly used with non-realtime outputs.
+/// All platforms - No stream thread is created internally. Streams are driven from [`FmodSys::update`](../struct.FmodSys.html#method.update). Mainly used with non-realtime outputs.
 pub static FMOD_INIT_STREAM_FROM_UPDATE        : c_uint = 0x00000001;
 /// All platforms - FMOD will treat +X as right, +Y as up and +Z as backwards (towards you).
 pub static FMOD_INIT_3D_RIGHTHANDED            : c_uint = 0x00000002;
 /// All platforms - Disable software mixer to save memory. Anything created with FMOD_SOFTWARE will fail and DSP will not work.
 pub static FMOD_INIT_SOFTWARE_DISABLE          : c_uint = 0x00000004;
-/// All platforms - All FMOD_SOFTWARE (and FMOD_HARDWARE on 3DS and NGP) with FMOD_3D based voices will add a software lowpass filter effect into the DSP chain which is automatically used when [`Channel::set_3D_occlusion`](/doc/rfmod/struct.Channel.html#method.set_3D_occlusion) is used or the geometry API.
+/// All platforms - All FMOD_SOFTWARE (and FMOD_HARDWARE on 3DS and NGP) with FMOD_3D based voices will add a software lowpass filter effect into the DSP chain which is automatically used when [`Channel::set_3D_occlusion`](../struct.Channel.html#method.set_3D_occlusion) is used or the geometry API.
 pub static FMOD_INIT_OCCLUSION_LOWPASS         : c_uint = 0x00000008;
-/// All platforms - All FMOD_SOFTWARE (and FMOD_HARDWARE on 3DS and NGP) with FMOD_3D based voices will add a software lowpass filter effect into the DSP chain which causes sounds to sound duller when the sound goes behind the listener. Use [`FmodSys::set_advanced_settings`](/doc/rfmod/struct.FmodSys.html#method.set_advanced_settings) to adjust cutoff frequency.
+/// All platforms - All FMOD_SOFTWARE (and FMOD_HARDWARE on 3DS and NGP) with FMOD_3D based voices will add a software lowpass filter effect into the DSP chain which causes sounds to sound duller when the sound goes behind the listener. Use [`FmodSys::set_advanced_settings`](../struct.FmodSys.html#method.set_advanced_settings) to adjust cutoff frequency.
 pub static FMOD_INIT_HRTF_LOWPASS              : c_uint = 0x00000010;
-/// All platforms - All FMOD_SOFTWARE with FMOD_3D based voices will add a software lowpass and highpass filter effect into the DSP chain which will act as a distance-automated bandpass filter. Use [`FmodSys::set_advanced_settings`](/doc/rfmod/struct.FmodSys.html#method.set_advanced_settings) to adjust the center frequency.
+/// All platforms - All FMOD_SOFTWARE with FMOD_3D based voices will add a software lowpass and highpass filter effect into the DSP chain which will act as a distance-automated bandpass filter. Use [`FmodSys::set_advanced_settings`](../struct.FmodSys.html#method.set_advanced_settings) to adjust the center frequency.
 pub static FMOD_INIT_DISTANCE_FILTERING        : c_uint = 0x00000200;
 /// All platforms - FMOD Software reverb will preallocate enough buffers for reverb per channel, rather than allocating them and freeing them at runtime.
 pub static FMOD_INIT_REVERB_PREALLOCBUFFERS    : c_uint = 0x00000040;
 /// All platforms - Enable TCP/IP based host which allows FMOD Designer or FMOD Profiler to connect to it, and view memory, CPU and the DSP network graph in real-time.
 pub static FMOD_INIT_ENABLE_PROFILE            : c_uint = 0x00000020;
-/// All platforms - Any sounds that are 0 volume will go virtual and not be processed except for having their positions updated virtually. Use [`FmodSys::set_advanced_settings`](/doc/rfmod/struct.FmodSys.html#method.set_advanced_settings) to adjust what volume besides zero to switch to virtual at.
+/// All platforms - Any sounds that are 0 volume will go virtual and not be processed except for having their positions updated virtually. Use [`FmodSys::set_advanced_settings`](../struct.FmodSys.html#method.set_advanced_settings) to adjust what volume besides zero to switch to virtual at.
 pub static FMOD_INIT_VOL0_BECOMES_VIRTUAL      : c_uint = 0x00000080;
 /// Win32 Vista only - for WASAPI output - Enable exclusive access to hardware, lower latency at the expense of excluding other applications from accessing the audio hardware.
 pub static FMOD_INIT_WASAPI_EXCLUSIVE          : c_uint = 0x00000100;
@@ -855,7 +855,7 @@ pub static FMOD_INIT_PS3_FORCE2CHLPCM          : c_uint = 0x01000000;
 pub static FMOD_INIT_DISABLEDOLBY              : c_uint = 0x00100000;
 /// Xbox 360 / PS3 - The "music" channelgroup which by default pauses when custom 360 dashboard / PS3 BGM music is played, can be changed to mute (therefore continues playing) instead of pausing, by using this flag.
 pub static FMOD_INIT_SYSTEM_MUSICMUTENOTPAUSE  : c_uint = 0x00200000;
-/// Win32/Wii/PS3/Xbox/Xbox 360 - FMOD Mixer thread is woken up to do a mix when [`FmodSys::update`](/doc/rfmod/struct.FmodSys.html#method.update) is called rather than waking periodically on its own timer.
+/// Win32/Wii/PS3/Xbox/Xbox 360 - FMOD Mixer thread is woken up to do a mix when [`FmodSys::update`](../struct.FmodSys.html#method.update) is called rather than waking periodically on its own timer.
 pub static FMOD_INIT_SYNCMIXERWITHUPDATE       : c_uint = 0x00400000;
 /// All platforms - With the geometry engine, only process the closest polygon rather than accumulating all polygons the sound to listener line intersects.
 pub static FMOD_INIT_GEOMETRY_USECLOSEST       : c_uint = 0x04000000;
@@ -874,15 +874,15 @@ pub static FMOD_TIMEUNIT_MS               : FmodTimeUnit = FmodTimeUnit(0x000000
 pub static FMOD_TIMEUNIT_PCM              : FmodTimeUnit = FmodTimeUnit(0x00000002);
 /// Bytes, related to PCM samples * channels * datawidth (ie 16bit = 2 bytes).
 pub static FMOD_TIMEUNIT_PCMBYTES         : FmodTimeUnit = FmodTimeUnit(0x00000004);
-/// Raw file bytes of (compressed) sound data (does not include headers). Only used by [`Sound::get_length`](/doc/rfmod/struct.Sound.html#method.get_length) and [`Channel::get_position`](/doc/rfmod/struct.Channel.html#method.get_position).
+/// Raw file bytes of (compressed) sound data (does not include headers). Only used by [`Sound::get_length`](../struct.Sound.html#method.get_length) and [`Channel::get_position`](../struct.Channel.html#method.get_position).
 pub static FMOD_TIMEUNIT_RAWBYTES         : FmodTimeUnit = FmodTimeUnit(0x00000008);
 /// Fractions of 1 PCM sample. Unsigned int range 0 to 0xFFFFFFFF. Used for sub-sample granularity for DSP purposes.
 pub static FMOD_TIMEUNIT_PCMFRACTION      : FmodTimeUnit = FmodTimeUnit(0x00000010);
-/// MOD/S3M/XM/IT. Order in a sequenced module format. Use [`Sound::get_format`](/doc/rfmod/struct.Sound.html#method.get_format) to determine the PCM format being decoded to.
+/// MOD/S3M/XM/IT. Order in a sequenced module format. Use [`Sound::get_format`](../struct.Sound.html#method.get_format) to determine the PCM format being decoded to.
 pub static FMOD_TIMEUNIT_MODORDER         : FmodTimeUnit = FmodTimeUnit(0x00000100);
-/// MOD/S3M/XM/IT. Current row in a sequenced module format. [`Sound::get_length`](/doc/rfmod/struct.Sound.html#method.get_length) will return the number of rows in the currently playing or seeked to pattern.
+/// MOD/S3M/XM/IT. Current row in a sequenced module format. [`Sound::get_length`](../struct.Sound.html#method.get_length) will return the number of rows in the currently playing or seeked to pattern.
 pub static FMOD_TIMEUNIT_MODROW           : FmodTimeUnit = FmodTimeUnit(0x00000200);
-/// MOD/S3M/XM/IT. Current pattern in a sequenced module format. [`Sound::get_length`](/doc/rfmod/struct.Sound.html#method.get_length) will return the number of patterns in the song and [`Channel::get_position`](/doc/rfmod/struct.Channel.html#method.get_position) will return the currently playing pattern.
+/// MOD/S3M/XM/IT. Current pattern in a sequenced module format. [`Sound::get_length`](../struct.Sound.html#method.get_length) will return the number of patterns in the song and [`Channel::get_position`](../struct.Channel.html#method.get_position) will return the currently playing pattern.
 pub static FMOD_TIMEUNIT_MODPATTERN       : FmodTimeUnit = FmodTimeUnit(0x00000400);
 /// Currently playing subsound in a sentence time in milliseconds.
 pub static FMOD_TIMEUNIT_SENTENCE_MS      : FmodTimeUnit = FmodTimeUnit(0x00010000);
@@ -901,43 +901,43 @@ pub static FMOD_TIMEUNIT_BUFFERED         : FmodTimeUnit = FmodTimeUnit(0x100000
 pub static FMOD_MEMBITS_OTHER             : FmodMemoryBits = FmodMemoryBits(0x00000001);
 /// String data
 pub static FMOD_MEMBITS_STRING            : FmodMemoryBits = FmodMemoryBits(0x00000002);
-/// [`FmodSys`](/doc/rfmod/struct.FmodSys.html) object and various internals
+/// [`FmodSys`](../struct.FmodSys.html) object and various internals
 pub static FMOD_MEMBITS_SYSTEM            : FmodMemoryBits = FmodMemoryBits(0x00000004);
 /// Plugin objects and internals
 pub static FMOD_MEMBITS_PLUGINS           : FmodMemoryBits = FmodMemoryBits(0x00000008);
 /// Output module object and internals
 pub static FMOD_MEMBITS_OUTPUT            : FmodMemoryBits = FmodMemoryBits(0x00000010);
-/// [`Channel`](/doc/rfmod/struct.Channel.html) related memory
+/// [`Channel`](../struct.Channel.html) related memory
 pub static FMOD_MEMBITS_CHANNEL           : FmodMemoryBits = FmodMemoryBits(0x00000020);
-/// [`ChannelGroup`](/doc/rfmod/struct.ChannelGroup.html) objects and internals
+/// [`ChannelGroup`](../struct.ChannelGroup.html) objects and internals
 pub static FMOD_MEMBITS_CHANNELGROUP      : FmodMemoryBits = FmodMemoryBits(0x00000040);
 /// Codecs allocated for streaming
 pub static FMOD_MEMBITS_CODEC             : FmodMemoryBits = FmodMemoryBits(0x00000080);
 /// Codecs allocated for streaming
 pub static FMOD_MEMBITS_FILE              : FmodMemoryBits = FmodMemoryBits(0x00000100);
-/// [`Sound`](/doc/rfmod/struct.Sound.html) objects and internals
+/// [`Sound`](../struct.Sound.html) objects and internals
 pub static FMOD_MEMBITS_SOUND             : FmodMemoryBits = FmodMemoryBits(0x00000200);
 /// Sound data stored in secondary RAM
 pub static FMOD_MEMBITS_SOUND_SECONDARYRAM: FmodMemoryBits = FmodMemoryBits(0x00000400);
-/// [`SoundGroup`](/doc/rfmod/struct.SoundGroup.html) objects and internals
+/// [`SoundGroup`](../struct.SoundGroup.html) objects and internals
 pub static FMOD_MEMBITS_SOUNDGROUP        : FmodMemoryBits = FmodMemoryBits(0x00000800);
 /// Stream buffer memory
 pub static FMOD_MEMBITS_STREAMBUFFER      : FmodMemoryBits = FmodMemoryBits(0x00001000);
-/// [`DspConnection`](/doc/rfmod/struct.DspConnection.html) objects and internals
+/// [`DspConnection`](../struct.DspConnection.html) objects and internals
 pub static FMOD_MEMBITS_DSPCONNECTION     : FmodMemoryBits = FmodMemoryBits(0x00002000);
-/// [`Dsp`](/doc/rfmod/struct.Dsp.html) implementation objects
+/// [`Dsp`](../struct.Dsp.html) implementation objects
 pub static FMOD_MEMBITS_DSP               : FmodMemoryBits = FmodMemoryBits(0x00004000);
-/// Realtime file format decoding [`Dsp`](/doc/rfmod/struct.Dsp.html) objects
+/// Realtime file format decoding [`Dsp`](../struct.Dsp.html) objects
 pub static FMOD_MEMBITS_DSPCODEC          : FmodMemoryBits = FmodMemoryBits(0x00008000);
 /// Profiler memory footprint.
 pub static FMOD_MEMBITS_PROFILE           : FmodMemoryBits = FmodMemoryBits(0x00010000);
 /// Buffer used to store recorded data from microphone
 pub static FMOD_MEMBITS_RECORDBUFFER      : FmodMemoryBits = FmodMemoryBits(0x00020000);
-/// [`Reverb`](/doc/rfmod/struct.Reverb.html) implementation objects
+/// [`Reverb`](../struct.Reverb.html) implementation objects
 pub static FMOD_MEMBITS_REVERB            : FmodMemoryBits = FmodMemoryBits(0x00040000);
 /// Reverb channel properties structs
 pub static FMOD_MEMBITS_REVERBCHANNELPROPS: FmodMemoryBits = FmodMemoryBits(0x00080000);
-/// [`Geometry`](/doc/rfmod/struct.Geometry.html) objects and internals
+/// [`Geometry`](../struct.Geometry.html) objects and internals
 pub static FMOD_MEMBITS_GEOMETRY          : FmodMemoryBits = FmodMemoryBits(0x00100000);
 /// Sync point memory.
 pub static FMOD_MEMBITS_SYNCPOINT         : FmodMemoryBits = FmodMemoryBits(0x00200000);

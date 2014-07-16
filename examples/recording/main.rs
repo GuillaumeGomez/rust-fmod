@@ -8,6 +8,7 @@ use rfmod::types::*;
 use rfmod::*;
 use std::io::timer::sleep;
 use std::mem;
+use std::default::Default;
 
 fn get_key() -> Result<int, std::io::IoError> {
     let mut reader = std::io::stdio::stdin();
@@ -117,7 +118,7 @@ fn main() {
         }
     };
 
-    let mut exinfo = FmodCreateSoundexInfo::new();
+    let mut exinfo : FmodCreateSoundexInfo = Default::default();
     let secs = 5i32;
 
     //exinfo.cbsize            = mem::size_of::<FMOD_CREATESOUNDEXINFO>() as i32;

@@ -30,6 +30,7 @@ use libc::{c_int, c_void};
 use fmod_sys;
 use fmod_sys::FmodMemoryUsageDetails;
 use std::mem::transmute;
+use std::default::Default;
 
 pub fn from_ptr(geometry: *mut ffi::FMOD_GEOMETRY) -> Geometry {
     Geometry{geometry: geometry}
@@ -120,7 +121,7 @@ impl Geometry {
     }
 
     pub fn get_polygon_vertex(&self, index: i32, vertex_index: i32) -> Result<vector::FmodVector, fmod::Result> {
-        let mut vertex = vector::get_ffi(&vector::new());
+        let mut vertex = vector::get_ffi(&vector::FmodVector::new());
 
         match unsafe { ffi::FMOD_Geometry_GetPolygonVertex(self.geometry, index, vertex_index, &mut vertex) } {
             fmod::Ok => Ok(vector::from_ptr(vertex)),
@@ -176,8 +177,8 @@ impl Geometry {
     }
 
     pub fn get_rotation(&self) -> Result<(vector::FmodVector, vector::FmodVector), fmod::Result> {
-        let mut forward = vector::get_ffi(&vector::new());
-        let mut up = vector::get_ffi(&vector::new());
+        let mut forward = vector::get_ffi(&vector::FmodVector::new());
+        let mut up = vector::get_ffi(&vector::FmodVector::new());
 
         match unsafe { ffi::FMOD_Geometry_GetRotation(self.geometry, &mut forward, &mut up) } {
             fmod::Ok => Ok((vector::from_ptr(forward), vector::from_ptr(up))),
@@ -192,7 +193,7 @@ impl Geometry {
     }
 
     pub fn get_position(&self) -> Result<vector::FmodVector, fmod::Result> {
-        let mut position = vector::get_ffi(&vector::new());
+        let mut position = vector::get_ffi(&vector::FmodVector::new());
 
         match unsafe { ffi::FMOD_Geometry_GetPosition(self.geometry, &mut position) } {
             fmod::Ok => Ok(vector::from_ptr(position)),
@@ -207,7 +208,7 @@ impl Geometry {
     }
 
     pub fn get_scale(&self) -> Result<vector::FmodVector, fmod::Result> {
-        let mut scale = vector::get_ffi(&vector::new());
+        let mut scale = vector::get_ffi(&vector::FmodVector::new());
 
         match unsafe { ffi::FMOD_Geometry_GetScale(self.geometry, &mut scale) } {
             fmod::Ok => Ok(vector::from_ptr(scale)),
@@ -217,7 +218,7 @@ impl Geometry {
 
     pub fn get_memory_info(&self, FmodMemoryBits(memory_bits): FmodMemoryBits,
         FmodEventMemoryBits(event_memory_bits): FmodEventMemoryBits) -> Result<(u32, FmodMemoryUsageDetails), fmod::Result> {
-        let mut details = fmod_sys::get_memory_usage_details_ffi(FmodMemoryUsageDetails::new());
+        let mut details = fmod_sys::get_memory_usage_details_ffi(Default::default());
         let mut memory_used = 0u32;
 
         match unsafe { ffi::FMOD_Geometry_GetMemoryInfo(self.geometry, memory_bits, event_memory_bits, &mut memory_used, &mut details) } {

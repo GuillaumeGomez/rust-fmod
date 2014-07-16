@@ -38,8 +38,9 @@ use vector;
 use sound;
 use sound::Sound;
 use std::mem::transmute;
+use std::default::Default;
 
-/// Struct which contains data for [`set_speaker_mix`](struct.Channel.html#method.set_speaker_mix) and [`get_speaker_mix`](struct.Channel.html#method.get_speaker_mix)
+/// Structure which contains data for [`Channel::set_speaker_mix`](struct.Channel.html#method.set_speaker_mix) and [`Channel::get_speaker_mix`](struct.Channel.html#method.get_speaker_mix)
 #[deriving(Show, PartialEq, PartialOrd, Clone)]
 pub struct FmodSpeakerMixOptions {
     pub front_left : f32,
@@ -52,14 +53,29 @@ pub struct FmodSpeakerMixOptions {
     pub side_right : f32
 }
 
+impl Default for FmodSpeakerMixOptions {
+    fn default() -> FmodSpeakerMixOptions {
+        FmodSpeakerMixOptions {
+            front_left: 0f32,
+            front_right: 0f32,
+            center: 0f32,
+            lfe: 0f32,
+            back_left: 0f32,
+            back_right: 0f32,
+            side_left: 0f32,
+            side_right: 0f32
+        }
+    }
+}
+
 /// Structure defining the properties for a reverb source, related to a FMOD channel.
 pub struct FmodReverbChannelProperties {
     /// [r/w] MIN: -10000 MAX: 1000 DEFAULT: 0 - Direct path level
-    pub direct          : c_int,
+    pub direct          : i32,
     /// [r/w] MIN: -10000 MAX: 1000 DEFAULT: 0 - Room effect level
-    pub room            : c_int,
+    pub room            : i32,
     /// [r/w] FMOD_REVERB_CHANNELFLAGS         - modifies the behavior of properties
-    pub flags           : c_uint,
+    pub flags           : u32,
     /// [r/w] See remarks.                     - DSP network location to connect reverb for this channel.
     pub connection_point: Dsp
 }
@@ -395,8 +411,8 @@ impl Channel {
     }
 
     pub fn get_3D_attributes(&self) -> Result<(vector::FmodVector, vector::FmodVector), fmod::Result> {
-        let mut position = vector::get_ffi(&vector::new());
-        let mut velocity = vector::get_ffi(&vector::new());
+        let mut position = vector::get_ffi(&vector::FmodVector::new());
+        let mut velocity = vector::get_ffi(&vector::FmodVector::new());
 
         match unsafe { ffi::FMOD_Channel_Get3DAttributes(self.channel, &mut position, &mut velocity) } {
             fmod::Ok => Ok((vector::from_ptr(position), vector::from_ptr(velocity))),
@@ -440,7 +456,7 @@ impl Channel {
     }
 
     pub fn get_3D_cone_orientation(&self) -> Result<vector::FmodVector, fmod::Result> {
-        let mut orientation = vector::get_ffi(&vector::new());
+        let mut orientation = vector::get_ffi(&vector::FmodVector::new());
 
         match unsafe { ffi::FMOD_Channel_Get3DConeOrientation(self.channel, &mut orientation) } {
             fmod::Ok => Ok(vector::from_ptr(orientation)),
@@ -448,7 +464,7 @@ impl Channel {
         }
     }
 
-    pub fn set_3D_custom_roll_off(&self, points: &Vec<vector::FmodVector>) -> fmod::Result {
+    pub fn set_3D_custom_rolloff(&self, points: &Vec<vector::FmodVector>) -> fmod::Result {
         let mut t_points = Vec::new();
 
         for tmp in points.iter() {
@@ -457,7 +473,7 @@ impl Channel {
         unsafe { ffi::FMOD_Channel_Set3DCustomRolloff(self.channel, t_points.as_mut_ptr(), points.len() as c_int) }
     }
 
-    pub fn get_3D_custom_roll_off(&self) -> Result<Vec<vector::FmodVector>, fmod::Result> {
+    pub fn get_3D_custom_rolloff(&self) -> Result<Vec<vector::FmodVector>, fmod::Result> {
         let mut points = ::std::ptr::mut_null();
         let mut num_points = 0i32;
 
@@ -631,7 +647,7 @@ impl Channel {
 
     pub fn get_memory_info(&self, FmodMemoryBits(memory_bits): FmodMemoryBits,
         FmodEventMemoryBits(event_memory_bits): FmodEventMemoryBits) -> Result<(u32, FmodMemoryUsageDetails), fmod::Result> {
-        let mut details = fmod_sys::get_memory_usage_details_ffi(FmodMemoryUsageDetails::new());
+        let mut details = fmod_sys::get_memory_usage_details_ffi(Default::default());
         let mut memory_used = 0u32;
 
         match unsafe { ffi::FMOD_Channel_GetMemoryInfo(self.channel, memory_bits, event_memory_bits, &mut memory_used, &mut details) } {

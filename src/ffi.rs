@@ -578,7 +578,7 @@ pub struct FMOD_CREATESOUNDEXINFO
     pub userasyncread      : FMOD_FILE_ASYNCREADCALLBACK,  /* [w] Optional. Specify 0 to ignore. Callback for seeking within this file. */
     pub userasynccancel    : FMOD_FILE_ASYNCCANCELCALLBACK,/* [w] Optional. Specify 0 to ignore. Callback for seeking within this file. */
     pub speakermap         : fmod::SpeakerMapType,         /* [w] Optional. Specify 0 to ignore. Use this to differ the way fmod maps multichannel sounds to speakers.  See fmod::SpeakerMapType for more. */
-    pub initialsoundgroup  : *mut FMOD_SOUNDGROUP,              /* [w] Optional. Specify 0 to ignore. Specify a sound group if required, to put sound in as it is created. */
+    pub initialsoundgroup  : *mut FMOD_SOUNDGROUP,         /* [w] Optional. Specify 0 to ignore. Specify a sound group if required, to put sound in as it is created. */
     pub initialseekposition: c_uint,                       /* [w] Optional. Specify 0 to ignore. For streams. Specify an initial position to seek the stream to. */
     pub initialseekpostype : FMOD_TIMEUNIT,                /* [w] Optional. Specify 0 to ignore. For streams. Specify the time unit for the position set in initialseekposition. */
     pub ignoresetfilesystem: c_int,                        /* [w] Optional. Specify 0 to ignore. Set to 1 to use fmod's built in file system. Ignores setFileSystem callbacks and also FMOD_CREATESOUNEXINFO file callbacks.  Useful for specific cases where you don't want to use your own file system but want to use fmod's file system (ie net streaming). */

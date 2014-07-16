@@ -39,6 +39,7 @@ use reverb_properties;
 use geometry;
 use reverb;
 use dsp_connection;
+use std::default::Default;
 
 /// Structure describing a globally unique identifier.
 pub struct FmodGuid
@@ -53,6 +54,17 @@ pub struct FmodGuid
     pub data4: [u8, ..8]
 }
 
+impl Default for FmodGuid {
+    fn default() -> FmodGuid {
+        FmodGuid {
+            data1: 0u32,
+            data2: 0u16,
+            data3: 0u16,
+            data4: [0u8, ..8]
+        }
+    }
+}
+
 /// Wrapper for arguments of [`FmodSys::set_software_format`](doc/rfmod/struct.FmodSys.html#method.set_software_format) and [`FmodSys::get_software_format`](doc/rfmod/struct.FmodSys.html#method.get_software_format)
 pub struct FmodSoftwareFormat
 {
@@ -64,8 +76,8 @@ pub struct FmodSoftwareFormat
     pub bits               : i32
 }
 
-impl FmodSoftwareFormat {
-    pub fn new() -> FmodSoftwareFormat {
+impl Default for FmodSoftwareFormat {
+    fn default() -> FmodSoftwareFormat {
         FmodSoftwareFormat {
             sample_rate: 0i32,
             format: fmod::SoundFormatNone,
@@ -134,8 +146,8 @@ pub struct FmodAdvancedSettings
     pub stack_size_mixer              : u32
 }
 
-impl FmodAdvancedSettings {
-    pub fn new() -> FmodAdvancedSettings {
+impl Default for FmodAdvancedSettings {
+    fn default() -> FmodAdvancedSettings {
         FmodAdvancedSettings {
             max_MPEG_codecs: 32i32,
             max_ADPCM_codecs: 32i32,
@@ -245,8 +257,8 @@ pub struct FmodCreateSoundexInfo
     pub non_block_thread_id    : i32
 }
 
-impl FmodCreateSoundexInfo {
-    pub fn new() -> FmodCreateSoundexInfo {
+impl Default for FmodCreateSoundexInfo {
+    fn default() -> FmodCreateSoundexInfo {
         FmodCreateSoundexInfo {
             length: 0u32,
             file_offset: 0u32,
@@ -282,7 +294,9 @@ impl FmodCreateSoundexInfo {
             non_block_thread_id: 0i32
         }
     }
+}
 
+impl FmodCreateSoundexInfo {
     fn convert_to_c(&mut self) -> ffi::FMOD_CREATESOUNDEXINFO {
         ffi::FMOD_CREATESOUNDEXINFO{
             cbsize: mem::size_of::<ffi::FMOD_CREATESOUNDEXINFO>() as i32,
@@ -399,8 +413,8 @@ pub struct FmodCodecDescription {
     get_wave_format      : ffi::FMOD_CODEC_GETWAVEFORMAT
 }
 
-impl FmodCodecDescription {
-    pub fn new() -> FmodCodecDescription {
+impl Default for FmodCodecDescription {
+    fn default() -> FmodCodecDescription {
         FmodCodecDescription {
             name: String::new(),
             version: 0u32,
@@ -524,8 +538,8 @@ pub struct FmodMemoryUsageDetails
     pub event_instance_pool    : u32
 }
 
-impl FmodMemoryUsageDetails {
-    pub fn new() -> FmodMemoryUsageDetails {
+impl Default for FmodMemoryUsageDetails {
+    fn default() -> FmodMemoryUsageDetails {
         FmodMemoryUsageDetails {
             other: 0u32,
             string: 0u32,
@@ -1222,10 +1236,10 @@ impl FmodSys {
     }
 
     pub fn get_3D_listener_attributes(&self, listener: i32) -> Result<(vector::FmodVector, vector::FmodVector, vector::FmodVector, vector::FmodVector), fmod::Result> {
-        let mut pos = vector::get_ffi(&vector::new());
-        let mut vel = vector::get_ffi(&vector::new());
-        let mut forward = vector::get_ffi(&vector::new());
-        let mut up = vector::get_ffi(&vector::new());
+        let mut pos = vector::get_ffi(&vector::FmodVector::new());
+        let mut vel = vector::get_ffi(&vector::FmodVector::new());
+        let mut forward = vector::get_ffi(&vector::FmodVector::new());
+        let mut up = vector::get_ffi(&vector::FmodVector::new());
 
         match unsafe { ffi::FMOD_System_Get3DListenerAttributes(self.system, listener, &mut pos, &mut vel, &mut forward, &mut up) } {
             fmod::Ok => Ok((vector::from_ptr(pos), vector::from_ptr(vel), vector::from_ptr(forward), vector::from_ptr(up))),
@@ -1424,7 +1438,7 @@ impl FmodSys {
     }
 
     pub fn get_reverb_properties(&self) -> Result<reverb_properties::ReverbProperties, fmod::Result> {
-        let mut properties = reverb_properties::get_ffi(reverb_properties::ReverbProperties::new());
+        let mut properties = reverb_properties::get_ffi(Default::default());
 
         match unsafe { ffi::FMOD_System_GetReverbProperties(self.system, &mut properties) } {
             fmod::Ok => Ok(reverb_properties::from_ptr(properties)),
@@ -1439,7 +1453,7 @@ impl FmodSys {
     }
 
     pub fn get_reverb_ambient_properties(&self) -> Result<reverb_properties::ReverbProperties, fmod::Result> {
-        let mut properties = reverb_properties::get_ffi(reverb_properties::ReverbProperties::new());
+        let mut properties = reverb_properties::get_ffi(Default::default());
 
         match unsafe { ffi::FMOD_System_GetReverbAmbientProperties(self.system, &mut properties) } {
             fmod::Ok => Ok(reverb_properties::from_ptr(properties)),
@@ -1570,8 +1584,8 @@ impl FmodSys {
     }
 
     pub fn get_geometry_occlusion(&self) -> Result<(vector::FmodVector, vector::FmodVector, f32, f32), fmod::Result> {
-        let listener = vector::get_ffi(&vector::new());
-        let source = vector::get_ffi(&vector::new());
+        let listener = vector::get_ffi(&vector::FmodVector::new());
+        let source = vector::get_ffi(&vector::FmodVector::new());
         let mut direct = 0f32;
         let mut reverb = 0f32;
 
@@ -1583,7 +1597,7 @@ impl FmodSys {
 
     pub fn get_memory_info(&self, FmodMemoryBits(memory_bits): FmodMemoryBits,
         FmodEventMemoryBits(event_memory_bits): FmodEventMemoryBits) -> Result<(u32, FmodMemoryUsageDetails), fmod::Result> {
-        let mut details = get_memory_usage_details_ffi(FmodMemoryUsageDetails::new());
+        let mut details = get_memory_usage_details_ffi(Default::default());
         let mut memory_used = 0u32;
 
         match unsafe { ffi::FMOD_System_GetMemoryInfo(self.system, memory_bits, event_memory_bits, &mut memory_used, &mut details) } {

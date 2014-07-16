@@ -8,6 +8,7 @@ use rfmod::enums::*;
 use rfmod::*;
 use rfmod::types::FmodMode;
 use std::os;
+use std::default::Default;
 
 fn get_key() -> u8 {
     let mut reader = std::io::stdio::stdin();
@@ -67,7 +68,7 @@ fn main() {
         Err(e) => {fail!("Sound.play failed : {}", e);}
     };
 
-    let mut description = DspDescription::new();
+    let mut description : DspDescription = Default::default();
     description.read = Some(my_DSP_callback);
     description.name = String::from_str("test");
 

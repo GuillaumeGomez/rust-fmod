@@ -31,6 +31,7 @@ use fmod_sys;
 use fmod_sys::FmodMemoryUsageDetails;
 use std::mem::transmute;
 use libc::{c_void};
+use std::default::Default;
 
 pub fn from_ptr(reverb: *mut ffi::FMOD_REVERB) -> Reverb {
     Reverb{reverb: reverb}
@@ -73,7 +74,7 @@ impl Reverb {
     }
 
     pub fn get_3D_attributes(&self) -> Result<(vector::FmodVector, f32, f32), fmod::Result> {
-        let mut position = vector::get_ffi(&vector::new());
+        let mut position = vector::get_ffi(&vector::FmodVector::new());
         let mut min_distance = 0f32;
         let mut max_distance = 0f32;
 
@@ -119,7 +120,7 @@ impl Reverb {
 
     pub fn get_memory_info(&self, FmodMemoryBits(memory_bits): FmodMemoryBits,
         FmodEventMemoryBits(event_memory_bits): FmodEventMemoryBits) -> Result<(u32, FmodMemoryUsageDetails), fmod::Result> {
-        let mut details = fmod_sys::get_memory_usage_details_ffi(FmodMemoryUsageDetails::new());
+        let mut details = fmod_sys::get_memory_usage_details_ffi(Default::default());
         let mut memory_used = 0u32;
 
         match unsafe { ffi::FMOD_Reverb_GetMemoryInfo(self.reverb, memory_bits, event_memory_bits, &mut memory_used, &mut details) } {

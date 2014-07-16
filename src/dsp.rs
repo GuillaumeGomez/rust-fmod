@@ -35,6 +35,7 @@ use libc::{c_char, c_void, c_uint, c_int, c_float, c_ushort};
 use std;
 use std::collections::hashmap::HashMap;
 use std::c_str::CString;
+use std::default::Default;
 
 extern "C" fn create_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> fmod::Result {
     unsafe {
@@ -282,6 +283,19 @@ pub struct DspParameterDesc
     pub description : String
 }
 
+impl Default for DspParameterDesc {
+    fn default() -> DspParameterDesc {
+        DspParameterDesc {
+            min: 0f32,
+            max: 0f32,
+            default_val: 0f32,
+            name: String::new(),
+            label: String::new(),
+            description: String::new()
+        }
+    }
+}
+
 pub fn from_parameter_ptr(dsp_parameter: *mut ffi::FMOD_DSP_PARAMETERDESC) -> DspParameterDesc {
     if dsp_parameter.is_not_null() {
         unsafe {
@@ -301,7 +315,7 @@ pub fn from_parameter_ptr(dsp_parameter: *mut ffi::FMOD_DSP_PARAMETERDESC) -> Ds
             }
         }
     } else {
-        new_parameter()
+        Default::default()
     }
 }
 
@@ -343,17 +357,6 @@ pub fn get_parameter_ffi(dsp_parameter: &DspParameterDesc) -> ffi::FMOD_DSP_PARA
     })
 }
 
-pub fn new_parameter() -> DspParameterDesc {
-    DspParameterDesc {
-        min: 0f32,
-        max: 0f32,
-        default_val: 0f32,
-        name: String::new(),
-        label: String::new(),
-        description: String::new()
-    }
-}
-
 /// When creating a DSP unit, declare one of these and provide the relevant callbacks and name for FMOD to use when it creates and uses a DSP unit of this type.
 pub struct DspDescription
 {
@@ -391,8 +394,8 @@ pub struct DspDescription
     user_data               : Box<DspCallbacks>
 }
 
-impl DspDescription {
-    pub fn new() -> DspDescription {
+impl Default for DspDescription {
+    fn default() -> DspDescription {
         DspDescription {
             name: String::new(),
             version: 0u32,
@@ -403,7 +406,7 @@ impl DspDescription {
             read: None,
             set_position: None,
             num_parameters: 0i32,
-            param_desc: new_parameter(),
+            param_desc: Default::default(),
             set_parameter: None,
             get_parameter: None,
             config: None,
@@ -819,7 +822,7 @@ impl Dsp {
 
     pub fn get_memory_info(&self, FmodMemoryBits(memory_bits): FmodMemoryBits,
         FmodEventMemoryBits(event_memory_bits): FmodEventMemoryBits) -> Result<(u32, FmodMemoryUsageDetails), fmod::Result> {
-        let mut details = fmod_sys::get_memory_usage_details_ffi(FmodMemoryUsageDetails::new());
+        let mut details = fmod_sys::get_memory_usage_details_ffi(Default::default());
         let mut memory_used = 0u32;
 
         match unsafe { ffi::FMOD_DSP_GetMemoryInfo(self.dsp, memory_bits, event_memory_bits, &mut memory_used, &mut details) } {

@@ -30,6 +30,7 @@ use libc::{c_int, c_void};
 use fmod_sys;
 use fmod_sys::FmodMemoryUsageDetails;
 use std::mem::transmute;
+use std::default::Default;
 
 pub fn from_ptr(dsp_connection: *mut ffi::FMOD_DSPCONNECTION) -> DspConnection {
     DspConnection{dsp_connection: dsp_connection}
@@ -101,7 +102,7 @@ impl DspConnection {
 
     pub fn get_memory_info(&self, FmodMemoryBits(memory_bits): FmodMemoryBits,
         FmodEventMemoryBits(event_memory_bits): FmodEventMemoryBits) -> Result<(u32, FmodMemoryUsageDetails), fmod::Result> {
-        let mut details = fmod_sys::get_memory_usage_details_ffi(FmodMemoryUsageDetails::new());
+        let mut details = fmod_sys::get_memory_usage_details_ffi(Default::default());
         let mut memory_used = 0u32;
 
         match unsafe { ffi::FMOD_DSPConnection_GetMemoryInfo(self.dsp_connection, memory_bits, event_memory_bits, &mut memory_used, &mut details) } {

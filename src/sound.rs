@@ -39,6 +39,7 @@ use std::io::File;
 use std::mem;
 use std::io::BufferedWriter;
 use std::slice;
+use std::default::Default;
 
 struct RiffChunk {
     id: [c_char, ..4],
@@ -91,8 +92,8 @@ pub struct FmodTag {
     pub updated  : bool
 }
 
-impl FmodTag {
-    pub fn new() -> FmodTag {
+impl Default for FmodTag {
+    fn default() -> FmodTag {
         FmodTag {
             _type: fmod::TagTypeUnknown,
             data_type: fmod::TagDataTypeBinary,
@@ -102,7 +103,9 @@ impl FmodTag {
             updated: false
         }
     }
+}
 
+impl FmodTag {
     fn from_ptr(pointer: ffi::FMOD_TAG) -> FmodTag {
         FmodTag{
             _type: pointer._type,
@@ -567,7 +570,7 @@ impl Sound {
 
     pub fn get_memory_info(&self, FmodMemoryBits(memory_bits): FmodMemoryBits,
         FmodEventMemoryBits(event_memory_bits): FmodEventMemoryBits) -> Result<(u32, FmodMemoryUsageDetails), fmod::Result> {
-        let mut details = fmod_sys::get_memory_usage_details_ffi(FmodMemoryUsageDetails::new());
+        let mut details = fmod_sys::get_memory_usage_details_ffi(Default::default());
         let mut memory_used = 0u32;
 
         match unsafe { ffi::FMOD_Sound_GetMemoryInfo(self.sound, memory_bits, event_memory_bits, &mut memory_used, &mut details) } {

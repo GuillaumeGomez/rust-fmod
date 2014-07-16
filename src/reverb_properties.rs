@@ -26,6 +26,7 @@ use ffi;
 use types::*;
 use enums::*;
 use vector;
+use std::default::Default;
 
 pub fn from_ptr(pointer: ffi::FMOD_REVERB_PROPERTIES) -> ReverbProperties {
     ReverbProperties {
@@ -122,8 +123,8 @@ pub struct ReverbProperties
     pub flags            : u32
 }
 
-impl ReverbProperties {
-    pub fn new() -> ReverbProperties {
+impl Default for ReverbProperties {
+    fn default() -> ReverbProperties {
         ReverbProperties {
             instance: 0i32,
             environment: -1i32,
