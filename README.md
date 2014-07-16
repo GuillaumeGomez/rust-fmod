@@ -26,6 +26,22 @@ You can build them separatly too.
 > make doc
 ```
 
+
+##Documentation
+
+You can access the __rfmod__ documentation locally, just build it :
+
+```Shell
+> make doc
+```
+
+Then open this file with an internet browser :
+file:///{rfmod_location}/doc/rfmod/index.html
+
+
+You can also access the latest build of the documentation via the internet :
+http://rust-ci.org/GuillaumeGomez/rust-fmod/doc/rfmod/
+
 ##Short example
 
 Here is a short example on how to create a file and to play it :
