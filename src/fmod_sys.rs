@@ -985,7 +985,7 @@ impl FmodSys {
 
     pub fn set_advanced_settings(&self, settings: &mut FmodAdvancedSettings) -> fmod::Result {
         let mut converted_c_char = Vec::from_fn(settings.ASIO_channel_list.len(), |pos| {
-            settings.ASIO_channel_list.get(pos).clone().with_c_str(|c_str| c_str)
+            settings.ASIO_channel_list[pos].clone().with_c_str(|c_str| c_str)
         });
         let deb_log_filename = settings.debug_log_filename.clone();
         let mut advanced_settings = ffi::FMOD_ADVANCEDSETTINGS{

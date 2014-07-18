@@ -127,8 +127,8 @@ extern "C" fn read_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, in_buffer: *mut
                         let mut it = 0;
                         for count in range(0i32, length as i32) {
                             for count2 in range(0i32, out_channels) {
-                                *in_buffer.offset((count * in_channels) as int + count2 as int) = *v_in_buffer.get(it);
-                                *out_buffer.offset((count * out_channels) as int + count2 as int) = *v_out_buffer.get(it);
+                                *in_buffer.offset((count * in_channels) as int + count2 as int) = v_in_buffer[it];
+                                *out_buffer.offset((count * out_channels) as int + count2 as int) = v_out_buffer[it];
                                 it += 1;
                             }
                         }

@@ -23,7 +23,7 @@ fn get_key() -> u8 {
 #[allow(unused_variable)]
 fn my_DSP_callback(dsp_state: &DspState, inbuffer: &mut Vec<f32>, outbuffer: &mut Vec<f32>, length: u32, inchannels: i32, outchannels: i32) -> fmod::Result {
     for it in range(0u, inbuffer.len() - 1u) {
-        *outbuffer.get_mut(it) = inbuffer.get(it) * 0.2f32;
+        *outbuffer.get_mut(it) = *inbuffer.get_mut(it) * 0.2f32;
     }
 
     fmod::Ok
