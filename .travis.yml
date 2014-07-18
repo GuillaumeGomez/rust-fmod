@@ -2,11 +2,7 @@ env:
   global:
     - secure: Id4Ztg0rzqPo7Qx8F3L2Y7TZyzqKcqs1/qL/nlVFv1QK4ISpEKprkIcEnxL97NJdIJCBqaqESkqzmMOII+l6a6zfLjHlze/aY3myhRY2DjcWwI5EC8IOq6zuGxkB7sclIX2DZvQOag4gW23d7grpI43tHeJLj4S9yHajxBcY41Q=
     - LD_LIBRARY_PATH=/usr/local/lib
-before_install:
-  - yes | sudo add-apt-repository ppa:cmrx64/cargo
-  - sudo apt-get update
 install:
-  - sudo apt-get install cargo
   - curl http://www.rust-lang.org/rustup.sh | sudo sh -
   - wget http://www.fmod.org/download/fmodex/api/Linux/fmodapi44439linux.tar.gz
   - tar xvf fmodapi44439linux.tar.gz
