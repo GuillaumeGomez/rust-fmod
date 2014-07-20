@@ -52,7 +52,7 @@ fn main() {
 
     let arg1 = tmp.get(0).unwrap();
 
-    let sound = match fmod.create_sound(String::from_str((*arg1).as_slice()), Some(FmodMode(FMOD_SOFTWARE | FMOD_LOOP_NORMAL)), None) {
+    let sound = match fmod.create_sound((*arg1).as_slice(), Some(FmodMode(FMOD_SOFTWARE | FMOD_LOOP_NORMAL)), None) {
         Ok(s) => s,
         Err(err) => {fail!("FmodSys.create_sound failed : {}", err);}
     };

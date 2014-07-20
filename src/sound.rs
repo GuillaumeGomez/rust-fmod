@@ -40,7 +40,6 @@ use std::mem;
 use std::io::BufferedWriter;
 use std::slice;
 use std::default::Default;
-use callbacks::*;
 
 struct RiffChunk {
     id: [c_char, ..4],
@@ -152,22 +151,22 @@ impl FmodTag {
 pub struct Sound {
     sound: *mut ffi::FMOD_SOUND,
     can_be_deleted: bool,
-    //user_data: ffi::SoundData
+    user_data: ffi::SoundData
 }
 
 pub fn get_ffi(sound: &Sound) -> *mut ffi::FMOD_SOUND {
     sound.sound
 }
 
-pub fn from_ptr(sound: *mut ffi::FMOD_SOUND/*, user_data: ffi::SoundData*/) -> Sound {
-    Sound{sound: sound, can_be_deleted: false/*, user_data: user_data*/}
+pub fn from_ptr(sound: *mut ffi::FMOD_SOUND) -> Sound {
+    Sound{sound: sound, can_be_deleted: false, user_data: ffi::SoundData::new()}
 }
 
-pub fn from_ptr_first(sound: *mut ffi::FMOD_SOUND/*, user_data: ffi::SoundData*/) -> Sound {
-    /*let tmp = */Sound{sound: sound, can_be_deleted: true/*, user_data: user_data*/}//;
+pub fn from_ptr_first(sound: *mut ffi::FMOD_SOUND, user_data: ffi::SoundData) -> Sound {
+    let mut tmp = Sound{sound: sound, can_be_deleted: true, user_data: user_data};
 
-    //unsafe { ffi::FMOD_Sound_SetUserData(sound, transmute(tmp.user_data)) };
-    //tmp
+    unsafe { ffi::FMOD_Sound_SetUserData(sound, transmute(&mut tmp.user_data)) };
+    tmp
 }
 
 impl Drop for Sound {
@@ -612,7 +611,7 @@ impl Sound {
             v_ptr2.len() as c_uint) }
     }
 
-    pub fn set_user_data<T>(&self, user_data: &mut T) -> fmod::Result {
+    pub fn set_user_data<T>(&mut self, user_data: &mut T) -> fmod::Result {
         let mut data : *mut c_void = ::std::ptr::mut_null();
 
         unsafe {
@@ -636,7 +635,6 @@ impl Sound {
                 }
             }
         }
-        unsafe { ffi::FMOD_Sound_SetUserData(self.sound, transmute(user_data)) }
     }
 
     fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, fmod::Result> {

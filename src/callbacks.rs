@@ -25,8 +25,8 @@
 use ffi;
 use dsp;
 use enums::*;
-use types::*;
 use sound;
+use types::FmodTimeUnit;
 
 /*pub type SystemCallback = Option<fn(fmod: &FmodSys, _type: fmod::SystemCallbackType, command_data1: *mut c_void,
     command_data2: *mut c_void) -> fmod::Result>;*/
@@ -44,7 +44,7 @@ pub type FMOD_FILE_ASYNCCANCELCALLBACK = Option<extern "C" fn(arg1: *mut c_void,
 /// sound callbacks
 pub type SoundNonBlockCallback = Option<fn(sound: &sound::Sound, result: fmod::Result) -> fmod::Result>;
 pub type SoundPcmReadCallback = Option<fn(sound: &sound::Sound, data: &mut Vec<i16>) -> fmod::Result>;
-pub type SoundPcmSetPosCallback = Option<fn(sound: &sound::Sound, sub_sound: i32, position: u32, postype: fmod::FmodTimeUnit) -> fmod::Result>;
+pub type SoundPcmSetPosCallback = Option<fn(sound: &sound::Sound, sub_sound: i32, position: u32, postype: FmodTimeUnit) -> fmod::Result>;
 
 /*  codec callbacks */
 /*pub type FMOD_CODEC_OPENCALLBACK = Option<extern "C" fn(codec_state: *mut FMOD_CODEC_STATE, user_mode: FMOD_MODE, userexinfo: *mut FMOD_CREATESOUNDEXINFO) -> fmod::Result>;
