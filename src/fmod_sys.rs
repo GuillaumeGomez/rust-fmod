@@ -40,6 +40,54 @@ use geometry;
 use reverb;
 use dsp_connection;
 use std::default::Default;
+use callbacks::*;
+
+extern "C" fn pcm_read_callback(sound: *mut ffi::FMOD_SOUND, data: *mut c_void, data_len: c_uint) -> fmod::Result {
+    unsafe {
+        /*if sound.is_not_null() {
+            let mut tmp = ::std::ptr::mut_null();
+
+            ffi::FMOD_Sound_GetUserData(sound, &mut tmp);
+            if tmp.is_not_null() {
+                let callbacks : &mut ffi::SoundData = ::std::mem::transmute(tmp);
+
+                match callbacks.pcm_read {
+                    Some(p) => {
+                        let mut data_vec = Vec::new();
+                        let mut in_buffer : *mut c_void = data as *mut c_void;
+
+                        for count in range(0u, data_len as uint) {
+                            data.push(*in_buffer.offset(count));
+                        }
+                        let ret = p(&sound::from_ptr(sound), &data_vec);
+                        for count in range(0u, data_len as uint) {
+                            *in_buffer.offset(count) = data_len[count];
+                        }
+                        ret
+                    },
+                    None => fmod::Ok
+                }
+            } else {
+                fmod::Ok
+            }
+        } else {
+            fmod::Ok
+        }*/
+        fmod::Ok
+    }
+}
+
+extern "C" fn non_block_callback(sound: *mut ffi::FMOD_SOUND, result: fmod::Result) -> fmod::Result {
+    unsafe {
+        fmod::Ok
+    }
+}
+
+extern "C" fn pcm_set_pos_callback(sound: *mut ffi::FMOD_SOUND, sub_sound: c_int, position: c_uint, postype: ffi::FMOD_TIMEUNIT) -> fmod::Result {
+    unsafe {
+        fmod::Ok
+    }
+}
 
 /// Structure describing a globally unique identifier.
 pub struct FmodGuid
@@ -210,11 +258,11 @@ pub struct FmodCreateSoundexInfo
     /// [w] Optional. Specify 0 to ignore. In a multi-sample format such as .FSB/.DLS/.SF2 it may be desirable to specify only a subset of sounds to be loaded out of the whole file. This is an array of subsound indices to load into memory when created.
     pub inclusion_list         : Vec<i32>,
     /// [w] Optional. Specify 0 to ignore. Callback to 'piggyback' on FMOD's read functions and accept or even write PCM data while FMOD is opening the sound. Used for user sounds created with FMOD_OPENUSER or for capturing decoded data as FMOD reads it.
-    pcm_read_callback          : ffi::FMOD_SOUND_PCMREADCALLBACK,
+    pub pcm_read_callback      : SoundPcmReadCallback,
     /// [w] Optional. Specify 0 to ignore. Callback for when the user calls a seeking function such as [`Channel::set_time`](doc/rfmod/struct.Channel.html#method.set_time) or [`Channel::set_position`](doc/rfmod/struct.Channel.html#method.set_position) within a multi-sample sound, and for when it is opened.
-    pcm_set_pos_callback       : ffi::FMOD_SOUND_PCMSETPOSCALLBACK,
+    pub pcm_set_pos_callback   : SoundPcmSetPosCallback,
     /// [w] Optional. Specify 0 to ignore. Callback for successful completion, or error while loading a sound that used the FMOD_NONBLOCKING flag. Also called duing seeking, when setPosition is called or a stream is restarted.
-    non_block_callback         : ffi::FMOD_SOUND_NONBLOCKCALLBACK,
+    pub non_block_callback     : SoundNonBlockCallback,
     /// [w] Optional. Specify 0 to ignore. Filename for a DLS or SF2 sample set when loading a MIDI file. If not specified, on Windows it will attempt to open /windows/system32/drivers/gm.dls or /windows/system32/drivers/etc/gm.dls, on Mac it will attempt to load /System/Library/Components/CoreAudio.component/Contents/Resources/gs_instruments.dls, otherwise the MIDI will fail to open. Current DLS support is for level 1 of the specification.
     pub dls_name               : String,
     /// [w] Optional. Specify 0 to ignore. Key for encrypted FSB file.  Without this key an encrypted FSB file will not load.
@@ -310,9 +358,18 @@ impl FmodCreateSoundexInfo {
             numsubsounds: self.num_subsounds,
             inclusionlist: self.inclusion_list.as_mut_ptr(),
             inclusionlistnum: self.inclusion_list.len() as i32,
-            pcmreadcallback: self.pcm_read_callback,
-            pcmsetposcallback: self.pcm_set_pos_callback,
-            nonblockcallback: self.non_block_callback,
+            pcmreadcallback: match self.pcm_read_callback {
+                Some(_) => Some(pcm_read_callback),
+                None => None
+            },
+            pcmsetposcallback: match self.pcm_set_pos_callback {
+                Some(_) => Some(pcm_set_pos_callback),
+                None => None
+            },
+            nonblockcallback: match self.non_block_callback {
+                Some(_) => Some(non_block_callback),
+                None => None
+            },
             dlsname: self.dls_name.clone().with_c_str(|c_str|{c_str as *mut c_char}),
             encryptionkey: self.encryption_key.clone().with_c_str(|c_str|{c_str as *mut c_char}),
             maxpolyphony: self.max_polyphony,
@@ -333,53 +390,6 @@ impl FmodCreateSoundexInfo {
             audioqueuepolicy: self.audio_queue_policy,
             minmidigranularity: self.min_midi_granularity,
             nonblockthreadid: self.non_block_thread_id
-        }
-    }
-
-    fn from_ptr(ptr: ffi::FMOD_CREATESOUNDEXINFO) -> FmodCreateSoundexInfo {
-        let inc: *mut i32 = ptr.inclusionlist as *mut i32;
-
-        FmodCreateSoundexInfo{
-            length: ptr.length,
-            file_offset: ptr.fileoffset,
-            num_channels: ptr.numchannels,
-            default_frequency: ptr.defaultfrequency,
-            format: ptr.format,
-            decode_buffer_size: ptr.decodebuffersize,
-            initial_subsound: ptr.initialsubsound,
-            num_subsounds: ptr.numsubsounds,
-            inclusion_list: unsafe { Vec::from_raw_parts(ptr.inclusionlistnum as uint, ptr.inclusionlistnum as uint, inc).clone() },
-            pcm_read_callback: ptr.pcmreadcallback,
-            pcm_set_pos_callback: ptr.pcmsetposcallback,
-            non_block_callback: ptr.nonblockcallback,
-            dls_name: if ptr.dlsname.is_null() {
-                    unsafe {::std::str::raw::from_c_str(ptr.dlsname as *const c_char).clone() }
-                } else {
-                    String::new()
-                },
-            encryption_key: if ptr.encryptionkey.is_null() {
-                    unsafe {::std::str::raw::from_c_str(ptr.encryptionkey as *const c_char).clone() }
-                } else {
-                    String::new()
-                },
-            max_polyphony: ptr.maxpolyphony,
-            user_data: ptr.userdata,
-            suggested_sound_type: ptr.suggestedsoundtype,
-            user_open: ptr.useropen,
-            user_close: ptr.userclose,
-            user_read: ptr.userread,
-            user_seek: ptr.userseek,
-            user_async_cancel: ptr.userasynccancel,
-            user_async_read: ptr.userasyncread,
-            speaker_map: ptr.speakermap,
-            initial_sound_group: sound_group::from_ptr(ptr.initialsoundgroup),
-            initial_seek_position: ptr.initialseekposition as u32,
-            initial_seek_pos_type: FmodTimeUnit(ptr.initialseekpostype),
-            ignore_set_file_system: ptr.ignoresetfilesystem,
-            cdda_force_aspi: ptr.cddaforceaspi,
-            audio_queue_policy: ptr.audioqueuepolicy,
-            min_midi_granularity: ptr.minmidigranularity,
-            non_block_thread_id: ptr.nonblockthreadid
         }
     }
 }
@@ -437,7 +447,7 @@ pub struct FmodOutputHandle {
     handle: *mut c_void
 }
 
-/// Structure to be filled with detailed memory usage information of an FMOD object
+/// Structure to be filled with detailed memory usage information of a FMOD object
 pub struct FmodMemoryUsageDetails
 {
     /// [out] Memory not accounted for by other types
@@ -762,35 +772,44 @@ impl FmodSys {
         }
     }
 
-    pub fn create_sound(&self, music: String, options: Option<FmodMode>, exinfo: Option<&mut FmodCreateSoundexInfo>) -> Result<Sound, fmod::Result> {
+    pub fn create_sound(&self, music: &str, options: Option<FmodMode>, exinfo: Option<&mut FmodCreateSoundexInfo>) -> Result<Sound, fmod::Result> {
         let tmp_v = music.clone();
         let mut sound = ::std::ptr::mut_null();
         let op = match options {
             Some(FmodMode(t)) => t,
             None => FMOD_SOFTWARE | FMOD_LOOP_OFF | FMOD_2D | FMOD_CREATESTREAM
         };
+        //let user_data = ffi::SoundData::new();
         let ex = match exinfo {
-            Some(e) => &mut e.convert_to_c() as *mut ffi::FMOD_CREATESOUNDEXINFO,
+            Some(e) => {
+                /*user_data.non_block = exinfo.non_block_callback;
+                user_data.pcm_read = exinfo.pcm_read_callback;
+                user_data.pcm_set_pos = exinfo.pcm_set_pos_callback;
+                user_data.user_data = exinfo.user_data;*/
+                &mut e.convert_to_c() as *mut ffi::FMOD_CREATESOUNDEXINFO
+            },
             None => ::std::ptr::mut_null()
         };
 
         if tmp_v.len() > 0 {
             tmp_v.with_c_str(|c_str|{
                 match unsafe { ffi::FMOD_System_CreateSound(self.system, c_str, op, ex, &mut sound) } {
-                    fmod::Ok => {Ok(sound::from_ptr_first(sound))},
+                    fmod::Ok => {
+                        Ok(sound::from_ptr_first(sound/*, user_data*/))
+                    },
                     err => Err(err)
                 }
             })
         } else {
             match unsafe { ffi::FMOD_System_CreateSound(self.system, ::std::ptr::null(), op, ex, &mut sound) } {
-                fmod::Ok => {Ok(sound::from_ptr_first(sound))},
+                fmod::Ok => {Ok(sound::from_ptr_first(sound/*, user_data*/))},
                 err => Err(err)
             }
         }
         
     }
 
-    pub fn create_stream(&self, music: String, options: Option<FmodMode>) -> Result<Sound, fmod::Result> {
+    pub fn create_stream(&self, music: &str, options: Option<FmodMode>) -> Result<Sound, fmod::Result> {
         let tmp_v = music.clone();
         let mut sound = ::std::ptr::mut_null();
         let op = match options {

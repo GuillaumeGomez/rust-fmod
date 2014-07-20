@@ -25,6 +25,8 @@
 use ffi;
 use dsp;
 use enums::*;
+use types::*;
+use sound;
 
 /*pub type SystemCallback = Option<fn(fmod: &FmodSys, _type: fmod::SystemCallbackType, command_data1: *mut c_void,
     command_data2: *mut c_void) -> fmod::Result>;*/
@@ -39,11 +41,10 @@ pub type FMOD_FILE_SEEKCALLBACK = Option<extern "C" fn(handle: *mut c_void, pos:
 pub type FMOD_FILE_ASYNCREADCALLBACK = Option<extern "C" fn(arg1: *mut FMOD_ASYNCREADINFO, arg2: *mut c_void) -> fmod::Result>;
 pub type FMOD_FILE_ASYNCCANCELCALLBACK = Option<extern "C" fn(arg1: *mut c_void, arg2: *mut c_void, arg3: c_uint) -> fmod::Result>;*/
 
-/* sound callbacks */
-/*pub type FMOD_SOUND_NONBLOCKCALLBACK = Option<extern "C" fn(sound: *mut FMOD_SOUND, result: fmod::Result) -> fmod::Result>;
-pub type FMOD_SOUND_PCMREADCALLBACK = Option<extern "C" fn(sound: *mut FMOD_SOUND, data: *mut c_void, data_len: c_uint) -> fmod::Result>;
-pub type FMOD_SOUND_PCMSETPOSCALLBACK = Option<extern "C" fn(sound: *mut FMOD_SOUND, sub_sound: c_int, position: c_uint,
-        postype: FMOD_TIMEUNIT) -> fmod::Result>;*/
+/// sound callbacks
+pub type SoundNonBlockCallback = Option<fn(sound: &sound::Sound, result: fmod::Result) -> fmod::Result>;
+pub type SoundPcmReadCallback = Option<fn(sound: &sound::Sound, data: &mut Vec<i16>) -> fmod::Result>;
+pub type SoundPcmSetPosCallback = Option<fn(sound: &sound::Sound, sub_sound: i32, position: u32, postype: fmod::FmodTimeUnit) -> fmod::Result>;
 
 /*  codec callbacks */
 /*pub type FMOD_CODEC_OPENCALLBACK = Option<extern "C" fn(codec_state: *mut FMOD_CODEC_STATE, user_mode: FMOD_MODE, userexinfo: *mut FMOD_CREATESOUNDEXINFO) -> fmod::Result>;
@@ -58,7 +59,7 @@ pub type FMOD_CODEC_METADATACALLBACK = Option<extern "C" fn(codec_state: *mut FM
 pub type FMOD_CODEC_GETWAVEFORMAT = Option<extern "C" fn(codec_state: *mut FMOD_CODEC_STATE, index: c_int, wave_format: *mut FMOD_CODEC_WAVEFORMAT) -> fmod::Result>;
 pub type FMOD_3D_ROLLOFFCALLBACK = Option<extern "C" fn(channel: *mut FMOD_CHANNEL, distance: c_float) -> fmod::Result>;*/
 
-/*  DSP callbacks */
+/// DSP callbacks
 pub type DspCreateCallback = Option<fn(dsp_state: &dsp::DspState) -> fmod::Result>;
 pub type DspReleaseCallback = Option<fn(dsp_state: &dsp::DspState) -> fmod::Result>;
 pub type DspResetCallback = Option<fn(dsp_state: &dsp::DspState) -> fmod::Result>;

@@ -838,7 +838,7 @@ impl Dsp {
             match ffi::FMOD_DSP_GetUserData(self.dsp, &mut data) {
                 fmod::Ok => {
                     if data.is_null() {
-                        self.user_data.user_data = transmute::<&mut T, *mut c_void>(user_data);
+                        self.user_data.user_data = ::std::ptr::mut_null();
 
                         ffi::FMOD_DSP_SetUserData(self.dsp, transmute(&mut self.user_data))
                     } else {

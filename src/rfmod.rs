@@ -105,7 +105,7 @@ For a more complete example : https://github.com/GuillaumeGomez/rust-music-playe
 #Notes
 
  * Members marked with [r] mean the variable is modified by FMOD and is for reading purposes only. Do not change this value.
- * Members marked with [w] mean the variable can be written to.  The user can set the value.
+ * Members marked with [w] mean the variable can be written to. The user can set the value.
 
 
 Here is the list of all modules :
@@ -127,8 +127,8 @@ Here is the list of all modules :
 extern crate libc;
 
 pub use channel::{Channel, FmodSpeakerMixOptions, FmodReverbChannelProperties};
-pub use sound::{Sound, FmodTag, FmodSyncPoint};
 pub use fmod_sys::{FmodSys, FmodGuid, FmodSoftwareFormat, FmodAdvancedSettings, FmodOutputHandle, FmodCreateSoundexInfo, FmodMemoryUsageDetails};
+pub use sound::{Sound, FmodTag, FmodSyncPoint};
 pub use channel_group::{ChannelGroup};
 pub use sound_group::SoundGroup;
 pub use dsp::{Dsp, DspParameterDesc, DspDescription, DspState};

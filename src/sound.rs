@@ -40,6 +40,7 @@ use std::mem;
 use std::io::BufferedWriter;
 use std::slice;
 use std::default::Default;
+use callbacks::*;
 
 struct RiffChunk {
     id: [c_char, ..4],
@@ -150,19 +151,23 @@ impl FmodTag {
 /// Sound object
 pub struct Sound {
     sound: *mut ffi::FMOD_SOUND,
-    can_be_deleted: bool
+    can_be_deleted: bool,
+    //user_data: ffi::SoundData
 }
 
 pub fn get_ffi(sound: &Sound) -> *mut ffi::FMOD_SOUND {
     sound.sound
 }
 
-pub fn from_ptr(sound: *mut ffi::FMOD_SOUND) -> Sound {
-    Sound{sound: sound, can_be_deleted: false}
+pub fn from_ptr(sound: *mut ffi::FMOD_SOUND/*, user_data: ffi::SoundData*/) -> Sound {
+    Sound{sound: sound, can_be_deleted: false/*, user_data: user_data*/}
 }
 
-pub fn from_ptr_first(sound: *mut ffi::FMOD_SOUND) -> Sound {
-    Sound{sound: sound, can_be_deleted: true}
+pub fn from_ptr_first(sound: *mut ffi::FMOD_SOUND/*, user_data: ffi::SoundData*/) -> Sound {
+    /*let tmp = */Sound{sound: sound, can_be_deleted: true/*, user_data: user_data*/}//;
+
+    //unsafe { ffi::FMOD_Sound_SetUserData(sound, transmute(tmp.user_data)) };
+    //tmp
 }
 
 impl Drop for Sound {
@@ -608,6 +613,29 @@ impl Sound {
     }
 
     pub fn set_user_data<T>(&self, user_data: &mut T) -> fmod::Result {
+        let mut data : *mut c_void = ::std::ptr::mut_null();
+
+        unsafe {
+            match ffi::FMOD_Sound_GetUserData(self.sound, &mut data) {
+                fmod::Ok => {
+                    if data.is_null() {
+                        self.user_data.user_data = ::std::ptr::mut_null();
+
+                        ffi::FMOD_Sound_SetUserData(self.sound, transmute(&mut self.user_data))
+                    } else {
+                        let tmp : &mut ffi::SoundData = transmute::<*mut c_void, &mut ffi::SoundData>(data);
+
+                        tmp.user_data = transmute::<&mut T, *mut c_void>(user_data);
+                        ffi::FMOD_Sound_SetUserData(self.sound, transmute(tmp))
+                    }
+                }
+                _ => {
+                    self.user_data.user_data = transmute::<&mut T, *mut c_void>(user_data);
+
+                    ffi::FMOD_Sound_SetUserData(self.sound, transmute(&mut self.user_data))
+                }
+            }
+        }
         unsafe { ffi::FMOD_Sound_SetUserData(self.sound, transmute(user_data)) }
     }
 
@@ -617,8 +645,13 @@ impl Sound {
 
             match ffi::FMOD_Sound_GetUserData(self.sound, &mut user_data) {
                 fmod::Ok => {
-                    let tmp : &mut T = transmute::<*mut c_void, &mut T>(user_data);
-                    Ok(tmp)
+                    if user_data.is_not_null() {
+                        let tmp : &mut ffi::SoundData = transmute::<*mut c_void, &mut ffi::SoundData>(user_data);
+                        let tmp2 : &mut T = transmute::<*mut c_void, &mut T>(tmp.user_data);
+                        Ok(tmp2)
+                    } else {
+                        Err(fmod::Ok)
+                    }
                 },
                 e => Err(e)
             }

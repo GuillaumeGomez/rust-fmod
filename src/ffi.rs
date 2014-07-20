@@ -26,6 +26,7 @@ extern crate libc;
 
 use enums::*;
 use dsp;
+use callbacks::*;
 use libc::{c_void, c_uint, c_int, c_char, c_float, c_ushort, c_uchar, c_short};
 
 pub type FMOD_BOOL = c_int;
@@ -807,4 +808,22 @@ pub struct FMOD_DSP_STATE
     pub instance: *mut FMOD_DSP,    /* [r] Handle to the DSP hand the user created.  Not to be modified.  C++ users cast to FMOD::DSP to use.  */
     pub plugin_data: *mut c_void,   /* [w] Plugin writer created data the output author wants to attach to this object. */
     pub speaker_mask: c_ushort      /* [w] Specifies which speakers the DSP effect is active on */
+}
+
+pub struct SoundData {
+    pub non_block: SoundNonBlockCallback,
+    pub pcm_read: SoundPcmReadCallback,
+    pub pcm_set_pos: SoundPcmSetPosCallback,
+    pub user_data: *mut c_void
+}
+
+impl SoundData {
+    pub fn new() -> SoundData {
+        SoundData {
+            non_block: None,
+            pcm_read: None,
+            pcm_set_pos: None,
+            user_data: ::std::ptr::mut_null()
+        }
+    }
 }
