@@ -139,7 +139,7 @@ impl Default for FmodGuid {
     }
 }
 
-/// Wrapper for arguments of [`FmodSys::set_software_format`](doc/rfmod/struct.FmodSys.html#method.set_software_format) and [`FmodSys::get_software_format`](doc/rfmod/struct.FmodSys.html#method.get_software_format)
+/// Wrapper for arguments of [`FmodSys::set_software_format`](struct.FmodSys.html#method.set_software_format) and [`FmodSys::get_software_format`](struct.FmodSys.html#method.get_software_format)
 pub struct FmodSoftwareFormat
 {
     pub sample_rate        : i32,
@@ -253,8 +253,9 @@ impl Default for FmodAdvancedSettings {
     }
 }
 
-/// Use this structure with [`FmodSys::create_sound`](doc/rfmod/struct.FmodSys.html#method.create_sound) when more control is needed over loading.
-/// The possible reasons to use this with [`FmodSys::create_sound`](doc/rfmod/struct.FmodSys.html#method.create_sound) are:
+/// Use this structure with [`FmodSys::create_sound`](struct.FmodSys.html#method.create_sound) when more control is needed over loading.
+/// The possible reasons to use this with [`FmodSys::create_sound`](struct.FmodSys.html#method.create_sound) are:
+///
 /// * Loading a file from memory.
 /// * Loading a file from within another larger (possibly wad/pak) file, by giving the loader an offset and length.
 /// * To create a user created / non file based sound.
@@ -262,6 +263,7 @@ impl Default for FmodAdvancedSettings {
 /// * To specify which subsounds to load for multi-sample sounds (ie FSB/DLS/SF2) so that memory is saved and only a subset is actually loaded/read from disk.
 /// * To specify 'piggyback' read and seek callbacks for capture of sound data as fmod reads and decodes it. Useful for ripping decoded PCM data from sounds as they are loaded / played.
 /// * To specify a MIDI DLS/SF2 sample set file to load when opening a MIDI file.
+///
 /// See below on what members to fill for each of the above types of sound you want to create.
 pub struct FmodCreateSoundexInfo
 {

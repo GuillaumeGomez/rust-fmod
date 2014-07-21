@@ -41,9 +41,11 @@ pub type FMOD_FILE_SEEKCALLBACK = Option<extern "C" fn(handle: *mut c_void, pos:
 pub type FMOD_FILE_ASYNCREADCALLBACK = Option<extern "C" fn(arg1: *mut FMOD_ASYNCREADINFO, arg2: *mut c_void) -> fmod::Result>;
 pub type FMOD_FILE_ASYNCCANCELCALLBACK = Option<extern "C" fn(arg1: *mut c_void, arg2: *mut c_void, arg3: c_uint) -> fmod::Result>;*/
 
-/// sound callbacks
+/// sound callback
 pub type SoundNonBlockCallback = Option<fn(sound: &sound::Sound, result: fmod::Result) -> fmod::Result>;
+/// callback which allow to set/change data that will be played
 pub type SoundPcmReadCallback = Option<fn(sound: &sound::Sound, data: &mut [i16]) -> fmod::Result>;
+/// notify the user that music position has changed
 pub type SoundPcmSetPosCallback = Option<fn(sound: &sound::Sound, sub_sound: i32, position: u32, postype: FmodTimeUnit) -> fmod::Result>;
 
 /*  codec callbacks */
@@ -59,12 +61,19 @@ pub type FMOD_CODEC_METADATACALLBACK = Option<extern "C" fn(codec_state: *mut FM
 pub type FMOD_CODEC_GETWAVEFORMAT = Option<extern "C" fn(codec_state: *mut FMOD_CODEC_STATE, index: c_int, wave_format: *mut FMOD_CODEC_WAVEFORMAT) -> fmod::Result>;
 pub type FMOD_3D_ROLLOFFCALLBACK = Option<extern "C" fn(channel: *mut FMOD_CHANNEL, distance: c_float) -> fmod::Result>;*/
 
-/// DSP callbacks
+/// notify the user that the DSP has been created
 pub type DspCreateCallback = Option<fn(dsp_state: &dsp::DspState) -> fmod::Result>;
+/// notify the user that the DSP has been released
 pub type DspReleaseCallback = Option<fn(dsp_state: &dsp::DspState) -> fmod::Result>;
+/// notify the user that the DSP has been reset
 pub type DspResetCallback = Option<fn(dsp_state: &dsp::DspState) -> fmod::Result>;
+/// allow the user to modify data that will be read
 pub type DspReadCallback = Option<fn(dsp_state: &dsp::DspState, in_buffer: &mut Vec<f32>, out_buffer: &mut Vec<f32>, length: u32, inchannels: i32, outchannels: i32) -> fmod::Result>;
+/// notify the user that DSP position has changed
 pub type DspSetPositionCallback = Option<fn(dsp_state: &dsp::DspState, pos: u32) -> fmod::Result>;
+/// DSP callback
 pub type DspSetParamCallback = Option<fn(dsp_state: &dsp::DspState, index: i32, value: f32) -> fmod::Result>;
+/// DSP callback
 pub type DspGetParamCallback = Option<fn(dsp_state: &dsp::DspState, index: i32, value: &mut f32, value_str: &str) -> fmod::Result>;
+/// DSP callback, not implemented yet
 pub type DspDialogCallback = Option<fn(dsp_state: dsp::DspState/*, hwnd: *mut c_void*/, show: i32) -> fmod::Result>;
