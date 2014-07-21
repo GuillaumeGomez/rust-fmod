@@ -34,7 +34,6 @@ fn pcmreadcallback(sound: &Sound, data: &mut [i16]) -> fmod::Result {
     fmod::Ok
 }
 
-
 fn get_key() -> Result<int, std::io::IoError> {
     let mut reader = std::io::stdio::stdin();
     print!("> ");

@@ -536,6 +536,9 @@ extern "C" {
     pub fn FMOD_Reverb_GetUserData(reverb: *mut FMOD_REVERB, user_data: *mut *mut c_void) -> fmod::Result;
     pub fn FMOD_Reverb_GetMemoryInfo(reverb: *mut FMOD_REVERB, memory_bits: c_uint, event_memory_bits: c_uint, memory_used: *mut c_uint,
         memory_used_details: *mut FMOD_MEMORY_USAGE_DETAILS) -> fmod::Result;
+
+
+    /* need to add FMOD_ErrorString */
 }
 
 pub struct FMOD_ASYNCREADINFO

@@ -1291,12 +1291,12 @@ impl FmodSys {
         }
     }
 
-    pub fn set_3D_listener_attributes(&self, listener: i32, pos: vector::FmodVector, vel: vector::FmodVector, forward: vector::FmodVector,
-        up: vector::FmodVector) -> fmod::Result {
-        let c_p = vector::get_ffi(&pos);
-        let c_v = vector::get_ffi(&vel);
-        let c_f = vector::get_ffi(&forward);
-        let c_u = vector::get_ffi(&up);
+    pub fn set_3D_listener_attributes(&self, listener: i32, pos: &vector::FmodVector, vel: &vector::FmodVector, forward: &vector::FmodVector,
+        up: &vector::FmodVector) -> fmod::Result {
+        let c_p = vector::get_ffi(pos);
+        let c_v = vector::get_ffi(vel);
+        let c_f = vector::get_ffi(forward);
+        let c_u = vector::get_ffi(up);
 
         unsafe { ffi::FMOD_System_Set3DListenerAttributes(self.system, listener, &c_p, &c_v, &c_f, &c_u) }
     }

@@ -28,3 +28,8 @@ path = "examples/dsp_custom/main.rs"
 
 name = "user_created_sound"
 path = "examples/user_created_sound/main.rs"
+
+[[bin]]
+
+name = "3d"
+path = "examples/3d/main.rs"
