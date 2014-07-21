@@ -43,7 +43,7 @@ pub type FMOD_FILE_ASYNCCANCELCALLBACK = Option<extern "C" fn(arg1: *mut c_void,
 
 /// sound callbacks
 pub type SoundNonBlockCallback = Option<fn(sound: &sound::Sound, result: fmod::Result) -> fmod::Result>;
-pub type SoundPcmReadCallback = Option<fn(sound: &sound::Sound, data: &mut Vec<i16>) -> fmod::Result>;
+pub type SoundPcmReadCallback = Option<fn(sound: &sound::Sound, data: &mut [i16]) -> fmod::Result>;
 pub type SoundPcmSetPosCallback = Option<fn(sound: &sound::Sound, sub_sound: i32, position: u32, postype: FmodTimeUnit) -> fmod::Result>;
 
 /*  codec callbacks */

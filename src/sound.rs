@@ -154,6 +154,10 @@ pub struct Sound {
     user_data: ffi::SoundData
 }
 
+pub fn get_fffi<'r>(sound: &'r mut Sound) -> &'r mut *mut ffi::FMOD_SOUND {
+    &mut sound.sound
+}
+
 pub fn get_ffi(sound: &Sound) -> *mut ffi::FMOD_SOUND {
     sound.sound
 }
@@ -162,11 +166,12 @@ pub fn from_ptr(sound: *mut ffi::FMOD_SOUND) -> Sound {
     Sound{sound: sound, can_be_deleted: false, user_data: ffi::SoundData::new()}
 }
 
-pub fn from_ptr_first(sound: *mut ffi::FMOD_SOUND, user_data: ffi::SoundData) -> Sound {
-    let mut tmp = Sound{sound: sound, can_be_deleted: true, user_data: user_data};
+pub fn from_ptr_first(sound: *mut ffi::FMOD_SOUND) -> Sound {
+    Sound{sound: sound, can_be_deleted: true, user_data: ffi::SoundData::new()}
+}
 
-    unsafe { ffi::FMOD_Sound_SetUserData(sound, transmute(&mut tmp.user_data)) };
-    tmp
+pub fn get_user_data<'r>(sound: &'r mut Sound) -> &'r mut ffi::SoundData {
+    &mut sound.user_data
 }
 
 impl Drop for Sound {
@@ -637,7 +642,7 @@ impl Sound {
         }
     }
 
-    fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, fmod::Result> {
+    pub fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, fmod::Result> {
         unsafe {
             let mut user_data : *mut c_void = ::std::ptr::mut_null();
 

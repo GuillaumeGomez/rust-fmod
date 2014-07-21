@@ -177,7 +177,7 @@ impl SoundGroup {
         unsafe { ffi::FMOD_SoundGroup_SetUserData(self.sound_group, transmute(user_data)) }
     }
 
-    fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, fmod::Result> {
+    pub fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, fmod::Result> {
         unsafe {
             let mut user_data : *mut c_void = ::std::ptr::mut_null();
 

@@ -231,7 +231,7 @@ impl Geometry {
         unsafe { ffi::FMOD_Geometry_SetUserData(self.geometry, transmute(user_data)) }
     }
 
-    fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, fmod::Result> {
+    pub fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, fmod::Result> {
         unsafe {
             let mut user_data : *mut c_void = ::std::ptr::mut_null();
 

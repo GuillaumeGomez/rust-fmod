@@ -41,6 +41,7 @@ use reverb;
 use dsp_connection;
 use std::default::Default;
 use callbacks::*;
+use std::c_vec::CVec;
 
 extern "C" fn pcm_read_callback(sound: *mut ffi::FMOD_SOUND, data: *mut c_void, data_len: c_uint) -> fmod::Result {
     unsafe {
@@ -53,16 +54,10 @@ extern "C" fn pcm_read_callback(sound: *mut ffi::FMOD_SOUND, data: *mut c_void, 
 
                 match callbacks.pcm_read {
                     Some(p) => {
-                        let mut data_vec = Vec::new();
-                        let in_buffer : *mut c_short = data as *mut c_short;
+                        let max = data_len as int >> 2;
+                        let mut data_vec = CVec::new(data as *mut c_short, max as uint * 2);
 
-                        for count in range(0i, data_len as int) {
-                            data_vec.push(*in_buffer.offset(count));
-                        }
-                        let ret = p(&sound::from_ptr(sound), &mut data_vec);
-                        for count in range(0i, data_len as int) {
-                            *in_buffer.offset(count) = data_vec[count as uint];
-                        }
+                        let ret = p(&sound::from_ptr(sound), data_vec.as_mut_slice());
                         ret
                     },
                     None => fmod::Ok
@@ -301,7 +296,7 @@ pub struct FmodCreateSoundexInfo
     /// [w] Optional. Specify 0 to ignore. For sequenced formats with dynamic channel allocation such as .MID and .IT, this specifies the maximum voice count allowed while playing. .IT defaults to 64. .MID defaults to 32.
     pub max_polyphony          : i32,
     /// [w] Optional. Specify 0 to ignore. This is user data to be attached to the sound during creation. Access via [`Sound::get_user_data`](doc/rfmod/struct.Sound.html#method.get_user_data). Note: This is not passed to FMOD_FILE_OPENCALLBACK, that is a different userdata that is file specific.
-    user_data                  : *mut c_void,
+    user_data                  : Box<ffi::SoundData>,
     /// [w] Optional. Specify 0 or fmod::SoundTypeUnknown to ignore. Instead of scanning all codec types, use this to speed up loading by making it jump straight to this codec.
     pub suggested_sound_type   : fmod::SoundType,
     /// [w] Optional. Specify 0 to ignore. Callback for opening this file.
@@ -354,7 +349,7 @@ impl Default for FmodCreateSoundexInfo {
             dls_name: String::new(),
             encryption_key: String::new(),
             max_polyphony: 0i32,
-            user_data: ::std::ptr::mut_null(),
+            user_data: box ffi::SoundData::new(),
             suggested_sound_type: fmod::SoundTypeUnknown,
             user_open: None,
             user_close: None,
@@ -404,7 +399,12 @@ impl FmodCreateSoundexInfo {
             dlsname: self.dls_name.clone().with_c_str(|c_str|{c_str as *mut c_char}),
             encryptionkey: self.encryption_key.clone().with_c_str(|c_str|{c_str as *mut c_char}),
             maxpolyphony: self.max_polyphony,
-            userdata: self.user_data,
+            userdata: {
+                self.user_data.non_block = self.non_block_callback;
+                self.user_data.pcm_read = self.pcm_read_callback;
+                self.user_data.pcm_set_pos = self.pcm_set_pos_callback;
+                unsafe { ::std::mem::transmute::<&mut ffi::SoundData, *mut c_void>(&mut *self.user_data) }
+            },
             suggestedsoundtype: self.suggested_sound_type,
             useropen: self.user_open,
             userclose: self.user_close,
@@ -803,68 +803,71 @@ impl FmodSys {
         }
     }
 
+    /// If music is empty, null is sent
     pub fn create_sound(&self, music: &str, options: Option<FmodMode>, exinfo: Option<&mut FmodCreateSoundexInfo>) -> Result<Sound, fmod::Result> {
-        let tmp_v = music.clone();
-        let mut sound = ::std::ptr::mut_null();
+        let mut sound = sound::from_ptr_first(::std::ptr::mut_null());
         let op = match options {
             Some(FmodMode(t)) => t,
             None => FMOD_SOFTWARE | FMOD_LOOP_OFF | FMOD_2D | FMOD_CREATESTREAM
         };
-        let mut user_data = ffi::SoundData::new();
         let ex = match exinfo {
             Some(e) => {
+                let user_data = sound::get_user_data(&mut sound);
                 user_data.non_block = e.non_block_callback;
                 user_data.pcm_read = e.pcm_read_callback;
                 user_data.pcm_set_pos = e.pcm_set_pos_callback;
-                user_data.user_data = e.user_data;
+                unsafe {
+                    user_data.user_data = ::std::mem::transmute::<&mut ffi::SoundData, *mut c_void>(&mut *e.user_data);
+                }
                 &mut e.convert_to_c() as *mut ffi::FMOD_CREATESOUNDEXINFO
             },
             None => ::std::ptr::mut_null()
         };
 
-        if tmp_v.len() > 0 {
-            tmp_v.with_c_str(|c_str|{
-                match unsafe { ffi::FMOD_System_CreateSound(self.system, c_str, op, ex, &mut sound) } {
-                    fmod::Ok => {
-                        Ok(sound::from_ptr_first(sound, user_data))
-                    },
-                    err => Err(err)
-                }
+        match if music.len() > 0 {
+            music.with_c_str(|c_str|{
+               unsafe { ffi::FMOD_System_CreateSound(self.system, c_str, op, ex, sound::get_fffi(&mut sound)) }
             })
         } else {
-            match unsafe { ffi::FMOD_System_CreateSound(self.system, ::std::ptr::null(), op, ex, &mut sound) } {
-                fmod::Ok => {Ok(sound::from_ptr_first(sound, user_data))},
-                err => Err(err)
-            }
+            unsafe { ffi::FMOD_System_CreateSound(self.system, ::std::ptr::null(), op, ex, sound::get_fffi(&mut sound)) }
+        } {
+            fmod::Ok => {
+                Ok(sound)
+            },
+            e => Err(e)
         }
-        
     }
 
     pub fn create_stream(&self, music: &str, options: Option<FmodMode>, exinfo: Option<&mut FmodCreateSoundexInfo>) -> Result<Sound, fmod::Result> {
-        let tmp_v = music.clone();
-        let mut sound = ::std::ptr::mut_null();
+        let mut sound = sound::from_ptr_first(::std::ptr::mut_null());
         let op = match options {
             Some(FmodMode(t)) => t,
             None => FMOD_SOFTWARE | FMOD_LOOP_OFF | FMOD_2D | FMOD_CREATESTREAM
         };
-        let mut user_data = ffi::SoundData::new();
         let ex = match exinfo {
             Some(e) => {
+                let user_data = sound::get_user_data(&mut sound);
                 user_data.non_block = e.non_block_callback;
                 user_data.pcm_read = e.pcm_read_callback;
                 user_data.pcm_set_pos = e.pcm_set_pos_callback;
-                user_data.user_data = e.user_data;
+                unsafe {
+                    user_data.user_data = ::std::mem::transmute::<&mut ffi::SoundData, *mut c_void>(&mut *e.user_data);
+                }
                 &mut e.convert_to_c() as *mut ffi::FMOD_CREATESOUNDEXINFO
             },
             None => ::std::ptr::mut_null()
         };
 
-        tmp_v.with_c_str(|c_str|{
-            match unsafe { ffi::FMOD_System_CreateStream(self.system, c_str, op, ex, &mut sound) } {
-                fmod::Ok => {Ok(sound::from_ptr_first(sound, user_data))},
-                err => Err(err)
-            }
-        })
+        match if music.len() > 0 {
+            music.with_c_str(|c_str|{
+                unsafe { ffi::FMOD_System_CreateStream(self.system, c_str, op, ex, sound::get_fffi(&mut sound)) }
+            })
+        } else {
+            unsafe { ffi::FMOD_System_CreateStream(self.system, ::std::ptr::null(), op, ex, sound::get_fffi(&mut sound)) }
+        } {
+            fmod::Ok => Ok(sound),
+            err => Err(err)
+        }
     }
 
     pub fn create_channel_group(&self, group_name: String) -> Result<channel_group::ChannelGroup, fmod::Result> {
@@ -1602,9 +1605,9 @@ impl FmodSys {
 
     pub fn start_record(&self, id: i32, sound: &sound::Sound, _loop: bool) -> fmod::Result {
         let t_loop = match _loop {
-                true => 1,
-                _ => 0
-            };
+            true => 1,
+            _ => 0
+        };
 
         unsafe { ffi::FMOD_System_RecordStart(self.system, id, sound::get_ffi(sound), t_loop) }
     }

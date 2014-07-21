@@ -481,13 +481,9 @@ impl Channel {
             match ffi::FMOD_Channel_Get3DCustomRolloff(self.channel, &mut points, &mut num_points) {
                 fmod::Ok => {
                     let mut ret_points = Vec::new();
-                    let mut it = 0i32;
 
-                    while it < num_points {
-                        let tmp = points.offset(it as int);
-
-                        ret_points.push(vector::from_ptr(*tmp));
-                        it += 1;
+                    for it in range(0i32, num_points) {
+                        ret_points.push(vector::from_ptr(*points.offset(it as int)));
                     }
                     Ok(ret_points)
                 }
@@ -631,7 +627,7 @@ impl Channel {
         unsafe { ffi::FMOD_Channel_SetUserData(self.channel, transmute(user_data)) }
     }
 
-    fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, fmod::Result> {
+    pub fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, fmod::Result> {
         unsafe {
             let mut user_data : *mut c_void = ::std::ptr::mut_null();
 

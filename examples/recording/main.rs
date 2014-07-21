@@ -121,7 +121,6 @@ fn main() {
     let mut exinfo : FmodCreateSoundexInfo = Default::default();
     let secs = 5i32;
 
-    //exinfo.cbsize            = mem::size_of::<FMOD_CREATESOUNDEXINFO>() as i32;
     exinfo.num_channels      = 2;
     exinfo.format            = fmod::SoundFormatPCM16;
     exinfo.default_frequency = 44100;

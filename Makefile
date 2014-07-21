@@ -31,6 +31,7 @@ examples: rfmod
 	  rustc -o bin/simple_music_player -L ./lib examples/simple_music_player/main.rs
 	  rustc -o bin/recording -L ./lib examples/recording/main.rs
 	  rustc -o bin/dsp_custom -L ./lib examples/dsp_custom/main.rs
+	  rustc -o bin/user_created_sound -L ./lib examples/user_created_sound/main.rs
 
 doc:
 	rustdoc -o doc src/rfmod.rs
@@ -40,5 +41,6 @@ clean:
 	rm -rf bin/simple_music_player
 	rm -rf bin/recording
 	rm -rf bin/dsp_custom
+	rm -rf bin/user_created_sound
 
 re: clean all

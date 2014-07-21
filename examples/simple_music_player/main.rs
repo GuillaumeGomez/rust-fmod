@@ -8,8 +8,14 @@ use std::os;
 use std::io::timer::sleep;
 
 fn play_to_the_end(sound: Sound, len: uint) -> fmod::Result {
-    let length = sound.get_length(FMOD_TIMEUNIT_MS).unwrap();
-    let name = sound.get_name(len as u32).unwrap();
+    let length = match sound.get_length(FMOD_TIMEUNIT_MS) {
+        Ok(l) => l,
+        Err(e) => fail!("sound.get_length error: {}", e)
+    };
+    let name = match sound.get_name(len as u32) {
+        Ok(n) => n,
+        Err(e) => fail!("sound.get_name error: {}", e)
+    };
     let mut old_position = 100u;
 
     match sound.play() {
