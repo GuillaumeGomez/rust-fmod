@@ -481,47 +481,47 @@ pub mod fmod {
         /// All             - Non-realtime version of FMOD_OUTPUTTYPE_WAVWRITER. User can drive mixer with [`FmodSys::update`](../../struct.FmodSys.html#method.update) at whatever rate they want.
         OutputTypeWAVWriterNRT,
 
-        /// Win32/Win64     - DirectSound output.                      (Default on Windows XP and below)
+        /// Win32/Win64     - DirectSound output.                     (Default on Windows XP and below)
         OutputTypeDSound,
         /// Win32/Win64     - Windows Multimedia output.
         OutputTypeWinMM,
-        /// Win32           - Windows Audio Session API.               (Default on Windows Vista and above)
+        /// Win32           - Windows Audio Session API.              (Default on Windows Vista and above)
         OutputTypeWASAPI,
         /// Win32           - Low latency ASIO 2.0 driver.
         OutputTypeASIO,
-        /// Linux/Linux64   - Open Sound System output.                (Default on Linux, third preference)
+        /// Linux/Linux64   - Open Sound System output.               (Default on Linux, third preference)
         OutputTypeOSS,
         /// Linux/Linux64   - Advanced Linux Sound Architecture output. (Default on Linux, second preference if available)
         OutputTypeALSA,
         /// Linux/Linux64   - Enlightment Sound Daemon output.
         OutputTypeESD,
-        /// Linux/Linux64   - PulseAudio output.                       (Default on Linux, first preference if available)
+        /// Linux/Linux64   - PulseAudio output.                      (Default on Linux, first preference if available)
         OutputTypePulseAudio,
-        /// Mac             - Macintosh CoreAudio output.              (Default on Mac)
+        /// Mac             - Macintosh CoreAudio output.             (Default on Mac)
         OutputTypeCoreAudio,
-        /// Xbox 360        - Native Xbox360 output.                   (Default on Xbox 360)
+        /// Xbox 360        - Native Xbox360 output.                  (Default on Xbox 360)
         OutputTypeXbox360,
-        /// PSP             - Native PSP output.                       (Default on PSP)
+        /// PSP             - Native PSP output.                      (Default on PSP)
         OutputTypePSP,
-        /// PS3             - Native PS3 output.                       (Default on PS3)
+        /// PS3             - Native PS3 output.                      (Default on PS3)
         OutputTypePS3,
-        /// NGP             - Native NGP output.                       (Default on NGP)
+        /// NGP             - Native NGP output.                      (Default on NGP)
         OutputTypeNGP,
-        /// Wii             - Native Wii output.                       (Default on Wii)
+        /// Wii             - Native Wii output.                      (Default on Wii)
         OutputTypeWii,
         /// 3DS             - Native 3DS output                         (Default on 3DS)
         OutputType3DS,
-        /// Android         - Java Audio Track output.                 (Default on Android 2.2 and below)
+        /// Android         - Java Audio Track output.                (Default on Android 2.2 and below)
         OutputTypeAudioTrack,
-        /// Android         - OpenSL ES output.                        (Default on Android 2.3 and above)
+        /// Android         - OpenSL ES output.                       (Default on Android 2.3 and above)
         OutputTypeOpenSL,
-        /// Native Client   - Native Client output.                    (Default on Native Client)
+        /// Native Client   - Native Client output.                   (Default on Native Client)
         OutputTypeNACL,
-        /// Wii U           - Native Wii U output.                     (Default on Wii U)
+        /// Wii U           - Native Wii U output.                    (Default on Wii U)
         OutputTypeWiiU,
-        /// BlackBerry      - Native BlackBerry asound output.         (Default on BlackBerry)
+        /// BlackBerry      - Native BlackBerry asound output.        (Default on BlackBerry)
         OutputTypeASound,
-        /// Orbis           - Audio Out output.                        (Default on Orbis)
+        /// Orbis           - Audio Out output.                       (Default on Orbis)
         OutputTypeAudioOut,
         /// Durango         - XAudio2 output.
         OutputTypeXAudio,
@@ -705,58 +705,388 @@ pub mod fmod {
     #[deriving(PartialEq, PartialOrd, Show)]
     #[repr(C)]
     /// These definitions can be used for creating FMOD defined special effects or DSP units.
+    /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
     pub enum DspType
     {
         /// This unit was created via a non FMOD plugin so has an unknown purpose.
-        DspTypeUnknown,
+        Unknown,
         /// This unit does nothing but take inputs and mix them together then feed the result to the soundcard unit.
-        DspTypeMixer,
+        Mixer,
         /// This unit generates sine/square/saw/triangle or noise tones.
-        DspTypeOscillator,
+        Oscillator,
         /// This unit filters sound using a high quality, resonant lowpass filter algorithm but consumes more CPU time.
-        DspTypeLowPass,
-        /// This unit filters sound using a resonant lowpass filter algorithm that is used in Impulse Tracker, but with limited cutoff range (0 to 8060hz).
-        DspTypeITLowPass,
+        LowPass,
+        /// This unit filters sound using a resonant lowpass filter algorithm that is used in Impulse Tracker, but with limited Cutoff range (0 to 8060hz).
+        ITLowPass,
         /// This unit filters sound using a resonant highpass filter algorithm.
-        DspTypeHighPass,
+        HighPass,
         /// This unit produces an echo on the sound and fades out at the desired rate.
-        DspTypeEcho,
+        Echo,
         /// This unit produces a flange effect on the sound.
-        DspTypeFlange,
+        Flange,
         /// This unit distorts the sound.
-        DspTypeDistortion,
+        Distortion,
         /// This unit normalizes or amplifies the sound to a certain level.
-        DspTypeNormalize,
+        Normalize,
         /// This unit attenuates or amplifies a selected frequency range.
-        DspTypeParameq,
+        Parameq,
         /// This unit bends the pitch of a sound without changing the speed of playback.
-        DspTypePitchShift,
+        PitchShift,
         /// This unit produces a chorus effect on the sound.
-        DspTypeChorus,
+        Chorus,
         /// This unit allows the use of Steinberg VST plugins
-        DspTypeVSTPlugin,
+        VSTPlugin,
         /// This unit allows the use of Nullsoft Winamp plugins
-        DspTypeWinampPlugin,
+        WinampPlugin,
         /// This unit produces an echo on the sound and fades out at the desired rate as is used in Impulse Tracker.
-        DspTypeITEcho,
+        ITEcho,
         /// This unit implements dynamic compression (linked multichannel, wideband)
-        DspTypeCompressor,
+        Compressor,
         /// This unit implements SFX reverb
-        DspTypeSFXReverb,
-        /// This unit filters sound using a simple lowpass with no resonance, but has flexible cutoff and is fast.
-        DspTypeLowPassSimple,
+        SFXReverb,
+        /// This unit filters sound using a simple lowpass with no resonance, but has flexible Cutoff and is fast.
+        LowPassSimple,
         /// This unit produces different delays on individual channels of the sound.
-        DspTypeDelay,
+        Delay,
         /// This unit produces a tremolo / chopper effect on the sound.
-        DspTypeTremolo,
+        Tremolo,
         /// This unit allows the use of LADSPA standard plugins.
-        DspTypeLADSPAPlugin,
-        /// This unit filters sound using a simple highpass with no resonance, but has flexible cutoff and is fast.
-        DspTypeHighPassSimple,
+        LADSPAPlugin,
+        /// This unit filters sound using a simple highpass with no resonance, but has flexible Cutoff and is fast.
+        HighPassSimple,
         /// Offset that platform specific FMOD_HARDWARE DSPs will start at.
-        DspTypeHardware = 1000,
+        Hardware = 1000,
         /// Makes sure this enum is signed 32bit.
-        DspTypeForceInt = 65536
+        ForceInt = 65536
+    }
+
+    #[deriving(PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// Parameter types for the FMOD_DSP_TYPE_OSCILLATOR filter.
+    /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
+    pub enum DspOscillator
+    {
+        /// Waveform type. 0 = sine. 1 = square. 2 = sawup. 3 = sawdown. 4 = triangle. 5 = noise.
+        DspOscillatorType,
+        /// Frequency of the sinewave in hz. 1.0 to 22000.0. Default = 220.0.
+        DspOscillatorRate
+    }
+
+    #[deriving(PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// Parameter types for the FMOD_DSP_TYPE_LOWPASS filter.
+    /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
+    pub enum DspLowPass
+    {
+        /// Lowpass Cutoff frequency in hz. 10.0 to 22000.0. Default = 5000.0.
+        DspLowPassCutoff,
+        /// Lowpass resonance Q value. 1.0 to 10.0. Default = 1.0.
+        DspLowPassResonance
+    }
+
+    #[deriving(PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// Parameter types for the FMOD_DSP_TYPE_ITLOWPASS filter.
+    // This is different to the default FMOD_DSP_TYPE_ITLOWPASS filter in that it uses a different quality algorithm and is 
+    // the filter used to produce the correct sounding playback in .IT files.
+    // FMOD Ex's .IT playback uses this filter.
+    /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
+    pub enum DspITLowPass
+    {
+        /// Lowpass Cutoff frequency in hz. 1.0 to 22000.0. Default = 5000.0
+        DspITLowPassCutoff,
+        /// Lowpass resonance Q value. 0.0 to 127.0. Default = 1.0.
+        DspITLowPassResonance
+    }
+
+    #[deriving(PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// Parameter types for the FMOD_DSP_TYPE_HIGHPASS filter.
+    /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
+    pub enum DspHighPass
+    {
+        /// Highpass Cutoff frequency in hz. 1.0 to output 22000.0. Default = 5000.0.
+        DspHighPassCutoff,
+        /// Highpass resonance Q value. 1.0 to 10.0. Default = 1.0.
+        DspHighPassResonance
+    }
+
+    #[deriving(PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// Parameter types for the DspTypeEcho filter.
+    /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
+    pub enum DspTypeEcho
+    {
+        /// Echo delay in ms. 10 to 5000. Default = 500.
+        DspTypeEchoDelay,
+        /// Echo decay per delay. 0 to 1. 1.0 = No decay, 0.0 = total decay (ie simple 1 line delay). Default = 0.5.
+        DspTypeEchoDecayRatio,
+        /// Maximum channels supported. 0 to 16. 0 = same as fmod's default output polyphony, 1 = mono, 2 = stereo etc. See remarks for more. Default = 0. It is suggested to leave at 0!
+        DspTypeEchoMaxChannels,
+        /// Volume of original signal to pass to output. 0.0 to 1.0. Default = 1.0.
+        DspTypeEchoDryMix,
+        /// Volume of echo signal to pass to output. 0.0 to 1.0. Default = 1.0.
+        DspTypeEchoWetMix
+    }
+
+    #[deriving(PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// Parameter types for the FMOD_DSP_TYPE_DELAY filter.
+    /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
+    pub enum DspDelay
+    {
+        /// Channel #0 Delay in ms. 0  to 10000. Default = 0.
+        DspDelayCH0,
+        /// Channel #1 Delay in ms. 0  to 10000. Default = 0.
+        DspDelayCH1,
+        /// Channel #2 Delay in ms. 0  to 10000. Default = 0.
+        DspDelayCH2,
+        /// Channel #3 Delay in ms. 0  to 10000. Default = 0.
+        DspDelayCH3,
+        /// Channel #4 Delay in ms. 0  to 10000. Default = 0.
+        DspDelayCH4,
+        /// Channel #5 Delay in ms. 0  to 10000. Default = 0.
+        DspDelayCH5,
+        /// Channel #6 Delay in ms. 0  to 10000. Default = 0.
+        DspDelayCH6,
+        /// Channel #7 Delay in ms. 0  to 10000. Default = 0.
+        DspDelayCH7,
+        /// Channel #8 Delay in ms. 0  to 10000. Default = 0.
+        DspDelayCH8,
+        /// Channel #9 Delay in ms. 0  to 10000. Default = 0.
+        DspDelayCH9,
+        /// Channel #10 Delay in ms. 0  to 10000. Default = 0.
+        DspDelayCH10,
+        /// Channel #11 Delay in ms. 0  to 10000. Default = 0.
+        DspDelayCH11,
+        /// Channel #12 Delay in ms. 0  to 10000. Default = 0.
+        DspDelayCH12,
+        /// Channel #13 Delay in ms. 0  to 10000. Default = 0.
+        DspDelayCH13,
+        /// Channel #14 Delay in ms. 0  to 10000. Default = 0.
+        DspDelayCH14,
+        /// Channel #15 Delay in ms. 0  to 10000. Default = 0.
+        DspDelayCH15,
+        /// Maximum delay in ms. 0  to 10000. Default = 10.
+        DspDelayMaxDelay
+    }
+
+    #[deriving(PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// Parameter types for the FMOD_DSP_TYPE_FLANGE filter.
+    /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
+    pub enum DspFlange
+    {
+        /// Volume of original signal to pass to output. 0.0 to 1.0. Default = 0.45.
+        DspFlangeDryMix,
+        /// Volume of flange signal to pass to output. 0.0 to 1.0. Default = 0.55.
+        DspFlangeWetMix,
+        /// Flange depth (percentage of 40ms delay). 0.01 to 1.0. Default = 1.0.
+        DspFlangeDepth,
+        /// Flange speed in hz. 0.0 to 20.0. Default = 0.1.
+        DspFlangeRate
+    }
+
+    #[deriving(PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// Parameter types for the FMOD_DSP_TYPE_TREMOLO filter.
+    /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
+    pub enum DspTremolo
+    {
+        /// LFO frequency in Hz. 0.1 to 20. Default = 4.
+        DspTremoloFrequency,
+        /// Tremolo depth. 0 to 1. Default = 0.
+        DspTremoloDepth,
+        /// LFO shape morph between triangle and sine. 0 to 1. Default = 0.
+        DspTremoloShape,
+        /// Time-skewing of LFO cycle. -1 to 1. Default = 0.
+        DspTremoloSkew,
+        /// LFO on-time. 0 to 1. Default = 0.5.
+        DspTremoloDuty,
+        /// Flatness of the LFO shape. 0 to 1. Default = 0.
+        DspTremoloSquare,
+        /// Instantaneous LFO phase. 0 to 1. Default = 0.
+        DspTremoloPhase,
+        /// Rotation / auto-pan effect. -1 to 1. Default = 0.
+        DspTremoloSpread
+    }
+
+    #[deriving(PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// Parameter types for the FMOD_DSP_TYPE_DISTORTION filter.
+    /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
+    pub enum DspDistortion
+    {
+        /// Distortion value. 0.0 to 1.0. Default = 0.5.
+        DspDistortionLevel,
+        /// Useless enum
+        DspDistortionUnused
+    }
+
+    #[deriving(PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// Parameter types for the FMOD_DSP_TYPE_NORMALIZE filter.
+    /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
+    pub enum DspNormalize
+    {
+        /// Time to ramp the silence to full in ms. 0.0 to 20000.0. Default = 5000.0.
+        DspNormalizeFadeTime,
+        /// Lower volume range threshold to ignore. 0.0 to 1.0. Default = 0.1. Raise higher to stop amplification of very quiet signals.
+        DspNormalizeThreshold,
+        /// Maximum amplification allowed. 1.0 to 100000.0. Default = 20.0. 1.0 = no amplifaction, higher values allow more boost.
+        DspNormalizeMaxAmp
+    }
+
+    #[deriving(PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// Parameter types for the DspTypeParameq filter.
+    /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
+    pub enum DspTypeParameq
+    {
+        /// Frequency center. 20.0 to 22000.0. Default = 8000.0.
+        DspTypeParameqCenter,
+        /// Octave range around the center frequency to filter. 0.2 to 5.0. Default = 1.0.
+        DspTypeParameqBandwidth,
+        /// Frequency Gain. 0.05 to 3.0. Default = 1.0.
+        DspTypeParameqGain
+    }
+
+    #[deriving(PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// Parameter types for the FMOD_DSP_TYPE_PITCHSHIFT filter.
+    /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
+    pub enum DspPitchShift
+    {
+        /// Pitch value. 0.5 to 2.0. Default = 1.0. 0.5 = one octave down, 2.0 = one octave up. 1.0 does not change the pitch.
+        DspPitchShiftPitch,
+        /// FFT window size. 256, 512, 1024, 2048, 4096. Default = 1024. Increase this to reduce 'smearing'. This effect is a warbling sound similar to when an mp3 is encoded at very low bitrates.
+        DspPitchShiftFFTSize,
+        /// Removed. Do not use. FMOD now uses 4 overlaps and cannot be changed.
+        DspPitchShiftOverLap,
+        /// Maximum channels supported. 0 to 16. 0 = same as fmod's default output polyphony, 1 = mono, 2 = stereo etc. See remarks for more. Default = 0. It is suggested to leave at 0!
+        DspPitchShiftMaxChannels
+    }
+
+    #[deriving(PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// Parameter types for the FMOD_DSP_TYPE_CHORUS filter.
+    /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
+    pub enum DspChorus
+    {
+        /// Volume of original signal to pass to output. 0.0 to 1.0. Default = 0.5.
+        DspChorusDryMix,
+        /// Volume of 1st chorus tap. 0.0 to 1.0. Default = 0.5.
+        DspChorusWetMix1,
+        /// Volume of 2nd chorus tap. This tap is 90 degrees out of phase of the first tap. 0.0 to 1.0. Default = 0.5.
+        DspChorusWetMix2,
+        /// Volume of 3rd chorus tap. This tap is 90 degrees out of phase of the second tap. 0.0 to 1.0. Default = 0.5.
+        DspChorusWetMix3,
+        /// Chorus delay in ms. 0.1 to 100.0. Default = 40.0 ms.
+        DspChorusDelay,
+        /// Chorus modulation rate in hz. 0.0 to 20.0. Default = 0.8 hz.
+        DspChorusRate,
+        /// Chorus modulation depth. 0.0 to 1.0. Default = 0.03.
+        DspChorusDepth
+    }
+
+    #[deriving(PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// Parameter types for the FMOD_DSP_TYPE_ITECHO filter.
+    /// This is effectively a software based echo filter that emulates the DirectX DMO echo effect. Impulse tracker files can support this, and FMOD will produce the effect on ANY platform, not just those that support DirectX effects!
+    /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
+    pub enum DspITEcho
+    {
+        /// Ratio of wet (processed) signal to dry (unprocessed) signal. Must be in the range from 0.0 through 100.0 (all wet). The default value is 50.
+        DspITEchoWetDryMix,
+        /// Percentage of output fed back into input, in the range from 0.0 through 100.0. The default value is 50.
+        DspITEchoFeedBack,
+        /// Delay for left channel, in milliseconds, in the range from 1.0 through 2000.0. The default value is 500 ms.
+        DspITEchoLeftDelay,
+        /// Delay for right channel, in milliseconds, in the range from 1.0 through 2000.0. The default value is 500 ms.
+        DspITEchoRightDelay,
+        /// Value that specifies whether to swap left and right delays with each successive echo. The default value is zero, meaning no swap. Possible values are defined as 0.0 (equivalent to FALSE) and 1.0 (equivalent to TRUE). CURRENTLY NOT SUPPORTED.
+        DspITEchoPanDelay
+    }
+
+    #[deriving(PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// Parameter types for the FMOD_DSP_TYPE_COMPRESSOR unit.
+    /// This is a simple linked multichannel software limiter that is uniform across the whole spectrum.
+    /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
+    pub enum DspCompressor
+    {
+        /// Threshold level (dB) in the range from -60 through 0. The default value is 0.
+        DspCompressorThreshold,
+        /// Gain reduction attack time (milliseconds), in the range from 10 through 200. The default value is 50.
+        DspCompressorAttack,
+        /// Gain reduction release time (milliseconds), in the range from 20 through 1000. The default value is 50.
+        DspCompressorRelease,
+        /// Make-up gain (dB) applied after limiting, in the range from 0 through 30. The default value is 0.
+        DspCompressorGainMakeup
+    }
+
+    #[deriving(PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// Parameter types for the FMOD_DSP_TYPE_SFXREVERB unit.
+    /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
+    pub enum DspSfxReverb
+    {
+        /// Dry Level      : Mix level of dry signal in output in mB. Ranges from -10000.0 to 0.0. Default is 0.
+        DspSfxReverbDryLevel,
+        /// Room           : Room effect level at low frequencies in mB. Ranges from -10000.0 to 0.0. Default is -10000.0.
+        DspSfxReverbRoom,
+        /// Room HF        : Room effect high-frequency level re. low frequency level in mB. Ranges from -10000.0 to 0.0. Default is 0.0.
+        DspSfxReverbRoomHF,
+        /// Decay Time     : Reverberation decay time at low-frequencies in seconds. Ranges from 0.1 to 20.0. Default is 1.0.
+        DspSfxReverbDecayTime,
+        /// Decay HF Ratio : High-frequency to low-frequency decay time ratio. Ranges from 0.1 to 2.0. Default is 0.5.
+        DspSfxReverbDecayHFRatio,
+        /// Reflections    : Early reflections level relative to room effect in mB. Ranges from -10000.0 to 1000.0. Default is -10000.0.
+        DspSfxReverbReflectionsLevel,
+        /// Reflect Delay  : Delay time of first reflection in seconds. Ranges from 0.0 to 0.3. Default is 0.02.
+        DspSfxReverbReflectionsDelay,
+        /// Reverb         : Late reverberation level relative to room effect in mB. Ranges from -10000.0 to 2000.0. Default is 0.0.
+        DspSfxReverbReverbLevel,
+        /// Reverb Delay   : Late reverberation delay time relative to first reflection in seconds. Ranges from 0.0 to 0.1. Default is 0.04.
+        DspSfxReverbReverbDelay,
+        /// Diffusion      : Reverberation diffusion (echo density) in percent. Ranges from 0.0 to 100.0. Default is 100.0.
+        DspSfxReverbDiffusion,
+        /// Density        : Reverberation density (modal density) in percent. Ranges from 0.0 to 100.0. Default is 100.0.
+        DspSfxReverbDensity,
+        /// HF Reference   : Reference high frequency in Hz. Ranges from 20.0 to 20000.0. Default is 5000.0.
+        DspSfxReverbHFReference,
+        /// Room LF        : Room effect low-frequency level in mB. Ranges from -10000.0 to 0.0. Default is 0.0.
+        DspSfxReverbRoomLF,
+        /// LF Reference   : Reference low-frequency in Hz. Ranges from 20.0 to 1000.0. Default is 250.0.
+        DspSfxReverbLFReference
+    }
+
+    #[deriving(PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// Parameter types for the FMOD_DSP_TYPE_LOWPASS_SIMPLE filter.
+    /// This is a very simple low pass filter, based on two single-pole RC time-constant modules.
+    /// The emphasis is on speed rather than accuracy, so this should not be used for task requiring critical filtering.
+    /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
+    pub enum DspLowPassSimple
+    {
+        /// Lowpass Cutoff frequency in hz. 10.0 to 22000.0. Default = 5000.0
+        DspLowPassSimpleCutoff,
+        /// Useless enum
+        DspLowPassSimpleUnused
+    }
+
+    #[deriving(PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// Parameter types for the FMOD_DSP_TYPE_HIGHPASS_SIMPLE filter.
+    /// This is a very simple single-order high pass filter.
+    /// The emphasis is on speed rather than accuracy, so this should not be used for task requiring critical filtering.
+    /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
+    pub enum DspHighPassSimple
+    {
+        /// Highpass cutoff frequency in hz. 10.0 to 22000.0. Default = 1000.0
+        DspHighPassSimpleCutoff,
+        /// Useless enum
+        DspHighPassSimpleUnused
     }
 }
 
@@ -835,7 +1165,7 @@ pub static FMOD_INIT_3D_RIGHTHANDED            : c_uint = 0x00000002;
 pub static FMOD_INIT_SOFTWARE_DISABLE          : c_uint = 0x00000004;
 /// All platforms - All FMOD_SOFTWARE (and FMOD_HARDWARE on 3DS and NGP) with FMOD_3D based voices will add a software lowpass filter effect into the DSP chain which is automatically used when [`Channel::set_3D_occlusion`](../struct.Channel.html#method.set_3D_occlusion) is used or the geometry API.
 pub static FMOD_INIT_OCCLUSION_LOWPASS         : c_uint = 0x00000008;
-/// All platforms - All FMOD_SOFTWARE (and FMOD_HARDWARE on 3DS and NGP) with FMOD_3D based voices will add a software lowpass filter effect into the DSP chain which causes sounds to sound duller when the sound goes behind the listener. Use [`FmodSys::set_advanced_settings`](../struct.FmodSys.html#method.set_advanced_settings) to adjust cutoff frequency.
+/// All platforms - All FMOD_SOFTWARE (and FMOD_HARDWARE on 3DS and NGP) with FMOD_3D based voices will add a software lowpass filter effect into the DSP chain which causes sounds to sound duller when the sound goes behind the listener. Use [`FmodSys::set_advanced_settings`](../struct.FmodSys.html#method.set_advanced_settings) to adjust Cutoff frequency.
 pub static FMOD_INIT_HRTF_LOWPASS              : c_uint = 0x00000010;
 /// All platforms - All FMOD_SOFTWARE with FMOD_3D based voices will add a software lowpass and highpass filter effect into the DSP chain which will act as a distance-automated bandpass filter. Use [`FmodSys::set_advanced_settings`](../struct.FmodSys.html#method.set_advanced_settings) to adjust the center frequency.
 pub static FMOD_INIT_DISTANCE_FILTERING        : c_uint = 0x00000200;

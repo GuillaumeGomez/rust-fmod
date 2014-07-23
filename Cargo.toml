@@ -33,3 +33,8 @@ path = "examples/user_created_sound/main.rs"
 
 name = "3d"
 path = "examples/3d/main.rs"
+
+[[bin]]
+
+name = "effects"
+path = "examples/effects/main.rs"

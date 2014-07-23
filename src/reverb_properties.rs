@@ -81,9 +81,9 @@ pub fn get_ffi(reverb: ReverbProperties) -> ffi::FMOD_REVERB_PROPERTIES {
 /// Structure defining a reverb environment.
 pub struct ReverbProperties
 {
-    /// [w]   Min: 0 - Max: 3 - Default: 0 - Environment Instance.  (SUPPORTED:SFX(4 instances) and Wii (3 instances))
+    /// [w]   Min: 0 - Max: 3 - Default: 0 - Environment Instance. (SUPPORTED:SFX(4 instances) and Wii (3 instances))
     pub instance         : i32,
-    /// [r/w] Min: -1 - Max: 25 - Default: -1 - Sets all listener properties.  -1 = OFF.  (SUPPORTED:SFX(-1 only)/PSP)
+    /// [r/w] Min: -1 - Max: 25 - Default: -1 - Sets all listener properties. -1 = OFF. (SUPPORTED:SFX(-1 only)/PSP)
     pub environment      : i32,
     /// [r/w] Min: 0.0 - Max: 1.0 - Default: 1.0 - Environment diffusion  (SUPPORTED:WII)
     pub env_diffusion    : f32,
@@ -115,7 +115,7 @@ pub struct ReverbProperties
     pub HF_reference     : f32,
     /// [r/w] Min: 20.0 - Max: 1000.0 - Default: 250.0 - Reference low frequency (hz)  (SUPPORTED:SFX)
     pub LF_reference     : f32,
-    /// [r/w] Min: 0.0 - Max: 100.0 - Default: 100.0 - Value that controls the echo density in the late reverberation decay.  (SUPPORTED:SFX)
+    /// [r/w] Min: 0.0 - Max: 100.0 - Default: 100.0 - Value that controls the echo density in the late reverberation decay. (SUPPORTED:SFX)
     pub diffusion        : f32,
     /// [r/w] Min: 0.0 - Max: 100.0 - Default: 100.0 - Value that controls the modal density in the late reverberation decay  (SUPPORTED:SFX)
     pub density          : f32,

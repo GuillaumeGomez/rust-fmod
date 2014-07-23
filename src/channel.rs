@@ -76,7 +76,7 @@ pub struct FmodReverbChannelProperties {
     pub room            : i32,
     /// [r/w] FMOD_REVERB_CHANNELFLAGS         - modifies the behavior of properties
     pub flags           : u32,
-    /// [r/w] See remarks.                     - DSP network location to connect reverb for this channel.
+    /// [r/w] See remarks.                    - DSP network location to connect reverb for this channel.
     pub connection_point: Dsp
 }
 

@@ -33,6 +33,7 @@ examples: rfmod
 	  rustc -o bin/dsp_custom -L ./lib examples/dsp_custom/main.rs
 	  rustc -o bin/user_created_sound -L ./lib examples/user_created_sound/main.rs
 	  rustc -o bin/3d -L ./lib examples/3d/main.rs
+	  rustc -o bin/effects -L ./lib examples/effects/main.rs
 
 doc:
 	rustdoc -o doc src/rfmod.rs
@@ -44,5 +45,6 @@ clean:
 	rm -rf bin/dsp_custom
 	rm -rf bin/user_created_sound
 	rm -rf bin/3d
+	rm -rf bin/effects
 
 re: clean all

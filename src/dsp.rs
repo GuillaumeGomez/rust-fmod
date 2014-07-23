@@ -373,19 +373,19 @@ pub struct DspDescription
     pub name                : String,
     /// [w] Plugin writer's version number.
     pub version             : u32,
-    /// [w] Number of channels.  Use 0 to process whatever number of channels is currently in the network. > 0 would be mostly used if the unit is a unit that only generates sound.
+    /// [w] Number of channels. Use 0 to process whatever number of channels is currently in the network. > 0 would be mostly used if the unit is a unit that only generates sound.
     pub channels            : i32,
-    /// [w] Create callback.  This is called when DSP unit is created.  Can be null.
+    /// [w] Create callback. This is called when DSP unit is created. Can be null.
     pub create              : DspCreateCallback,
-    /// [w] Release callback.  This is called just before the unit is freed so the user can do any cleanup needed for the unit. Can be null.
+    /// [w] Release callback. This is called just before the unit is freed so the user can do any cleanup needed for the unit. Can be null.
     pub release             : DspReleaseCallback,
-    /// [w] Reset callback.  This is called by the user to reset any history buffers that may need resetting for a filter, when it is to be used or re-used for the first time to its initial clean state.  Use to avoid clicks or artifacts.
+    /// [w] Reset callback. This is called by the user to reset any history buffers that may need resetting for a filter, when it is to be used or re-used for the first time to its initial clean state. Use to avoid clicks or artifacts.
     pub reset               : DspResetCallback,
-    /// [w] Read callback.  Processing is done here. Can be null.
+    /// [w] Read callback. Processing is done here. Can be null.
     pub read                : DspReadCallback,
-    /// [w] Set position callback.  This is called if the unit wants to update its position info but not process data, or reset a cursor position internally if it is reading data from a certain source.  Can be null.
+    /// [w] Set position callback. This is called if the unit wants to update its position info but not process data, or reset a cursor position internally if it is reading data from a certain source. Can be null.
     pub set_position        : DspSetPositionCallback,
-    /// [w] Number of parameters used in this filter.  The user finds this with DSP::getNumParameters
+    /// [w] Number of parameters used in this filter. The user finds this with DSP::getNumParameters
     pub num_parameters      : i32,
     /// [w] Variable number of parameter structures.
     pub param_desc          : DspParameterDesc,
@@ -393,7 +393,7 @@ pub struct DspDescription
     pub set_parameter       : DspSetParamCallback,
     /// [w] This is called when the user calls DSP::getParameter. Can be null.
     pub get_parameter       : DspGetParamCallback,
-    /// [w] This is called when the user calls DSP::showConfigDialog. Can be used to display a dialog to configure the filter.  Can be null.
+    /// [w] This is called when the user calls DSP::showConfigDialog. Can be used to display a dialog to configure the filter. Can be null.
     config                  : DspDialogCallback,
     /// [w] Width of config dialog graphic if there is one. 0 otherwise.
     pub config_width        : i32,
@@ -512,7 +512,7 @@ pub fn from_state_ptr(state: ffi::FMOD_DSP_STATE) -> DspState {
 /// DSP plugin structure that is passed into each callback.
 pub struct DspState
 {
-    /// [r] Handle to the DSP hand the user created.  Not to be modified.  C++ users cast to FMOD::DSP to use.
+    /// [r] Handle to the DSP hand the user created. Not to be modified. C++ users cast to FMOD::DSP to use.
     pub instance: Dsp,
     /// [w] Plugin writer created data the output author wants to attach to this object.
     plugin_data: *mut c_void,
@@ -691,11 +691,11 @@ impl Dsp {
         unsafe { ffi::FMOD_DSP_SetActive(self.dsp, t_active) }
     }
 
-    pub fn is_active(&self) -> Result<bool, fmod::Result> {
+    pub fn get_active(&self) -> Result<bool, fmod::Result> {
         let mut active = 0i32;
 
         match unsafe { ffi::FMOD_DSP_GetActive(self.dsp, &mut active) } {
-            fmod::Ok => Ok(active == 1i32),
+            fmod::Ok => Ok(active != 0i32),
             e => Err(e)
         }
     }
@@ -742,10 +742,54 @@ impl Dsp {
         unsafe { ffi::FMOD_DSP_Reset(self.dsp) }
     }
 
+    /// value argument depends directly on the index argument,
+    /// index argument depends on your DSP type, it is a value from one of the following enums :
+    /// 
+    /// * [`DspType`](enums/fmod/type.DspType.html)
+    /// * [`DspOscillator`](enums/fmod/type.DspOscillator.html)
+    /// * [`DspLowPass`](enums/fmod/type.DspLowPass.html)
+    /// * [`DspITLowPass`](enums/fmod/type.DspITLowPass.html)
+    /// * [`DspHighPass`](enums/fmod/type.DspHighPass.html)
+    /// * [`DspTypeEcho`](enums/fmod/type.DspTypeEcho.html)
+    /// * [`DspDelay`](enums/fmod/type.DspDelay.html)
+    /// * [`DspFlange`](enums/fmod/type.DspFlange.html)
+    /// * [`DspTremolo`](enums/fmod/type.DspTremolo.html)
+    /// * [`DspDistortion`](enums/fmod/type.DspDistortion.html)
+    /// * [`DspNormalize`](enums/fmod/type.DspNormalize.html)
+    /// * [`DspTypeParameq`](enums/fmod/type.DspTypeParameq.html)
+    /// * [`DspPitchShift`](enums/fmod/type.DspPitchShift.html)
+    /// * [`DspChorus`](enums/fmod/type.DspChorus.html)
+    /// * [`DspITEcho`](enums/fmod/type.DspITEcho.html)
+    /// * [`DspCompressor`](enums/fmod/type.DspCompressor.html)
+    /// * [`DspSfxReverb`](enums/fmod/type.DspSfxReverb.html)
+    /// * [`DspLowPassSimple`](enums/fmod/type.DspLowPassSimple.html)
+    /// * [`DspHighPassSimple`](enums/fmod/type.DspHighPassSimple.html)
     pub fn set_parameter(&self, index: i32, value: f32) -> fmod::Result {
         unsafe { ffi::FMOD_DSP_SetParameter(self.dsp, index, value) }
     }
 
+    /// value result depends directly on the index argument,
+    /// index argument depends on your DSP type, it is a value from one of the following enums :
+    /// 
+    /// * [`DspType`](enums/fmod/type.DspType.html)
+    /// * [`DspOscillator`](enums/fmod/type.DspOscillator.html)
+    /// * [`DspLowPass`](enums/fmod/type.DspLowPass.html)
+    /// * [`DspITLowPass`](enums/fmod/type.DspITLowPass.html)
+    /// * [`DspHighPass`](enums/fmod/type.DspHighPass.html)
+    /// * [`DspTypeEcho`](enums/fmod/type.DspTypeEcho.html)
+    /// * [`DspDelay`](enums/fmod/type.DspDelay.html)
+    /// * [`DspFlange`](enums/fmod/type.DspFlange.html)
+    /// * [`DspTremolo`](enums/fmod/type.DspTremolo.html)
+    /// * [`DspDistortion`](enums/fmod/type.DspDistortion.html)
+    /// * [`DspNormalize`](enums/fmod/type.DspNormalize.html)
+    /// * [`DspTypeParameq`](enums/fmod/type.DspTypeParameq.html)
+    /// * [`DspPitchShift`](enums/fmod/type.DspPitchShift.html)
+    /// * [`DspChorus`](enums/fmod/type.DspChorus.html)
+    /// * [`DspITEcho`](enums/fmod/type.DspITEcho.html)
+    /// * [`DspCompressor`](enums/fmod/type.DspCompressor.html)
+    /// * [`DspSfxReverb`](enums/fmod/type.DspSfxReverb.html)
+    /// * [`DspLowPassSimple`](enums/fmod/type.DspLowPassSimple.html)
+    /// * [`DspHighPassSimple`](enums/fmod/type.DspHighPassSimple.html)
     pub fn get_parameter(&self, index: i32, value_str_len: u32) -> Result<(f32, String), fmod::Result> {
         let tmp_v = String::with_capacity(value_str_len as uint);
         let mut value = 0f32;
@@ -807,7 +851,7 @@ impl Dsp {
     }
 
     pub fn get_type(&self) -> Result<fmod::DspType, fmod::Result> {
-        let mut _type = fmod::DspTypeUnknown;
+        let mut _type = fmod::Unknown;
 
         match unsafe { ffi::FMOD_DSP_GetType(self.dsp, &mut _type) } {
             fmod::Ok => Ok(_type),

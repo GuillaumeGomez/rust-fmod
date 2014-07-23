@@ -267,7 +267,7 @@ impl Default for FmodAdvancedSettings {
 /// See below on what members to fill for each of the above types of sound you want to create.
 pub struct FmodCreateSoundexInfo
 {
-    /// [w] Optional. Specify 0 to ignore. Size in bytes of file to load, or sound to create (in this case only if FMOD_OPENUSER is used). Required if loading from memory.  If 0 is specified, then it will use the size of the file (unless loading from memory then an error will be returned).
+    /// [w] Optional. Specify 0 to ignore. Size in bytes of file to load, or sound to create (in this case only if FMOD_OPENUSER is used). Required if loading from memory. If 0 is specified, then it will use the size of the file (unless loading from memory then an error will be returned).
     pub length                 : u32,
     /// [w] Optional. Specify 0 to ignore. Offset from start of the file to start loading from. This is useful for loading files from inside big data files.
     pub file_offset            : u32,
@@ -281,7 +281,7 @@ pub struct FmodCreateSoundexInfo
     pub decode_buffer_size     : u32,
     /// [w] Optional. Specify 0 to ignore. In a multi-sample file format such as .FSB/.DLS/.SF2, specify the initial subsound to seek to, only if FMOD_CREATESTREAM is used.
     pub initial_subsound       : i32,
-    /// [w] Optional. Specify 0 to ignore or have no subsounds.  In a sound created with FMOD_OPENUSER, specify the number of subsounds that are accessable with [`Sound::get_sub_sound`](doc/rfmod/struct.Sound.html#method.get_sub_sound). If not created with FMOD_OPENUSER, this will limit the number of subsounds loaded within a multi-subsound file. If using FSB, then if FMOD_CREATESOUNDEXINFO::inclusionlist is used, this will shuffle subsounds down so that there are not any gaps. It will mean that the indices of the sounds will be different.
+    /// [w] Optional. Specify 0 to ignore or have no subsounds. In a sound created with FMOD_OPENUSER, specify the number of subsounds that are accessable with [`Sound::get_sub_sound`](doc/rfmod/struct.Sound.html#method.get_sub_sound). If not created with FMOD_OPENUSER, this will limit the number of subsounds loaded within a multi-subsound file. If using FSB, then if FMOD_CREATESOUNDEXINFO::inclusionlist is used, this will shuffle subsounds down so that there are not any gaps. It will mean that the indices of the sounds will be different.
     pub num_subsounds          : i32,
     /// [w] Optional. Specify 0 to ignore. In a multi-sample format such as .FSB/.DLS/.SF2 it may be desirable to specify only a subset of sounds to be loaded out of the whole file. This is an array of subsound indices to load into memory when created.
     pub inclusion_list         : Vec<i32>,
@@ -293,7 +293,7 @@ pub struct FmodCreateSoundexInfo
     pub non_block_callback     : SoundNonBlockCallback,
     /// [w] Optional. Specify 0 to ignore. Filename for a DLS or SF2 sample set when loading a MIDI file. If not specified, on Windows it will attempt to open /windows/system32/drivers/gm.dls or /windows/system32/drivers/etc/gm.dls, on Mac it will attempt to load /System/Library/Components/CoreAudio.component/Contents/Resources/gs_instruments.dls, otherwise the MIDI will fail to open. Current DLS support is for level 1 of the specification.
     pub dls_name               : String,
-    /// [w] Optional. Specify 0 to ignore. Key for encrypted FSB file.  Without this key an encrypted FSB file will not load.
+    /// [w] Optional. Specify 0 to ignore. Key for encrypted FSB file. Without this key an encrypted FSB file will not load.
     pub encryption_key         : String,
     /// [w] Optional. Specify 0 to ignore. For sequenced formats with dynamic channel allocation such as .MID and .IT, this specifies the maximum voice count allowed while playing. .IT defaults to 64. .MID defaults to 32.
     pub max_polyphony          : i32,
@@ -329,7 +329,7 @@ pub struct FmodCreateSoundexInfo
     pub audio_queue_policy     : u32,
     /// [w] Optional. Specify 0 to ignore. Allows you to set a minimum desired MIDI mixer granularity. Values smaller than 512 give greater than default accuracy at the cost of more CPU and vice versa. Specify 0 for default (512 samples).
     pub min_midi_granularity   : u32,
-    /// [w] Optional. Specify 0 to ignore. Specifies a thread index to execute non blocking load on. Allows for up to 5 threads to be used for loading at once.  This is to avoid one load blocking another.  Maximum value = 4.
+    /// [w] Optional. Specify 0 to ignore. Specifies a thread index to execute non blocking load on. Allows for up to 5 threads to be used for loading at once. This is to avoid one load blocking another. Maximum value = 4.
     pub non_block_thread_id    : i32
 }
 
