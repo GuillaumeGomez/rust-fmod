@@ -98,8 +98,8 @@ For a more complete example : https://github.com/GuillaumeGomez/rust-music-playe
 ##License
 
     Copyright (c) 2014 Guillaume Gomez
-    
-    The license of this project is the same of the FMOD non-commercial use. 
+
+    The license of this project is the same of the FMOD non-commercial use.
     Please refer to it. Here is the website for FMOD : http://www.fmod.org/
 
 #Notes
@@ -154,7 +154,16 @@ pub mod types;
 pub mod enums;
 pub mod callbacks;
 
-#[cfg(target_arch="x86")]
-#[link(name = "fmodex")] extern{}
-#[cfg(target_arch="x86_64")]
-#[link(name = "fmodex64")] extern{}
+
+#[cfg(target_os = "linux")]
+mod platform {
+    #[cfg(target_arch="x86")]
+    #[link(name = "fmodex")] extern{}
+    #[cfg(target_arch="x86_64")]
+    #[link(name = "fmodex64")] extern{}
+}
+
+#[cfg(target_os = "macos")]
+mod platform {
+    #[link(name = "fmodex")] extern{}
+}
