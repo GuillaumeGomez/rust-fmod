@@ -33,6 +33,7 @@ use fmod_sys::FmodMemoryUsageDetails;
 use std::mem::transmute;
 use libc::{c_char};
 use std::default::Default;
+use std::string;
 
 /// SoundGroup object
 pub struct SoundGroup {
@@ -129,7 +130,7 @@ impl SoundGroup {
 
         name.with_c_str(|c_name|{
             match unsafe { ffi::FMOD_SoundGroup_GetName(self.sound_group, c_name as *mut c_char, name_len as i32) } {
-                fmod::Ok => Ok(unsafe {::std::str::raw::from_c_str(c_name).clone() }),
+                fmod::Ok => Ok(unsafe {string::raw::from_buf(c_name as *const u8).clone() }),
                 e => Err(e)
             }
         })

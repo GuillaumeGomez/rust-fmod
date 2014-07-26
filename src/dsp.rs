@@ -36,6 +36,7 @@ use std;
 use std::collections::hashmap::HashMap;
 use std::c_str::CString;
 use std::default::Default;
+use std::string;
 
 extern "C" fn create_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> fmod::Result {
     unsafe {
@@ -202,7 +203,7 @@ extern "C" fn get_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index:
                         let ret = p(&from_state_ptr(*dsp_state),
                             index as i32,
                             &mut t_value,
-                            ::std::str::raw::from_c_str(value_str as *const c_char).as_slice());
+                            string::raw::from_buf(value_str as *const u8).as_slice());
                         *value = t_value;
                         ret
                     },
@@ -320,7 +321,7 @@ pub fn from_parameter_ptr(dsp_parameter: *mut ffi::FMOD_DSP_PARAMETERDESC) -> Ds
                     Some(s) => s.to_string(),
                     None => "".to_string()
                 },
-                description: ::std::str::raw::from_c_str((*dsp_parameter).description.clone())
+                description: string::raw::from_buf((*dsp_parameter).description.clone() as *const u8)
             }
         }
     } else {
@@ -796,7 +797,7 @@ impl Dsp {
 
         tmp_v.with_c_str(|c_str|{
             match unsafe { ffi::FMOD_DSP_GetParameter(self.dsp, index, &mut value, c_str as *mut c_char, value_str_len as i32) } {
-                fmod::Ok => Ok((value, unsafe {::std::str::raw::from_c_str(c_str).clone() })),
+                fmod::Ok => Ok((value, unsafe {string::raw::from_buf(c_str as *const u8).clone() })),
                 e => Err(e)
             }
         })
@@ -823,7 +824,7 @@ impl Dsp {
                 t_label.with_c_str(|c_label|{
                     match unsafe { ffi::FMOD_DSP_GetParameterInfo(self.dsp, index, c_name as *mut c_char, c_label as *mut c_char,
                         c_description as *mut c_char, description_len as i32, &mut min, &mut max) } {
-                        fmod::Ok => Ok((unsafe {::std::str::raw::from_c_str(c_description).clone() }, min, max)),
+                        fmod::Ok => Ok((unsafe {string::raw::from_buf(c_description as *const u8).clone() }, min, max)),
                         e => Err(e)
                     }
                 })

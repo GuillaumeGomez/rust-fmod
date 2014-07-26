@@ -42,6 +42,7 @@ use dsp_connection;
 use std::default::Default;
 use callbacks::*;
 use std::c_vec::CVec;
+use std::string;
 
 extern "C" fn pcm_read_callback(sound: *mut ffi::FMOD_SOUND, data: *mut c_void, data_len: c_uint) -> fmod::Result {
     unsafe {
@@ -962,7 +963,7 @@ impl FmodSys {
         tmp_v.with_c_str(|c_str|{
             match unsafe { ffi::FMOD_System_GetDriverInfo(self.system, id, c_str as *mut c_char, name_len as i32, &mut guid) } {
                 fmod::Ok => Ok((FmodGuid{data1: guid.Data1, data2: guid.Data2, data3: guid.Data3, data4: guid.Data4},
-                    unsafe {::std::str::raw::from_c_str(c_str).clone() })),
+                    unsafe {string::raw::from_buf(c_str as *const u8).clone() })),
                 e => Err(e)
             }
         })
@@ -1132,7 +1133,7 @@ impl FmodSys {
                             if tmp.is_null() {
                                 break;
                             }
-                            converted_ASIO_channel_vec.push(::std::str::raw::from_c_str(*tmp as *const c_char));
+                            converted_ASIO_channel_vec.push(string::raw::from_buf(*tmp as *const u8));
                             it += 1;
                         }
                     }
@@ -1169,7 +1170,7 @@ impl FmodSys {
                     default_decode_buffer_size: advanced_settings.defaultDecodeBufferSize,
                     debug_log_filename: {
                         if advanced_settings.debugLogFilename.is_not_null() {
-                            unsafe {::std::str::raw::from_c_str(advanced_settings.debugLogFilename as *const c_char).clone() }
+                            unsafe {string::raw::from_buf(advanced_settings.debugLogFilename as *const u8).clone() }
                         } else {
                             String::new()
                         }
@@ -1250,7 +1251,7 @@ impl FmodSys {
 
         name.with_c_str(|c_str|{
             match unsafe { ffi::FMOD_System_GetPluginInfo(self.system, handle, &mut plugin_type, c_str as *mut c_char, name_len as i32, &mut version) } {
-                fmod::Ok => Ok((unsafe {::std::str::raw::from_c_str(c_str).clone() }, plugin_type, version)),
+                fmod::Ok => Ok((unsafe {string::raw::from_buf(c_str as *const u8).clone() }, plugin_type, version)),
                 e => Err(e)
             }
         })
@@ -1434,9 +1435,9 @@ impl FmodSys {
                 device_name.with_c_str(|c_device_name|{
                     match unsafe { ffi::FMOD_System_GetCDROMDriveName(self.system, drive, c_drive_name as *mut c_char, drive_name_len as i32, c_scsi_name as *mut c_char,
                         scsi_name_len as i32, c_device_name as *mut c_char, device_name_len as i32) } {
-                        fmod::Ok => Ok((unsafe {::std::str::raw::from_c_str(c_drive_name).clone() },
-                                        unsafe {::std::str::raw::from_c_str(c_scsi_name).clone() },
-                                        unsafe {::std::str::raw::from_c_str(c_device_name).clone() })),
+                        fmod::Ok => Ok((unsafe {string::raw::from_buf(c_drive_name as *const u8).clone() },
+                                        unsafe {string::raw::from_buf(c_scsi_name as *const u8).clone() },
+                                        unsafe {string::raw::from_buf(c_device_name as *const u8).clone() })),
                         e => Err(e)
                     }
                 })
@@ -1579,7 +1580,7 @@ impl FmodSys {
         tmp_v.with_c_str(|c_str|{
             match unsafe { ffi::FMOD_System_GetRecordDriverInfo(self.system, id, c_str as *mut c_char, name_len as i32, &mut guid) } {
                 fmod::Ok => Ok((FmodGuid{data1: guid.Data1, data2: guid.Data2, data3: guid.Data3, data4: guid.Data4},
-                    unsafe {::std::str::raw::from_c_str(c_str).clone() })),
+                    unsafe {string::raw::from_buf(c_str as *const u8).clone() })),
                 e => Err(e)
             }
         })
