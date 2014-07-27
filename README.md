@@ -16,7 +16,7 @@ To build it, please use :
 > make
 ```
 
-This command build __rfmod__, the examples, and the documentation.
+This command build __rfmod__, the examples and the documentation.
 
 You can build them separatly too.
 
