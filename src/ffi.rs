@@ -50,7 +50,7 @@ pub type FMOD_SYSTEM_CALLBACK = Option<extern "C" fn(system: *mut FMOD_SYSTEM, _
     command_data2: *mut c_void) -> fmod::Result>;
 
 /* file callbacks */
-pub type FMOD_FILE_OPENCALLBACK = Option<extern "C" fn(name: *mut c_char, unicode: int, file_size: *mut c_uint, handle: *mut *mut c_void,
+pub type FMOD_FILE_OPENCALLBACK = Option<extern "C" fn(name: *mut c_char, unicode: c_int, file_size: *mut c_uint, handle: *mut *mut c_void,
     user_data: *mut *mut c_void) -> fmod::Result>;
 pub type FMOD_FILE_CLOSECALLBACK = Option<extern "C" fn(handle: *mut c_void, user_data: *mut c_void) -> fmod::Result>;
 pub type FMOD_FILE_READCALLBACK = Option<extern "C" fn(handle: *mut c_void, buffer: *mut c_void, size_bytes: c_uint, bytes_read: *mut c_uint,

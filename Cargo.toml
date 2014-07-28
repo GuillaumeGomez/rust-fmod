@@ -38,3 +38,8 @@ path = "examples/3d/main.rs"
 
 name = "effects"
 path = "examples/effects/main.rs"
+
+[[bin]]
+
+name = "file_callbacks"
+path = "examples/file_callbacks/main.rs"

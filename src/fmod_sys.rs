@@ -43,6 +43,144 @@ use std::default::Default;
 use callbacks::*;
 use std::c_vec::CVec;
 use std::string;
+use std;
+use file;
+use libc::types::common::c95::FILE;
+
+fn get_saved_sys_callback<'r>() -> &'r mut SysCallback {
+    static mut callback : SysCallback = SysCallback {
+            file_open: None,
+            file_close: None,
+            file_read: None,
+            file_seek: None
+        };
+
+    unsafe { &mut callback }
+}
+
+struct SysCallback {
+    file_open: FileOpenCallback,
+    file_close: FileCloseCallback,
+    file_read: FileReadCallback,
+    file_seek: FileSeekCallback
+}
+
+impl SysCallback {
+    fn new() -> SysCallback {
+        SysCallback {
+            file_open: None,
+            file_close: None,
+            file_read: None,
+            file_seek: None
+        }
+    }
+}
+
+extern "C" fn file_open_callback(name: *mut c_char, unicode: c_int, file_size: *mut c_uint, handle: *mut *mut c_void,
+    user_data: *mut *mut c_void) -> fmod::Result {
+    let tmp = get_saved_sys_callback();
+
+    match tmp.file_open {
+        Some(s) => {
+            let t_name = if name.is_null() {
+                String::new()
+            } else {
+                unsafe { string::raw::from_buf(name as *const u8) }
+            };
+            match s(t_name.as_slice(), unicode) {
+                Some((f, s)) => {
+                    unsafe {
+                        *file_size = f.get_file_size() as u32;
+                        *handle = file::get_ffi(&f) as *mut c_void;
+                        *user_data = match s {
+                            Some(mut d) => std::mem::transmute(&mut d),
+                            None => ::std::ptr::mut_null()
+                        };
+                    }
+                    fmod::Ok
+                }
+                None => {
+                    unsafe {
+                        *file_size = 0u32;
+                        *handle = std::ptr::mut_null();
+                        *user_data = std::ptr::mut_null();
+                    }
+                    fmod::ErrFileNotFound
+                }
+            }
+        },
+        None => {
+            unsafe {
+                *file_size = 0u32;
+                *handle = std::ptr::mut_null();
+                *user_data = std::ptr::mut_null();
+            }
+            fmod::Ok
+        }
+    }
+}
+
+extern "C" fn file_close_callback(handle: *mut c_void, user_data: *mut c_void) -> fmod::Result {
+    let tmp = get_saved_sys_callback();
+
+    match tmp.file_close {
+        Some(s) => {
+            unsafe {
+                s(&mut file::from_ffi(handle as *mut FILE), if user_data.is_null() {
+                    None
+                } else {
+                    Some(std::mem::transmute(user_data))
+                });
+            }
+            fmod::Ok
+        }
+        None => fmod::Ok
+    }
+}
+
+extern "C" fn file_read_callback(handle: *mut c_void, buffer: *mut c_void, size_bytes: c_uint, bytes_read: *mut c_uint,
+    user_data: *mut c_void) -> fmod::Result {
+    let tmp = get_saved_sys_callback();
+
+    match tmp.file_read {
+        Some(s) => {
+            unsafe {
+                let mut data_vec : CVec<u8> = CVec::new(buffer as *mut u8, size_bytes as uint);
+
+                let read_bytes = s(&mut file::from_ffi(handle as *mut FILE), data_vec.as_mut_slice(), size_bytes, if user_data.is_null() {
+                    None
+                } else {
+                    Some(std::mem::transmute(user_data))
+                });
+                *bytes_read = read_bytes as u32;
+                if read_bytes < size_bytes as uint {
+                    fmod::ErrFileEOF
+                } else {
+                    fmod::Ok
+                }
+            }
+        }
+        None => fmod::Ok
+    }
+}
+
+extern "C" fn file_seek_callback(handle: *mut c_void, pos: c_uint, user_data: *mut c_void) -> fmod::Result {
+    let tmp = get_saved_sys_callback();
+
+    match tmp.file_seek {
+        Some(s) => {
+            unsafe {
+                s(&mut file::from_ffi(handle as *mut FILE), pos, if user_data.is_null() {
+                    None
+                } else {
+                    Some(std::mem::transmute(user_data))
+                });
+            }
+            fmod::Ok
+        }
+        None => fmod::Ok
+    }
+}
 
 extern "C" fn pcm_read_callback(sound: *mut ffi::FMOD_SOUND, data: *mut c_void, data_len: c_uint) -> fmod::Result {
     unsafe {
@@ -51,7 +189,7 @@ extern "C" fn pcm_read_callback(sound: *mut ffi::FMOD_SOUND, data: *mut c_void, 
 
             ffi::FMOD_Sound_GetUserData(sound, &mut tmp);
             if tmp.is_not_null() {
-                let callbacks : &mut ffi::SoundData = ::std::mem::transmute(tmp);
+                let callbacks : &mut ffi::SoundData = std::mem::transmute(tmp);
 
                 match callbacks.pcm_read {
                     Some(p) => {
@@ -136,6 +274,33 @@ impl Default for FmodGuid {
             data2: 0u16,
             data3: 0u16,
             data4: [0u8, ..8]
+        }
+    }
+}
+
+/// Structure used to store user data for file callback
+pub struct FmodUserData {
+    user_data: *mut c_void
+}
+
+impl FmodUserData {
+    pub fn set_user_data<T>(&mut self, user_data: &mut T) {
+        unsafe { self.user_data = std::mem::transmute(user_data) }
+    }
+
+    pub fn get_user_data<'r, T>(&self) -> Option<&'r mut T> {
+        if self.user_data.is_null() {
+            None
+        } else {
+            Some(unsafe { std::mem::transmute(self.user_data) })
+        }
+    }
+}
+
+impl Default for FmodUserData {
+    fn default() -> FmodUserData {
+        FmodUserData {
+            user_data: ::std::ptr::mut_null()
         }
     }
 }
@@ -1673,18 +1838,36 @@ impl FmodSys {
         }
     }
 
-    /*pub fn set_file_system(&self, user_open: ffi::FMOD_FILE_OPENCALLBACK, user_close: ffi::FMOD_FILE_CLOSECALLBACK,
-        user_read: ffi::FMOD_FILE_READCALLBACK, user_seek: ffi::FMOD_FILE_SEEKCALLBACK,
-        user_async_read: ffi::FMOD_FILE_ASYNCREADCALLBACK, user_async_cancel: ffi::FMOD_FILE_ASYNCCANCELCALLBACK,
+    pub fn set_file_system(&self, user_open: FileOpenCallback, user_close: FileCloseCallback,
+        user_read: FileReadCallback, user_seek: FileSeekCallback,/*
+        user_async_read: ffi::FMOD_FILE_ASYNCREADCALLBACK, user_async_cancel: ffi::FMOD_FILE_ASYNCCANCELCALLBACK,*/
         block_align: i32) -> fmod::Result {
+        let tmp = get_saved_sys_callback();
+
+        tmp.file_open = user_open;
+        tmp.file_read = user_read;
+        tmp.file_close = user_close;
+        tmp.file_seek = user_seek;
         unsafe { ffi::FMOD_System_SetFileSystem(self.system,
-            user_open,
-            user_close,
-            user_read,
-            user_seek,
-            user_async_read,
-            user_async_cancel,
+            match user_open {
+                Some(_) => Some(file_open_callback),
+                None => None
+            },
+            match user_close {
+                Some(_) => Some(file_close_callback),
+                None => None
+            },
+            match user_read {
+                Some(_) => Some(file_read_callback),
+                None => None
+            },
+            match user_seek {
+                Some(_) => Some(file_seek_callback),
+                None => None
+            },
+            None,
+            None,
             block_align)
         }
-    }*/
+    }
 }

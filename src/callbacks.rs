@@ -27,11 +27,19 @@ use dsp;
 use enums::*;
 use sound;
 use types::FmodTimeUnit;
+use std::io::fs::File;
+use fmod_sys;
+use std::io::IoResult;
+use file;
 
 /*pub type SystemCallback = Option<fn(fmod: &FmodSys, _type: fmod::SystemCallbackType, command_data1: *mut c_void,
     command_data2: *mut c_void) -> fmod::Result>;*/
 
 /* file callbacks */
+pub type FileOpenCallback = Option<fn(name: &str, unicode: i32) -> Option<(file::FmodFile, Option<fmod_sys::FmodUserData>)>>;
+pub type FileCloseCallback = Option<fn(handle: &mut file::FmodFile, user_data: Option<&mut fmod_sys::FmodUserData>)>;
+pub type FileReadCallback = Option<fn(handle: &mut file::FmodFile, buffer: &mut [u8], size_to_read: u32, user_data: Option<&mut fmod_sys::FmodUserData>) -> uint>;
+pub type FileSeekCallback = Option<fn(handle: &mut file::FmodFile, pos: u32, user_data: Option<&mut fmod_sys::FmodUserData>)>;
 /*pub type FMOD_FILE_OPENCALLBACK = Option<extern "C" fn(name: *mut c_char, unicode: int, file_size: *mut c_uint, handle: *mut *mut c_void,
     user_data: *mut *mut c_void) -> fmod::Result>;
 pub type FMOD_FILE_CLOSECALLBACK = Option<extern "C" fn(handle: *mut c_void, user_data: *mut c_void) -> fmod::Result>;

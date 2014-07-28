@@ -127,7 +127,7 @@ Here is the list of all modules :
 extern crate libc;
 
 pub use channel::{Channel, FmodSpeakerMixOptions, FmodReverbChannelProperties};
-pub use fmod_sys::{FmodSys, FmodGuid, FmodSoftwareFormat, FmodAdvancedSettings, FmodOutputHandle, FmodCreateSoundexInfo, FmodMemoryUsageDetails};
+pub use fmod_sys::{FmodSys, FmodGuid, FmodSoftwareFormat, FmodAdvancedSettings, FmodOutputHandle, FmodCreateSoundexInfo, FmodMemoryUsageDetails, FmodUserData};
 pub use sound::{Sound, FmodTag, FmodSyncPoint};
 pub use channel_group::{ChannelGroup};
 pub use sound_group::SoundGroup;
@@ -137,6 +137,7 @@ pub use reverb::Reverb;
 pub use reverb_properties::ReverbProperties;
 pub use vector::FmodVector;
 pub use geometry::Geometry;
+pub use file::FmodFile;
 
 mod ffi;
 mod sound;
@@ -150,6 +151,7 @@ mod geometry;
 mod vector;
 mod reverb;
 mod reverb_properties;
+mod file;
 pub mod types;
 pub mod enums;
 pub mod callbacks;
