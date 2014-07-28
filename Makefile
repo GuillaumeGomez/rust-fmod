@@ -20,7 +20,7 @@
 #
 # 3. This notice may not be removed or altered from any source distribution.
 
-all: rfmod examples docs
+all: rfmod examples doc
 
 rfmod:
 	mkdir -p lib
