@@ -22,8 +22,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-use libc::{c_void, c_uint, c_int, c_char, c_float};
 use types::{FmodTimeUnit, FmodMemoryBits};
+use libc::c_uint;
 
 pub mod fmod {
     #[deriving(PartialEq, PartialOrd, Show)]

@@ -118,7 +118,6 @@ Here is the list of all modules :
 
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case_functions)]
-#![allow(unused_imports)]
 #![allow(dead_code)]
 #![allow(uppercase_variables)]
 

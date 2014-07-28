@@ -23,9 +23,6 @@
 */
 
 use ffi;
-use types::*;
-use enums::*;
-use vector;
 use std::default::Default;
 
 pub fn from_ptr(pointer: ffi::FMOD_REVERB_PROPERTIES) -> ReverbProperties {

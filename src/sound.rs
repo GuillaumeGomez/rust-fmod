@@ -24,12 +24,11 @@
 
 use enums::*;
 use types::*;
-use libc::{c_int, c_void, c_uint, c_char, c_ushort, c_void};
+use libc::{c_int, c_uint, c_char, c_ushort, c_void};
 use ffi;
 use channel;
 use channel::Channel;
 use sound_group;
-use fmod_sys;
 use std::io::timer::sleep;
 use vector;
 use fmod_sys;

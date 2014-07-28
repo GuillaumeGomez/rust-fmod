@@ -22,7 +22,7 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-use libc::{c_void, c_uint, c_int, c_char, c_float, c_short};
+use libc::{c_void, c_uint, c_int, c_char, c_short};
 use ffi;
 use types::*;
 use enums::*;

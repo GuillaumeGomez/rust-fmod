@@ -22,7 +22,6 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-use libc::{c_void, c_uint, c_int, c_char, c_float, c_short};
 use libc::funcs::c95::stdio::{fopen, fread, fclose, fseek, ftell};
 use libc::consts::os::c95::{SEEK_SET, SEEK_CUR, SEEK_END};
 use std::io::{SeekStyle, SeekSet, SeekEnd, SeekCur};
@@ -31,6 +30,7 @@ use libc::types::os::arch::posix01::stat;
 use std::mem::zeroed;
 use libc::funcs::posix88::stat_::fstat;
 use libc::funcs::posix88::stdio::fileno;
+use libc::c_void;
 
 pub fn get_ffi(file: &FmodFile) -> *mut FILE {
     file.fd

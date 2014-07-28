@@ -26,7 +26,6 @@ use enums::*;
 use types::*;
 use ffi;
 use channel;
-use fmod_sys;
 use dsp;
 use dsp_connection;
 use libc::{c_int, c_void};

@@ -25,7 +25,6 @@
 extern crate libc;
 
 use enums::*;
-use dsp;
 use callbacks::*;
 use libc::{c_void, c_uint, c_int, c_char, c_float, c_ushort, c_uchar, c_short};
 

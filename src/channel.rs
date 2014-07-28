@@ -24,7 +24,7 @@
 
 use enums::*;
 use types::*;
-use libc::{c_int, c_uint, c_void};
+use libc::{c_int, c_void};
 use ffi;
 use dsp;
 use dsp::Dsp;

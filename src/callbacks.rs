@@ -22,14 +22,11 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-use ffi;
 use dsp;
 use enums::*;
 use sound;
 use types::FmodTimeUnit;
-use std::io::fs::File;
 use fmod_sys;
-use std::io::IoResult;
 use file;
 
 /*pub type SystemCallback = Option<fn(fmod: &FmodSys, _type: fmod::SystemCallbackType, command_data1: *mut c_void,
