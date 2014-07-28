@@ -40,13 +40,7 @@ pub type FileOpenCallback = Option<fn(name: &str, unicode: i32) -> Option<(file:
 pub type FileCloseCallback = Option<fn(handle: &mut file::FmodFile, user_data: Option<&mut fmod_sys::FmodUserData>)>;
 pub type FileReadCallback = Option<fn(handle: &mut file::FmodFile, buffer: &mut [u8], size_to_read: u32, user_data: Option<&mut fmod_sys::FmodUserData>) -> uint>;
 pub type FileSeekCallback = Option<fn(handle: &mut file::FmodFile, pos: u32, user_data: Option<&mut fmod_sys::FmodUserData>)>;
-/*pub type FMOD_FILE_OPENCALLBACK = Option<extern "C" fn(name: *mut c_char, unicode: int, file_size: *mut c_uint, handle: *mut *mut c_void,
-    user_data: *mut *mut c_void) -> fmod::Result>;
-pub type FMOD_FILE_CLOSECALLBACK = Option<extern "C" fn(handle: *mut c_void, user_data: *mut c_void) -> fmod::Result>;
-pub type FMOD_FILE_READCALLBACK = Option<extern "C" fn(handle: *mut c_void, buffer: *mut c_void, size_bytes: c_uint, bytes_read: *mut c_uint,
-    user_data: *mut c_void) -> fmod::Result>;
-pub type FMOD_FILE_SEEKCALLBACK = Option<extern "C" fn(handle: *mut c_void, pos: c_uint, user_data: *mut c_void) -> fmod::Result>;
-pub type FMOD_FILE_ASYNCREADCALLBACK = Option<extern "C" fn(arg1: *mut FMOD_ASYNCREADINFO, arg2: *mut c_void) -> fmod::Result>;
+/*pub type FMOD_FILE_ASYNCREADCALLBACK = Option<extern "C" fn(arg1: *mut FMOD_ASYNCREADINFO, arg2: *mut c_void) -> fmod::Result>;
 pub type FMOD_FILE_ASYNCCANCELCALLBACK = Option<extern "C" fn(arg1: *mut c_void, arg2: *mut c_void, arg3: c_uint) -> fmod::Result>;*/
 
 /// sound callback
