@@ -487,8 +487,8 @@ pub struct FmodCreateSoundexInfo
     pub initial_seek_position  : u32,
     /// [w] Optional. Specify 0 to ignore. For streams. Specify the time unit for the position set in initialseekposition.
     pub initial_seek_pos_type  : FmodTimeUnit,
-    /// [w] Optional. Specify 0 to ignore. Set to 1 to use fmod's built in file system. Ignores setFileSystem callbacks and also FMOD_CREATESOUNEXINFO file callbacks. Useful for specific cases where you don't want to use your own file system but want to use fmod's file system (ie net streaming).
-    pub ignore_set_file_system : i32,
+    /// [w] Optional. Specify true to ignore. Set to false to use fmod's built in file system. Ignores setFileSystem callbacks and also FMOD_CREATESOUNEXINFO file callbacks. Useful for specific cases where you don't want to use your own file system but want to use fmod's file system (ie net streaming).
+    pub ignore_set_file_system : bool,
     /// [w] Optional. Specify 0 to ignore. For CDDA sounds only - if non-zero use ASPI instead of NTSCSI to access the specified CD/DVD device.
     pub cdda_force_aspi        : i32,
     /// [w] Optional. Specify 0 or FMOD_AUDIOQUEUE_CODECPOLICY_DEFAULT to ignore. Policy used to determine whether hardware or software is used for decoding, see FMOD_AUDIOQUEUE_CODECPOLICY for options (iOS >= 3.0 required, otherwise only hardware is available)
@@ -529,7 +529,7 @@ impl Default for FmodCreateSoundexInfo {
             initial_sound_group: sound_group::from_ptr(::std::ptr::mut_null()),
             initial_seek_position: 0u32,
             initial_seek_pos_type: FmodTimeUnit(0u32),
-            ignore_set_file_system: 0i32,
+            ignore_set_file_system: true,
             cdda_force_aspi: 0i32,
             audio_queue_policy: 0u32,
             min_midi_granularity: 0u32,
@@ -584,7 +584,10 @@ impl FmodCreateSoundexInfo {
             initialsoundgroup: sound_group::get_ffi(&self.initial_sound_group),
             initialseekposition: self.initial_seek_position,
             initialseekpostype: match self.initial_seek_pos_type {FmodTimeUnit(v) => v},
-            ignoresetfilesystem: self.ignore_set_file_system,
+            ignoresetfilesystem: match self.ignore_set_file_system {
+                true => 0i32,
+                false => 1i32
+            },
             cddaforceaspi: self.cdda_force_aspi,
             audioqueuepolicy: self.audio_queue_policy,
             minmidigranularity: self.min_midi_granularity,
