@@ -313,7 +313,7 @@ extern "C" {
     pub fn FMOD_Channel_GetLowPassGain(channel: *mut FMOD_CHANNEL, gain: *mut c_float) -> fmod::Result;
     pub fn FMOD_Channel_SetChannelGroup(channel: *mut FMOD_CHANNEL, channelgroup: *mut FMOD_CHANNELGROUP) -> fmod::Result;
     pub fn FMOD_Channel_GetChannelGroup(channel: *mut FMOD_CHANNEL, channelgroup: *mut *mut FMOD_CHANNELGROUP) -> fmod::Result;
-    /* I'll bint it later */
+    /* I'll bind it later */
     //pub fn FMOD_Channel_SetCallback(channel: *mut FMOD_CHANNEL, callback: *mut FMOD_Channel_CALLBACK) -> fmod::Result;
     /* 3D functionality */
     pub fn FMOD_Channel_Set3DAttributes(channel: *mut FMOD_CHANNEL, position: *mut FMOD_VECTOR, velociy: *mut FMOD_VECTOR) -> fmod::Result;
