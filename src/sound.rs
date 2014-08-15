@@ -30,6 +30,7 @@ use channel;
 use channel::Channel;
 use sound_group;
 use std::io::timer::sleep;
+use std::time::duration::Duration;
 use vector;
 use fmod_sys;
 use fmod_sys::{FmodMemoryUsageDetails, FmodSys};
@@ -239,7 +240,7 @@ impl Sound {
                     match chan.is_playing() {
                         Ok(b) => {
                             if b == true {
-                                sleep(30)
+                                sleep(Duration::milliseconds(30))
                             } else {
                                 break;
                             }

@@ -32,6 +32,7 @@ use rfmod::types::*;
 use rfmod::*;
 use std::os;
 use std::io::timer::sleep;
+use std::time::duration::Duration;
 
 fn get_key() -> Result<int, std::io::IoError> {
     let mut reader = std::io::stdio::stdin();
@@ -168,6 +169,6 @@ fn main() {
             Err(e) => fail!("Entry error: {}", e)
         }
         fmod.update();
-        sleep(30); // to let time to system for update
+        sleep(Duration::milliseconds(30)); // let time to the system for update
     }
 }

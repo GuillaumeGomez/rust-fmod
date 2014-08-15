@@ -33,6 +33,7 @@ use rfmod::*;
 use std::io::timer::sleep;
 use std::mem;
 use std::default::Default;
+use std::time::duration::Duration;
 
 fn get_key() -> Result<int, std::io::IoError> {
     let mut reader = std::io::stdio::stdin();
@@ -174,7 +175,7 @@ fn main() {
                                 while fmod.is_recording(record_driver).unwrap() == true {
                                     print!("\rRecording : {}", fmod.get_record_position(record_driver).unwrap());
                                     fmod.update();
-                                    sleep(15);
+                                    sleep(Duration::milliseconds(15));
                                 }
                                 Some(fmod::Ok)
                             }
@@ -188,7 +189,7 @@ fn main() {
                                 while chan.is_playing().unwrap() == true {
                                     print!("\rPlaying : {} / {}", chan.get_position(FMOD_TIMEUNIT_MS).unwrap(), sound.get_length(FMOD_TIMEUNIT_MS).unwrap());
                                     fmod.update();
-                                    sleep(15);
+                                    sleep(Duration::milliseconds(15));
                                 }
                                 Some(fmod::Ok)
                             }

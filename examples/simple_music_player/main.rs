@@ -30,6 +30,7 @@ use rfmod::enums::*;
 use rfmod::*;
 use std::os;
 use std::io::timer::sleep;
+use std::time::duration::Duration;
 
 fn play_to_the_end(sound: Sound, len: uint) -> fmod::Result {
     let length = match sound.get_length(FMOD_TIMEUNIT_MS) {
@@ -54,7 +55,7 @@ fn play_to_the_end(sound: Sound, len: uint) -> fmod::Result {
                                 old_position = position;
                                 print!("\r{} : {:02u}:{:02u} / {:02u}:{:02u}", name, position / 1000 / 60, position / 1000 % 60, length / 1000 / 60, length / 1000 % 60);
                             }
-                            sleep(30)
+                            sleep(Duration::milliseconds(30))
                         } else {
                             break;
                         }

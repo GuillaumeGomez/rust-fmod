@@ -33,6 +33,7 @@ use rfmod::*;
 use std::default::Default;
 use std::io::timer::sleep;
 use std::os;
+use std::time::duration::Duration;
 
 fn main() {
     let args = os::args();
@@ -97,6 +98,6 @@ fn main() {
         unsafe { tmp.as_mut_bytes()[listener_pos.x as uint + 35u] = 'L' as u8; }
         print!("{}", tmp);
         fmod.update();
-        sleep(interface_update_time as u64 - 1u64);
+        sleep(Duration::milliseconds(interface_update_time as i32 - 1i32));
     }
 }
