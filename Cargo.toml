@@ -1,10 +1,10 @@
 [package]
 
 name = "rust-fmod"
-version = "0.8.0"
+version = "0.9.5"
 authors = ["Guillaume Gomez <guillaume1.gomez@gmail.com>"]
 
-[[lib]]
+[lib]
 
 name = "rfmod"
 crate-type = ["dylib", "rlib"]
