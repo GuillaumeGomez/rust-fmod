@@ -1298,7 +1298,7 @@ impl FmodSys {
                         loop {
                             let tmp = advanced_settings.ASIOChannelList.offset(it);
 
-                            if tmp.is_null() {
+                            if (*tmp).is_null() {
                                 break;
                             }
                             converted_ASIO_channel_vec.push(string::raw::from_buf(*tmp as *const u8));
