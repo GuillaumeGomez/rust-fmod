@@ -42,17 +42,19 @@ pub struct ChannelGroup {
     channel_group: *mut ffi::FMOD_CHANNELGROUP,
 }
 
-pub fn get_ffi(channel_group: &ChannelGroup) -> *mut ffi::FMOD_CHANNELGROUP {
-    channel_group.channel_group
-}
-
-pub fn from_ptr(channel_group: *mut ffi::FMOD_CHANNELGROUP) -> ChannelGroup {
-    ChannelGroup{channel_group: channel_group}
-}
-
 impl Drop for ChannelGroup {
     fn drop(&mut self) {
         self.release();
+    }
+}
+
+impl ffi::FFI<ffi::FMOD_CHANNELGROUP> for ChannelGroup {
+    fn wrap(channel_group: *mut ffi::FMOD_CHANNELGROUP) -> ChannelGroup {
+        ChannelGroup {channel_group: channel_group}
+    }
+
+    fn unwrap(c: &ChannelGroup) -> *mut ffi::FMOD_CHANNELGROUP {
+        c.channel_group
     }
 }
 
@@ -265,7 +267,7 @@ impl ChannelGroup {
         let mut channel = ::std::ptr::mut_null();
 
         match unsafe { ffi::FMOD_ChannelGroup_GetChannel(self.channel_group, index, &mut channel) } {
-            fmod::Ok => Ok(channel::from_ptr(channel)),
+            fmod::Ok => Ok(ffi::FFI::wrap(channel)),
             e => Err(e)
         }
     }

@@ -214,13 +214,13 @@ impl Sound {
             }
             Err(e) => e
         } {
-            fmod::Ok => Ok(channel::from_ptr(channel)),
+            fmod::Ok => Ok(ffi::FFI::wrap(channel)),
             e => Err(e)
         }
     }
 
     pub fn play_with_parameters(&self, paused: bool, channel: &mut channel::Channel) -> fmod::Result {
-        let mut chan = channel::get_ffi(channel);
+        let mut chan = ffi::FFI::unwrap(channel);
         
         match self.get_system_object() {
             Ok(s) => { 

@@ -30,7 +30,6 @@ use dsp;
 use dsp::Dsp;
 use dsp_connection;
 use dsp_connection::DspConnection;
-use channel_group;
 use channel_group::ChannelGroup;
 use fmod_sys;
 use fmod_sys::{FmodMemoryUsageDetails, FmodSys};
@@ -80,18 +79,6 @@ pub struct FmodReverbChannelProperties {
     pub connection_point: Dsp
 }
 
-pub fn get_ffi(channel: &mut Channel) -> *mut ffi::FMOD_CHANNEL {
-    channel.channel
-}
-
-pub fn new() -> Channel {
-    Channel{channel: ::std::ptr::mut_null()}
-}
-
-pub fn from_ptr(channel: *mut ffi::FMOD_CHANNEL) -> Channel {
-    Channel{channel: channel}
-}
-
 /// Channel Object
 pub struct Channel {
     channel: *mut ffi::FMOD_CHANNEL
@@ -103,7 +90,21 @@ impl Drop for Channel {
     }
 }
 
+impl ffi::FFI<ffi::FMOD_CHANNEL> for Channel {
+    fn wrap(channel: *mut ffi::FMOD_CHANNEL) -> Channel {
+        Channel {channel: channel}
+    }
+
+    fn unwrap(c: &Channel) -> *mut ffi::FMOD_CHANNEL {
+        c.channel
+    }
+}
+
 impl Channel {
+    pub fn new() -> Channel {
+        Channel {channel: ::std::ptr::mut_null()}
+    }
+
     pub fn release(&mut self) {
         self.channel = ::std::ptr::mut_null();
     }
@@ -391,14 +392,14 @@ impl Channel {
     }
 
     pub fn set_channel_group(&mut self, channel_group: &ChannelGroup) -> fmod::Result {
-        unsafe { ffi::FMOD_Channel_SetChannelGroup(self.channel, channel_group::get_ffi(channel_group)) }
+        unsafe { ffi::FMOD_Channel_SetChannelGroup(self.channel, ffi::FFI::unwrap(channel_group)) }
     }
 
     pub fn get_channel_group(&self) -> Result<ChannelGroup, fmod::Result> {
         let mut channel_group = ::std::ptr::mut_null();
 
         match unsafe { ffi::FMOD_Channel_GetChannelGroup(self.channel, &mut channel_group) } {
-            fmod::Ok => Ok(channel_group::from_ptr(channel_group)),
+            fmod::Ok => Ok(ffi::FFI::wrap(channel_group)),
             e => Err(e)
         }
     }

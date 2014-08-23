@@ -28,6 +28,11 @@ use enums::*;
 use callbacks::*;
 use libc::{c_void, c_uint, c_int, c_char, c_float, c_ushort, c_uchar, c_short};
 
+pub trait FFI<T> {
+    fn wrap(r: *mut T) -> Self;
+    fn unwrap(&Self) -> *mut T;
+}
+
 pub type FMOD_BOOL = c_int;
 pub type FMOD_CAPS = c_uint;
 pub type FMOD_INITFLAGS = c_uint;

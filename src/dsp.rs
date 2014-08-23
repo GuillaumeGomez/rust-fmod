@@ -591,7 +591,7 @@ impl Dsp {
             }
             Err(e) => e
         } {
-            fmod::Ok => Ok(channel::from_ptr(channel)),
+            fmod::Ok => Ok(ffi::FFI::wrap(channel)),
             e => Err(e)
         }
     }
@@ -605,7 +605,7 @@ impl Dsp {
             }
             Err(e) => e
         } {
-            fmod::Ok => Ok(channel::from_ptr(channel)),
+            fmod::Ok => Ok(ffi::FFI::wrap(channel)),
             e => Err(e)
         }
     }

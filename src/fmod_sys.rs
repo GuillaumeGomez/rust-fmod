@@ -1047,7 +1047,7 @@ impl FmodSys {
 
         t_group_name.with_c_str(|c_str|{
             match unsafe { ffi::FMOD_System_CreateChannelGroup(self.system, c_str, &mut channel_group) } {
-                fmod::Ok => Ok(channel_group::from_ptr(channel_group)),
+                fmod::Ok => Ok(ffi::FFI::wrap(channel_group)),
                 e => Err(e)
             }
         })
@@ -1643,7 +1643,7 @@ impl FmodSys {
         let mut channel = ::std::ptr::mut_null();
 
         match unsafe { ffi::FMOD_System_GetChannel(self.system, channel_id, &mut channel) } {
-            fmod::Ok => Ok(channel::from_ptr(channel)),
+            fmod::Ok => Ok(ffi::FFI::wrap(channel)),
             e => Err(e)
         }
     }
@@ -1652,7 +1652,7 @@ impl FmodSys {
         let mut channel_group = ::std::ptr::mut_null();
 
         match unsafe { ffi::FMOD_System_GetMasterChannelGroup(self.system, &mut channel_group) } {
-            fmod::Ok => Ok(channel_group::from_ptr(channel_group)),
+            fmod::Ok => Ok(ffi::FFI::wrap(channel_group)),
             e => Err(e)
         }
     }
