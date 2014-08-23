@@ -120,6 +120,7 @@ Here is the list of all modules :
 #![allow(non_snake_case_functions)]
 #![allow(dead_code)]
 #![allow(uppercase_variables)]
+#![allow(ctypes)]
 
 #![feature(globs)]
 
