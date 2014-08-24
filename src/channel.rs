@@ -26,15 +26,12 @@ use enums::*;
 use types::*;
 use libc::{c_int, c_void};
 use ffi;
-use dsp;
 use dsp::Dsp;
-use dsp_connection;
 use dsp_connection::DspConnection;
 use channel_group::ChannelGroup;
 use fmod_sys;
 use fmod_sys::{FmodMemoryUsageDetails, FmodSys};
 use vector;
-use sound;
 use sound::Sound;
 use std::mem::transmute;
 use std::default::Default;
@@ -113,7 +110,7 @@ impl Channel {
         let mut system = ::std::ptr::mut_null();
 
         match unsafe { ffi::FMOD_Channel_GetSystemObject(self.channel, &mut system) } {
-            fmod::Ok => Ok(fmod_sys::from_ptr(system)),
+            fmod::Ok => Ok(ffi::FFI::wrap(system)),
             e => Err(e)
         }
     }
@@ -184,7 +181,7 @@ impl Channel {
         let mut sound = ::std::ptr::mut_null();
 
         match unsafe { ffi::FMOD_Channel_GetCurrentSound(self.channel, &mut sound) } {
-            fmod::Ok => Ok(sound::from_ptr(sound)),
+            fmod::Ok => Ok(ffi::FFI::wrap(sound)),
             e => Err(e)
         }
     }
@@ -373,7 +370,7 @@ impl Channel {
                 direct: t.Direct,
                 room: t.Room,
                 flags: t.Flags,
-                connection_point: dsp::from_ptr(t.ConnectionPoint)}),
+                connection_point: ffi::FFI::wrap(t.ConnectionPoint)}),
             e => Err(e),
         }
     }
@@ -569,7 +566,7 @@ impl Channel {
         let mut dsp = ::std::ptr::mut_null();
 
         match unsafe { ffi::FMOD_Channel_GetDSPHead(self.channel, &mut dsp) } {
-            fmod::Ok => Ok(dsp::from_ptr(dsp)),
+            fmod::Ok => Ok(ffi::FFI::wrap(dsp)),
             e => Err(e)
         }
     }
@@ -577,8 +574,8 @@ impl Channel {
     pub fn add_DSP(&self, dsp: &Dsp) -> Result<DspConnection, fmod::Result> {
         let mut connection = ::std::ptr::mut_null();
 
-        match unsafe { ffi::FMOD_Channel_AddDSP(self.channel, dsp::get_ffi(dsp), &mut connection) } {
-            fmod::Ok => Ok(dsp_connection::from_ptr(connection)),
+        match unsafe { ffi::FMOD_Channel_AddDSP(self.channel, ffi::FFI::unwrap(dsp), &mut connection) } {
+            fmod::Ok => Ok(ffi::FFI::wrap(connection)),
             e => Err(e)
         }
     }

@@ -32,17 +32,19 @@ use fmod_sys::FmodMemoryUsageDetails;
 use std::mem::transmute;
 use std::default::Default;
 
-pub fn from_ptr(geometry: *mut ffi::FMOD_GEOMETRY) -> Geometry {
-    Geometry{geometry: geometry}
-}
-
-pub fn get_ffi(geometry: Geometry) -> *mut ffi::FMOD_GEOMETRY {
-    geometry.geometry
-}
-
 /// Geometry object
 pub struct Geometry {
     geometry: *mut ffi::FMOD_GEOMETRY
+}
+
+impl ffi::FFI<ffi::FMOD_GEOMETRY> for Geometry {
+    fn wrap(g: *mut ffi::FMOD_GEOMETRY) -> Geometry {
+        Geometry {geometry: g}
+    }
+
+    fn unwrap(g: &Geometry) -> *mut ffi::FMOD_GEOMETRY {
+        g.geometry
+    }
 }
 
 impl Drop for Geometry {

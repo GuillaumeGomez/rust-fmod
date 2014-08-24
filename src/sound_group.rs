@@ -39,12 +39,14 @@ pub struct SoundGroup {
     sound_group: *mut ffi::FMOD_SOUNDGROUP,
 }
 
-pub fn get_ffi(sound_group: &SoundGroup) -> *mut ffi::FMOD_SOUNDGROUP {
-    sound_group.sound_group
-}
+impl ffi::FFI<ffi::FMOD_SOUNDGROUP> for SoundGroup {
+    fn wrap(s: *mut ffi::FMOD_SOUNDGROUP) -> SoundGroup {
+        SoundGroup {sound_group: s}
+    }
 
-pub fn from_ptr(sound_group: *mut ffi::FMOD_SOUNDGROUP) -> SoundGroup {
-    SoundGroup{sound_group: sound_group}
+    fn unwrap(s: &SoundGroup) -> *mut ffi::FMOD_SOUNDGROUP {
+        s.sound_group
+    }
 }
 
 impl Drop for SoundGroup {
@@ -148,7 +150,7 @@ impl SoundGroup {
         let mut sound = ::std::ptr::mut_null();
 
         match unsafe { ffi::FMOD_SoundGroup_GetSound(self.sound_group, index, &mut sound) } {
-            fmod::Ok => Ok(sound::from_ptr(sound)),
+            fmod::Ok => Ok(ffi::FFI::wrap(sound)),
             e => Err(e)
         }
     }

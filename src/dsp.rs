@@ -494,7 +494,7 @@ pub fn get_description_ffi(dsp_description: &mut DspDescription) -> ffi::FMOD_DS
 
 pub fn get_state_ffi(state: &DspState) -> ffi::FMOD_DSP_STATE {
     ffi::FMOD_DSP_STATE {
-        instance: get_ffi(&state.instance),
+        instance: ffi::FFI::unwrap(&state.instance),
         plugin_data: state.plugin_data,
         speaker_mask: state.speaker_mask
     }
@@ -502,7 +502,7 @@ pub fn get_state_ffi(state: &DspState) -> ffi::FMOD_DSP_STATE {
 
 pub fn from_state_ptr(state: ffi::FMOD_DSP_STATE) -> DspState {
     DspState {
-        instance: from_ptr(state.instance),
+        instance: ffi::FFI::wrap(state.instance),
         plugin_data: state.plugin_data,
         speaker_mask: state.speaker_mask
     }
@@ -519,17 +519,6 @@ pub struct DspState
     pub speaker_mask: u16
 }
 
-pub fn from_ptr(dsp: *mut ffi::FMOD_DSP) -> Dsp {
-    Dsp {
-        dsp: dsp,
-        can_be_deleted: false,
-        user_data: UserData {
-            callbacks: DspCallbacks::new(),
-            user_data: ::std::ptr::mut_null()
-        }
-    }
-}
-
 pub fn from_ptr_first(dsp: *mut ffi::FMOD_DSP) -> Dsp {
     Dsp {
         dsp: dsp,
@@ -541,15 +530,28 @@ pub fn from_ptr_first(dsp: *mut ffi::FMOD_DSP) -> Dsp {
     }
 }
 
-pub fn get_ffi(dsp: &Dsp) -> *mut ffi::FMOD_DSP {
-    dsp.dsp
-}
-
 /// Dsp object
 pub struct Dsp {
     dsp: *mut ffi::FMOD_DSP,
     can_be_deleted: bool,
     user_data: UserData
+}
+
+impl ffi::FFI<ffi::FMOD_DSP> for Dsp {
+    fn wrap(dsp: *mut ffi::FMOD_DSP) -> Dsp {
+        Dsp {
+            dsp: dsp,
+            can_be_deleted: false,
+            user_data: UserData {
+                callbacks: DspCallbacks::new(),
+                user_data: ::std::ptr::mut_null()
+            }
+        }
+    }
+
+    fn unwrap(d: &Dsp) -> *mut ffi::FMOD_DSP {
+        d.dsp
+    }
 }
 
 impl Drop for Dsp {
@@ -563,7 +565,7 @@ impl Dsp {
         let mut system = ::std::ptr::mut_null();
 
         match unsafe { ffi::FMOD_DSP_GetSystemObject(self.dsp, &mut system) } {
-            fmod::Ok => Ok(fmod_sys::from_ptr(system)),
+            fmod::Ok => Ok(ffi::FFI::wrap(system)),
             e => Err(e)
         }
     }
@@ -587,7 +589,7 @@ impl Dsp {
 
         match match self.get_system_object() {
             Ok(s) => { 
-                unsafe { ffi::FMOD_System_PlayDSP(fmod_sys::get_ffi(&s), fmod::ChannelFree, self.dsp, 0, &mut channel) }
+                unsafe { ffi::FMOD_System_PlayDSP(ffi::FFI::unwrap(&s), fmod::ChannelFree, self.dsp, 0, &mut channel) }
             }
             Err(e) => e
         } {
@@ -601,7 +603,7 @@ impl Dsp {
         
         match match self.get_system_object() {
             Ok(s) => { 
-                unsafe { ffi::FMOD_System_PlayDSP(fmod_sys::get_ffi(&s), channel_id, self.dsp, 0, &mut channel) }
+                unsafe { ffi::FMOD_System_PlayDSP(ffi::FFI::unwrap(&s), channel_id, self.dsp, 0, &mut channel) }
             }
             Err(e) => e
         } {
@@ -614,7 +616,7 @@ impl Dsp {
         let mut connection = ::std::ptr::mut_null();
 
         match unsafe { ffi::FMOD_DSP_AddInput(self.dsp, target.dsp, &mut connection) } {
-            fmod::Ok => Ok(dsp_connection::from_ptr(connection)),
+            fmod::Ok => Ok(ffi::FFI::wrap(connection)),
             e => Err(e)
         }
     }
@@ -665,7 +667,7 @@ impl Dsp {
         let mut input_connection = ::std::ptr::mut_null();
 
         match unsafe { ffi::FMOD_DSP_GetInput(self.dsp, index, &mut input, &mut input_connection) } {
-            fmod::Ok => Ok((from_ptr(input), dsp_connection::from_ptr(input_connection))),
+            fmod::Ok => Ok((ffi::FFI::wrap(input), ffi::FFI::wrap(input_connection))),
             e => Err(e)
         }
     }
@@ -675,7 +677,7 @@ impl Dsp {
         let mut output_connection = ::std::ptr::mut_null();
 
         match unsafe { ffi::FMOD_DSP_GetOutput(self.dsp, index, &mut output, &mut output_connection) } {
-            fmod::Ok => Ok((from_ptr(output), dsp_connection::from_ptr(output_connection ))),
+            fmod::Ok => Ok((ffi::FFI::wrap(output), ffi::FFI::wrap(output_connection ))),
             e => Err(e)
         }
     }

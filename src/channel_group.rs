@@ -176,7 +176,7 @@ impl ChannelGroup {
             Direct: properties.direct,
             Room: properties.room,
             Flags: properties.flags,
-            ConnectionPoint: dsp::get_ffi(&properties.connection_point)
+            ConnectionPoint: ffi::FFI::unwrap(&properties.connection_point)
         };
 
         unsafe { ffi::FMOD_ChannelGroup_OverrideReverbProperties(self.channel_group, &prop) }
@@ -229,7 +229,7 @@ impl ChannelGroup {
         let mut dsp = ::std::ptr::mut_null();
 
         match unsafe { ffi::FMOD_ChannelGroup_GetDSPHead(self.channel_group, &mut dsp) } {
-            fmod::Ok => Ok(dsp::from_ptr(dsp)),
+            fmod::Ok => Ok(ffi::FFI::wrap(dsp)),
             e => Err(e)
         }
     }
@@ -237,8 +237,8 @@ impl ChannelGroup {
     pub fn add_DSP(&self, dsp: &dsp::Dsp) -> Result<dsp_connection::DspConnection, fmod::Result> {
         let mut dsp_connection = ::std::ptr::mut_null();
 
-        match unsafe { ffi::FMOD_ChannelGroup_AddDSP(self.channel_group, dsp::get_ffi(dsp), &mut dsp_connection) } {
-            fmod::Ok => Ok(dsp_connection::from_ptr(dsp_connection)),
+        match unsafe { ffi::FMOD_ChannelGroup_AddDSP(self.channel_group, ffi::FFI::unwrap(dsp), &mut dsp_connection) } {
+            fmod::Ok => Ok(ffi::FFI::wrap(dsp_connection)),
             e => Err(e)
         }
     }

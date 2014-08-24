@@ -33,14 +33,6 @@ use std::mem::transmute;
 use libc::{c_void};
 use std::default::Default;
 
-pub fn from_ptr(reverb: *mut ffi::FMOD_REVERB) -> Reverb {
-    Reverb{reverb: reverb}
-}
-
-pub fn get_ffi(reverb: Reverb) -> *mut ffi::FMOD_REVERB {
-    reverb.reverb
-}
-
 /// Reverb object
 pub struct Reverb {
     reverb: *mut ffi::FMOD_REVERB
@@ -49,6 +41,16 @@ pub struct Reverb {
 impl Drop for Reverb {
     fn drop(&mut self) {
         self.release();
+    }
+}
+
+impl ffi::FFI<ffi::FMOD_REVERB> for Reverb {
+    fn wrap(r: *mut ffi::FMOD_REVERB) -> Reverb {
+        Reverb {reverb: r}
+    }
+
+    fn unwrap(r: &Reverb) -> *mut ffi::FMOD_REVERB {
+        r.reverb
     }
 }
 

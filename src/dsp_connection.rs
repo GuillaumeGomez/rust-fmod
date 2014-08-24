@@ -32,17 +32,19 @@ use fmod_sys::FmodMemoryUsageDetails;
 use std::mem::transmute;
 use std::default::Default;
 
-pub fn from_ptr(dsp_connection: *mut ffi::FMOD_DSPCONNECTION) -> DspConnection {
-    DspConnection{dsp_connection: dsp_connection}
-}
-
-pub fn get_ffi(dsp_connection: DspConnection) -> *mut ffi::FMOD_DSPCONNECTION {
-    dsp_connection.dsp_connection
-}
-
 /// DspConnection object
 pub struct DspConnection {
     dsp_connection: *mut ffi::FMOD_DSPCONNECTION
+}
+
+impl ffi::FFI<ffi::FMOD_DSPCONNECTION> for DspConnection {
+    fn wrap(d: *mut ffi::FMOD_DSPCONNECTION) -> DspConnection {
+        DspConnection {dsp_connection: d}
+    }
+
+    fn unwrap(d: &DspConnection) -> *mut ffi::FMOD_DSPCONNECTION {
+        d.dsp_connection
+    }
 }
 
 impl Drop for DspConnection {
@@ -60,7 +62,7 @@ impl DspConnection {
         let mut input = ::std::ptr::mut_null();
 
         match unsafe { ffi::FMOD_DSPConnection_GetInput(self.dsp_connection, &mut input) } {
-            fmod::Ok => Ok(dsp::from_ptr(input)),
+            fmod::Ok => Ok(ffi::FFI::wrap(input)),
             e => Err(e)
         }
     }
@@ -69,7 +71,7 @@ impl DspConnection {
         let mut output = ::std::ptr::mut_null();
 
         match unsafe { ffi::FMOD_DSPConnection_GetOutput(self.dsp_connection, &mut output) } {
-            fmod::Ok => Ok(dsp::from_ptr(output)),
+            fmod::Ok => Ok(ffi::FFI::wrap(output)),
             e => Err(e)
         }
     }

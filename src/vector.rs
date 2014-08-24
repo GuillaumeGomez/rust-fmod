@@ -26,11 +26,11 @@ use ffi;
 use std::default::Default;
 
 pub fn from_ptr(vec: ffi::FMOD_VECTOR) -> FmodVector {
-    FmodVector{x: vec.x, y: vec.y, z: vec.z}
+    FmodVector {x: vec.x, y: vec.y, z: vec.z}
 }
 
 pub fn get_ffi(vec: &FmodVector) -> ffi::FMOD_VECTOR {
-    ffi::FMOD_VECTOR{x: vec.x, y: vec.y, z: vec.z}
+    ffi::FMOD_VECTOR {x: vec.x, y: vec.y, z: vec.z}
 }
 
 #[deriving(Show)]

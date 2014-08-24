@@ -155,16 +155,18 @@ pub struct Sound {
     user_data: ffi::SoundData
 }
 
+impl ffi::FFI<ffi::FMOD_SOUND> for Sound {
+    fn wrap(s: *mut ffi::FMOD_SOUND) -> Sound {
+        Sound {sound: s, can_be_deleted: false, user_data: ffi::SoundData::new()}
+    }
+
+    fn unwrap(s: &Sound) -> *mut ffi::FMOD_SOUND {
+        s.sound
+    }
+}
+
 pub fn get_fffi<'r>(sound: &'r mut Sound) -> &'r mut *mut ffi::FMOD_SOUND {
     &mut sound.sound
-}
-
-pub fn get_ffi(sound: &Sound) -> *mut ffi::FMOD_SOUND {
-    sound.sound
-}
-
-pub fn from_ptr(sound: *mut ffi::FMOD_SOUND) -> Sound {
-    Sound{sound: sound, can_be_deleted: false, user_data: ffi::SoundData::new()}
 }
 
 pub fn from_ptr_first(sound: *mut ffi::FMOD_SOUND) -> Sound {
@@ -186,7 +188,7 @@ impl Sound {
         let mut system = ::std::ptr::mut_null();
 
         match unsafe { ffi::FMOD_Sound_GetSystemObject(self.sound, &mut system) } {
-            fmod::Ok => Ok(fmod_sys::from_ptr(system)),
+            fmod::Ok => Ok(ffi::FFI::wrap(system)),
             e => Err(e)
         }
     }
@@ -210,7 +212,7 @@ impl Sound {
 
         match match self.get_system_object() {
             Ok(s) => { 
-                unsafe { ffi::FMOD_System_PlaySound(fmod_sys::get_ffi(&s), fmod::ChannelFree, self.sound, 0, &mut channel) }
+                unsafe { ffi::FMOD_System_PlaySound(ffi::FFI::unwrap(&s), fmod::ChannelFree, self.sound, 0, &mut channel) }
             }
             Err(e) => e
         } {
@@ -224,7 +226,7 @@ impl Sound {
         
         match self.get_system_object() {
             Ok(s) => { 
-                unsafe { ffi::FMOD_System_PlaySound(fmod_sys::get_ffi(&s), fmod::ChannelReUse, self.sound, match paused {
+                unsafe { ffi::FMOD_System_PlaySound(ffi::FFI::unwrap(&s), fmod::ChannelReUse, self.sound, match paused {
                     true => 1,
                     false => 0
                 }, &mut chan) }
@@ -350,7 +352,7 @@ impl Sound {
         let mut sub_sound = ::std::ptr::mut_null();
 
         match unsafe { ffi::FMOD_Sound_GetSubSound(self.sound, index, &mut sub_sound) } {
-            fmod::Ok => Ok(from_ptr(sub_sound)),
+            fmod::Ok => Ok(ffi::FFI::wrap(sub_sound)),
             e => Err(e)
         }
     }
@@ -438,14 +440,14 @@ impl Sound {
     }
 
     pub fn set_sound_group(&self, sound_group: sound_group::SoundGroup) -> fmod::Result {
-        unsafe { ffi::FMOD_Sound_SetSoundGroup(self.sound, sound_group::get_ffi(&sound_group)) }
+        unsafe { ffi::FMOD_Sound_SetSoundGroup(self.sound, ffi::FFI::unwrap(&sound_group)) }
     }
 
     pub fn get_sound_group(&self) -> Result<sound_group::SoundGroup, fmod::Result> {
         let mut sound_group = ::std::ptr::mut_null();
 
         match unsafe { ffi::FMOD_Sound_GetSoundGroup(self.sound, &mut sound_group) } {
-            fmod::Ok => Ok(sound_group::from_ptr(sound_group)),
+            fmod::Ok => Ok(ffi::FFI::wrap(sound_group)),
             e => Err(e)
         }
     }

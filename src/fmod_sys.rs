@@ -196,7 +196,7 @@ extern "C" fn pcm_read_callback(sound: *mut ffi::FMOD_SOUND, data: *mut c_void, 
                         let max = data_len as int >> 2;
                         let mut data_vec = CVec::new(data as *mut c_short, max as uint * 2);
 
-                        let ret = p(&sound::from_ptr(sound), data_vec.as_mut_slice());
+                        let ret = p(&ffi::FFI::wrap(sound), data_vec.as_mut_slice());
                         ret
                     },
                     None => fmod::Ok
@@ -220,7 +220,7 @@ extern "C" fn non_block_callback(sound: *mut ffi::FMOD_SOUND, result: fmod::Resu
                 let callbacks : &mut ffi::SoundData = ::std::mem::transmute(tmp);
 
                 match callbacks.non_block {
-                    Some(p) => p(&sound::from_ptr(sound), result),
+                    Some(p) => p(&ffi::FFI::wrap(sound), result),
                     None => fmod::Ok
                 }
             } else {
@@ -242,7 +242,7 @@ extern "C" fn pcm_set_pos_callback(sound: *mut ffi::FMOD_SOUND, sub_sound: c_int
                 let callbacks : &mut ffi::SoundData = ::std::mem::transmute(tmp);
 
                 match callbacks.pcm_set_pos {
-                    Some(p) => p(&sound::from_ptr(sound), sub_sound, position, FmodTimeUnit(postype)),
+                    Some(p) => p(&ffi::FFI::wrap(sound), sub_sound, position, FmodTimeUnit(postype)),
                     None => fmod::Ok
                 }
             } else {
@@ -526,7 +526,7 @@ impl Default for FmodCreateSoundexInfo {
             user_async_read: None,
             user_async_cancel: None,
             speaker_map: fmod::SpeakerMapTypeDefault,
-            initial_sound_group: sound_group::from_ptr(::std::ptr::mut_null()),
+            initial_sound_group: ffi::FFI::wrap(::std::ptr::mut_null()),
             initial_seek_position: 0u32,
             initial_seek_pos_type: FmodTimeUnit(0u32),
             ignore_set_file_system: true,
@@ -581,7 +581,7 @@ impl FmodCreateSoundexInfo {
             userasynccancel: self.user_async_cancel,
             userasyncread: self.user_async_read,
             speakermap: self.speaker_map,
-            initialsoundgroup: sound_group::get_ffi(&self.initial_sound_group),
+            initialsoundgroup: ffi::FFI::unwrap(&self.initial_sound_group),
             initialseekposition: self.initial_seek_position,
             initialseekpostype: match self.initial_seek_pos_type {FmodTimeUnit(v) => v},
             ignoresetfilesystem: match self.ignore_set_file_system {
@@ -911,18 +911,20 @@ pub fn from_memory_usage_details_ptr(details: ffi::FMOD_MEMORY_USAGE_DETAILS) ->
     }
 }
 
-pub fn from_ptr(system: *mut ffi::FMOD_SYSTEM) -> FmodSys {
-    FmodSys{system: system, is_first: false}
-}
-
-pub fn get_ffi(system: &FmodSys) -> *mut ffi::FMOD_SYSTEM {
-    system.system
-}
-
 /// FMOD System Object
 pub struct FmodSys {
     system: *mut ffi::FMOD_SYSTEM,
     is_first: bool
+}
+
+impl ffi::FFI<ffi::FMOD_SYSTEM> for FmodSys {
+    fn wrap(system: *mut ffi::FMOD_SYSTEM) -> FmodSys {
+        FmodSys {system: system, is_first: false}
+    }
+
+    fn unwrap(s: &FmodSys) -> *mut ffi::FMOD_SYSTEM {
+        s.system
+    }
 }
 
 impl Drop for FmodSys {
@@ -1059,7 +1061,7 @@ impl FmodSys {
 
         t_group_name.with_c_str(|c_str|{
             match unsafe { ffi::FMOD_System_CreateSoundGroup(self.system, c_str, &mut sound_group) } {
-                fmod::Ok => Ok(sound_group::from_ptr(sound_group)),
+                fmod::Ok => Ok(ffi::FFI::wrap(sound_group)),
                 e => Err(e)
             }
         })
@@ -1069,7 +1071,7 @@ impl FmodSys {
         let mut t_reverb = ::std::ptr::mut_null();
 
         match unsafe { ffi::FMOD_System_CreateReverb(self.system, &mut t_reverb) } {
-            fmod::Ok => Ok(reverb::from_ptr(t_reverb)),
+            fmod::Ok => Ok(ffi::FFI::wrap(t_reverb)),
             e => Err(e)
         }
     }
@@ -1661,7 +1663,7 @@ impl FmodSys {
         let mut sound_group = ::std::ptr::mut_null();
 
         match unsafe { ffi::FMOD_System_GetMasterSoundGroup(self.system, &mut sound_group) } {
-            fmod::Ok => Ok(sound_group::from_ptr(sound_group)),
+            fmod::Ok => Ok(ffi::FFI::wrap(sound_group)),
             e => Err(e)
         }
     }
@@ -1700,7 +1702,7 @@ impl FmodSys {
         let mut head = ::std::ptr::mut_null();
 
         match unsafe { ffi::FMOD_System_GetDSPHead(self.system, &mut head) } {
-            fmod::Ok => Ok(dsp::from_ptr(head)),
+            fmod::Ok => Ok(ffi::FFI::wrap(head)),
             e => Err(e)
         }
     }
@@ -1708,8 +1710,8 @@ impl FmodSys {
     pub fn add_DSP(&self, dsp: &dsp::Dsp) -> Result<dsp_connection::DspConnection, fmod::Result> {
         let mut t_connection = ::std::ptr::mut_null();
 
-        match unsafe { ffi::FMOD_System_AddDSP(self.system, dsp::get_ffi(dsp), &mut t_connection) } {
-            fmod::Ok => Ok(dsp_connection::from_ptr(t_connection)),
+        match unsafe { ffi::FMOD_System_AddDSP(self.system, ffi::FFI::unwrap(dsp), &mut t_connection) } {
+            fmod::Ok => Ok(ffi::FFI::wrap(t_connection)),
             e => Err(e)
         }
     }
@@ -1780,7 +1782,7 @@ impl FmodSys {
             _ => 0
         };
 
-        unsafe { ffi::FMOD_System_RecordStart(self.system, id, sound::get_ffi(sound), t_loop) }
+        unsafe { ffi::FMOD_System_RecordStart(self.system, id, ffi::FFI::unwrap(sound), t_loop) }
     }
 
     pub fn stop_record(&self, id: i32) -> fmod::Result {
@@ -1800,7 +1802,7 @@ impl FmodSys {
         let mut geometry = ::std::ptr::mut_null();
 
         match unsafe { ffi::FMOD_System_CreateGeometry(self.system, max_polygons, max_vertices, &mut geometry) } {
-            fmod::Ok => Ok(geometry::from_ptr(geometry)),
+            fmod::Ok => Ok(ffi::FFI::wrap(geometry)),
             e => Err(e)
         }
     }
