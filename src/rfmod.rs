@@ -117,9 +117,8 @@ Here is the list of all modules :
 #![crate_type = "dylib"]
 
 #![allow(non_camel_case_types)]
-#![allow(non_snake_case_functions)]
+#![allow(non_snake_case)]
 #![allow(dead_code)]
-#![allow(uppercase_variables)]
 #![allow(ctypes)]
 
 #![feature(globs)]
