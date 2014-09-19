@@ -116,7 +116,7 @@ impl FmodFile {
         unsafe {
             if self.fd.is_not_null() {
                 fclose(self.fd);
-                self.fd = ::std::ptr::mut_null();
+                self.fd = ::std::ptr::null_mut();
             }
         }
     }

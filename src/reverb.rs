@@ -56,10 +56,10 @@ impl ffi::FFI<ffi::FMOD_REVERB> for Reverb {
 
 impl Reverb {
     pub fn release(&mut self) -> fmod::Result {
-        if self.reverb !=::std::ptr::mut_null() {
+        if self.reverb !=::std::ptr::null_mut() {
             match unsafe { ffi::FMOD_Reverb_Release(self.reverb) } {
                 fmod::Ok => {
-                    self.reverb = ::std::ptr::mut_null();
+                    self.reverb = ::std::ptr::null_mut();
                     fmod::Ok
                 }
                 e => e
@@ -137,7 +137,7 @@ impl Reverb {
 
     pub fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, fmod::Result> {
         unsafe {
-            let mut user_data : *mut c_void = ::std::ptr::mut_null();
+            let mut user_data : *mut c_void = ::std::ptr::null_mut();
 
             match ffi::FMOD_Reverb_GetUserData(self.reverb, &mut user_data) {
                 fmod::Ok => {

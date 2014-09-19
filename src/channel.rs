@@ -99,15 +99,15 @@ impl ffi::FFI<ffi::FMOD_CHANNEL> for Channel {
 
 impl Channel {
     pub fn new() -> Channel {
-        Channel {channel: ::std::ptr::mut_null()}
+        Channel {channel: ::std::ptr::null_mut()}
     }
 
     pub fn release(&mut self) {
-        self.channel = ::std::ptr::mut_null();
+        self.channel = ::std::ptr::null_mut();
     }
 
     pub fn get_system_object(&self) -> Result<FmodSys, fmod::Result> {
-        let mut system = ::std::ptr::mut_null();
+        let mut system = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_Channel_GetSystemObject(self.channel, &mut system) } {
             fmod::Ok => Ok(ffi::FFI::wrap(system)),
@@ -178,7 +178,7 @@ impl Channel {
     }
 
     pub fn get_current_sound(&self) -> Result<Sound, fmod::Result> {
-        let mut sound = ::std::ptr::mut_null();
+        let mut sound = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_Channel_GetCurrentSound(self.channel, &mut sound) } {
             fmod::Ok => Ok(ffi::FFI::wrap(sound)),
@@ -357,13 +357,13 @@ impl Channel {
     }
 
     pub fn set_reverb_properties(&self, prop: &FmodReverbChannelProperties) -> fmod::Result {
-        let t = ffi::FMOD_REVERB_CHANNELPROPERTIES{Direct: prop.direct, Room: prop.room, Flags: prop.flags, ConnectionPoint: ::std::ptr::mut_null()};
+        let t = ffi::FMOD_REVERB_CHANNELPROPERTIES{Direct: prop.direct, Room: prop.room, Flags: prop.flags, ConnectionPoint: ::std::ptr::null_mut()};
 
         unsafe { ffi::FMOD_Channel_SetReverbProperties(self.channel, &t) }
     }
 
     pub fn get_reverb_properties(&self) -> Result<FmodReverbChannelProperties, fmod::Result> {
-        let mut t = ffi::FMOD_REVERB_CHANNELPROPERTIES{Direct: 0, Room: 0, Flags: 0, ConnectionPoint: ::std::ptr::mut_null()};
+        let mut t = ffi::FMOD_REVERB_CHANNELPROPERTIES{Direct: 0, Room: 0, Flags: 0, ConnectionPoint: ::std::ptr::null_mut()};
 
         match unsafe { ffi::FMOD_Channel_GetReverbProperties(self.channel, &mut t) } {
             fmod::Ok => Ok(FmodReverbChannelProperties{
@@ -393,7 +393,7 @@ impl Channel {
     }
 
     pub fn get_channel_group(&self) -> Result<ChannelGroup, fmod::Result> {
-        let mut channel_group = ::std::ptr::mut_null();
+        let mut channel_group = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_Channel_GetChannelGroup(self.channel, &mut channel_group) } {
             fmod::Ok => Ok(ffi::FFI::wrap(channel_group)),
@@ -472,7 +472,7 @@ impl Channel {
     }
 
     pub fn get_3D_custom_rolloff(&self) -> Result<Vec<vector::FmodVector>, fmod::Result> {
-        let mut points = ::std::ptr::mut_null();
+        let mut points = ::std::ptr::null_mut();
         let mut num_points = 0i32;
 
         unsafe {
@@ -563,7 +563,7 @@ impl Channel {
     }
 
     pub fn get_DSP_head(&self) -> Result<Dsp, fmod::Result> {
-        let mut dsp = ::std::ptr::mut_null();
+        let mut dsp = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_Channel_GetDSPHead(self.channel, &mut dsp) } {
             fmod::Ok => Ok(ffi::FFI::wrap(dsp)),
@@ -572,7 +572,7 @@ impl Channel {
     }
 
     pub fn add_DSP(&self, dsp: &Dsp) -> Result<DspConnection, fmod::Result> {
-        let mut connection = ::std::ptr::mut_null();
+        let mut connection = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_Channel_AddDSP(self.channel, ffi::FFI::unwrap(dsp), &mut connection) } {
             fmod::Ok => Ok(ffi::FFI::wrap(connection)),
@@ -627,7 +627,7 @@ impl Channel {
 
     pub fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, fmod::Result> {
         unsafe {
-            let mut user_data : *mut c_void = ::std::ptr::mut_null();
+            let mut user_data : *mut c_void = ::std::ptr::null_mut();
 
             match ffi::FMOD_Channel_GetUserData(self.channel, &mut user_data) {
                 fmod::Ok => {

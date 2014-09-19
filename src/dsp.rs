@@ -39,7 +39,7 @@ use std::string;
 extern "C" fn create_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> fmod::Result {
     unsafe {
         if dsp_state.is_not_null() && (*dsp_state).instance.is_not_null() {
-            let mut tmp = ::std::ptr::mut_null();
+            let mut tmp = ::std::ptr::null_mut();
 
             ffi::FMOD_DSP_GetUserData((*dsp_state).instance, &mut tmp);
             if tmp.is_not_null() {
@@ -61,7 +61,7 @@ extern "C" fn create_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> fmod::Resu
 extern "C" fn release_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> fmod::Result {
     unsafe {
         if dsp_state.is_not_null() && (*dsp_state).instance.is_not_null() {
-            let mut tmp = ::std::ptr::mut_null();
+            let mut tmp = ::std::ptr::null_mut();
 
             ffi::FMOD_DSP_GetUserData((*dsp_state).instance, &mut tmp);
             if tmp.is_not_null() {
@@ -83,7 +83,7 @@ extern "C" fn release_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> fmod::Res
 extern "C" fn reset_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> fmod::Result {
     unsafe {
         if dsp_state.is_not_null() && (*dsp_state).instance.is_not_null() {
-            let mut tmp = ::std::ptr::mut_null();
+            let mut tmp = ::std::ptr::null_mut();
 
             ffi::FMOD_DSP_GetUserData((*dsp_state).instance, &mut tmp);
             if tmp.is_not_null() {
@@ -105,7 +105,7 @@ extern "C" fn read_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, in_buffer: *mut
     in_channels: c_int, out_channels: c_int) -> fmod::Result {
     unsafe {
         if dsp_state.is_not_null() && (*dsp_state).instance.is_not_null() {
-            let mut tmp = ::std::ptr::mut_null();
+            let mut tmp = ::std::ptr::null_mut();
 
             ffi::FMOD_DSP_GetUserData((*dsp_state).instance, &mut tmp);
             if tmp.is_not_null() {
@@ -147,7 +147,7 @@ extern "C" fn read_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, in_buffer: *mut
 extern "C" fn set_position_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, pos: c_uint) -> fmod::Result {
     unsafe {
         if dsp_state.is_not_null() && (*dsp_state).instance.is_not_null() {
-            let mut tmp = ::std::ptr::mut_null();
+            let mut tmp = ::std::ptr::null_mut();
 
             ffi::FMOD_DSP_GetUserData((*dsp_state).instance, &mut tmp);
             if tmp.is_not_null() {
@@ -168,7 +168,7 @@ extern "C" fn set_position_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, pos: c_
 extern "C" fn set_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index: c_int, value: c_float) -> fmod::Result {
     unsafe {
         if dsp_state.is_not_null() && (*dsp_state).instance.is_not_null() {
-            let mut tmp = ::std::ptr::mut_null();
+            let mut tmp = ::std::ptr::null_mut();
 
             ffi::FMOD_DSP_GetUserData((*dsp_state).instance, &mut tmp);
             if tmp.is_not_null() {
@@ -189,7 +189,7 @@ extern "C" fn set_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index:
 extern "C" fn get_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index: c_int, value: *mut c_float, value_str: *mut c_char) -> fmod::Result {
     unsafe {
         if dsp_state.is_not_null() && (*dsp_state).instance.is_not_null() {
-            let mut tmp = ::std::ptr::mut_null();
+            let mut tmp = ::std::ptr::null_mut();
 
             ffi::FMOD_DSP_GetUserData((*dsp_state).instance, &mut tmp);
             if tmp.is_not_null() {
@@ -230,7 +230,7 @@ impl UserData {
     fn new() -> UserData {
         UserData {
             callbacks: DspCallbacks::new(),
-            user_data: ::std::ptr::mut_null()
+            user_data: ::std::ptr::null_mut()
         }
     }
 }
@@ -525,7 +525,7 @@ pub fn from_ptr_first(dsp: *mut ffi::FMOD_DSP) -> Dsp {
         can_be_deleted: true,
         user_data: UserData {
             callbacks: DspCallbacks::new(),
-            user_data: ::std::ptr::mut_null()
+            user_data: ::std::ptr::null_mut()
         }
     }
 }
@@ -544,7 +544,7 @@ impl ffi::FFI<ffi::FMOD_DSP> for Dsp {
             can_be_deleted: false,
             user_data: UserData {
                 callbacks: DspCallbacks::new(),
-                user_data: ::std::ptr::mut_null()
+                user_data: ::std::ptr::null_mut()
             }
         }
     }
@@ -562,7 +562,7 @@ impl Drop for Dsp {
 
 impl Dsp {
     pub fn get_system_object(&self) -> Result<FmodSys, fmod::Result> {
-        let mut system = ::std::ptr::mut_null();
+        let mut system = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_DSP_GetSystemObject(self.dsp, &mut system) } {
             fmod::Ok => Ok(ffi::FFI::wrap(system)),
@@ -574,7 +574,7 @@ impl Dsp {
         if self.can_be_deleted && self.dsp.is_not_null() {
             match unsafe { ffi::FMOD_DSP_Release(self.dsp) } {
                 fmod::Ok => {
-                    self.dsp =::std::ptr::mut_null();
+                    self.dsp =::std::ptr::null_mut();
                     fmod::Ok
                 }
                 e => e
@@ -585,7 +585,7 @@ impl Dsp {
     }
 
     pub fn play(&self) -> Result<channel::Channel, fmod::Result> {
-        let mut channel = ::std::ptr::mut_null();
+        let mut channel = ::std::ptr::null_mut();
 
         match match self.get_system_object() {
             Ok(s) => { 
@@ -599,7 +599,7 @@ impl Dsp {
     }
 
     pub fn play_with_parameters(&self, channel_id: fmod::ChannelIndex) -> Result<channel::Channel, fmod::Result> {
-        let mut channel = ::std::ptr::mut_null();
+        let mut channel = ::std::ptr::null_mut();
         
         match match self.get_system_object() {
             Ok(s) => { 
@@ -613,7 +613,7 @@ impl Dsp {
     }
 
     pub fn add_input(&self, target: Dsp) -> Result<dsp_connection::DspConnection, fmod::Result> {
-        let mut connection = ::std::ptr::mut_null();
+        let mut connection = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_DSP_AddInput(self.dsp, target.dsp, &mut connection) } {
             fmod::Ok => Ok(ffi::FFI::wrap(connection)),
@@ -663,8 +663,8 @@ impl Dsp {
     }
 
     pub fn get_input(&self, index: i32) -> Result<(Dsp, dsp_connection::DspConnection), fmod::Result> {
-        let mut input = ::std::ptr::mut_null();
-        let mut input_connection = ::std::ptr::mut_null();
+        let mut input = ::std::ptr::null_mut();
+        let mut input_connection = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_DSP_GetInput(self.dsp, index, &mut input, &mut input_connection) } {
             fmod::Ok => Ok((ffi::FFI::wrap(input), ffi::FFI::wrap(input_connection))),
@@ -673,8 +673,8 @@ impl Dsp {
     }
 
     pub fn get_output(&self, index: i32) -> Result<(Dsp, dsp_connection::DspConnection), fmod::Result> {
-        let mut output = ::std::ptr::mut_null();
-        let mut output_connection = ::std::ptr::mut_null();
+        let mut output = ::std::ptr::null_mut();
+        let mut output_connection = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_DSP_GetOutput(self.dsp, index, &mut output, &mut output_connection) } {
             fmod::Ok => Ok((ffi::FFI::wrap(output), ffi::FFI::wrap(output_connection ))),
@@ -884,13 +884,13 @@ impl Dsp {
     }
 
     pub fn set_user_data<T>(&mut self, user_data: &mut T) -> fmod::Result {
-        let mut data : *mut c_void = ::std::ptr::mut_null();
+        let mut data : *mut c_void = ::std::ptr::null_mut();
 
         unsafe {
             match ffi::FMOD_DSP_GetUserData(self.dsp, &mut data) {
                 fmod::Ok => {
                     if data.is_null() {
-                        self.user_data.user_data = ::std::ptr::mut_null();
+                        self.user_data.user_data = ::std::ptr::null_mut();
 
                         ffi::FMOD_DSP_SetUserData(self.dsp, transmute(&mut self.user_data))
                     } else {
@@ -911,7 +911,7 @@ impl Dsp {
 
     pub fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, fmod::Result> {
         unsafe {
-            let mut user_data : *mut c_void = ::std::ptr::mut_null();
+            let mut user_data : *mut c_void = ::std::ptr::null_mut();
 
             match ffi::FMOD_DSP_GetUserData(self.dsp, &mut user_data) {
                 fmod::Ok => {

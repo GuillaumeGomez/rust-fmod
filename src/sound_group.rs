@@ -60,7 +60,7 @@ impl SoundGroup {
         if self.sound_group.is_not_null() {
             match unsafe { ffi::FMOD_SoundGroup_Release(self.sound_group) } {
                 fmod::Ok => {
-                    self.sound_group =::std::ptr::mut_null();
+                    self.sound_group =::std::ptr::null_mut();
                     fmod::Ok
                 }
                 e => e
@@ -147,7 +147,7 @@ impl SoundGroup {
     }
 
     pub fn get_sound(&self, index: i32) -> Result<sound::Sound, fmod::Result> {
-        let mut sound = ::std::ptr::mut_null();
+        let mut sound = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_SoundGroup_GetSound(self.sound_group, index, &mut sound) } {
             fmod::Ok => Ok(ffi::FFI::wrap(sound)),
@@ -181,7 +181,7 @@ impl SoundGroup {
 
     pub fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, fmod::Result> {
         unsafe {
-            let mut user_data : *mut c_void = ::std::ptr::mut_null();
+            let mut user_data : *mut c_void = ::std::ptr::null_mut();
 
             match ffi::FMOD_SoundGroup_GetUserData(self.sound_group, &mut user_data) {
                 fmod::Ok => {

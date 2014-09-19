@@ -99,7 +99,7 @@ impl Default for FmodTag {
             _type: fmod::TagTypeUnknown,
             data_type: fmod::TagDataTypeBinary,
             name: String::new(),
-            data: ::std::ptr::mut_null(),
+            data: ::std::ptr::null_mut(),
             data_len: 0u32,
             updated: false
         }
@@ -185,7 +185,7 @@ impl Drop for Sound {
 
 impl Sound {
     pub fn get_system_object(&self) -> Result<FmodSys, fmod::Result> {
-        let mut system = ::std::ptr::mut_null();
+        let mut system = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_Sound_GetSystemObject(self.sound, &mut system) } {
             fmod::Ok => Ok(ffi::FFI::wrap(system)),
@@ -197,7 +197,7 @@ impl Sound {
         if self.can_be_deleted && self.sound.is_not_null() {
             match unsafe { ffi::FMOD_Sound_Release(self.sound) } {
                 fmod::Ok => {
-                    self.sound = ::std::ptr::mut_null();
+                    self.sound = ::std::ptr::null_mut();
                     fmod::Ok
                 }
                 e => e
@@ -208,7 +208,7 @@ impl Sound {
     }
 
     pub fn play(&self) -> Result<channel::Channel, fmod::Result> {
-        let mut channel = ::std::ptr::mut_null();
+        let mut channel = ::std::ptr::null_mut();
 
         match match self.get_system_object() {
             Ok(s) => { 
@@ -320,7 +320,7 @@ impl Sound {
     pub fn set_3D_custom_rolloff(&self, points: Vec<vector::FmodVector>) -> fmod::Result {
         let mut points_vec = Vec::with_capacity(points.len());
 
-        for tmp in points.move_iter() {
+        for tmp in points.into_iter() {
             points_vec.push(vector::get_ffi(&tmp));
         }
         unsafe { ffi::FMOD_Sound_Set3DCustomRolloff(self.sound, points_vec.as_mut_ptr(), points_vec.len() as i32) }
@@ -335,7 +335,7 @@ impl Sound {
             fmod::Ok => {
                 let mut points = Vec::with_capacity(points_vec.len());
 
-                for tmp in points_vec.move_iter() {
+                for tmp in points_vec.into_iter() {
                     points.push(vector::from_ptr(tmp));
                 }
                 Ok(points)
@@ -349,7 +349,7 @@ impl Sound {
     }
 
     pub fn get_sub_sound(&self, index: i32) -> Result<Sound, fmod::Result> {
-        let mut sub_sound = ::std::ptr::mut_null();
+        let mut sub_sound = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_Sound_GetSubSound(self.sound, index, &mut sub_sound) } {
             fmod::Ok => Ok(ffi::FFI::wrap(sub_sound)),
@@ -410,8 +410,8 @@ impl Sound {
 
     //to test if tag's data needs to be filled by user
     pub fn get_tag(&self, name: String, index: i32) -> Result<FmodTag, fmod::Result> {
-        let mut tag = ffi::FMOD_TAG{_type: fmod::TagTypeUnknown, datatype: fmod::TagDataTypeBinary, name: ::std::ptr::mut_null(),
-            data: ::std::ptr::mut_null(), datalen: 0, updated: 0};
+        let mut tag = ffi::FMOD_TAG{_type: fmod::TagTypeUnknown, datatype: fmod::TagDataTypeBinary, name: ::std::ptr::null_mut(),
+            data: ::std::ptr::null_mut(), datalen: 0, updated: 0};
 
         match unsafe { ffi::FMOD_Sound_GetTag(self.sound, name.into_string().with_c_str(|c_name|{c_name}), index, &mut tag) } {
             fmod::Ok => Ok(FmodTag::from_ptr(tag)),
@@ -444,7 +444,7 @@ impl Sound {
     }
 
     pub fn get_sound_group(&self) -> Result<sound_group::SoundGroup, fmod::Result> {
-        let mut sound_group = ::std::ptr::mut_null();
+        let mut sound_group = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_Sound_GetSoundGroup(self.sound, &mut sound_group) } {
             fmod::Ok => Ok(ffi::FFI::wrap(sound_group)),
@@ -462,7 +462,7 @@ impl Sound {
     }
 
     pub fn get_sync_point(&self, index: i32) -> Result<FmodSyncPoint, fmod::Result> {
-        let mut sync_point = ::std::ptr::mut_null();
+        let mut sync_point = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_Sound_GetSyncPoint(self.sound, index, &mut sync_point) } {
             fmod::Ok => Ok(FmodSyncPoint::from_ptr(sync_point)),
@@ -482,7 +482,7 @@ impl Sound {
     }
 
     pub fn add_sync_point(&self, offset: u32, FmodTimeUnit(offset_type): FmodTimeUnit, name: String) -> Result<FmodSyncPoint, fmod::Result> {
-        let mut sync_point = ::std::ptr::mut_null();
+        let mut sync_point = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_Sound_AddSyncPoint(self.sound, offset, offset_type, name.into_string().with_c_str(|c_name|{c_name}), &mut sync_point) } {
             fmod::Ok => Ok(FmodSyncPoint::from_ptr(sync_point)),
@@ -594,8 +594,8 @@ impl Sound {
     pub fn lock(&self, offset: u32, length: u32) -> Result<(Vec<u8>, Vec<u8>), fmod::Result> {
         let mut len1 = 0u32;
         let mut len2 = 0u32;
-        let mut ptr1 =::std::ptr::mut_null();
-        let mut ptr2 =::std::ptr::mut_null();
+        let mut ptr1 =::std::ptr::null_mut();
+        let mut ptr2 =::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_Sound_Lock(self.sound, offset, length, &mut ptr1, &mut ptr2, &mut len1, &mut len2) } {
             fmod::Ok => {
@@ -620,13 +620,13 @@ impl Sound {
     }
 
     pub fn set_user_data<T>(&mut self, user_data: &mut T) -> fmod::Result {
-        let mut data : *mut c_void = ::std::ptr::mut_null();
+        let mut data : *mut c_void = ::std::ptr::null_mut();
 
         unsafe {
             match ffi::FMOD_Sound_GetUserData(self.sound, &mut data) {
                 fmod::Ok => {
                     if data.is_null() {
-                        self.user_data.user_data = ::std::ptr::mut_null();
+                        self.user_data.user_data = ::std::ptr::null_mut();
 
                         ffi::FMOD_Sound_SetUserData(self.sound, transmute(&mut self.user_data))
                     } else {
@@ -647,7 +647,7 @@ impl Sound {
 
     pub fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, fmod::Result> {
         unsafe {
-            let mut user_data : *mut c_void = ::std::ptr::mut_null();
+            let mut user_data : *mut c_void = ::std::ptr::null_mut();
 
             match ffi::FMOD_Sound_GetUserData(self.sound, &mut user_data) {
                 fmod::Ok => {
@@ -675,11 +675,11 @@ impl Sound {
             };
             let mut len1 = 0u32;
             let mut len2 = 0u32;
-            let mut ptr1: *mut c_void =::std::ptr::mut_null();
-            let mut ptr2: *mut c_void =::std::ptr::mut_null();
+            let mut ptr1: *mut c_void =::std::ptr::null_mut();
+            let mut ptr2: *mut c_void =::std::ptr::null_mut();
 
-            match ffi::FMOD_Sound_GetFormat(self.sound, ::std::ptr::mut_null(), ::std::ptr::mut_null(), &mut channels, &mut bits) {
-                fmod::Ok => match ffi::FMOD_Sound_GetDefaults(self.sound, &mut rate, ::std::ptr::mut_null(), ::std::ptr::mut_null(), ::std::ptr::mut_null()) {
+            match ffi::FMOD_Sound_GetFormat(self.sound, ::std::ptr::null_mut(), ::std::ptr::null_mut(), &mut channels, &mut bits) {
+                fmod::Ok => match ffi::FMOD_Sound_GetDefaults(self.sound, &mut rate, ::std::ptr::null_mut(), ::std::ptr::null_mut(), ::std::ptr::null_mut()) {
                     fmod::Ok => {}
                     e => return Err(format!("{}", e))
                 },

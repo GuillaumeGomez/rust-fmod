@@ -94,7 +94,7 @@ extern "C" fn file_open_callback(name: *mut c_char, unicode: c_int, file_size: *
                         *handle = file::get_ffi(&f) as *mut c_void;
                         *user_data = match s {
                             Some(mut d) => std::mem::transmute(&mut d),
-                            None => ::std::ptr::mut_null()
+                            None => ::std::ptr::null_mut()
                         };
                     }
                     fmod::Ok
@@ -102,8 +102,8 @@ extern "C" fn file_open_callback(name: *mut c_char, unicode: c_int, file_size: *
                 None => {
                     unsafe {
                         *file_size = 0u32;
-                        *handle = std::ptr::mut_null();
-                        *user_data = std::ptr::mut_null();
+                        *handle = std::ptr::null_mut();
+                        *user_data = std::ptr::null_mut();
                     }
                     fmod::ErrFileNotFound
                 }
@@ -112,8 +112,8 @@ extern "C" fn file_open_callback(name: *mut c_char, unicode: c_int, file_size: *
         None => {
             unsafe {
                 *file_size = 0u32;
-                *handle = std::ptr::mut_null();
-                *user_data = std::ptr::mut_null();
+                *handle = std::ptr::null_mut();
+                *user_data = std::ptr::null_mut();
             }
             fmod::Ok
         }
@@ -185,7 +185,7 @@ extern "C" fn file_seek_callback(handle: *mut c_void, pos: c_uint, user_data: *m
 extern "C" fn pcm_read_callback(sound: *mut ffi::FMOD_SOUND, data: *mut c_void, data_len: c_uint) -> fmod::Result {
     unsafe {
         if sound.is_not_null() {
-            let mut tmp = ::std::ptr::mut_null();
+            let mut tmp = ::std::ptr::null_mut();
 
             ffi::FMOD_Sound_GetUserData(sound, &mut tmp);
             if tmp.is_not_null() {
@@ -213,7 +213,7 @@ extern "C" fn pcm_read_callback(sound: *mut ffi::FMOD_SOUND, data: *mut c_void, 
 extern "C" fn non_block_callback(sound: *mut ffi::FMOD_SOUND, result: fmod::Result) -> fmod::Result {
     unsafe {
         if sound.is_not_null() {
-            let mut tmp = ::std::ptr::mut_null();
+            let mut tmp = ::std::ptr::null_mut();
 
             ffi::FMOD_Sound_GetUserData(sound, &mut tmp);
             if tmp.is_not_null() {
@@ -235,7 +235,7 @@ extern "C" fn non_block_callback(sound: *mut ffi::FMOD_SOUND, result: fmod::Resu
 extern "C" fn pcm_set_pos_callback(sound: *mut ffi::FMOD_SOUND, sub_sound: c_int, position: c_uint, postype: ffi::FMOD_TIMEUNIT) -> fmod::Result {
     unsafe {
         if sound.is_not_null() {
-            let mut tmp = ::std::ptr::mut_null();
+            let mut tmp = ::std::ptr::null_mut();
 
             ffi::FMOD_Sound_GetUserData(sound, &mut tmp);
             if tmp.is_not_null() {
@@ -300,7 +300,7 @@ impl FmodUserData {
 impl Default for FmodUserData {
     fn default() -> FmodUserData {
         FmodUserData {
-            user_data: ::std::ptr::mut_null()
+            user_data: ::std::ptr::null_mut()
         }
     }
 }
@@ -526,7 +526,7 @@ impl Default for FmodCreateSoundexInfo {
             user_async_read: None,
             user_async_cancel: None,
             speaker_map: fmod::SpeakerMapTypeDefault,
-            initial_sound_group: ffi::FFI::wrap(::std::ptr::mut_null()),
+            initial_sound_group: ffi::FFI::wrap(::std::ptr::null_mut()),
             initial_seek_position: 0u32,
             initial_seek_pos_type: FmodTimeUnit(0u32),
             ignore_set_file_system: true,
@@ -936,7 +936,7 @@ impl Drop for FmodSys {
 impl FmodSys {
     /* the first one created has to be the last one released */
     pub fn new() -> Result<FmodSys, fmod::Result> {
-        let mut tmp = ::std::ptr::mut_null();
+        let mut tmp = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_System_Create(&mut tmp) } {
             fmod::Ok => Ok(FmodSys{system: tmp, is_first: true}),
@@ -945,11 +945,11 @@ impl FmodSys {
     }
 
     pub fn init(&self) -> fmod::Result {
-        unsafe { ffi::FMOD_System_Init(self.system, 1, FMOD_INIT_NORMAL, ::std::ptr::mut_null()) }
+        unsafe { ffi::FMOD_System_Init(self.system, 1, FMOD_INIT_NORMAL, ::std::ptr::null_mut()) }
     }
 
     pub fn init_with_parameters(&self, max_channels: i32, FmodInitFlag(flag): FmodInitFlag) -> fmod::Result {
-        unsafe { ffi::FMOD_System_Init(self.system, max_channels, flag, ::std::ptr::mut_null()) }
+        unsafe { ffi::FMOD_System_Init(self.system, max_channels, flag, ::std::ptr::null_mut()) }
     }
 
     pub fn update(&self) -> fmod::Result {
@@ -964,7 +964,7 @@ impl FmodSys {
                     e => e
                 } {
                     fmod::Ok => {
-                        self.system = ::std::ptr::mut_null();
+                        self.system = ::std::ptr::null_mut();
                         fmod::Ok
                     }
                     e => e
@@ -978,7 +978,7 @@ impl FmodSys {
 
     /// If music is empty, null is sent
     pub fn create_sound(&self, music: &str, options: Option<FmodMode>, exinfo: Option<&mut FmodCreateSoundexInfo>) -> Result<Sound, fmod::Result> {
-        let mut sound = sound::from_ptr_first(::std::ptr::mut_null());
+        let mut sound = sound::from_ptr_first(::std::ptr::null_mut());
         let op = match options {
             Some(FmodMode(t)) => t,
             None => FMOD_SOFTWARE | FMOD_LOOP_OFF | FMOD_2D | FMOD_CREATESTREAM
@@ -994,7 +994,7 @@ impl FmodSys {
                 }
                 &mut e.convert_to_c() as *mut ffi::FMOD_CREATESOUNDEXINFO
             },
-            None => ::std::ptr::mut_null()
+            None => ::std::ptr::null_mut()
         };
 
         match if music.len() > 0 {
@@ -1012,7 +1012,7 @@ impl FmodSys {
     }
 
     pub fn create_stream(&self, music: &str, options: Option<FmodMode>, exinfo: Option<&mut FmodCreateSoundexInfo>) -> Result<Sound, fmod::Result> {
-        let mut sound = sound::from_ptr_first(::std::ptr::mut_null());
+        let mut sound = sound::from_ptr_first(::std::ptr::null_mut());
         let op = match options {
             Some(FmodMode(t)) => t,
             None => FMOD_SOFTWARE | FMOD_LOOP_OFF | FMOD_2D | FMOD_CREATESTREAM
@@ -1028,7 +1028,7 @@ impl FmodSys {
                 }
                 &mut e.convert_to_c() as *mut ffi::FMOD_CREATESOUNDEXINFO
             },
-            None => ::std::ptr::mut_null()
+            None => ::std::ptr::null_mut()
         };
 
         match if music.len() > 0 {
@@ -1045,7 +1045,7 @@ impl FmodSys {
 
     pub fn create_channel_group(&self, group_name: String) -> Result<channel_group::ChannelGroup, fmod::Result> {
         let t_group_name = group_name.clone();
-        let mut channel_group = ::std::ptr::mut_null();
+        let mut channel_group = ::std::ptr::null_mut();
 
         t_group_name.with_c_str(|c_str|{
             match unsafe { ffi::FMOD_System_CreateChannelGroup(self.system, c_str, &mut channel_group) } {
@@ -1057,7 +1057,7 @@ impl FmodSys {
 
     pub fn create_sound_group(&self, group_name: String) -> Result<sound_group::SoundGroup, fmod::Result> {
         let t_group_name = group_name.clone();
-        let mut sound_group = ::std::ptr::mut_null();
+        let mut sound_group = ::std::ptr::null_mut();
 
         t_group_name.with_c_str(|c_str|{
             match unsafe { ffi::FMOD_System_CreateSoundGroup(self.system, c_str, &mut sound_group) } {
@@ -1068,7 +1068,7 @@ impl FmodSys {
     }
 
     pub fn create_reverb(&self) -> Result<reverb::Reverb, fmod::Result>{
-        let mut t_reverb = ::std::ptr::mut_null();
+        let mut t_reverb = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_System_CreateReverb(self.system, &mut t_reverb) } {
             fmod::Ok => Ok(ffi::FFI::wrap(t_reverb)),
@@ -1077,16 +1077,16 @@ impl FmodSys {
     }
 
     pub fn create_DSP(&self) -> Result<dsp::Dsp, fmod::Result> {
-        let mut t_dsp = ::std::ptr::mut_null();
+        let mut t_dsp = ::std::ptr::null_mut();
 
-        match unsafe { ffi::FMOD_System_CreateDSP(self.system, ::std::ptr::mut_null(), &mut t_dsp) } {
+        match unsafe { ffi::FMOD_System_CreateDSP(self.system, ::std::ptr::null_mut(), &mut t_dsp) } {
             fmod::Ok => Ok(dsp::from_ptr_first(t_dsp)),
             e => Err(e)
         }
     }
 
     pub fn create_DSP_with_description(&self, description: &mut dsp::DspDescription) -> Result<dsp::Dsp, fmod::Result> {
-        let mut t_dsp = ::std::ptr::mut_null();
+        let mut t_dsp = ::std::ptr::null_mut();
         let mut t_description = dsp::get_description_ffi(description);
 
         match unsafe { ffi::FMOD_System_CreateDSP(self.system, &mut t_description, &mut t_dsp) } {
@@ -1096,7 +1096,7 @@ impl FmodSys {
     }
 
     pub fn create_DSP_by_type(&self, _type: fmod::DspType) -> Result<dsp::Dsp, fmod::Result> {
-        let mut t_dsp = ::std::ptr::mut_null();
+        let mut t_dsp = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_System_CreateDSPByType(self.system, _type, &mut t_dsp) } {
             fmod::Ok => Ok(dsp::from_ptr_first(t_dsp)),
@@ -1269,8 +1269,8 @@ impl FmodSys {
             maxAT9Codecs: 0,
             maxPCMcodecs: 0,
             ASIONumChannels: 0,
-            ASIOChannelList: ::std::ptr::mut_null(),
-            ASIOSpeakerList: ::std::ptr::mut_null(),
+            ASIOChannelList: ::std::ptr::null_mut(),
+            ASIOSpeakerList: ::std::ptr::null_mut(),
             max3DReverbDSPs: 0,
             HRTFMinAngle: 0f32,
             HRTFMaxAngle: 0f32,
@@ -1278,7 +1278,7 @@ impl FmodSys {
             vol0virtualvol: 0f32,
             eventqueuesize: 0,
             defaultDecodeBufferSize: 0,
-            debugLogFilename: ::std::ptr::mut_null(),
+            debugLogFilename: ::std::ptr::null_mut(),
             profileport: 0,
             geometryMaxFadeTime: 0,
             maxSpectrumWaveDataBuffers: 0,
@@ -1441,7 +1441,7 @@ impl FmodSys {
     }
 
     pub fn create_DSP_by_plugin(&self, FmodPluginHandle(handle): FmodPluginHandle) -> Result<Dsp, fmod::Result> {
-        let mut dsp = ::std::ptr::mut_null();
+        let mut dsp = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_System_CreateDSPByPlugin(self.system, handle, &mut dsp) } {
             fmod::Ok => Ok(dsp::from_ptr_first(dsp)),
@@ -1545,7 +1545,7 @@ impl FmodSys {
     }
 
     pub fn get_output_handle(&self) -> Result<FmodOutputHandle, fmod::Result> {
-        let mut output_h = ::std::ptr::mut_null();
+        let mut output_h = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_System_GetOutputHandle(self.system, &mut output_h) } {
             fmod::Ok => Ok(FmodOutputHandle{handle: output_h}),
@@ -1642,7 +1642,7 @@ impl FmodSys {
     }
     
     pub fn get_channel(&self, channel_id: i32) -> Result<channel::Channel, fmod::Result> {
-        let mut channel = ::std::ptr::mut_null();
+        let mut channel = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_System_GetChannel(self.system, channel_id, &mut channel) } {
             fmod::Ok => Ok(ffi::FFI::wrap(channel)),
@@ -1651,7 +1651,7 @@ impl FmodSys {
     }
 
     pub fn get_master_channel_group(&self) -> Result<channel_group::ChannelGroup, fmod::Result> {
-        let mut channel_group = ::std::ptr::mut_null();
+        let mut channel_group = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_System_GetMasterChannelGroup(self.system, &mut channel_group) } {
             fmod::Ok => Ok(ffi::FFI::wrap(channel_group)),
@@ -1660,7 +1660,7 @@ impl FmodSys {
     }
 
     pub fn get_master_sound_group(&self) -> Result<sound_group::SoundGroup, fmod::Result> {
-        let mut sound_group = ::std::ptr::mut_null();
+        let mut sound_group = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_System_GetMasterSoundGroup(self.system, &mut sound_group) } {
             fmod::Ok => Ok(ffi::FFI::wrap(sound_group)),
@@ -1699,7 +1699,7 @@ impl FmodSys {
     }
 
     pub fn get_DSP_head(&self) -> Result<Dsp, fmod::Result> {
-        let mut head = ::std::ptr::mut_null();
+        let mut head = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_System_GetDSPHead(self.system, &mut head) } {
             fmod::Ok => Ok(ffi::FFI::wrap(head)),
@@ -1708,7 +1708,7 @@ impl FmodSys {
     }
 
     pub fn add_DSP(&self, dsp: &dsp::Dsp) -> Result<dsp_connection::DspConnection, fmod::Result> {
-        let mut t_connection = ::std::ptr::mut_null();
+        let mut t_connection = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_System_AddDSP(self.system, ffi::FFI::unwrap(dsp), &mut t_connection) } {
             fmod::Ok => Ok(ffi::FFI::wrap(t_connection)),
@@ -1799,7 +1799,7 @@ impl FmodSys {
     }
 
     pub fn create_geometry(&self, max_polygons: i32, max_vertices: i32) -> Result<geometry::Geometry, fmod::Result> {
-        let mut geometry = ::std::ptr::mut_null();
+        let mut geometry = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_System_CreateGeometry(self.system, max_polygons, max_vertices, &mut geometry) } {
             fmod::Ok => Ok(ffi::FFI::wrap(geometry)),

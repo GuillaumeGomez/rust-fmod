@@ -63,7 +63,7 @@ impl ChannelGroup {
         if self.channel_group.is_not_null() {
             match unsafe { ffi::FMOD_ChannelGroup_Release(self.channel_group) } {
                 fmod::Ok => {
-                    self.channel_group = ::std::ptr::mut_null();
+                    self.channel_group = ::std::ptr::null_mut();
                     fmod::Ok
                 }
                 e => e
@@ -208,7 +208,7 @@ impl ChannelGroup {
     }
 
     pub fn get_group(&self, index: i32) -> Result<ChannelGroup, fmod::Result> {
-        let mut group = ::std::ptr::mut_null();
+        let mut group = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_ChannelGroup_GetGroup(self.channel_group, index, &mut group) } {
             fmod::Ok => Ok(ChannelGroup{channel_group: group}),
@@ -217,7 +217,7 @@ impl ChannelGroup {
     }
 
     pub fn get_parent_group(&self) -> Result<ChannelGroup, fmod::Result> {
-        let mut parent_group = ::std::ptr::mut_null();
+        let mut parent_group = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_ChannelGroup_GetParentGroup(self.channel_group, &mut parent_group) } {
             fmod::Ok => Ok(ChannelGroup{channel_group: parent_group}),
@@ -226,7 +226,7 @@ impl ChannelGroup {
     }
 
     pub fn get_DSP_head(&self) -> Result<dsp::Dsp, fmod::Result> {
-        let mut dsp = ::std::ptr::mut_null();
+        let mut dsp = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_ChannelGroup_GetDSPHead(self.channel_group, &mut dsp) } {
             fmod::Ok => Ok(ffi::FFI::wrap(dsp)),
@@ -235,7 +235,7 @@ impl ChannelGroup {
     }
 
     pub fn add_DSP(&self, dsp: &dsp::Dsp) -> Result<dsp_connection::DspConnection, fmod::Result> {
-        let mut dsp_connection = ::std::ptr::mut_null();
+        let mut dsp_connection = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_ChannelGroup_AddDSP(self.channel_group, ffi::FFI::unwrap(dsp), &mut dsp_connection) } {
             fmod::Ok => Ok(ffi::FFI::wrap(dsp_connection)),
@@ -264,7 +264,7 @@ impl ChannelGroup {
     }
 
     pub fn get_channel(&self, index: i32) -> Result<channel::Channel, fmod::Result> {
-        let mut channel = ::std::ptr::mut_null();
+        let mut channel = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_ChannelGroup_GetChannel(self.channel_group, index, &mut channel) } {
             fmod::Ok => Ok(ffi::FFI::wrap(channel)),
@@ -315,7 +315,7 @@ impl ChannelGroup {
 
     pub fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, fmod::Result> {
         unsafe {
-            let mut user_data : *mut c_void = ::std::ptr::mut_null();
+            let mut user_data : *mut c_void = ::std::ptr::null_mut();
 
             match ffi::FMOD_ChannelGroup_GetUserData(self.channel_group, &mut user_data) {
                 fmod::Ok => {

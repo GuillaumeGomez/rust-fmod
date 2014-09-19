@@ -55,10 +55,10 @@ impl Drop for Geometry {
 
 impl Geometry {
     pub fn release(&mut self) -> fmod::Result {
-        if self.geometry !=::std::ptr::mut_null() {
+        if self.geometry !=::std::ptr::null_mut() {
             match unsafe { ffi::FMOD_Geometry_Release(self.geometry) } {
                 fmod::Ok => {
-                    self.geometry =::std::ptr::mut_null();
+                    self.geometry =::std::ptr::null_mut();
                     fmod::Ok
                 }
                 e => e
@@ -235,7 +235,7 @@ impl Geometry {
 
     pub fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, fmod::Result> {
         unsafe {
-            let mut user_data : *mut c_void = ::std::ptr::mut_null();
+            let mut user_data : *mut c_void = ::std::ptr::null_mut();
 
             match ffi::FMOD_Geometry_GetUserData(self.geometry, &mut user_data) {
                 fmod::Ok => {

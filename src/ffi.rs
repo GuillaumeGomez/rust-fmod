@@ -830,7 +830,7 @@ impl SoundData {
             non_block: None,
             pcm_read: None,
             pcm_set_pos: None,
-            user_data: ::std::ptr::mut_null()
+            user_data: ::std::ptr::null_mut()
         }
     }
 }
