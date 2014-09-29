@@ -202,7 +202,7 @@ fn main() {
 
                         match reader.read_line() {
                             Ok(mut name) => {
-                                name.pop_char().unwrap();
+                                name.pop().unwrap();
                                 match sound.save_to_wav(&name) {
                                     Ok(b) => if b {
                                         println!("export succeeded");

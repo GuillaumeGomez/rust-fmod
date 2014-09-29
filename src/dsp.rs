@@ -328,8 +328,8 @@ pub fn from_parameter_ptr(dsp_parameter: *mut ffi::FMOD_DSP_PARAMETERDESC) -> Ds
 }
 
 pub fn get_parameter_ffi(dsp_parameter: &DspParameterDesc) -> ffi::FMOD_DSP_PARAMETERDESC {
-    let mut tmp_name = Vec::from_slice(dsp_parameter.name.as_bytes());
-    let mut tmp_label = Vec::from_slice(dsp_parameter.label.as_bytes());
+    let mut tmp_name = dsp_parameter.name.as_bytes().to_vec();
+    let mut tmp_label = dsp_parameter.label.as_bytes().to_vec();
 
     tmp_name.truncate(16);
     tmp_label.truncate(16);
@@ -426,7 +426,7 @@ impl Default for DspDescription {
 }
 
 pub fn get_description_ffi(dsp_description: &mut DspDescription) -> ffi::FMOD_DSP_DESCRIPTION {
-    let mut tmp_s = Vec::from_slice(dsp_description.name.as_bytes());
+    let mut tmp_s = dsp_description.name.as_bytes().to_vec();
 
     tmp_s.truncate(32);
     tmp_s.reserve_exact(32);

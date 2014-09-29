@@ -603,10 +603,10 @@ impl Sound {
                 let mut v_ptr2 = Vec::new();
 
                 unsafe { slice::raw::buf_as_slice(ptr1 as *const u8, len1 as uint, |b| {
-                   v_ptr1 = Vec::from_slice(b).clone();
+                   v_ptr1 = b.clone().to_vec();
                 }); }
                 unsafe { slice::raw::buf_as_slice(ptr2 as *const u8, len2 as uint, |b| {
-                   v_ptr2 = Vec::from_slice(b).clone();
+                   v_ptr2 = b.clone().to_vec();
                 }); }
                 Ok((v_ptr1, v_ptr2))
             }

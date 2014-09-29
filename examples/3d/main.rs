@@ -95,7 +95,7 @@ fn main() {
         fmod.set_3D_listener_attributes(0, &listener_pos, &vel, &forward, &up);
 
         let mut tmp = String::from_str("|.......................<1>......................<2>....................|\r");
-        unsafe { tmp.as_mut_bytes()[listener_pos.x as uint + 35u] = 'L' as u8; }
+        unsafe { tmp.as_mut_vec().as_mut_slice()[listener_pos.x as uint + 35u] = 'L' as u8; }
         print!("{}", tmp);
         fmod.update();
         sleep(Duration::milliseconds(interface_update_time as i64 - 1i64));
