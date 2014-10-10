@@ -1091,245 +1091,245 @@ pub mod fmod {
 }
 
 /// Default for all modes listed below. FMOD_LOOP_OFF, FMOD_2D, FMOD_HARDWARE
-pub static FMOD_DEFAULT                : c_uint = 0x00000000;
+pub const FMOD_DEFAULT                : c_uint = 0x00000000;
 /// For non looping sounds. (DEFAULT). Overrides FMOD_LOOP_NORMAL / FMOD_LOOP_BIDI.
-pub static FMOD_LOOP_OFF               : c_uint = 0x00000001;
+pub const FMOD_LOOP_OFF               : c_uint = 0x00000001;
 /// For forward looping sounds.
-pub static FMOD_LOOP_NORMAL            : c_uint = 0x00000002;
+pub const FMOD_LOOP_NORMAL            : c_uint = 0x00000002;
 /// For bidirectional looping sounds. (only works on software mixed static sounds).
-pub static FMOD_LOOP_BIDI              : c_uint = 0x00000004;
+pub const FMOD_LOOP_BIDI              : c_uint = 0x00000004;
 /// Ignores any 3d processing. (DEFAULT).
-pub static FMOD_2D                     : c_uint = 0x00000008;
+pub const FMOD_2D                     : c_uint = 0x00000008;
 /// Makes the sound positionable in 3D. Overrides FMOD_2D
-pub static FMOD_3D                     : c_uint = 0x00000010;
+pub const FMOD_3D                     : c_uint = 0x00000010;
 /// Attempts to make sounds use hardware acceleration. (DEFAULT). Note on platforms that don't support FMOD_HARDWARE (only 3DS, PS Vita, PSP, Wii and Wii U support FMOD_HARDWARE), this will be internally treated as FMOD_SOFTWARE.
-pub static FMOD_HARDWARE               : c_uint = 0x00000020;
+pub const FMOD_HARDWARE               : c_uint = 0x00000020;
 /// Makes the sound be mixed by the FMOD CPU based software mixer. Overrides FMOD_HARDWARE. Use this for FFT, DSP, compressed sample support, 2D multi-speaker support and other software related features.
-pub static FMOD_SOFTWARE               : c_uint = 0x00000040;
+pub const FMOD_SOFTWARE               : c_uint = 0x00000040;
 /// Decompress at runtime, streaming from the source provided (ie from disk). Overrides FMOD_CREATESAMPLE and FMOD_CREATECOMPRESSEDSAMPLE. Note a stream can only be played once at a time due to a stream only having 1 stream buffer and file handle. Open multiple streams to have them play concurrently.
-pub static FMOD_CREATESTREAM           : c_uint = 0x00000080;
+pub const FMOD_CREATESTREAM           : c_uint = 0x00000080;
 /// Decompress at loadtime, decompressing or decoding whole file into memory as the target sample format (ie PCM). Fastest for FMOD_SOFTWARE based playback and most flexible.
-pub static FMOD_CREATESAMPLE           : c_uint = 0x00000100;
+pub const FMOD_CREATESAMPLE           : c_uint = 0x00000100;
 /// Load MP2/MP3/IMAADPCM/CELT/Vorbis/AT9 or XMA into memory and leave it compressed. CELT/Vorbis/AT9 encoding only supported in the FSB file format. During playback the FMOD software mixer will decode it in realtime as a 'compressed sample'. Can only be used in combination with FMOD_SOFTWARE. Overrides FMOD_CREATESAMPLE. If the sound data is not one of the supported formats, it will behave as if it was created with FMOD_CREATESAMPLE and decode the sound into PCM.
-pub static FMOD_CREATECOMPRESSEDSAMPLE : c_uint = 0x00000200;
+pub const FMOD_CREATECOMPRESSEDSAMPLE : c_uint = 0x00000200;
 /// Opens a user created static sample or stream. Use FMOD_CREATESOUNDEXINFO to specify format and/or read callbacks. If a user created 'sample' is created with no read callback, the sample will be empty. Use [`Sound::lock`](../struct.Sound.html#method.lock) and [`Sound::unlock`](../struct.Sound.html#method.unlock) to place sound data into the sound if this is the case.
-pub static FMOD_OPENUSER               : c_uint = 0x00000400;
+pub const FMOD_OPENUSER               : c_uint = 0x00000400;
 /// "name_or_data" will be interpreted as a pointer to memory instead of filename for creating sounds. Use FMOD_CREATESOUNDEXINFO to specify length. If used with FMOD_CREATESAMPLE or FMOD_CREATECOMPRESSEDSAMPLE, FMOD duplicates the memory into its own buffers. Your own buffer can be freed after open. If used with FMOD_CREATESTREAM, FMOD will stream out of the buffer whose pointer you passed in. In this case, your own buffer should not be freed until you have finished with and released the stream.
-pub static FMOD_OPENMEMORY             : c_uint = 0x00000800;
+pub const FMOD_OPENMEMORY             : c_uint = 0x00000800;
 /// "name_or_data" will be interpreted as a pointer to memory instead of filename for creating sounds. Use FMOD_CREATESOUNDEXINFO to specify length. This differs to FMOD_OPENMEMORY in that it uses the memory as is, without duplicating the memory into its own buffers. For Wii/PSP FMOD_HARDWARE supports this flag for the GCADPCM/VAG formats. On other platforms FMOD_SOFTWARE must be used, as sound hardware on the other platforms (ie PC) cannot access main ram. Cannot be freed after open, only after [`Sound::release`](../struct.Sound.html#method.release). Will not work if the data is compressed and FMOD_CREATECOMPRESSEDSAMPLE is not used.
-pub static FMOD_OPENMEMORY_POINT       : c_uint = 0x10000000;
+pub const FMOD_OPENMEMORY_POINT       : c_uint = 0x10000000;
 /// Will ignore file format and treat as raw pcm. Use FMOD_CREATESOUNDEXINFO to specify format. Requires at least defaultfrequency, numchannels and format to be specified before it will open. Must be little endian data.
-pub static FMOD_OPENRAW                : c_uint = 0x00001000;
+pub const FMOD_OPENRAW                : c_uint = 0x00001000;
 /// Just open the file, dont prebuffer or read. Good for fast opens for info, or when sound::readData is to be used.
-pub static FMOD_OPENONLY               : c_uint = 0x00002000;
+pub const FMOD_OPENONLY               : c_uint = 0x00002000;
 /// For [`FmodSys::create_sound`](../struct.FmodSys.html#method.create_sound) - for accurate [`Sound::get_length`](../struct.Sound.html#method.get_length) / [`Channel::set_position`](../struct.Channel.html#method.set_position) on VBR MP3, and MOD/S3M/XM/IT/MIDI files. Scans file first, so takes longer to open. FMOD_OPENONLY does not affect this.
-pub static FMOD_ACCURATETIME           : c_uint = 0x00004000;
+pub const FMOD_ACCURATETIME           : c_uint = 0x00004000;
 /// For corrupted / bad MP3 files. This will search all the way through the file until it hits a valid MPEG header. Normally only searches for 4k.
-pub static FMOD_MPEGSEARCH             : c_uint = 0x00008000;
+pub const FMOD_MPEGSEARCH             : c_uint = 0x00008000;
 /// For opening sounds and getting streamed subsounds (seeking) asyncronously. Use [`Sound::get_open_state`](../struct.Sound.html#method.get_open_state) to poll the state of the sound as it opens or retrieves the subsound in the background.
-pub static FMOD_NONBLOCKING            : c_uint = 0x00010000;
+pub const FMOD_NONBLOCKING            : c_uint = 0x00010000;
 /// Unique sound, can only be played one at a time
-pub static FMOD_UNIQUE                 : c_uint = 0x00020000;
+pub const FMOD_UNIQUE                 : c_uint = 0x00020000;
 /// Make the sound's position, velocity and orientation relative to the listener.
-pub static FMOD_3D_HEADRELATIVE        : c_uint = 0x00040000;
+pub const FMOD_3D_HEADRELATIVE        : c_uint = 0x00040000;
 /// Make the sound's position, velocity and orientation absolute (relative to the world). (DEFAULT)
-pub static FMOD_3D_WORLDRELATIVE       : c_uint = 0x00080000;
+pub const FMOD_3D_WORLDRELATIVE       : c_uint = 0x00080000;
 /// This sound will follow the inverse rolloff model where mindistance = full volume, maxdistance = where sound stops attenuating, and rolloff is fixed according to the global rolloff factor. (DEFAULT)
-pub static FMOD_3D_INVERSEROLLOFF      : c_uint = 0x00100000;
+pub const FMOD_3D_INVERSEROLLOFF      : c_uint = 0x00100000;
 /// This sound will follow a linear rolloff model where mindistance = full volume, maxdistance = silence. Rolloffscale is ignored.
-pub static FMOD_3D_LINEARROLLOFF       : c_uint = 0x00200000;
+pub const FMOD_3D_LINEARROLLOFF       : c_uint = 0x00200000;
 /// This sound will follow a linear-square rolloff model where mindistance = full volume, maxdistance = silence. Rolloffscale is ignored.
-pub static FMOD_3D_LINEARSQUAREROLLOFF : c_uint = 0x00400000;
+pub const FMOD_3D_LINEARSQUAREROLLOFF : c_uint = 0x00400000;
 /// This sound will follow a rolloff model defined by [`Sound::set_3D_custom_rolloff`](../struct.Sound.html#method.set_3D_custom_rolloff) / [`Channel::set_3D_custom_rolloff`](../struct.Channel.html#method.set_3D_custom_rolloff).
-pub static FMOD_3D_CUSTOMROLLOFF       : c_uint = 0x04000000;
+pub const FMOD_3D_CUSTOMROLLOFF       : c_uint = 0x04000000;
 /// Is not affect by geometry occlusion. If not specified in [`Sound::set_mode`](../struct.Sound.html#method.set_mode), or [`Channel::set_mode`](../struct.Channel.html#method.set_mode), the flag is cleared and it is affected by geometry again.
-pub static FMOD_3D_IGNOREGEOMETRY      : c_uint = 0x40000000;
+pub const FMOD_3D_IGNOREGEOMETRY      : c_uint = 0x40000000;
 /// Filename is double-byte unicode.
-pub static FMOD_UNICODE                : c_uint = 0x01000000;
+pub const FMOD_UNICODE                : c_uint = 0x01000000;
 /// Skips id3v2/asf/etc tag checks when opening a sound, to reduce seek/read overhead when opening files (helps with CD performance).
-pub static FMOD_IGNORETAGS             : c_uint = 0x02000000;
+pub const FMOD_IGNORETAGS             : c_uint = 0x02000000;
 /// Removes some features from samples to give a lower memory overhead, like [`Sound::get_name`](../struct.Sound.html#method.get_name). See remarks.
-pub static FMOD_LOWMEM                 : c_uint = 0x08000000;
+pub const FMOD_LOWMEM                 : c_uint = 0x08000000;
 /// Load sound into the secondary RAM of supported platform. On PS3, sounds will be loaded into RSX/VRAM.
-pub static FMOD_LOADSECONDARYRAM       : c_uint = 0x20000000;
+pub const FMOD_LOADSECONDARYRAM       : c_uint = 0x20000000;
 /// For sounds that start virtual (due to being quiet or low importance), instead of swapping back to audible, and playing at the correct offset according to time, this flag makes the sound play from the start.
-pub static FMOD_VIRTUAL_PLAYFROMSTART  : c_uint = 0x80000000;
+pub const FMOD_VIRTUAL_PLAYFROMSTART  : c_uint = 0x80000000;
 
 /// All platforms - Initialize normally
-pub static FMOD_INIT_NORMAL                    : c_uint = 0x00000000;
+pub const FMOD_INIT_NORMAL                    : c_uint = 0x00000000;
 /// All platforms - No stream thread is created internally. Streams are driven from [`FmodSys::update`](../struct.FmodSys.html#method.update). Mainly used with non-realtime outputs.
-pub static FMOD_INIT_STREAM_FROM_UPDATE        : c_uint = 0x00000001;
+pub const FMOD_INIT_STREAM_FROM_UPDATE        : c_uint = 0x00000001;
 /// All platforms - FMOD will treat +X as right, +Y as up and +Z as backwards (towards you).
-pub static FMOD_INIT_3D_RIGHTHANDED            : c_uint = 0x00000002;
+pub const FMOD_INIT_3D_RIGHTHANDED            : c_uint = 0x00000002;
 /// All platforms - Disable software mixer to save memory. Anything created with FMOD_SOFTWARE will fail and DSP will not work.
-pub static FMOD_INIT_SOFTWARE_DISABLE          : c_uint = 0x00000004;
+pub const FMOD_INIT_SOFTWARE_DISABLE          : c_uint = 0x00000004;
 /// All platforms - All FMOD_SOFTWARE (and FMOD_HARDWARE on 3DS and NGP) with FMOD_3D based voices will add a software lowpass filter effect into the DSP chain which is automatically used when [`Channel::set_3D_occlusion`](../struct.Channel.html#method.set_3D_occlusion) is used or the geometry API.
-pub static FMOD_INIT_OCCLUSION_LOWPASS         : c_uint = 0x00000008;
+pub const FMOD_INIT_OCCLUSION_LOWPASS         : c_uint = 0x00000008;
 /// All platforms - All FMOD_SOFTWARE (and FMOD_HARDWARE on 3DS and NGP) with FMOD_3D based voices will add a software lowpass filter effect into the DSP chain which causes sounds to sound duller when the sound goes behind the listener. Use [`FmodSys::set_advanced_settings`](../struct.FmodSys.html#method.set_advanced_settings) to adjust Cutoff frequency.
-pub static FMOD_INIT_HRTF_LOWPASS              : c_uint = 0x00000010;
+pub const FMOD_INIT_HRTF_LOWPASS              : c_uint = 0x00000010;
 /// All platforms - All FMOD_SOFTWARE with FMOD_3D based voices will add a software lowpass and highpass filter effect into the DSP chain which will act as a distance-automated bandpass filter. Use [`FmodSys::set_advanced_settings`](../struct.FmodSys.html#method.set_advanced_settings) to adjust the center frequency.
-pub static FMOD_INIT_DISTANCE_FILTERING        : c_uint = 0x00000200;
+pub const FMOD_INIT_DISTANCE_FILTERING        : c_uint = 0x00000200;
 /// All platforms - FMOD Software reverb will preallocate enough buffers for reverb per channel, rather than allocating them and freeing them at runtime.
-pub static FMOD_INIT_REVERB_PREALLOCBUFFERS    : c_uint = 0x00000040;
+pub const FMOD_INIT_REVERB_PREALLOCBUFFERS    : c_uint = 0x00000040;
 /// All platforms - Enable TCP/IP based host which allows FMOD Designer or FMOD Profiler to connect to it, and view memory, CPU and the DSP network graph in real-time.
-pub static FMOD_INIT_ENABLE_PROFILE            : c_uint = 0x00000020;
+pub const FMOD_INIT_ENABLE_PROFILE            : c_uint = 0x00000020;
 /// All platforms - Any sounds that are 0 volume will go virtual and not be processed except for having their positions updated virtually. Use [`FmodSys::set_advanced_settings`](../struct.FmodSys.html#method.set_advanced_settings) to adjust what volume besides zero to switch to virtual at.
-pub static FMOD_INIT_VOL0_BECOMES_VIRTUAL      : c_uint = 0x00000080;
+pub const FMOD_INIT_VOL0_BECOMES_VIRTUAL      : c_uint = 0x00000080;
 /// Win32 Vista only - for WASAPI output - Enable exclusive access to hardware, lower latency at the expense of excluding other applications from accessing the audio hardware.
-pub static FMOD_INIT_WASAPI_EXCLUSIVE          : c_uint = 0x00000100;
+pub const FMOD_INIT_WASAPI_EXCLUSIVE          : c_uint = 0x00000100;
 /// PS3 only - Prefer DTS over Dolby Digital if both are supported. Note: 8 and 6 channel LPCM is always preferred over both DTS and Dolby Digital.
-pub static FMOD_INIT_PS3_PREFERDTS             : c_uint = 0x00800000;
+pub const FMOD_INIT_PS3_PREFERDTS             : c_uint = 0x00800000;
 /// PS3 only - Force PS3 system output mode to 2 channel LPCM.
-pub static FMOD_INIT_PS3_FORCE2CHLPCM          : c_uint = 0x01000000;
+pub const FMOD_INIT_PS3_FORCE2CHLPCM          : c_uint = 0x01000000;
 /// Wii / 3DS - Disable Dolby Pro Logic surround. Speakermode will be set to STEREO even if user has selected surround in the system settings.
-pub static FMOD_INIT_DISABLEDOLBY              : c_uint = 0x00100000;
+pub const FMOD_INIT_DISABLEDOLBY              : c_uint = 0x00100000;
 /// Xbox 360 / PS3 - The "music" channelgroup which by default pauses when custom 360 dashboard / PS3 BGM music is played, can be changed to mute (therefore continues playing) instead of pausing, by using this flag.
-pub static FMOD_INIT_SYSTEM_MUSICMUTENOTPAUSE  : c_uint = 0x00200000;
+pub const FMOD_INIT_SYSTEM_MUSICMUTENOTPAUSE  : c_uint = 0x00200000;
 /// Win32/Wii/PS3/Xbox/Xbox 360 - FMOD Mixer thread is woken up to do a mix when [`FmodSys::update`](../struct.FmodSys.html#method.update) is called rather than waking periodically on its own timer.
-pub static FMOD_INIT_SYNCMIXERWITHUPDATE       : c_uint = 0x00400000;
+pub const FMOD_INIT_SYNCMIXERWITHUPDATE       : c_uint = 0x00400000;
 /// All platforms - With the geometry engine, only process the closest polygon rather than accumulating all polygons the sound to listener line intersects.
-pub static FMOD_INIT_GEOMETRY_USECLOSEST       : c_uint = 0x04000000;
+pub const FMOD_INIT_GEOMETRY_USECLOSEST       : c_uint = 0x04000000;
 /// Win32 - Disables automatic setting of of FMOD_SPEAKERMODE_STEREO to FMOD_SPEAKERMODE_MYEARS if the MyEars profile exists on the PC. MyEars is HRTF 7.1 downmixing through headphones.
-pub static FMOD_INIT_DISABLE_MYEARS_AUTODETECT : c_uint = 0x08000000;
+pub const FMOD_INIT_DISABLE_MYEARS_AUTODETECT : c_uint = 0x08000000;
 /// PS3 only - Disable DTS output mode selection
-pub static FMOD_INIT_PS3_DISABLEDTS            : c_uint = 0x10000000;
+pub const FMOD_INIT_PS3_DISABLEDTS            : c_uint = 0x10000000;
 /// PS3 only - Disable Dolby Digital output mode selection
-pub static FMOD_INIT_PS3_DISABLEDOLBYDIGITAL   : c_uint = 0x20000000;
+pub const FMOD_INIT_PS3_DISABLEDOLBYDIGITAL   : c_uint = 0x20000000;
 /// PS3/PS4 only - FMOD uses the WAVEFORMATEX Microsoft 7.1 speaker mapping where the last 2 pairs of speakers are 'rears' then 'sides', but on PS3/PS4 these are mapped to 'surrounds' and 'backs'. Use this flag to swap fmod's last 2 pair of speakers on PS3/PS4 to avoid needing to do a special case for these platforms.
-pub static FMOD_INIT_7POINT1_DOLBYMAPPING      : c_uint = 0x40000000;
+pub const FMOD_INIT_7POINT1_DOLBYMAPPING      : c_uint = 0x40000000;
 
 /// Milliseconds.
-pub static FMOD_TIMEUNIT_MS               : FmodTimeUnit = FmodTimeUnit(0x00000001);
+pub const FMOD_TIMEUNIT_MS               : FmodTimeUnit = FmodTimeUnit(0x00000001);
 /// PCM samples, related to milliseconds * samplerate / 1000.
-pub static FMOD_TIMEUNIT_PCM              : FmodTimeUnit = FmodTimeUnit(0x00000002);
+pub const FMOD_TIMEUNIT_PCM              : FmodTimeUnit = FmodTimeUnit(0x00000002);
 /// Bytes, related to PCM samples * channels * datawidth (ie 16bit = 2 bytes).
-pub static FMOD_TIMEUNIT_PCMBYTES         : FmodTimeUnit = FmodTimeUnit(0x00000004);
+pub const FMOD_TIMEUNIT_PCMBYTES         : FmodTimeUnit = FmodTimeUnit(0x00000004);
 /// Raw file bytes of (compressed) sound data (does not include headers). Only used by [`Sound::get_length`](../struct.Sound.html#method.get_length) and [`Channel::get_position`](../struct.Channel.html#method.get_position).
-pub static FMOD_TIMEUNIT_RAWBYTES         : FmodTimeUnit = FmodTimeUnit(0x00000008);
+pub const FMOD_TIMEUNIT_RAWBYTES         : FmodTimeUnit = FmodTimeUnit(0x00000008);
 /// Fractions of 1 PCM sample. Unsigned int range 0 to 0xFFFFFFFF. Used for sub-sample granularity for DSP purposes.
-pub static FMOD_TIMEUNIT_PCMFRACTION      : FmodTimeUnit = FmodTimeUnit(0x00000010);
+pub const FMOD_TIMEUNIT_PCMFRACTION      : FmodTimeUnit = FmodTimeUnit(0x00000010);
 /// MOD/S3M/XM/IT. Order in a sequenced module format. Use [`Sound::get_format`](../struct.Sound.html#method.get_format) to determine the PCM format being decoded to.
-pub static FMOD_TIMEUNIT_MODORDER         : FmodTimeUnit = FmodTimeUnit(0x00000100);
+pub const FMOD_TIMEUNIT_MODORDER         : FmodTimeUnit = FmodTimeUnit(0x00000100);
 /// MOD/S3M/XM/IT. Current row in a sequenced module format. [`Sound::get_length`](../struct.Sound.html#method.get_length) will return the number of rows in the currently playing or seeked to pattern.
-pub static FMOD_TIMEUNIT_MODROW           : FmodTimeUnit = FmodTimeUnit(0x00000200);
+pub const FMOD_TIMEUNIT_MODROW           : FmodTimeUnit = FmodTimeUnit(0x00000200);
 /// MOD/S3M/XM/IT. Current pattern in a sequenced module format. [`Sound::get_length`](../struct.Sound.html#method.get_length) will return the number of patterns in the song and [`Channel::get_position`](../struct.Channel.html#method.get_position) will return the currently playing pattern.
-pub static FMOD_TIMEUNIT_MODPATTERN       : FmodTimeUnit = FmodTimeUnit(0x00000400);
+pub const FMOD_TIMEUNIT_MODPATTERN       : FmodTimeUnit = FmodTimeUnit(0x00000400);
 /// Currently playing subsound in a sentence time in milliseconds.
-pub static FMOD_TIMEUNIT_SENTENCE_MS      : FmodTimeUnit = FmodTimeUnit(0x00010000);
+pub const FMOD_TIMEUNIT_SENTENCE_MS      : FmodTimeUnit = FmodTimeUnit(0x00010000);
 /// Currently playing subsound in a sentence time in PCM Samples, related to milliseconds * samplerate / 1000.
-pub static FMOD_TIMEUNIT_SENTENCE_PCM     : FmodTimeUnit = FmodTimeUnit(0x00020000);
+pub const FMOD_TIMEUNIT_SENTENCE_PCM     : FmodTimeUnit = FmodTimeUnit(0x00020000);
 /// Currently playing subsound in a sentence time in bytes, related to PCM samples * channels * datawidth (ie 16bit = 2 bytes).
-pub static FMOD_TIMEUNIT_SENTENCE_PCMBYTES: FmodTimeUnit = FmodTimeUnit(0x00040000);
+pub const FMOD_TIMEUNIT_SENTENCE_PCMBYTES: FmodTimeUnit = FmodTimeUnit(0x00040000);
 /// Currently playing sentence index according to the channel.
-pub static FMOD_TIMEUNIT_SENTENCE         : FmodTimeUnit = FmodTimeUnit(0x00080000);
+pub const FMOD_TIMEUNIT_SENTENCE         : FmodTimeUnit = FmodTimeUnit(0x00080000);
 /// Currently playing subsound index in a sentence.
-pub static FMOD_TIMEUNIT_SENTENCE_SUBSOUND: FmodTimeUnit = FmodTimeUnit(0x00100000);
+pub const FMOD_TIMEUNIT_SENTENCE_SUBSOUND: FmodTimeUnit = FmodTimeUnit(0x00100000);
 /// Time value as seen by buffered stream. This is always ahead of audible time, and is only used for processing.
-pub static FMOD_TIMEUNIT_BUFFERED         : FmodTimeUnit = FmodTimeUnit(0x10000000);
+pub const FMOD_TIMEUNIT_BUFFERED         : FmodTimeUnit = FmodTimeUnit(0x10000000);
 
 /// Memory not accounted for by other types
-pub static FMOD_MEMBITS_OTHER             : FmodMemoryBits = FmodMemoryBits(0x00000001);
+pub const FMOD_MEMBITS_OTHER             : FmodMemoryBits = FmodMemoryBits(0x00000001);
 /// String data
-pub static FMOD_MEMBITS_STRING            : FmodMemoryBits = FmodMemoryBits(0x00000002);
+pub const FMOD_MEMBITS_STRING            : FmodMemoryBits = FmodMemoryBits(0x00000002);
 /// [`FmodSys`](../struct.FmodSys.html) object and various internals
-pub static FMOD_MEMBITS_SYSTEM            : FmodMemoryBits = FmodMemoryBits(0x00000004);
+pub const FMOD_MEMBITS_SYSTEM            : FmodMemoryBits = FmodMemoryBits(0x00000004);
 /// Plugin objects and internals
-pub static FMOD_MEMBITS_PLUGINS           : FmodMemoryBits = FmodMemoryBits(0x00000008);
+pub const FMOD_MEMBITS_PLUGINS           : FmodMemoryBits = FmodMemoryBits(0x00000008);
 /// Output module object and internals
-pub static FMOD_MEMBITS_OUTPUT            : FmodMemoryBits = FmodMemoryBits(0x00000010);
+pub const FMOD_MEMBITS_OUTPUT            : FmodMemoryBits = FmodMemoryBits(0x00000010);
 /// [`Channel`](../struct.Channel.html) related memory
-pub static FMOD_MEMBITS_CHANNEL           : FmodMemoryBits = FmodMemoryBits(0x00000020);
+pub const FMOD_MEMBITS_CHANNEL           : FmodMemoryBits = FmodMemoryBits(0x00000020);
 /// [`ChannelGroup`](../struct.ChannelGroup.html) objects and internals
-pub static FMOD_MEMBITS_CHANNELGROUP      : FmodMemoryBits = FmodMemoryBits(0x00000040);
+pub const FMOD_MEMBITS_CHANNELGROUP      : FmodMemoryBits = FmodMemoryBits(0x00000040);
 /// Codecs allocated for streaming
-pub static FMOD_MEMBITS_CODEC             : FmodMemoryBits = FmodMemoryBits(0x00000080);
+pub const FMOD_MEMBITS_CODEC             : FmodMemoryBits = FmodMemoryBits(0x00000080);
 /// Codecs allocated for streaming
-pub static FMOD_MEMBITS_FILE              : FmodMemoryBits = FmodMemoryBits(0x00000100);
+pub const FMOD_MEMBITS_FILE              : FmodMemoryBits = FmodMemoryBits(0x00000100);
 /// [`Sound`](../struct.Sound.html) objects and internals
-pub static FMOD_MEMBITS_SOUND             : FmodMemoryBits = FmodMemoryBits(0x00000200);
+pub const FMOD_MEMBITS_SOUND             : FmodMemoryBits = FmodMemoryBits(0x00000200);
 /// Sound data stored in secondary RAM
-pub static FMOD_MEMBITS_SOUND_SECONDARYRAM: FmodMemoryBits = FmodMemoryBits(0x00000400);
+pub const FMOD_MEMBITS_SOUND_SECONDARYRAM: FmodMemoryBits = FmodMemoryBits(0x00000400);
 /// [`SoundGroup`](../struct.SoundGroup.html) objects and internals
-pub static FMOD_MEMBITS_SOUNDGROUP        : FmodMemoryBits = FmodMemoryBits(0x00000800);
+pub const FMOD_MEMBITS_SOUNDGROUP        : FmodMemoryBits = FmodMemoryBits(0x00000800);
 /// Stream buffer memory
-pub static FMOD_MEMBITS_STREAMBUFFER      : FmodMemoryBits = FmodMemoryBits(0x00001000);
+pub const FMOD_MEMBITS_STREAMBUFFER      : FmodMemoryBits = FmodMemoryBits(0x00001000);
 /// [`DspConnection`](../struct.DspConnection.html) objects and internals
-pub static FMOD_MEMBITS_DSPCONNECTION     : FmodMemoryBits = FmodMemoryBits(0x00002000);
+pub const FMOD_MEMBITS_DSPCONNECTION     : FmodMemoryBits = FmodMemoryBits(0x00002000);
 /// [`Dsp`](../struct.Dsp.html) implementation objects
-pub static FMOD_MEMBITS_DSP               : FmodMemoryBits = FmodMemoryBits(0x00004000);
+pub const FMOD_MEMBITS_DSP               : FmodMemoryBits = FmodMemoryBits(0x00004000);
 /// Realtime file format decoding [`Dsp`](../struct.Dsp.html) objects
-pub static FMOD_MEMBITS_DSPCODEC          : FmodMemoryBits = FmodMemoryBits(0x00008000);
+pub const FMOD_MEMBITS_DSPCODEC          : FmodMemoryBits = FmodMemoryBits(0x00008000);
 /// Profiler memory footprint.
-pub static FMOD_MEMBITS_PROFILE           : FmodMemoryBits = FmodMemoryBits(0x00010000);
+pub const FMOD_MEMBITS_PROFILE           : FmodMemoryBits = FmodMemoryBits(0x00010000);
 /// Buffer used to store recorded data from microphone
-pub static FMOD_MEMBITS_RECORDBUFFER      : FmodMemoryBits = FmodMemoryBits(0x00020000);
+pub const FMOD_MEMBITS_RECORDBUFFER      : FmodMemoryBits = FmodMemoryBits(0x00020000);
 /// [`Reverb`](../struct.Reverb.html) implementation objects
-pub static FMOD_MEMBITS_REVERB            : FmodMemoryBits = FmodMemoryBits(0x00040000);
+pub const FMOD_MEMBITS_REVERB            : FmodMemoryBits = FmodMemoryBits(0x00040000);
 /// Reverb channel properties structs
-pub static FMOD_MEMBITS_REVERBCHANNELPROPS: FmodMemoryBits = FmodMemoryBits(0x00080000);
+pub const FMOD_MEMBITS_REVERBCHANNELPROPS: FmodMemoryBits = FmodMemoryBits(0x00080000);
 /// [`Geometry`](../struct.Geometry.html) objects and internals
-pub static FMOD_MEMBITS_GEOMETRY          : FmodMemoryBits = FmodMemoryBits(0x00100000);
+pub const FMOD_MEMBITS_GEOMETRY          : FmodMemoryBits = FmodMemoryBits(0x00100000);
 /// Sync point memory.
-pub static FMOD_MEMBITS_SYNCPOINT         : FmodMemoryBits = FmodMemoryBits(0x00200000);
+pub const FMOD_MEMBITS_SYNCPOINT         : FmodMemoryBits = FmodMemoryBits(0x00200000);
 /// All memory used by FMOD Ex
-pub static FMOD_MEMBITS_ALL               : FmodMemoryBits = FmodMemoryBits(0xffffffff);
+pub const FMOD_MEMBITS_ALL               : FmodMemoryBits = FmodMemoryBits(0xffffffff);
 
 /// EventSystem and various internals
-pub static FMOD_EVENT_MEMBITS_EVENTSYSTEM          : c_uint = 0x00000001;
+pub const FMOD_EVENT_MEMBITS_EVENTSYSTEM          : c_uint = 0x00000001;
 /// MusicSystem and various internals
-pub static FMOD_EVENT_MEMBITS_MUSICSYSTEM          : c_uint = 0x00000002;
+pub const FMOD_EVENT_MEMBITS_MUSICSYSTEM          : c_uint = 0x00000002;
 /// Definition of objects contained in all loaded projects e.g. events, groups, categories
-pub static FMOD_EVENT_MEMBITS_FEV                  : c_uint = 0x00000004;
+pub const FMOD_EVENT_MEMBITS_FEV                  : c_uint = 0x00000004;
 /// Data loaded with preloadFSB
-pub static FMOD_EVENT_MEMBITS_MEMORYFSB            : c_uint = 0x00000008;
+pub const FMOD_EVENT_MEMBITS_MEMORYFSB            : c_uint = 0x00000008;
 /// EventProject objects and internals
-pub static FMOD_EVENT_MEMBITS_EVENTPROJECT         : c_uint = 0x00000010;
+pub const FMOD_EVENT_MEMBITS_EVENTPROJECT         : c_uint = 0x00000010;
 /// EventGroup objects and internals
-pub static FMOD_EVENT_MEMBITS_EVENTGROUPI          : c_uint = 0x00000020;
+pub const FMOD_EVENT_MEMBITS_EVENTGROUPI          : c_uint = 0x00000020;
 /// Objects used to manage wave banks
-pub static FMOD_EVENT_MEMBITS_SOUNDBANKCLASS       : c_uint = 0x00000040;
+pub const FMOD_EVENT_MEMBITS_SOUNDBANKCLASS       : c_uint = 0x00000040;
 /// Data used to manage lists of wave bank usage
-pub static FMOD_EVENT_MEMBITS_SOUNDBANKLIST        : c_uint = 0x00000080;
+pub const FMOD_EVENT_MEMBITS_SOUNDBANKLIST        : c_uint = 0x00000080;
 /// Stream objects and internals
-pub static FMOD_EVENT_MEMBITS_STREAMINSTANCE       : c_uint = 0x00000100;
+pub const FMOD_EVENT_MEMBITS_STREAMINSTANCE       : c_uint = 0x00000100;
 /// Sound definition objects
-pub static FMOD_EVENT_MEMBITS_SOUNDDEFCLASS        : c_uint = 0x00000200;
+pub const FMOD_EVENT_MEMBITS_SOUNDDEFCLASS        : c_uint = 0x00000200;
 /// Sound definition static data objects
-pub static FMOD_EVENT_MEMBITS_SOUNDDEFDEFCLASS     : c_uint = 0x00000400;
+pub const FMOD_EVENT_MEMBITS_SOUNDDEFDEFCLASS     : c_uint = 0x00000400;
 /// Sound definition pool data
-pub static FMOD_EVENT_MEMBITS_SOUNDDEFPOOL         : c_uint = 0x00000800;
+pub const FMOD_EVENT_MEMBITS_SOUNDDEFPOOL         : c_uint = 0x00000800;
 /// Reverb definition objects
-pub static FMOD_EVENT_MEMBITS_REVERBDEF            : c_uint = 0x00001000;
+pub const FMOD_EVENT_MEMBITS_REVERBDEF            : c_uint = 0x00001000;
 /// Reverb objects
-pub static FMOD_EVENT_MEMBITS_EVENTREVERB          : c_uint = 0x00002000;
+pub const FMOD_EVENT_MEMBITS_EVENTREVERB          : c_uint = 0x00002000;
 /// User property objects
-pub static FMOD_EVENT_MEMBITS_USERPROPERTY         : c_uint = 0x00004000;
+pub const FMOD_EVENT_MEMBITS_USERPROPERTY         : c_uint = 0x00004000;
 /// Event instance base objects
-pub static FMOD_EVENT_MEMBITS_EVENTINSTANCE        : c_uint = 0x00008000;
+pub const FMOD_EVENT_MEMBITS_EVENTINSTANCE        : c_uint = 0x00008000;
 /// Complex event instance objects
-pub static FMOD_EVENT_MEMBITS_EVENTINSTANCE_COMPLEX: c_uint = 0x00010000;
+pub const FMOD_EVENT_MEMBITS_EVENTINSTANCE_COMPLEX: c_uint = 0x00010000;
 /// Simple event instance objects
-pub static FMOD_EVENT_MEMBITS_EVENTINSTANCE_SIMPLE : c_uint = 0x00020000;
+pub const FMOD_EVENT_MEMBITS_EVENTINSTANCE_SIMPLE : c_uint = 0x00020000;
 /// Event layer instance objects
-pub static FMOD_EVENT_MEMBITS_EVENTINSTANCE_LAYER  : c_uint = 0x00040000;
+pub const FMOD_EVENT_MEMBITS_EVENTINSTANCE_LAYER  : c_uint = 0x00040000;
 /// Event sound instance objects
-pub static FMOD_EVENT_MEMBITS_EVENTINSTANCE_SOUND  : c_uint = 0x00080000;
+pub const FMOD_EVENT_MEMBITS_EVENTINSTANCE_SOUND  : c_uint = 0x00080000;
 /// Event envelope objects
-pub static FMOD_EVENT_MEMBITS_EVENTENVELOPE        : c_uint = 0x00100000;
+pub const FMOD_EVENT_MEMBITS_EVENTENVELOPE        : c_uint = 0x00100000;
 /// Event envelope definition objects
-pub static FMOD_EVENT_MEMBITS_EVENTENVELOPEDEF     : c_uint = 0x00200000;
+pub const FMOD_EVENT_MEMBITS_EVENTENVELOPEDEF     : c_uint = 0x00200000;
 /// Event parameter objects
-pub static FMOD_EVENT_MEMBITS_EVENTPARAMETER       : c_uint = 0x00400000;
+pub const FMOD_EVENT_MEMBITS_EVENTPARAMETER       : c_uint = 0x00400000;
 /// Event category objects
-pub static FMOD_EVENT_MEMBITS_EVENTCATEGORY        : c_uint = 0x00800000;
+pub const FMOD_EVENT_MEMBITS_EVENTCATEGORY        : c_uint = 0x00800000;
 /// Event envelope point objects
-pub static FMOD_EVENT_MEMBITS_EVENTENVELOPEPOINT   : c_uint = 0x01000000;
+pub const FMOD_EVENT_MEMBITS_EVENTENVELOPEPOINT   : c_uint = 0x01000000;
 /// Event instance pool data
-pub static FMOD_EVENT_MEMBITS_EVENTINSTANCEPOOL    : c_uint = 0x02000000;
+pub const FMOD_EVENT_MEMBITS_EVENTINSTANCEPOOL    : c_uint = 0x02000000;
 /// All memory used by FMOD Event System
-pub static FMOD_EVENT_MEMBITS_ALL                  : c_uint = 0xffffffff;
+pub const FMOD_EVENT_MEMBITS_ALL                  : c_uint = 0xffffffff;
 
 /// All event instance memory
-pub static FMOD_EVENT_MEMBITS_EVENTINSTANCE_GROUP  : c_uint = FMOD_EVENT_MEMBITS_EVENTINSTANCE | FMOD_EVENT_MEMBITS_EVENTINSTANCE_COMPLEX | FMOD_EVENT_MEMBITS_EVENTINSTANCE_SIMPLE | FMOD_EVENT_MEMBITS_EVENTINSTANCE_LAYER | FMOD_EVENT_MEMBITS_EVENTINSTANCE_SOUND;
+pub const FMOD_EVENT_MEMBITS_EVENTINSTANCE_GROUP  : c_uint = FMOD_EVENT_MEMBITS_EVENTINSTANCE | FMOD_EVENT_MEMBITS_EVENTINSTANCE_COMPLEX | FMOD_EVENT_MEMBITS_EVENTINSTANCE_SIMPLE | FMOD_EVENT_MEMBITS_EVENTINSTANCE_LAYER | FMOD_EVENT_MEMBITS_EVENTINSTANCE_SOUND;
 /// All sound definition memory
-pub static FMOD_EVENT_MEMBITS_SOUNDDEF_GROUP       : c_uint = FMOD_EVENT_MEMBITS_SOUNDDEFCLASS | FMOD_EVENT_MEMBITS_SOUNDDEFDEFCLASS | FMOD_EVENT_MEMBITS_SOUNDDEFPOOL;
+pub const FMOD_EVENT_MEMBITS_SOUNDDEF_GROUP       : c_uint = FMOD_EVENT_MEMBITS_SOUNDDEFCLASS | FMOD_EVENT_MEMBITS_SOUNDDEFDEFCLASS | FMOD_EVENT_MEMBITS_SOUNDDEFPOOL;
