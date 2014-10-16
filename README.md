@@ -57,7 +57,6 @@ Here is a short example on how to create a file and to play it :
 extern crate libc;
 extern crate rfmod;
 
-use rfmod::enums::*;
 use rfmod::*;
 use std::os;
 
@@ -83,7 +82,7 @@ fn main() {
                     };
 
     match sound.play_to_the_end() {
-        fmod::Ok => {println!("Ok !");}
+        enums::Ok => {println!("Ok !");}
         err => {fail!("Error code : {}", err);}
     };
 }
