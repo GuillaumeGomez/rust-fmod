@@ -24,7 +24,7 @@
 
 use ffi;
 use types::*;
-use enums::*;
+use enums;
 use dsp;
 use libc::{c_int, c_void};
 use fmod_sys;
@@ -58,72 +58,73 @@ impl DspConnection {
         self.dsp_connection = ::std::ptr::null_mut();
     }
 
-    pub fn get_input(&self) -> Result<dsp::Dsp, fmod::Result> {
+    pub fn get_input(&self) -> Result<dsp::Dsp, enums::Result> {
         let mut input = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_DSPConnection_GetInput(self.dsp_connection, &mut input) } {
-            fmod::Ok => Ok(ffi::FFI::wrap(input)),
+            enums::Ok => Ok(ffi::FFI::wrap(input)),
             e => Err(e)
         }
     }
 
-    pub fn get_output(&self) -> Result<dsp::Dsp, fmod::Result> {
+    pub fn get_output(&self) -> Result<dsp::Dsp, enums::Result> {
         let mut output = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_DSPConnection_GetOutput(self.dsp_connection, &mut output) } {
-            fmod::Ok => Ok(ffi::FFI::wrap(output)),
+            enums::Ok => Ok(ffi::FFI::wrap(output)),
             e => Err(e)
         }
     }
 
-    pub fn set_mix(&self, volume: f32) -> fmod::Result {
+    pub fn set_mix(&self, volume: f32) -> enums::Result {
         unsafe { ffi::FMOD_DSPConnection_SetMix(self.dsp_connection, volume) }
     }
 
-    pub fn get_mix(&self) -> Result<f32, fmod::Result> {
+    pub fn get_mix(&self) -> Result<f32, enums::Result> {
         let mut volume = 0f32;
 
         match unsafe { ffi::FMOD_DSPConnection_GetMix(self.dsp_connection, &mut volume) } {
-            fmod::Ok => Ok(volume),
+            enums::Ok => Ok(volume),
             e => Err(e)
         }
     }
 
-    pub fn set_levels(&self, speaker: fmod::Speaker, levels: &mut Vec<f32>) -> fmod::Result {
+    pub fn set_levels(&self, speaker: enums::Speaker, levels: &mut Vec<f32>) -> enums::Result {
         unsafe { ffi::FMOD_DSPConnection_SetLevels(self.dsp_connection, speaker, levels.as_mut_ptr(), levels.len() as c_int) }
     }
 
-    pub fn get_levels(&self, speaker: fmod::Speaker, num_levels: uint) -> Result<Vec<f32>, fmod::Result> {
+    pub fn get_levels(&self, speaker: enums::Speaker, num_levels: uint) -> Result<Vec<f32>, enums::Result> {
         let mut levels = Vec::from_elem(num_levels, 0f32);
 
         match unsafe { ffi::FMOD_DSPConnection_GetLevels(self.dsp_connection, speaker, levels.as_mut_ptr(), levels.len() as c_int) } {
-            fmod::Ok => Ok(levels),
+            enums::Ok => Ok(levels),
             e => Err(e)
         }
     }
 
     pub fn get_memory_info(&self, FmodMemoryBits(memory_bits): FmodMemoryBits,
-        FmodEventMemoryBits(event_memory_bits): FmodEventMemoryBits) -> Result<(u32, FmodMemoryUsageDetails), fmod::Result> {
+        FmodEventMemoryBits(event_memory_bits): FmodEventMemoryBits) -> Result<(u32, FmodMemoryUsageDetails), enums::Result> {
         let mut details = fmod_sys::get_memory_usage_details_ffi(Default::default());
         let mut memory_used = 0u32;
 
         match unsafe { ffi::FMOD_DSPConnection_GetMemoryInfo(self.dsp_connection, memory_bits, event_memory_bits, &mut memory_used, &mut details) } {
-            fmod::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
+            enums::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
             e => Err(e)
         }
     }
 
-    pub fn set_user_data<T>(&self, user_data: &mut T) -> fmod::Result {
+    pub fn set_user_data<T>(&self, user_data: &mut T) -> enums::Result {
         unsafe { ffi::FMOD_DSPConnection_SetUserData(self.dsp_connection, transmute(user_data)) }
     }
 
-    pub fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, fmod::Result> {
+    pub fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, enums::Result> {
         unsafe {
             let mut user_data : *mut c_void = ::std::ptr::null_mut();
 
             match ffi::FMOD_DSPConnection_GetUserData(self.dsp_connection, &mut user_data) {
-                fmod::Ok => {
+               enums::Ok => {
                     let tmp : &mut T = transmute::<*mut c_void, &mut T>(user_data);
+                    
                     Ok(tmp)
                 },
                 e => Err(e)

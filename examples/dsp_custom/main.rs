@@ -28,7 +28,6 @@
 
 extern crate rfmod;
 
-use rfmod::enums::*;
 use rfmod::*;
 use rfmod::types::FmodMode;
 use std::os;
@@ -45,12 +44,13 @@ fn get_key() -> u8 {
 }
 
 #[allow(unused_variable)]
-fn my_DSP_callback(dsp_state: &DspState, inbuffer: &mut Vec<f32>, outbuffer: &mut Vec<f32>, length: u32, inchannels: i32, outchannels: i32) -> fmod::Result {
+fn my_DSP_callback(dsp_state: &DspState, inbuffer: &mut Vec<f32>, outbuffer: &mut Vec<f32>, length: u32, inchannels: i32,
+    outchannels: i32) -> enums::Result {
     for it in range(0u, inbuffer.len() - 1u) {
         *outbuffer.get_mut(it) = *inbuffer.get_mut(it) * 0.2f32;
     }
 
-    fmod::Ok
+    enums::Ok
 }
 
 fn main() {
@@ -68,7 +68,7 @@ fn main() {
     };
 
     match fmod.init() {
-        fmod::Ok => {}
+        enums::Ok => {}
         e => {
             fail!("FmodSys.init failed : {}", e);
         }
@@ -76,7 +76,7 @@ fn main() {
 
     let arg1 = tmp.get(0).unwrap();
 
-    let sound = match fmod.create_sound((*arg1).as_slice(), Some(FmodMode(FMOD_SOFTWARE | FMOD_LOOP_NORMAL)), None) {
+    let sound = match fmod.create_sound((*arg1).as_slice(), Some(FmodMode(enums::FMOD_SOFTWARE | enums::FMOD_LOOP_NORMAL)), None) {
         Ok(s) => s,
         Err(err) => {fail!("FmodSys.create_sound failed : {}", err);}
     };

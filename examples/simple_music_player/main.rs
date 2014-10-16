@@ -26,14 +26,13 @@
 
 extern crate rfmod;
 
-use rfmod::enums::*;
 use rfmod::*;
 use std::os;
 use std::io::timer::sleep;
 use std::time::duration::Duration;
 
-fn play_to_the_end(sound: Sound, len: uint) -> fmod::Result {
-    let length = match sound.get_length(FMOD_TIMEUNIT_MS) {
+fn play_to_the_end(sound: Sound, len: uint) -> enums::Result {
+    let length = match sound.get_length(enums::FMOD_TIMEUNIT_MS) {
         Ok(l) => l,
         Err(e) => fail!("sound.get_length error: {}", e)
     };
@@ -49,7 +48,7 @@ fn play_to_the_end(sound: Sound, len: uint) -> fmod::Result {
                 match chan.is_playing() {
                     Ok(b) => {
                         if b == true {
-                            let position = chan.get_position(FMOD_TIMEUNIT_MS).unwrap();
+                            let position = chan.get_position(enums::FMOD_TIMEUNIT_MS).unwrap();
 
                             if position != old_position {
                                 old_position = position;
@@ -63,7 +62,7 @@ fn play_to_the_end(sound: Sound, len: uint) -> fmod::Result {
                     Err(e) => return e,
                 }
             }
-            fmod::Ok
+            enums::Ok
         }
         Err(err) => err,
     }
@@ -84,7 +83,7 @@ fn main() {
     };
 
     match fmod.init() {
-        fmod::Ok => {}
+        enums::Ok => {}
         e => {
             fail!("FmodSys.init failed : {}", e);
         }
@@ -98,7 +97,7 @@ fn main() {
     };
 
     match play_to_the_end(sound, arg1.len()) {
-        fmod::Ok => {println!("Ok !");},
+        enums::Ok => {println!("Ok !");},
         err => {fail!("FmodSys.play_to_the_end : {}", err);}
     };
 }

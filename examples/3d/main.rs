@@ -27,7 +27,6 @@
 extern crate libc;
 extern crate rfmod;
 
-use rfmod::enums::*;
 use rfmod::types::*;
 use rfmod::*;
 use std::default::Default;
@@ -49,8 +48,8 @@ fn main() {
         }
     };
 
-    match fmod.init_with_parameters(10i32, FmodInitFlag(FMOD_INIT_NORMAL)) {
-        fmod::Ok => {}
+    match fmod.init_with_parameters(10i32, FmodInitFlag(enums::FMOD_INIT_NORMAL)) {
+        enums::Ok => {}
         e => {
             fail!("FmodSys.init failed : {}", e);
         }
@@ -61,12 +60,12 @@ fn main() {
     println!("=========================================");
 
     let arg1 = tmp.get(0).unwrap();
-    let sound = match fmod.create_sound((*arg1).as_slice(), Some(FmodMode(FMOD_3D | FMOD_SOFTWARE)), None) {
+    let sound = match fmod.create_sound((*arg1).as_slice(), Some(FmodMode(enums::FMOD_3D | enums::FMOD_SOFTWARE)), None) {
         Ok(s) => s,
         Err(e) => fail!("create sound error: {}", e)
     };
     sound.set_3D_min_max_distance(4f32, 10000f32);
-    sound.set_mode(FmodMode(FMOD_LOOP_NORMAL));
+    sound.set_mode(FmodMode(enums::FMOD_LOOP_NORMAL));
 
     let chan = match sound.play() {
         Ok(c) => c,

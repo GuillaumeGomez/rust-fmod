@@ -74,7 +74,7 @@ fn main() {
     };
 
     match fmod.init() {
-        fmod::Ok => {}
+       enums::Ok => {}
         e => {
             fmod.release();
             fail!("FmodSys.init failed : {}", e);
@@ -82,12 +82,12 @@ fn main() {
     };
 
     let mut sound = match fmod.create_sound(StrBuf::from_str("music.mp3"), None, None) {
-                      Ok(s) => s,
+                      enums::Ok(s) => s,
                       Err(err) => {fail!("Error code : {}", err);},
                     };
 
     match sound.play_to_the_end() {
-        fmod::Ok => {println!("Ok !");}
+       enums::Ok => {println!("Ok !");}
         err => {fail!("Error code : {}", err);}
     };
 }
@@ -154,6 +154,7 @@ mod file;
 pub mod types;
 pub mod enums;
 pub mod callbacks;
+pub mod error;
 
 
 #[cfg(target_os = "linux")]

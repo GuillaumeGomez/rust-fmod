@@ -27,7 +27,6 @@
 extern crate libc;
 extern crate rfmod;
 
-use rfmod::enums::*;
 use rfmod::types::*;
 use rfmod::*;
 use std::os;
@@ -64,11 +63,11 @@ fn switch_dsp_state(dsp: &Dsp, fmod: &FmodSys, dsp_type: int) {
     } else {
         fmod.add_DSP(dsp).unwrap();
         match dsp_type {
-            3 => {dsp.set_parameter(fmod::DspTypeEchoDelay as i32, 50f32);},
-            5 => {dsp.set_parameter(fmod::DspDistortionLevel as i32, 0.8f32);},
+            3 => {dsp.set_parameter(enums::DspTypeEchoDelay as i32, 50f32);},
+            5 => {dsp.set_parameter(enums::DspDistortionLevel as i32, 0.8f32);},
             7 => {
-                dsp.set_parameter(fmod::DspTypeParameqCenter as i32, 5000f32);
-                dsp.set_parameter(fmod::DspTypeParameqGain as i32, 0f32);
+                dsp.set_parameter(enums::DspTypeParameqCenter as i32, 5000f32);
+                dsp.set_parameter(enums::DspTypeParameqGain as i32, 0f32);
             }
             _ => {}
         };
@@ -89,8 +88,8 @@ fn main() {
         }
     };
 
-    match fmod.init_with_parameters(32i32, FmodInitFlag(FMOD_INIT_NORMAL)) {
-        fmod::Ok => {}
+    match fmod.init_with_parameters(32i32, FmodInitFlag(enums::FMOD_INIT_NORMAL)) {
+        enums::Ok => {}
         e => {
             fail!("FmodSys.init failed : {}", e);
         }
@@ -101,42 +100,42 @@ fn main() {
     println!("==============================================");
 
     let arg1 = tmp.get(0).unwrap();
-    let sound = match fmod.create_sound((*arg1).as_slice(), Some(FmodMode(FMOD_SOFTWARE)), None) {
+    let sound = match fmod.create_sound((*arg1).as_slice(), Some(FmodMode(enums::FMOD_SOFTWARE)), None) {
         Ok(s) => s,
         Err(e) => fail!("create sound error: {}", e)
     };
-    sound.set_mode(FmodMode(FMOD_LOOP_NORMAL));
+    sound.set_mode(FmodMode(enums::FMOD_LOOP_NORMAL));
 
     match sound.play() {
         Ok(_) => {},
         Err(e) => fail!("sound.play error: {}", e)
     };
     let mut dsps = Vec::new();
-    dsps.push(match fmod.create_DSP_by_type(fmod::LowPass) {
+    dsps.push(match fmod.create_DSP_by_type(enums::LowPass) {
         Ok(r) => r,
         Err(e) => fail!("fmod.create_DSP_by_type low_pass error: {}", e)
     });
-    dsps.push(match fmod.create_DSP_by_type(fmod::HighPass) {
+    dsps.push(match fmod.create_DSP_by_type(enums::HighPass) {
         Ok(r) => r,
         Err(e) => fail!("fmod.create_DSP_by_type high_pass error: {}", e)
     });
-    dsps.push(match fmod.create_DSP_by_type(fmod::Echo) {
+    dsps.push(match fmod.create_DSP_by_type(enums::Echo) {
         Ok(r) => r,
         Err(e) => fail!("fmod.create_DSP_by_type echo error: {}", e)
     });
-    dsps.push(match fmod.create_DSP_by_type(fmod::Flange) {
+    dsps.push(match fmod.create_DSP_by_type(enums::Flange) {
         Ok(r) => r,
         Err(e) => fail!("fmod.create_DSP_by_type flange error: {}", e)
     });
-    dsps.push(match fmod.create_DSP_by_type(fmod::Distortion) {
+    dsps.push(match fmod.create_DSP_by_type(enums::Distortion) {
         Ok(r) => r,
         Err(e) => fail!("fmod.create_DSP_by_type distortion error: {}", e)
     });
-    dsps.push(match fmod.create_DSP_by_type(fmod::Chorus) {
+    dsps.push(match fmod.create_DSP_by_type(enums::Chorus) {
         Ok(r) => r,
         Err(e) => fail!("fmod.create_DSP_by_type chorus error: {}", e)
     });
-    dsps.push(match fmod.create_DSP_by_type(fmod::Parameq) {
+    dsps.push(match fmod.create_DSP_by_type(enums::Parameq) {
         Ok(r) => r,
         Err(e) => fail!("fmod.create_DSP_by_type parameq error: {}", e)
     });

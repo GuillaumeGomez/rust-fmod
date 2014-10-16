@@ -27,7 +27,6 @@
 extern crate libc;
 extern crate rfmod;
 
-use rfmod::enums::*;
 use rfmod::types::*;
 use rfmod::*;
 use std::io::timer::sleep;
@@ -76,15 +75,15 @@ fn main() {
         }
     };
 
-    match fmod.init_with_parameters(1i32, FmodInitFlag(FMOD_INIT_NORMAL)) {
-        fmod::Ok => {}
+    match fmod.init_with_parameters(1i32, FmodInitFlag(enums::FMOD_INIT_NORMAL)) {
+        enums::Ok => {}
         e => {
             fail!("FmodSys.init failed : {}", e);
         }
     };
 
     match fmod.set_file_system(Some(my_open), Some(my_close), Some(my_read), Some(my_seek), 2048i32) {
-        fmod::Ok => {}
+        enums::Ok => {}
         e => {
             fail!("FmodSys.set_file_system failed : {}", e);
         }
@@ -95,7 +94,7 @@ fn main() {
     println!("============================================================================");
 
     let arg1 = tmp.get(0).unwrap();
-    let sound = match fmod.create_stream((*arg1).as_slice(), Some(FmodMode(FMOD_2D | FMOD_HARDWARE | FMOD_LOOP_OFF)), None)
+    let sound = match fmod.create_stream((*arg1).as_slice(), Some(FmodMode(enums::FMOD_2D | enums::FMOD_HARDWARE | enums::FMOD_LOOP_OFF)), None)
     {
         Ok(s) => s,
         Err(e) => fail!("create sound error: {}", e)
@@ -106,9 +105,9 @@ fn main() {
         Err(e) => fail!("sound.play error: {}", e)
     };
 
-    let length = sound.get_length(FMOD_TIMEUNIT_MS).unwrap();
+    let length = sound.get_length(enums::FMOD_TIMEUNIT_MS).unwrap();
     while chan.is_playing().unwrap() {
-        let position = chan.get_position(FMOD_TIMEUNIT_MS).unwrap();
+        let position = chan.get_position(enums::FMOD_TIMEUNIT_MS).unwrap();
 
         print!("{:02u}:{:02u} / {:02u}:{:02u}\r", position / 1000 / 60, position / 1000 % 60, length / 1000 / 60, length / 1000 % 60);
         sleep(Duration::milliseconds(30))

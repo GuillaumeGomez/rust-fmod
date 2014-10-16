@@ -27,7 +27,6 @@
 extern crate libc;
 extern crate rfmod;
 
-use rfmod::enums::*;
 use rfmod::types::*;
 use rfmod::*;
 use std::default::Default;
@@ -35,7 +34,7 @@ use std::io::timer::sleep;
 use std::time::duration::Duration;
 
 #[allow(unused_variable)]
-fn pcmreadcallback(sound: &Sound, data: &mut [i16]) -> fmod::Result {
+fn pcmreadcallback(sound: &Sound, data: &mut [i16]) -> enums::Result {
     static mut t1 : f32 = 0f32; // time
     static mut t2 : f32 = 0f32; // time
     static mut v1 : f32 = 0f32; // velocity
@@ -56,7 +55,7 @@ fn pcmreadcallback(sound: &Sound, data: &mut [i16]) -> fmod::Result {
         }
     }
 
-    fmod::Ok
+    enums::Ok
 }
 
 fn get_key() -> Result<int, std::io::IoError> {
@@ -86,8 +85,8 @@ fn main() {
         }
     };
 
-    match fmod.init_with_parameters(32i32, FmodInitFlag(FMOD_INIT_NORMAL)) {
-        fmod::Ok => {}
+    match fmod.init_with_parameters(32i32, FmodInitFlag(enums::FMOD_INIT_NORMAL)) {
+        enums::Ok => {}
         e => {
             fail!("FmodSys.init failed : {}", e);
         }
@@ -117,12 +116,14 @@ fn main() {
     exinfo.length = 44100u32 * channels as u32 * std::mem::size_of::<i16>() as u32 * 5u32;
     exinfo.num_channels = channels;
     exinfo.default_frequency  = 44100;
-    exinfo.format = fmod::SoundFormatPCM16;
+    exinfo.format = enums::SoundFormatPCM16;
     exinfo.pcm_read_callback = Some(pcmreadcallback);
 
     let sound = match match ret {
-        1 => fmod.create_sound("", Some(FmodMode(FMOD_2D | FMOD_OPENUSER | FMOD_HARDWARE | FMOD_LOOP_NORMAL | FMOD_CREATESTREAM)), Some(&mut exinfo)),
-        2 => fmod.create_sound("", Some(FmodMode(FMOD_2D | FMOD_OPENUSER | FMOD_HARDWARE | FMOD_LOOP_NORMAL)), Some(&mut exinfo)),
+        1 => fmod.create_sound("", Some(FmodMode(enums::FMOD_2D | enums::FMOD_OPENUSER | enums::FMOD_HARDWARE | enums::FMOD_LOOP_NORMAL
+            | enums::FMOD_CREATESTREAM)), Some(&mut exinfo)),
+        2 => fmod.create_sound("", Some(FmodMode(enums::FMOD_2D | enums::FMOD_OPENUSER | enums::FMOD_HARDWARE | enums::FMOD_LOOP_NORMAL)),
+            Some(&mut exinfo)),
         _ => return
     } {
         Ok(s) => s,
@@ -134,9 +135,9 @@ fn main() {
         Err(e) => fail!("sound.play error: {}", e)
     };
 
-    let length = sound.get_length(FMOD_TIMEUNIT_MS).unwrap();
+    let length = sound.get_length(enums::FMOD_TIMEUNIT_MS).unwrap();
     while chan.is_playing().unwrap() {
-        let position = chan.get_position(FMOD_TIMEUNIT_MS).unwrap();
+        let position = chan.get_position(enums::FMOD_TIMEUNIT_MS).unwrap();
 
         print!("{:02u}:{:02u} / {:02u}:{:02u}\r", position / 1000 / 60, position / 1000 % 60, length / 1000 / 60, length / 1000 % 60);
         sleep(Duration::milliseconds(30))

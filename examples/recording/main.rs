@@ -27,7 +27,6 @@
 extern crate libc;
 extern crate rfmod;
 
-use rfmod::enums::*;
 use rfmod::types::*;
 use rfmod::*;
 use std::io::timer::sleep;
@@ -78,10 +77,10 @@ fn main() {
         match get_key() {
             Ok(n) => {
                 match match n {
-                    1 => Some(fmod.set_output(fmod::OutputTypeOSS)),
-                    2 => Some(fmod.set_output(fmod::OutputTypeALSA)),
-                    3 => Some(fmod.set_output(fmod::OutputTypeESD)),
-                    4 => Some(fmod.set_output(fmod::OutputTypePulseAudio)),
+                    1 => Some(fmod.set_output(enums::OutputTypeOSS)),
+                    2 => Some(fmod.set_output(enums::OutputTypeALSA)),
+                    3 => Some(fmod.set_output(enums::OutputTypeESD)),
+                    4 => Some(fmod.set_output(enums::OutputTypePulseAudio)),
                     -1 => {
                         return;
                     }
@@ -137,7 +136,7 @@ fn main() {
     }
 
     match fmod.init() {
-        fmod::Ok => {}
+        enums::Ok => {}
         e => {
             fail!("FmodSys.init failed : {}", e);
         }
@@ -147,11 +146,11 @@ fn main() {
     let secs = 5i32;
 
     exinfo.num_channels      = 2;
-    exinfo.format            = fmod::SoundFormatPCM16;
+    exinfo.format            = enums::SoundFormatPCM16;
     exinfo.default_frequency = 44100;
     exinfo.length            = (exinfo.default_frequency * mem::size_of::<i16>() as i32 * exinfo.num_channels * secs) as u32;
 
-    let sound = match fmod.create_sound("", Some(FmodMode(FMOD_2D | FMOD_SOFTWARE | FMOD_OPENUSER)), Some(&mut exinfo)) {
+    let sound = match fmod.create_sound("", Some(FmodMode(enums::FMOD_2D | enums::FMOD_SOFTWARE | enums::FMOD_OPENUSER)), Some(&mut exinfo)) {
         Ok(s) => s,
         Err(e) => fail!("create sound error: {}", e)
     };
@@ -171,13 +170,13 @@ fn main() {
                 match match nb {
                     0 => {
                         match fmod.start_record(record_driver, &sound, false) {
-                            fmod::Ok => {
+                            enums::Ok => {
                                 while fmod.is_recording(record_driver).unwrap() == true {
                                     print!("\rRecording : {}", fmod.get_record_position(record_driver).unwrap());
                                     fmod.update();
                                     sleep(Duration::milliseconds(15));
                                 }
-                                Some(fmod::Ok)
+                                Some(enums::Ok)
                             }
                             e => Some(e)
                         }
@@ -187,11 +186,12 @@ fn main() {
                             Ok(chan) => {
                                 fmod.update();
                                 while chan.is_playing().unwrap() == true {
-                                    print!("\rPlaying : {} / {}", chan.get_position(FMOD_TIMEUNIT_MS).unwrap(), sound.get_length(FMOD_TIMEUNIT_MS).unwrap());
+                                    print!("\rPlaying : {} / {}", chan.get_position(enums::FMOD_TIMEUNIT_MS).unwrap(),
+                                        sound.get_length(enums::FMOD_TIMEUNIT_MS).unwrap());
                                     fmod.update();
                                     sleep(Duration::milliseconds(15));
                                 }
-                                Some(fmod::Ok)
+                                Some(enums::Ok)
                             }
                             Err(e) => Some(e)
                         }
@@ -223,7 +223,7 @@ fn main() {
                     -1 => break,
                     _ => None
                 } {
-                    Some(r) if r == fmod::Ok => {}
+                    Some(r) if r == enums::Ok => {}
                     Some(e) => {
                         println!("Error : {}", e);
                         break;
