@@ -69,7 +69,7 @@ fn main() {
     let fmod = match FmodSys::new() {
         Ok(f) => f,
         Err(e) => {
-            fail!("Error code : {}", e);
+            panic!("Error code : {}", e);
         }
     };
 
@@ -77,18 +77,18 @@ fn main() {
        enums::Ok => {}
         e => {
             fmod.release();
-            fail!("FmodSys.init failed : {}", e);
+            panic!("FmodSys.init failed : {}", e);
         }
     };
 
     let mut sound = match fmod.create_sound(StrBuf::from_str("music.mp3"), None, None) {
                       enums::Ok(s) => s,
-                      Err(err) => {fail!("Error code : {}", err);},
+                      Err(err) => {panic!("Error code : {}", err);},
                     };
 
     match sound.play_to_the_end() {
        enums::Ok => {println!("Ok !");}
-        err => {fail!("Error code : {}", err);}
+        err => {panic!("Error code : {}", err);}
     };
 }
 ```
@@ -119,7 +119,7 @@ Here is the list of all modules :
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 #![allow(dead_code)]
-#![allow(ctypes)]
+#![allow(improper_ctypes)]
 
 #![feature(globs)]
 

@@ -33,7 +33,7 @@ use std::default::Default;
 use std::io::timer::sleep;
 use std::time::duration::Duration;
 
-#[allow(unused_variable)]
+#[allow(unused_variables)]
 fn pcmreadcallback(sound: &Sound, data: &mut [i16]) -> enums::Result {
     static mut t1 : f32 = 0f32; // time
     static mut t2 : f32 = 0f32; // time
@@ -81,14 +81,14 @@ fn main() {
     let fmod = match FmodSys::new() {
         Ok(f) => f,
         Err(e) => {
-            fail!("FmodSys.new : {}", e);
+            panic!("FmodSys.new : {}", e);
         }
     };
 
     match fmod.init_with_parameters(32i32, FmodInitFlag(enums::FMOD_INIT_NORMAL)) {
         enums::Ok => {}
         e => {
-            fail!("FmodSys.init failed : {}", e);
+            panic!("FmodSys.init failed : {}", e);
         }
     };
 
@@ -127,12 +127,12 @@ fn main() {
         _ => return
     } {
         Ok(s) => s,
-        Err(e) => fail!("create sound error: {}", e)
+        Err(e) => panic!("create sound error: {}", e)
     };
 
     let chan = match sound.play() {
         Ok(c) => c,
-        Err(e) => fail!("sound.play error: {}", e)
+        Err(e) => panic!("sound.play error: {}", e)
     };
 
     let length = sound.get_length(enums::FMOD_TIMEUNIT_MS).unwrap();

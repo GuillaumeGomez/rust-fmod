@@ -34,11 +34,11 @@ use std::time::duration::Duration;
 fn play_to_the_end(sound: Sound, len: uint) -> enums::Result {
     let length = match sound.get_length(enums::FMOD_TIMEUNIT_MS) {
         Ok(l) => l,
-        Err(e) => fail!("sound.get_length error: {}", e)
+        Err(e) => panic!("sound.get_length error: {}", e)
     };
     let name = match sound.get_name(len as u32) {
         Ok(n) => n,
-        Err(e) => fail!("sound.get_name error: {}", e)
+        Err(e) => panic!("sound.get_name error: {}", e)
     };
     let mut old_position = 100u;
 
@@ -73,19 +73,19 @@ fn main() {
     let tmp = args.tail();
 
     if tmp.len() < 1 {
-        fail!("USAGE: ./simple_music_player [music_file]");
+        panic!("USAGE: ./simple_music_player [music_file]");
     }
     let fmod = match FmodSys::new() {
         Ok(f) => f,
         Err(e) => {
-            fail!("FmodSys.new : {}", e);
+            panic!("FmodSys.new : {}", e);
         }
     };
 
     match fmod.init() {
         enums::Ok => {}
         e => {
-            fail!("FmodSys.init failed : {}", e);
+            panic!("FmodSys.init failed : {}", e);
         }
     };
 
@@ -93,11 +93,11 @@ fn main() {
 
     let sound = match fmod.create_sound((*arg1).as_slice(), None, None) {
         Ok(s) => s,
-        Err(err) => {fail!("FmodSys.create_sound failed : {}", err);},
+        Err(err) => {panic!("FmodSys.create_sound failed : {}", err);},
     };
 
     match play_to_the_end(sound, arg1.len()) {
         enums::Ok => {println!("Ok !");},
-        err => {fail!("FmodSys.play_to_the_end : {}", err);}
+        err => {panic!("FmodSys.play_to_the_end : {}", err);}
     };
 }

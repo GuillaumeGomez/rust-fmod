@@ -64,7 +64,7 @@ fn main() {
     let fmod = match FmodSys::new() {
         Ok(f) => f,
         Err(e) => {
-            fail!("Error code : {}", e);
+            panic!("Error code : {}", e);
         }
     };
 
@@ -72,18 +72,18 @@ fn main() {
         fmod::Ok => {}
         e => {
             fmod.release();
-            fail!("FmodSys.init failed : {}", e);
+            panic!("FmodSys.init failed : {}", e);
         }
     };
 
     let mut sound = match fmod.create_sound(StrBuf::from_str("music.mp3"), None, None) {
                       Ok(s) => s,
-                      Err(err) => {fail!("Error code : {}", err);},
+                      Err(err) => {panic!("Error code : {}", err);},
                     };
 
     match sound.play_to_the_end() {
         enums::Ok => {println!("Ok !");}
-        err => {fail!("Error code : {}", err);}
+        err => {panic!("Error code : {}", err);}
     };
 }
 ```

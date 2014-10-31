@@ -79,19 +79,19 @@ fn main() {
     let tmp = args.tail();
 
     if tmp.len() < 1 {
-        fail!("USAGE: ./effects [music_file]");
+        panic!("USAGE: ./effects [music_file]");
     }
     let fmod = match FmodSys::new() {
         Ok(f) => f,
         Err(e) => {
-            fail!("FmodSys.new : {}", e);
+            panic!("FmodSys.new : {}", e);
         }
     };
 
     match fmod.init_with_parameters(32i32, FmodInitFlag(enums::FMOD_INIT_NORMAL)) {
         enums::Ok => {}
         e => {
-            fail!("FmodSys.init failed : {}", e);
+            panic!("FmodSys.init failed : {}", e);
         }
     };
 
@@ -102,42 +102,42 @@ fn main() {
     let arg1 = tmp.get(0).unwrap();
     let sound = match fmod.create_sound((*arg1).as_slice(), Some(FmodMode(enums::FMOD_SOFTWARE)), None) {
         Ok(s) => s,
-        Err(e) => fail!("create sound error: {}", e)
+        Err(e) => panic!("create sound error: {}", e)
     };
     sound.set_mode(FmodMode(enums::FMOD_LOOP_NORMAL));
 
     match sound.play() {
         Ok(_) => {},
-        Err(e) => fail!("sound.play error: {}", e)
+        Err(e) => panic!("sound.play error: {}", e)
     };
     let mut dsps = Vec::new();
     dsps.push(match fmod.create_DSP_by_type(enums::LowPass) {
         Ok(r) => r,
-        Err(e) => fail!("fmod.create_DSP_by_type low_pass error: {}", e)
+        Err(e) => panic!("fmod.create_DSP_by_type low_pass error: {}", e)
     });
     dsps.push(match fmod.create_DSP_by_type(enums::HighPass) {
         Ok(r) => r,
-        Err(e) => fail!("fmod.create_DSP_by_type high_pass error: {}", e)
+        Err(e) => panic!("fmod.create_DSP_by_type high_pass error: {}", e)
     });
     dsps.push(match fmod.create_DSP_by_type(enums::Echo) {
         Ok(r) => r,
-        Err(e) => fail!("fmod.create_DSP_by_type echo error: {}", e)
+        Err(e) => panic!("fmod.create_DSP_by_type echo error: {}", e)
     });
     dsps.push(match fmod.create_DSP_by_type(enums::Flange) {
         Ok(r) => r,
-        Err(e) => fail!("fmod.create_DSP_by_type flange error: {}", e)
+        Err(e) => panic!("fmod.create_DSP_by_type flange error: {}", e)
     });
     dsps.push(match fmod.create_DSP_by_type(enums::Distortion) {
         Ok(r) => r,
-        Err(e) => fail!("fmod.create_DSP_by_type distortion error: {}", e)
+        Err(e) => panic!("fmod.create_DSP_by_type distortion error: {}", e)
     });
     dsps.push(match fmod.create_DSP_by_type(enums::Chorus) {
         Ok(r) => r,
-        Err(e) => fail!("fmod.create_DSP_by_type chorus error: {}", e)
+        Err(e) => panic!("fmod.create_DSP_by_type chorus error: {}", e)
     });
     dsps.push(match fmod.create_DSP_by_type(enums::Parameq) {
         Ok(r) => r,
-        Err(e) => fail!("fmod.create_DSP_by_type parameq error: {}", e)
+        Err(e) => panic!("fmod.create_DSP_by_type parameq error: {}", e)
     });
 
     println!("Enter '1' to toggle dsp low pass effect.");
@@ -165,7 +165,7 @@ fn main() {
                 },
                 _ => println!("Invalid entry")
             },
-            Err(e) => fail!("Entry error: {}", e)
+            Err(e) => panic!("Entry error: {}", e)
         }
         fmod.update();
         sleep(Duration::milliseconds(30)); // let time to the system for update

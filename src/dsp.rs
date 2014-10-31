@@ -220,7 +220,7 @@ extern "C" fn get_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index:
     }
 }
 
-#[allow(unused_variable)]
+#[allow(unused_variables)]
 extern "C" fn config_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, hwnd: *mut c_void, show: c_int) -> enums::Result {
    enums::Ok
 }

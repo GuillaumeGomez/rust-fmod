@@ -24,12 +24,12 @@
 
 #![feature(globs)]
 #![allow(non_snake_case)]
-#![allow(unused_variable)]
+#![allow(unused_variables)]
 
 extern crate rfmod;
 
-use rfmod::*;
 use rfmod::types::FmodMode;
+use rfmod::{FmodSys, DspDescription, DspState, enums};
 use std::os;
 use std::default::Default;
 
@@ -43,11 +43,10 @@ fn get_key() -> u8 {
     }
 }
 
-#[allow(unused_variable)]
 fn my_DSP_callback(dsp_state: &DspState, inbuffer: &mut Vec<f32>, outbuffer: &mut Vec<f32>, length: u32, inchannels: i32,
     outchannels: i32) -> enums::Result {
     for it in range(0u, inbuffer.len() - 1u) {
-        *outbuffer.get_mut(it) = *inbuffer.get_mut(it) * 0.2f32;
+        outbuffer[it] = inbuffer[it] * 0.2f32;
     }
 
     enums::Ok
@@ -58,19 +57,19 @@ fn main() {
     let tmp = args.tail();
 
     if tmp.len() < 1 {
-        fail!("USAGE: ./dsp_custom [music_file]");
+        panic!("USAGE: ./dsp_custom [music_file]");
     }
     let fmod = match FmodSys::new() {
         Ok(f) => f,
         Err(e) => {
-            fail!("FmodSys.new : {}", e);
+            panic!("FmodSys.new : {}", e);
         }
     };
 
     match fmod.init() {
         enums::Ok => {}
         e => {
-            fail!("FmodSys.init failed : {}", e);
+            panic!("FmodSys.init failed : {}", e);
         }
     };
 
@@ -78,7 +77,7 @@ fn main() {
 
     let sound = match fmod.create_sound((*arg1).as_slice(), Some(FmodMode(enums::FMOD_SOFTWARE | enums::FMOD_LOOP_NORMAL)), None) {
         Ok(s) => s,
-        Err(err) => {fail!("FmodSys.create_sound failed : {}", err);}
+        Err(err) => {panic!("FmodSys.create_sound failed : {}", err);}
     };
 
     println!("============================");
@@ -89,7 +88,7 @@ fn main() {
 
     let channel = match sound.play() {
         Ok(c) => c,
-        Err(e) => {fail!("Sound.play failed : {}", e);}
+        Err(e) => {panic!("Sound.play failed : {}", e);}
     };
 
     let mut description : DspDescription = Default::default();
@@ -98,13 +97,13 @@ fn main() {
 
     let dsp = match fmod.create_DSP_with_description(&mut description) {
         Ok(dsp) => dsp,
-        Err(e) => {fail!("FmodSys.create_DSP_with_description failed : {}", e);}
+        Err(e) => {panic!("FmodSys.create_DSP_with_description failed : {}", e);}
     };
 
     dsp.set_bypass(true);
     let connection = match fmod.add_DSP(&dsp) {
         Ok(c) => c,
-        Err(e) => {fail!("FmodSys.add_DSP failed : {}", e);}
+        Err(e) => {panic!("FmodSys.add_DSP failed : {}", e);}
     };
 
     let mut active = false;

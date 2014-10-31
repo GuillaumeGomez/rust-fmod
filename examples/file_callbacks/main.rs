@@ -27,36 +27,36 @@
 extern crate libc;
 extern crate rfmod;
 
-use rfmod::types::*;
-use rfmod::*;
 use std::io::timer::sleep;
 use std::os;
 use std::io::SeekSet;
 use std::time::duration::Duration;
+use rfmod::{FmodFile, FmodSys, FmodUserData, enums};
+use rfmod::types::{FmodMode, FmodInitFlag};
 
-#[allow(unused_variable)]
+#[allow(unused_variables)]
 fn my_open(music_name: &str, unicode: i32) -> Option<(FmodFile, Option<FmodUserData>)> {
     println!("Let's start !");
     let file = match FmodFile::open(music_name) {
         Some(f) => f,
-        None => fail!("Couldn't open: {}", music_name)
+        None => panic!("Couldn't open: {}", music_name)
     };
 
     Some((file, None))
 }
 
-#[allow(unused_variable)]
+#[allow(unused_variables)]
 fn my_close(music_file: &mut FmodFile, user_data: Option<&mut FmodUserData>) {
     println!("This is the end !");
     music_file.close();
 }
 
-#[allow(unused_variable)]
+#[allow(unused_variables)]
 fn my_read(handle: &mut FmodFile, buffer: &mut [u8], size_to_read: u32, user_data: Option<&mut FmodUserData>) -> uint {
     handle.read(buffer)
 }
 
-#[allow(unused_variable)]
+#[allow(unused_variables)]
 fn my_seek(handle: &mut FmodFile, pos: u32, user_data: Option<&mut FmodUserData>) {
     handle.seek(pos as i64, SeekSet);
 }
@@ -66,26 +66,26 @@ fn main() {
     let tmp = args.tail();
 
     if tmp.len() < 1 {
-        fail!("USAGE: ./file_callback [music_file]");
+        panic!("USAGE: ./file_callback [music_file]");
     }
     let fmod = match FmodSys::new() {
         Ok(f) => f,
         Err(e) => {
-            fail!("FmodSys.new : {}", e);
+            panic!("FmodSys.new : {}", e);
         }
     };
 
     match fmod.init_with_parameters(1i32, FmodInitFlag(enums::FMOD_INIT_NORMAL)) {
         enums::Ok => {}
         e => {
-            fail!("FmodSys.init failed : {}", e);
+            panic!("FmodSys.init failed : {}", e);
         }
     };
 
     match fmod.set_file_system(Some(my_open), Some(my_close), Some(my_read), Some(my_seek), 2048i32) {
         enums::Ok => {}
         e => {
-            fail!("FmodSys.set_file_system failed : {}", e);
+            panic!("FmodSys.set_file_system failed : {}", e);
         }
     };
 
@@ -97,12 +97,12 @@ fn main() {
     let sound = match fmod.create_stream((*arg1).as_slice(), Some(FmodMode(enums::FMOD_2D | enums::FMOD_HARDWARE | enums::FMOD_LOOP_OFF)), None)
     {
         Ok(s) => s,
-        Err(e) => fail!("create sound error: {}", e)
+        Err(e) => panic!("create sound error: {}", e)
     };
 
     let chan = match sound.play() {
         Ok(c) => c,
-        Err(e) => fail!("sound.play error: {}", e)
+        Err(e) => panic!("sound.play error: {}", e)
     };
 
     let length = sound.get_length(enums::FMOD_TIMEUNIT_MS).unwrap();

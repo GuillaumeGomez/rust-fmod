@@ -58,7 +58,7 @@ fn main() {
     let fmod = match FmodSys::new() {
         Ok(f) => f,
         Err(e) => {
-            fail!("FmodSys.new : {}", e);
+            panic!("FmodSys.new : {}", e);
         }
     };
 
@@ -92,12 +92,12 @@ fn main() {
                     _ => {}
                 }
             }
-            Err(e) => fail!("Input type error: {}", e),
+            Err(e) => panic!("Input type error: {}", e),
         }
     }
 
     let num_drivers = match fmod.get_num_drivers().unwrap() as uint {
-        0 => fail!("No driver available for this output type"),
+        0 => panic!("No driver available for this output type"),
         val => val
     };
     let mut it = 0i32;
@@ -109,7 +109,7 @@ fn main() {
         //check this function
         let t = match fmod.get_driver_info(it, 256u) {
             Ok((_, name)) => name,
-            Err(e) => fail!("get_driver_info error: {}", e)
+            Err(e) => panic!("get_driver_info error: {}", e)
         };
         println!("{} : {}", it, t);
         it = it + 1;
@@ -130,7 +130,7 @@ fn main() {
                 }
             }
             Err(e) => {
-                fail!("Input type error: {}", e);
+                panic!("Input type error: {}", e);
             }
         }
     }
@@ -138,7 +138,7 @@ fn main() {
     match fmod.init() {
         enums::Ok => {}
         e => {
-            fail!("FmodSys.init failed : {}", e);
+            panic!("FmodSys.init failed : {}", e);
         }
     };
 
@@ -152,7 +152,7 @@ fn main() {
 
     let sound = match fmod.create_sound("", Some(FmodMode(enums::FMOD_2D | enums::FMOD_SOFTWARE | enums::FMOD_OPENUSER)), Some(&mut exinfo)) {
         Ok(s) => s,
-        Err(e) => fail!("create sound error: {}", e)
+        Err(e) => panic!("create sound error: {}", e)
     };
 
     println!("\n=========================");
@@ -232,7 +232,7 @@ fn main() {
                 }
             }
             Err(e) => {
-                fail!("Input type error: {}", e)
+                panic!("Input type error: {}", e)
             }
         }
     }
