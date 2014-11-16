@@ -33,6 +33,7 @@ use std::default::Default;
 use std::io::timer::sleep;
 use std::os;
 use std::time::duration::Duration;
+use std::num::FloatMath;
 
 fn main() {
     let args = os::args();

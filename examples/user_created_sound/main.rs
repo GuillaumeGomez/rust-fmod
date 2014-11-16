@@ -32,6 +32,7 @@ use rfmod::*;
 use std::default::Default;
 use std::io::timer::sleep;
 use std::time::duration::Duration;
+use std::num::FloatMath;
 
 #[allow(unused_variables)]
 fn pcmreadcallback(sound: &Sound, data: &mut [i16]) -> enums::Result {
