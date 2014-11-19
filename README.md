@@ -52,16 +52,13 @@ http://rust-ci.org/GuillaumeGomez/rust-fmod/doc/rfmod/
 Here is a short example on how to create a file and to play it :
 
 ```Rust
-#![feature(globs)]
-
 extern crate libc;
 extern crate rfmod;
 
-use rfmod::*;
 use std::os;
 
 fn main() {
-    let fmod = match FmodSys::new() {
+    let fmod = match rfmod::FmodSys::new() {
         Ok(f) => f,
         Err(e) => {
             panic!("Error code : {}", e);
@@ -69,21 +66,26 @@ fn main() {
     };
 
     match fmod.init() {
-        fmod::Ok => {}
+        rfmod::Result::Ok => {}
         e => {
-            fmod.release();
             panic!("FmodSys.init failed : {}", e);
         }
     };
 
     let mut sound = match fmod.create_sound(StrBuf::from_str("music.mp3"), None, None) {
-                      Ok(s) => s,
-                      Err(err) => {panic!("Error code : {}", err);},
-                    };
+        Ok(s) => s,
+        Err(err) => {
+            panic!("Error code : {}", err);
+        }
+    };
 
     match sound.play_to_the_end() {
-        enums::Ok => {println!("Ok !");}
-        err => {panic!("Error code : {}", err);}
+        rfmod::Result::Ok => {
+            println!("Ok !");
+        }
+        err => {
+            panic!("Error code : {}", err);
+        }
     };
 }
 ```
