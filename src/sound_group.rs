@@ -22,7 +22,6 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-use enums;
 use types::*;
 use ffi;
 use sound;
@@ -56,135 +55,135 @@ impl Drop for SoundGroup {
 }
 
 impl SoundGroup {
-    pub fn release(&mut self) -> enums::Result {
+    pub fn release(&mut self) -> ::Result {
         if self.sound_group.is_not_null() {
             match unsafe { ffi::FMOD_SoundGroup_Release(self.sound_group) } {
-               enums::Result::Ok => {
+               ::Result::Ok => {
                     self.sound_group =::std::ptr::null_mut();
-                   enums::Result::Ok
+                   ::Result::Ok
                 }
                 e => e
             }
         } else {
-           enums::Result::Ok
+           ::Result::Ok
         }
     }
 
-    pub fn set_max_audible(&self, max_audible: i32) -> enums::Result {
+    pub fn set_max_audible(&self, max_audible: i32) -> ::Result {
         unsafe { ffi::FMOD_SoundGroup_SetMaxAudible(self.sound_group, max_audible) }
     }
 
-    pub fn get_max_audible(&self) -> Result<i32, enums::Result> {
+    pub fn get_max_audible(&self) -> Result<i32, ::Result> {
         let mut max_audible = 0i32;
 
         match unsafe { ffi::FMOD_SoundGroup_GetMaxAudible(self.sound_group, &mut max_audible) } {
-            enums::Result::Ok => Ok(max_audible),
+            ::Result::Ok => Ok(max_audible),
             e => Err(e)
         }
     }
 
-    pub fn set_max_audible_behavior(&self, max_audible_behavior: enums::SoundGroupBehavior) -> enums::Result {
+    pub fn set_max_audible_behavior(&self, max_audible_behavior: ::SoundGroupBehavior) -> ::Result {
         unsafe { ffi::FMOD_SoundGroup_SetMaxAudibleBehavior(self.sound_group, max_audible_behavior) }
     }
 
-    pub fn get_max_audible_behavior(&self) -> Result<enums::SoundGroupBehavior, enums::Result> {
-        let mut max_audible_behavior = enums::SoundGroupBehavior::SoundGroupBehaviorFail;
+    pub fn get_max_audible_behavior(&self) -> Result<::SoundGroupBehavior, ::Result> {
+        let mut max_audible_behavior = ::SoundGroupBehavior::Fail;
 
         match unsafe { ffi::FMOD_SoundGroup_GetMaxAudibleBehavior(self.sound_group, &mut max_audible_behavior) } {
-            enums::Result::Ok => Ok(max_audible_behavior),
+            ::Result::Ok => Ok(max_audible_behavior),
             e => Err(e)
         }
     }
 
-    pub fn set_mute_fade_speed(&self, speed: f32) -> enums::Result {
+    pub fn set_mute_fade_speed(&self, speed: f32) -> ::Result {
         unsafe { ffi::FMOD_SoundGroup_SetMuteFadeSpeed(self.sound_group, speed) }
     }
 
-    pub fn get_mute_fade_speed(&self) -> Result<f32, enums::Result> {
+    pub fn get_mute_fade_speed(&self) -> Result<f32, ::Result> {
         let mut speed = 0f32;
 
         match unsafe { ffi::FMOD_SoundGroup_GetMuteFadeSpeed(self.sound_group, &mut speed) } {
-            enums::Result::Ok => Ok(speed),
+            ::Result::Ok => Ok(speed),
             e => Err(e)
         }
     }
 
-    pub fn set_volume(&self, volume: f32) -> enums::Result {
+    pub fn set_volume(&self, volume: f32) -> ::Result {
         unsafe { ffi::FMOD_SoundGroup_SetVolume(self.sound_group, volume) }
     }
 
-    pub fn get_volume(&self) -> Result<f32, enums::Result> {
+    pub fn get_volume(&self) -> Result<f32, ::Result> {
         let mut volume = 0f32;
 
         match unsafe { ffi::FMOD_SoundGroup_GetVolume(self.sound_group, &mut volume) } {
-            enums::Result::Ok => Ok(volume),
+            ::Result::Ok => Ok(volume),
             e => Err(e)
         }
     }
 
-    pub fn stop(&self) -> enums::Result {
+    pub fn stop(&self) -> ::Result {
         unsafe { ffi::FMOD_SoundGroup_Stop(self.sound_group) }
     }
 
-    pub fn get_name(&self, name_len: u32) -> Result<String, enums::Result> {
+    pub fn get_name(&self, name_len: u32) -> Result<String, ::Result> {
         let name = String::with_capacity(name_len as uint);
 
         name.with_c_str(|c_name|{
             match unsafe { ffi::FMOD_SoundGroup_GetName(self.sound_group, c_name as *mut c_char, name_len as i32) } {
-               enums::Result::Ok => Ok(unsafe {string::raw::from_buf(c_name as *const u8).clone() }),
+               ::Result::Ok => Ok(unsafe {string::raw::from_buf(c_name as *const u8).clone() }),
                 e => Err(e)
             }
         })
     }
 
-    pub fn get_num_sounds(&self) -> Result<i32, enums::Result> {
+    pub fn get_num_sounds(&self) -> Result<i32, ::Result> {
         let mut num_sounds = 0i32;
 
         match unsafe { ffi::FMOD_SoundGroup_GetNumSounds(self.sound_group, &mut num_sounds) } {
-            enums::Result::Ok => Ok(num_sounds),
+            ::Result::Ok => Ok(num_sounds),
             e => Err(e)
         }
     }
 
-    pub fn get_sound(&self, index: i32) -> Result<sound::Sound, enums::Result> {
+    pub fn get_sound(&self, index: i32) -> Result<sound::Sound, ::Result> {
         let mut sound = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_SoundGroup_GetSound(self.sound_group, index, &mut sound) } {
-            enums::Result::Ok => Ok(ffi::FFI::wrap(sound)),
+            ::Result::Ok => Ok(ffi::FFI::wrap(sound)),
             e => Err(e)
         }
     }
 
-    pub fn get_num_playing(&self) -> Result<i32, enums::Result> {
+    pub fn get_num_playing(&self) -> Result<i32, ::Result> {
         let mut num_playing = 0i32;
 
         match unsafe { ffi::FMOD_SoundGroup_GetNumPlaying(self.sound_group, &mut num_playing) } {
-            enums::Result::Ok => Ok(num_playing),
+            ::Result::Ok => Ok(num_playing),
             e => Err(e)
         }
     }
 
     pub fn get_memory_info(&self, FmodMemoryBits(memory_bits): FmodMemoryBits,
-        FmodEventMemoryBits(event_memory_bits): FmodEventMemoryBits) -> Result<(u32, FmodMemoryUsageDetails), enums::Result> {
+        FmodEventMemoryBits(event_memory_bits): FmodEventMemoryBits) -> Result<(u32, FmodMemoryUsageDetails), ::Result> {
         let mut details = fmod_sys::get_memory_usage_details_ffi(Default::default());
         let mut memory_used = 0u32;
 
         match unsafe { ffi::FMOD_SoundGroup_GetMemoryInfo(self.sound_group, memory_bits, event_memory_bits, &mut memory_used, &mut details) } {
-            enums::Result::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
+            ::Result::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
             e => Err(e)
         }
     }
 
-    pub fn set_user_data<T>(&self, user_data: &mut T) -> enums::Result {
+    pub fn set_user_data<T>(&self, user_data: &mut T) -> ::Result {
         unsafe { ffi::FMOD_SoundGroup_SetUserData(self.sound_group, transmute(user_data)) }
     }
 
-    pub fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, enums::Result> {
+    pub fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, ::Result> {
         unsafe {
             let mut user_data : *mut c_void = ::std::ptr::null_mut();
 
             match ffi::FMOD_SoundGroup_GetUserData(self.sound_group, &mut user_data) {
-               enums::Result::Ok => {
+               ::Result::Ok => {
                     let tmp : &mut T = transmute::<*mut c_void, &mut T>(user_data);
                     
                     Ok(tmp)

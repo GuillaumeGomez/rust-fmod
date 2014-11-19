@@ -138,6 +138,25 @@ pub use vector::FmodVector;
 pub use geometry::Geometry;
 pub use file::FmodFile;
 
+pub use self::enums::result::Result;
+pub use self::enums::speaker_map_type::SpeakerMapType;
+pub use self::enums::sound_type::SoundType;
+pub use self::enums::sound_format::SoundFormat;
+pub use self::enums::tag_type::TagType;
+pub use self::enums::tag_data_type::TagDataType;
+pub use self::enums::channel_index::ChannelIndex;
+pub use self::enums::dsp_fft_window::DspFftWindow;
+pub use self::enums::delay_type::DelayType;
+pub use self::enums::output_type::OutputType;
+pub use self::enums::speaker::Speaker;
+pub use self::enums::speaker_mode::SpeakerMode;
+pub use self::enums::dsp_resampler::DspResampler;
+pub use self::enums::plugin_type::PluginType;
+pub use self::enums::open_state::OpenState;
+pub use self::enums::system_callback_type::SystemCallbackType;
+pub use self::enums::sound_group_behavior::SoundGroupBehavior;
+pub use self::enums::dsp_type::DspType;
+
 mod ffi;
 mod sound;
 mod channel;

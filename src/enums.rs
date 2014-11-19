@@ -25,703 +25,738 @@
 use types::{FmodTimeUnit, FmodMemoryBits};
 use libc::c_uint;
 
-#[deriving(Clone, PartialEq, PartialOrd, Show)]
-#[repr(C)]
-/// Error codes. Returned from every function.
-pub enum Result {
-    /// No errors.
-    Ok,
-    /// Tried to call lock a second time before unlock was called.
-    AlreadyLocked,
-    /// Tried to call a function on a data type that does not allow this type of functionality (ie calling Sound::lock on a streaming sound).
-    BadCommand,
-    /// Neither NTSCSI nor ASPI could be initialised.
-    CDDADrivers,
-    /// An error occurred while initialising the CDDA subsystem.
-    CDDAInit,
-    /// Couldn't find the specified device.
-    CDDAInvalidDevice,
-    /// No audio tracks on the specified disc.
-    CDDANoAudio,
-    /// No CD/DVD devices were found.
-    CDDANoDevices,
-    /// No disc present in the specified drive.
-    CDDANoDisc,
-    /// A CDDA read error occurred.
-    CDDARead,
-    /// Error trying to allocate a channel.
-    ChannelAlloc,
-    /// The specified channel has been reused to play another sound.
-    ChannelStolen,
-    /// A Win32 COM related error occured. COM failed to initialize or a QueryInterface failed meaning a Windows codec or driver was not installed properly.
-    COM,
-    /// DMA Failure. See debug output for more information.
-    DMA,
-    /// DSP connection error. Connection possibly caused a cyclic dependancy. Or tried to connect a tree too many units deep (more than 128).
-    DSPConnection,
-    /// DSP Format error. A DSP unit may have attempted to connect to this network with the wrong format.
-    DSPFormat,
-    /// DSP connection error. Couldn't find the DSP unit specified.
-    DSPNotFound,
-    /// DSP error. Cannot perform this operation while the network is in the middle of running. This will most likely happen if a connection or disconnection is attempted in a DSP callback.
-    DSPRunning,
-    /// DSP connection error. The unit being connected to or disconnected should only have 1 input or output.
-    DSPTooManyConnections,
-    /// Error loading file.
-    FileBad,
-    /// Couldn't perform seek operation. This is a limitation of the medium (ie netstreams) or the file format.
-    FileCouldNotSeek,
-    /// Media was ejected while reading.
-    FileDiskEjected,
-    /// End of file unexpectedly reached while trying to read essential data (truncated data ?).
-    FileEOF,
-    /// File not found.
-    FileNotFound,
-    /// Unwanted file access occured.
-    FileUnwanted,
-    /// Unsupported file or audio format.
-    Format,
-    /// A HTTP error occurred. This is a catch-all for HTTP errors not listed elsewhere.
-    HTTP,
-    /// The specified resource requires authentication or is forbidden.
-    HTTPAccess,
-    /// Proxy authentication is required to access the specified resource.
-    HTTPProxyAuth,
-    /// A HTTP server error occurred.
-    HTTPServerError,
-    /// The HTTP request timed out.
-    HTTPTimeout,
-    /// FMOD was not initialized correctly to support this function.
-    Initialization,
-    /// Cannot call this command after System::init.
-    Initialized,
-    /// An error occured that wasn't supposed to. Contact support.
-    Internal,
-    /// On Xbox 360, this memory address passed to FMOD must be physical, (ie allocated with XPhysicalAlloc.)
-    InvalidAddress,
-    /// Value passed in was a NaN, Inf or denormalized float.
-    InvalidFloat,
-    /// An invalid object handle was used.
-    InvalidHandle,
-    /// An invalid parameter was passed to this function.
-    InvalidParam,
-    /// An invalid seek position was passed to this function.
-    InvalidPosition,
-    /// An invalid speaker was passed to this function based on the current speaker mode.
-    InvalidSpeaker,
-    /// The syncpoint did not come from this sound handle.
-    InvalidSyncPoint,
-    /// The vectors passed in are not unit length, or perpendicular.
-    InvalidVector,
-    /// Reached maximum audible playback count for this sound's soundgroup.
-    MaxAudible,
-    /// Not enough memory or resources.
-    Memory,
-    /// Can't use FMOD_OPENMEMORY_POINT on non PCM source data, or non mp3/xma/adpcm data if FMOD_CREATECOMPRESSEDSAMPLE was used.
-    MemoryCantPoint,
-    /// Not enough memory or resources on console sound ram.
-    MemorySRAM,
-    /// Tried to call a command on a 3d sound when the command was meant for 2d sound.
-    Needs2D,
-    /// Tried to call a command on a 2d sound when the command was meant for 3d sound.
-    Needs3D,
-    /// Tried to use a feature that requires hardware support. (ie trying to play a GCADPCM compressed sound in software on Wii).
-    NeedsHardware,
-    /// Tried to use a feature that requires the software engine. Software engine has either been turned off, or command was executed on a hardware channel which does not support this feature.
-    NeedsSoftware,
-    /// Couldn't connect to the specified host.
-    NetConnect,
-    /// A socket error occurred. This is a catch-all for socket-related errors not listed elsewhere.
-    NetSocketError,
-    /// The specified URL couldn't be resolved.
-    NetURL,
-    /// Operation on a non-blocking socket could not complete immediately.
-    NetWouldBlock,
-    /// Operation could not be performed because specified sound/DSP connection is not ready.
-    NotReady,
-    /// Error initializing output device, but more specifically, the output device is already in use and cannot be reused.
-    OutputAllocated,
-    /// Error creating hardware sound buffer.
-    OutputCreateBuffer,
-    /// A call to a standard soundcard driver failed, which could possibly mean a bug in the driver or resources were missing or exhausted.
-    OutputDriverCall,
-    /// Error enumerating the available driver list. List may be inconsistent due to a recent device addition or removal.
-    OutputEnumeration,
-    /// Soundcard does not support the minimum features needed for this soundsystem (16bit stereo output).
-    OutputFormat,
-    /// Error initializing output device.
-    OutputInit,
-    /// FMOD_HARDWARE was specified but the sound card does not have the resources necessary to play it.
-    OutputNoHardware,
-    /// Attempted to create a software sound but no software channels were specified in System::init.
-    OutputNoSoftware,
-    /// Panning only works with mono or stereo sound sources.
-    Pan,
-    /// An unspecified error has been returned from a 3rd party plugin.
-    Plugin,
-    /// The number of allowed instances of a plugin has been exceeded.
-    PluginInstances,
-    /// A requested output, dsp unit type or codec was not available.
-    PluginMissing,
-    /// A resource that the plugin requires cannot be found. (ie the DLS file for MIDI playback or other DLLs that it needs to load)
-    PluginResource,
-    /// The specified sound is still in use by the event system, call EventSystem::unloadFSB before trying to release it.
-    Preloaded,
-    /// The specified sound is still in use by the event system, wait for the event which is using it finish with it.
-    ProgrammerSound,
-    /// An error occured trying to initialize the recording device.
-    Record,
-    /// Specified instance in FMOD_REVERB_PROPERTIES couldn't be set. Most likely because it is an invalid instance number or the reverb doesnt exist.
-    ReverbInstance,
-    /// This subsound is already being used by another sound, you cannot have more than one parent to a sound. Null out the other parent's entry first.
-    SubsoundAllocated,
-    /// Shared subsounds cannot be replaced or moved from their parent stream, such as when the parent stream is an FSB file.
-    SubsoundCantMove,
-    /// The subsound's mode bits do not match with the parent sound's mode bits. See documentation for function that it was called with.
-    SubsoundMode,
-    /// The error occured because the sound referenced contains subsounds when it shouldn't have, or it doesn't contain subsounds when it should have. The operation may also not be able to be performed on a parent sound, or a parent sound was played without setting up a sentence first.
-    Subsounds,
-    /// The specified tag could not be found or there are no tags.
-    TagNotFound,
-    /// The sound created exceeds the allowable input channel count. This can be increased using the maxinputchannels parameter in System::setSoftwareFormat.
-    TooManyChannels,
-    /// Something in FMOD hasn't been implemented when it should be ! contact support !
-    Unimplemented,
-    /// This command failed because System::init or System::setDriver was not called.
-    Uninitialized,
-    /// A command issued was not supported by this object. Possibly a plugin without certain callbacks specified.
-    Unsupported,
-    /// An error caused by System::update occured.
-    Update,
-    /// The version number of this file format is not supported.
-    Version,
-    /// An Event failed to be retrieved, most likely due to 'just fail' being specified as the max playbacks behavior.
-    EventFailed,
-    /// Can't execute this command on an EVENT_INFOONLY event.
-    EventInfoOnly,
-    /// An error occured that wasn't supposed to. See debug log for reason.
-    EventInternal,
-    /// Event failed because 'Max streams' was hit when FMOD_EVENT_INIT_FAIL_ON_MAXSTREAMS was specified.
-    EventMaxStreams,
-    /// FSB mismatches the FEV it was compiled with, the stream/sample mode it was meant to be created with was different, or the FEV was built for a different platform.
-    EventMismatch,
-    /// A category with the same name already exists.
-    EventNameConflict,
-    /// The requested event, event group, event category or event property could not be found.
-    EventNotFound,
-    /// Tried to call a function on a complex event that's only supported by simple events.
-    EventNeedsSimple,
-    /// An event with the same GUID already exists.
-    EventGuidConflict,
-    /// The specified project or bank has already been loaded. Having multiple copies of the same project loaded simultaneously is forbidden.
-    EventAlreadyLoaded,
-    /// Music system is not initialized probably because no music data is loaded.
-    MusicUninitialized,
-    /// The requested music entity could not be found.
-    MusicNotFound,
-    /// The music callback is required, but it has not been set.
-    MusicNoCallback,
-    /// Makes sure this enum is signed 32bit.
-    ResultForceInt = 65536
+pub mod result {
+    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// Error codes. Returned from every function.
+    pub enum Result {
+        /// No errors.
+        Ok,
+        /// Tried to call lock a second time before unlock was called.
+        AlreadyLocked,
+        /// Tried to call a function on a data type that does not allow this type of functionality (ie calling Sound::lock on a streaming sound).
+        BadCommand,
+        /// Neither NTSCSI nor ASPI could be initialised.
+        CDDADrivers,
+        /// An error occurred while initialising the CDDA subsystem.
+        CDDAInit,
+        /// Couldn't find the specified device.
+        CDDAInvalidDevice,
+        /// No audio tracks on the specified disc.
+        CDDANoAudio,
+        /// No CD/DVD devices were found.
+        CDDANoDevices,
+        /// No disc present in the specified drive.
+        CDDANoDisc,
+        /// A CDDA read error occurred.
+        CDDARead,
+        /// Error trying to allocate a channel.
+        ChannelAlloc,
+        /// The specified channel has been reused to play another sound.
+        ChannelStolen,
+        /// A Win32 COM related error occured. COM failed to initialize or a QueryInterface failed meaning a Windows codec or driver was not installed properly.
+        COM,
+        /// DMA Failure. See debug output for more information.
+        DMA,
+        /// DSP connection error. Connection possibly caused a cyclic dependancy. Or tried to connect a tree too many units deep (more than 128).
+        DSPConnection,
+        /// DSP Format error. A DSP unit may have attempted to connect to this network with the wrong format.
+        DSPFormat,
+        /// DSP connection error. Couldn't find the DSP unit specified.
+        DSPNotFound,
+        /// DSP error. Cannot perform this operation while the network is in the middle of running. This will most likely happen if a connection or disconnection is attempted in a DSP callback.
+        DSPRunning,
+        /// DSP connection error. The unit being connected to or disconnected should only have 1 input or output.
+        DSPTooManyConnections,
+        /// Error loading file.
+        FileBad,
+        /// Couldn't perform seek operation. This is a limitation of the medium (ie netstreams) or the file format.
+        FileCouldNotSeek,
+        /// Media was ejected while reading.
+        FileDiskEjected,
+        /// End of file unexpectedly reached while trying to read essential data (truncated data ?).
+        FileEOF,
+        /// File not found.
+        FileNotFound,
+        /// Unwanted file access occured.
+        FileUnwanted,
+        /// Unsupported file or audio format.
+        Format,
+        /// A HTTP error occurred. This is a catch-all for HTTP errors not listed elsewhere.
+        HTTP,
+        /// The specified resource requires authentication or is forbidden.
+        HTTPAccess,
+        /// Proxy authentication is required to access the specified resource.
+        HTTPProxyAuth,
+        /// A HTTP server error occurred.
+        HTTPServerError,
+        /// The HTTP request timed out.
+        HTTPTimeout,
+        /// FMOD was not initialized correctly to support this function.
+        Initialization,
+        /// Cannot call this command after System::init.
+        Initialized,
+        /// An error occured that wasn't supposed to. Contact support.
+        Internal,
+        /// On Xbox 360, this memory address passed to FMOD must be physical, (ie allocated with XPhysicalAlloc.)
+        InvalidAddress,
+        /// Value passed in was a NaN, Inf or denormalized float.
+        InvalidFloat,
+        /// An invalid object handle was used.
+        InvalidHandle,
+        /// An invalid parameter was passed to this function.
+        InvalidParam,
+        /// An invalid seek position was passed to this function.
+        InvalidPosition,
+        /// An invalid speaker was passed to this function based on the current speaker mode.
+        InvalidSpeaker,
+        /// The syncpoint did not come from this sound handle.
+        InvalidSyncPoint,
+        /// The vectors passed in are not unit length, or perpendicular.
+        InvalidVector,
+        /// Reached maximum audible playback count for this sound's soundgroup.
+        MaxAudible,
+        /// Not enough memory or resources.
+        Memory,
+        /// Can't use FMOD_OPENMEMORY_POINT on non PCM source data, or non mp3/xma/adpcm data if FMOD_CREATECOMPRESSEDSAMPLE was used.
+        MemoryCantPoint,
+        /// Not enough memory or resources on console sound ram.
+        MemorySRAM,
+        /// Tried to call a command on a 3d sound when the command was meant for 2d sound.
+        Needs2D,
+        /// Tried to call a command on a 2d sound when the command was meant for 3d sound.
+        Needs3D,
+        /// Tried to use a feature that requires hardware support. (ie trying to play a GCADPCM compressed sound in software on Wii).
+        NeedsHardware,
+        /// Tried to use a feature that requires the software engine. Software engine has either been turned off, or command was executed on a hardware channel which does not support this feature.
+        NeedsSoftware,
+        /// Couldn't connect to the specified host.
+        NetConnect,
+        /// A socket error occurred. This is a catch-all for socket-related errors not listed elsewhere.
+        NetSocketError,
+        /// The specified URL couldn't be resolved.
+        NetURL,
+        /// Operation on a non-blocking socket could not complete immediately.
+        NetWouldBlock,
+        /// Operation could not be performed because specified sound/DSP connection is not ready.
+        NotReady,
+        /// Error initializing output device, but more specifically, the output device is already in use and cannot be reused.
+        OutputAllocated,
+        /// Error creating hardware sound buffer.
+        OutputCreateBuffer,
+        /// A call to a standard soundcard driver failed, which could possibly mean a bug in the driver or resources were missing or exhausted.
+        OutputDriverCall,
+        /// Error enumerating the available driver list. List may be inconsistent due to a recent device addition or removal.
+        OutputEnumeration,
+        /// Soundcard does not support the minimum features needed for this soundsystem (16bit stereo output).
+        OutputFormat,
+        /// Error initializing output device.
+        OutputInit,
+        /// FMOD_HARDWARE was specified but the sound card does not have the resources necessary to play it.
+        OutputNoHardware,
+        /// Attempted to create a software sound but no software channels were specified in System::init.
+        OutputNoSoftware,
+        /// Panning only works with mono or stereo sound sources.
+        Pan,
+        /// An unspecified error has been returned from a 3rd party plugin.
+        Plugin,
+        /// The number of allowed instances of a plugin has been exceeded.
+        PluginInstances,
+        /// A requested output, dsp unit type or codec was not available.
+        PluginMissing,
+        /// A resource that the plugin requires cannot be found. (ie the DLS file for MIDI playback or other DLLs that it needs to load)
+        PluginResource,
+        /// The specified sound is still in use by the event system, call EventSystem::unloadFSB before trying to release it.
+        Preloaded,
+        /// The specified sound is still in use by the event system, wait for the event which is using it finish with it.
+        ProgrammerSound,
+        /// An error occured trying to initialize the recording device.
+        Record,
+        /// Specified instance in FMOD_REVERB_PROPERTIES couldn't be set. Most likely because it is an invalid instance number or the reverb doesnt exist.
+        ReverbInstance,
+        /// This subsound is already being used by another sound, you cannot have more than one parent to a sound. Null out the other parent's entry first.
+        SubsoundAllocated,
+        /// Shared subsounds cannot be replaced or moved from their parent stream, such as when the parent stream is an FSB file.
+        SubsoundCantMove,
+        /// The subsound's mode bits do not match with the parent sound's mode bits. See documentation for function that it was called with.
+        SubsoundMode,
+        /// The error occured because the sound referenced contains subsounds when it shouldn't have, or it doesn't contain subsounds when it should have. The operation may also not be able to be performed on a parent sound, or a parent sound was played without setting up a sentence first.
+        Subsounds,
+        /// The specified tag could not be found or there are no tags.
+        TagNotFound,
+        /// The sound created exceeds the allowable input channel count. This can be increased using the maxinputchannels parameter in System::setSoftwareFormat.
+        TooManyChannels,
+        /// Something in FMOD hasn't been implemented when it should be ! contact support !
+        Unimplemented,
+        /// This command failed because System::init or System::setDriver was not called.
+        Uninitialized,
+        /// A command issued was not supported by this object. Possibly a plugin without certain callbacks specified.
+        Unsupported,
+        /// An error caused by System::update occured.
+        Update,
+        /// The version number of this file format is not supported.
+        Version,
+        /// An Event failed to be retrieved, most likely due to 'just fail' being specified as the max playbacks behavior.
+        EventFailed,
+        /// Can't execute this command on an EVENT_INFOONLY event.
+        EventInfoOnly,
+        /// An error occured that wasn't supposed to. See debug log for reason.
+        EventInternal,
+        /// Event failed because 'Max streams' was hit when FMOD_EVENT_INIT_FAIL_ON_MAXSTREAMS was specified.
+        EventMaxStreams,
+        /// FSB mismatches the FEV it was compiled with, the stream/sample mode it was meant to be created with was different, or the FEV was built for a different platform.
+        EventMismatch,
+        /// A category with the same name already exists.
+        EventNameConflict,
+        /// The requested event, event group, event category or event property could not be found.
+        EventNotFound,
+        /// Tried to call a function on a complex event that's only supported by simple events.
+        EventNeedsSimple,
+        /// An event with the same GUID already exists.
+        EventGuidConflict,
+        /// The specified project or bank has already been loaded. Having multiple copies of the same project loaded simultaneously is forbidden.
+        EventAlreadyLoaded,
+        /// Music system is not initialized probably because no music data is loaded.
+        MusicUninitialized,
+        /// The requested music entity could not be found.
+        MusicNotFound,
+        /// The music callback is required, but it has not been set.
+        MusicNoCallback,
+        /// Makes sure this enum is signed 32bit.
+        ResultForceInt = 65536
+    }
 }
 
-#[deriving(Clone, PartialEq, PartialOrd, Show)]
-#[repr(C)]
-/// When creating a multichannel sound, FMOD will pan them to their default speaker locations:
-/// * For example a 6 channel sound will default to one channel per 5.1 output speaker.
-/// * Another example is a stereo sound. It will default to left = front left, right = front right.
-/// * This is for sounds that are not 'default'. For example you might have a sound that is 6 channels but actually made up of 3 stereo pairs, that should all be located in front left, front right only.
-pub enum SpeakerMapType {
-    /// This is the default, and just means FMOD decides which speakers it puts the source channels.
-    SpeakerMapTypeDefault,
-    /// This means the sound is made up of all mono sounds. All voices will be panned to the front center by default in this case.
-    SpeakerMapTypeAllMono,
-    /// This means the sound is made up of all stereo sounds. All voices will be panned to front left and front right alternating every second channel.
-    SpeakerMapTypeAllStereo,
-    /// Map a 5.1 sound to use protools L C R Ls Rs LFE mapping. Will return an error if not a 6 channel sound.
-    SpeakerMapType51ProTools
+pub mod speaker_map_type {
+    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// When creating a multichannel sound, FMOD will pan them to their default speaker locations:
+    /// * For example a 6 channel sound will default to one channel per 5.1 output speaker.
+    /// * Another example is a stereo sound. It will default to left = front left, right = front right.
+    /// * This is for sounds that are not 'default'. For example you might have a sound that is 6 channels but actually made up of 3 stereo pairs, that should all be located in front left, front right only.
+    pub enum SpeakerMapType {
+        /// This is the default, and just means FMOD decides which speakers it puts the source channels.
+        Default,
+        /// This means the sound is made up of all mono sounds. All voices will be panned to the front center by default in this case.
+        AllMono,
+        /// This means the sound is made up of all stereo sounds. All voices will be panned to front left and front right alternating every second channel.
+        AllStereo,
+        /// Map a 5.1 sound to use protools L C R Ls Rs LFE mapping. Will return an error if not a 6 channel sound.
+        _51ProTools
+    }
 }
 
-#[deriving(Clone, PartialEq, PartialOrd, Show)]
-#[repr(C)]
-/// These definitions describe the native format of the hardware or software buffer that will be used.
-pub enum SoundFormat {
-    /// Uninitialized / unknown.
-    SoundFormatNone,
-    /// 8bit integer PCM data.
-    SoundFormatPCM8,
-    /// 16bit integer PCM data.
-    SoundFormatPCM16,
-    /// 24bit integer PCM data.
-    SoundFormatPCM24,
-    /// 32bit integer PCM data.
-    SoundFormatPCM32,
-    /// 32bit floating point PCM data.
-    SoundFormatPCMFloat,
-    /// Compressed Nintendo 3DS/Wii DSP data.
-    SoundFormatGCADPCM,
-    /// Compressed IMA ADPCM data.
-    SoundFormatIMAADPCM,
-    /// Compressed PlayStation Portable ADPCM data.
-    SoundFormatVAG,
-    /// Compressed PSVita ADPCM data.
-    SoundFormatHEVAG,
-    /// Compressed Xbox360 XMA data.
-    SoundFormatXMA,
-    /// Compressed MPEG layer 2 or 3 data.
-    SoundFormatMPEG,
-    /// Compressed CELT data.
-    SoundFormatCELT,
-    /// Compressed PSVita ATRAC9 data.
-    SoundFormatAT9,
-    /// Compressed Xbox360 xWMA data.
-    SoundFormatXWMA,
-    /// Compressed Vorbis data.
-    SoundFormatVORBIS,
-    /// Maximum number of sound formats supported.
-    SoundFormatMax,
-    /// Makes sure this enum is signed 32bit.
-    SoundFormatForceInt = 65536
+pub mod sound_format {
+    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// These definitions describe the native format of the hardware or software buffer that will be used.
+    pub enum SoundFormat {
+        /// Uninitialized / unknown.
+        None,
+        /// 8bit integer PCM data.
+        PCM8,
+        /// 16bit integer PCM data.
+        PCM16,
+        /// 24bit integer PCM data.
+        PCM24,
+        /// 32bit integer PCM data.
+        PCM32,
+        /// 32bit floating point PCM data.
+        PCMFloat,
+        /// Compressed Nintendo 3DS/Wii DSP data.
+        GCADPCM,
+        /// Compressed IMA ADPCM data.
+        IMAADPCM,
+        /// Compressed PlayStation Portable ADPCM data.
+        VAG,
+        /// Compressed PSVita ADPCM data.
+        HEVAG,
+        /// Compressed Xbox360 XMA data.
+        XMA,
+        /// Compressed MPEG layer 2 or 3 data.
+        MPEG,
+        /// Compressed CELT data.
+        CELT,
+        /// Compressed PSVita ATRAC9 data.
+        AT9,
+        /// Compressed Xbox360 xWMA data.
+        XWMA,
+        /// Compressed Vorbis data.
+        VORBIS,
+        /// Maximum number of sound formats supported.
+        Max,
+        /// Makes sure this enum is signed 32bit.
+        ForceInt = 65536
+    }
 }
 
-#[deriving(Clone, PartialEq, PartialOrd, Show)]
-#[repr(C)]
-/// These definitions describe the type of song being played.
-pub enum SoundType {
-    /// 3rd party / unknown plugin format.
-    SoundTypeUnknown,
-    /// AIFF.
-    SoundTypeAIFF,
-    /// Microsoft Advanced Systems Format (ie WMA/ASF/WMV).
-    SoundTypeASF,
-    /// Sony ATRAC 3 format
-    SoundTypeAT3,
-    /// Digital CD audio.
-    SoundTypeCDDA,
-    /// Sound font / downloadable sound bank.
-    SoundTypeDLS,
-    /// FLAC lossless codec.
-    SoundTypeFLAC,
-    /// FMOD Sample Bank.
-    SoundTypeFSB,
-    /// Nintendo GameCube/Wii ADPCM
-    SoundTypeGCADPCM,
-    /// Impulse Tracker.
-    SoundTypeIT,
-    /// MIDI. extracodecdata is a pointer to an FMOD_MIDI_EXTRACODECDATA structure.
-    SoundTypeMIDI,
-    /// Protracker / Fasttracker MOD.
-    SoundTypeMOD,
-    /// MP2/MP3 MPEG.
-    SoundTypeMPEG,
-    /// Ogg vorbis.
-    SoundTypeOGGVORBIS,
-    /// Information only from ASX/PLS/M3U/WAX playlists
-    SoundTypePlaylist,
-    /// Raw PCM data.
-    SoundTypeRaw,
-    /// ScreamTracker 3.
-    SoundTypeS3M,
-    /// Sound font 2 format.
-    SoundTypeSF2,
-    /// User created sound.
-    SoundTypeUser,
-    /// Microsoft WAV.
-    SoundTypeWAV,
-    /// FastTracker 2 XM.
-    SoundTypeXM,
-    /// Xbox360 XMA
-    SoundTypeXMA,
-    /// PlayStation Portable ADPCM VAG format.
-    SoundTypeVAG,
-    /// iPhone hardware decoder, supports AAC, ALAC and MP3. extracodecdata is a pointer to an FMOD_AUDIOQUEUE_EXTRACODECDATA structure.
-    SoundTypeAudioQueue,
-    /// Xbox360 XWMA
-    SoundTypeXWMA,
-    /// 3DS BCWAV container format for DSP ADPCM and PCM
-    SoundTypeBCWAV,
-    /// NGP ATRAC 9 format
-    SoundTypeAT9,
-    /// Raw vorbis
-    SoundTypeVORBIS,
-    /// Microsoft Media Foundation wrappers, supports ASF/WMA
-    SoundTypeMediaFoundation,
-    /// Maximum number of sound types supported.
-    SoundTypeMax,
-    /// Makes sure this enum is signed 32bit.
-    SoundTypeForceInt = 65536
+pub mod sound_type {
+    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// These definitions describe the type of song being played.
+    pub enum SoundType {
+        /// 3rd party / unknown plugin format.
+        Unknown,
+        /// AIFF.
+        AIFF,
+        /// Microsoft Advanced Systems Format (ie WMA/ASF/WMV).
+        ASF,
+        /// Sony ATRAC 3 format
+        AT3,
+        /// Digital CD audio.
+        CDDA,
+        /// Sound font / downloadable sound bank.
+        DLS,
+        /// FLAC lossless codec.
+        FLAC,
+        /// FMOD Sample Bank.
+        FSB,
+        /// Nintendo GameCube/Wii ADPCM
+        GCADPCM,
+        /// Impulse Tracker.
+        IT,
+        /// MIDI. extracodecdata is a pointer to an FMOD_MIDI_EXTRACODECDATA structure.
+        MIDI,
+        /// Protracker / Fasttracker MOD.
+        MOD,
+        /// MP2/MP3 MPEG.
+        MPEG,
+        /// Ogg vorbis.
+        OGGVORBIS,
+        /// Information only from ASX/PLS/M3U/WAX playlists
+        Playlist,
+        /// Raw PCM data.
+        Raw,
+        /// ScreamTracker 3.
+        S3M,
+        /// Sound font 2 format.
+        SF2,
+        /// User created sound.
+        User,
+        /// Microsoft WAV.
+        WAV,
+        /// FastTracker 2 XM.
+        XM,
+        /// Xbox360 XMA
+        XMA,
+        /// PlayStation Portable ADPCM VAG format.
+        VAG,
+        /// iPhone hardware decoder, supports AAC, ALAC and MP3. extracodecdata is a pointer to an FMOD_AUDIOQUEUE_EXTRACODECDATA structure.
+        AudioQueue,
+        /// Xbox360 XWMA
+        XWMA,
+        /// 3DS BCWAV container format for DSP ADPCM and PCM
+        BCWAV,
+        /// NGP ATRAC 9 format
+        AT9,
+        /// Raw vorbis
+        VORBIS,
+        /// Microsoft Media Foundation wrappers, supports ASF/WMA
+        MediaFoundation,
+        /// Maximum number of sound types supported.
+        Max,
+        /// Makes sure this enum is signed 32bit.
+        ForceInt = 65536
+    }
 }
 
-#[deriving(Clone, PartialEq, PartialOrd, Show)]
-#[repr(C)]
-/// List of tag types that could be stored within a sound. These include id3 tags, metadata from netstreams and vorbis/asf data.
-pub enum TagType {
-    TagTypeUnknown = 0,
-    TagTypeID3V1,
-    TagTypeID3V2,
-    TagTypeVORBISComment,
-    TagTypeShoutCast,
-    TagTypeIceCast,
-    TagTypeASF,
-    TagTypeMIDI,
-    TagTypePlaylist,
-    TagTypeFmod,
-    TagTypeUser,
+pub mod tag_type {
+    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// List of tag types that could be stored within a sound. These include id3 tags, metadata from netstreams and vorbis/asf data.
+    pub enum TagType {
+        Unknown = 0,
+        ID3V1,
+        ID3V2,
+        VORBISComment,
+        ShoutCast,
+        IceCast,
+        ASF,
+        MIDI,
+        Playlist,
+        Fmod,
+        User,
 
-    /// Maximum number of tag types supported.
-    TagTypeMax,
-    /// Makes sure this enum is signed 32bit.
-    TagTypeForceInt = 65536
+        /// Maximum number of tag types supported.
+        Max,
+        /// Makes sure this enum is signed 32bit.
+        ForceInt = 65536
+    }
 }
 
-#[deriving(Clone, PartialEq, PartialOrd, Show)]
-#[repr(C)]
-/// List of data types that can be returned by [`Sound::get_tag`](../../struct.Sound.html#method.get_tag)
-pub enum TagDataType {
-    TagDataTypeBinary = 0,
-    TagDataTypeInt,
-    TagDataTypeFloat,
-    TagDataTypeString,
-    TagDataTypeStringUTF16,
-    TagDataTypeStringUTF16BE,
-    TagDataTypeStringUTF8,
-    TagDataTypeCDTOC,
-    /// Maximum number of tag datatypes supported.
-    TagDataTypeMax,
-    /// Makes sure this enum is signed 32bit.
-    TagDataTypeForceInt = 65536
+pub mod tag_data_type {
+    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// List of data types that can be returned by [`Sound::get_tag`](../../struct.Sound.html#method.get_tag)
+    pub enum TagDataType {
+        Binary = 0,
+        Int,
+        Float,
+        String,
+        StringUTF16,
+        StringUTF16BE,
+        StringUTF8,
+        CDTOC,
+        /// Maximum number of tag datatypes supported.
+        Max,
+        /// Makes sure this enum is signed 32bit.
+        ForceInt = 65536
+    }
 }
 
-#[deriving(Clone, PartialEq, PartialOrd, Show)]
-#[repr(C)]
-/// Special channel index values for FMOD functions.
-pub enum ChannelIndex {
-    /// For a channel index, FMOD chooses a free voice using the priority system.
-    ChannelFree  = -1,
-    /// For a channel index, re-use the channel handle that was passed in.
-    ChannelReUse = -2,
+pub mod channel_index {
+    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// Special channel index values for FMOD functions.
+    pub enum ChannelIndex {
+        /// For a channel index, FMOD chooses a free voice using the priority system.
+        Free  = -1,
+        /// For a channel index, re-use the channel handle that was passed in.
+        ReUse = -2,
+    }
 }
 
-#[deriving(Clone, PartialEq, PartialOrd, Show)]
-#[repr(C)]
-/// List of windowing methods used in spectrum analysis to reduce leakage / transient signals intefering with the analysis.
-/// This is a problem with analysis of continuous signals that only have a small portion of the signal sample (the fft window size).
-/// Windowing the signal with a curve or triangle tapers the sides of the fft window to help alleviate this problem.
-pub enum DSP_FFT_Window {
-    /// w[n] = 1.0
-    DSP_FFT_WindowRect,
-    /// w[n] = TRI(2n/N)
-    DSP_FFT_WindowTriangle,
-    /// w[n] = 0.54 - (0.46 * COS(n/N) )
-    DSP_FFT_WindowHamming,
-    /// w[n] = 0.5 *  (1.0  - COS(n/N) )
-    DSP_FFT_WindowHanning,
-    /// w[n] = 0.42 - (0.5  * COS(n/N) ) + (0.08 * COS(2.0 * n/N) )
-    DSP_FFT_WindowBlackMan,
-    /// w[n] = 0.35875 - (0.48829 * COS(1.0 * n/N)) + (0.14128 * COS(2.0 * n/N)) - (0.01168 * COS(3.0 * n/N))
-    DSP_FFT_WindowBlackManHarris,
-    /// Maximum number of FFT window types supported.
-    DSP_FFT_WindowMax,
-    /// Makes sure this enum is signed 32bit.
-    DSP_FFT_WindowForceInt = 65536
+pub mod dsp_fft_window {
+    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// List of windowing methods used in spectrum analysis to reduce leakage / transient signals intefering with the analysis.
+    /// This is a problem with analysis of continuous signals that only have a small portion of the signal sample (the fft window size).
+    /// Windowing the signal with a curve or triangle tapers the sides of the fft window to help alleviate this problem.
+    pub enum DspFftWindow {
+        /// w[n] = 1.0
+        Rect,
+        /// w[n] = TRI(2n/N)
+        Triangle,
+        /// w[n] = 0.54 - (0.46 * COS(n/N) )
+        Hamming,
+        /// w[n] = 0.5 *  (1.0  - COS(n/N) )
+        Hanning,
+        /// w[n] = 0.42 - (0.5  * COS(n/N) ) + (0.08 * COS(2.0 * n/N) )
+        BlackMan,
+        /// w[n] = 0.35875 - (0.48829 * COS(1.0 * n/N)) + (0.14128 * COS(2.0 * n/N)) - (0.01168 * COS(3.0 * n/N))
+        BlackManHarris,
+        /// Maximum number of FFT window types supported.
+        Max,
+        /// Makes sure this enum is signed 32bit.
+        ForceInt = 65536
+    }
 }
 
-#[deriving(Clone, PartialEq, PartialOrd, Show)]
-#[repr(C)]
-/// Types of delay that can be used with [`Channel::set_delay`](../../struct.Channel.html#method.set_delay) / [`Channel::get_delay`](../../struct.Channel.html#method.get_delay).
-pub enum DelayType {
-    /// Delay at the end of the sound in milliseconds. Use delayhi only. [`Channel::is_playing`](../../struct.Channel.html#method.is_playing) will remain true until this delay has passed even though the sound itself has stopped playing.
-    DelayTypeEndMS,
-    /// Time the sound started if [`Channel::get_delay`](../../struct.Channel.html#method.get_delay) is used, or if [`Channel::set_delay`](../../struct.Channel.html#method.set_delay) is used, the sound will delay playing until this exact tick.
-    DelayTypeDSPClockStart,
-    /// Time the sound should end. If this is non-zero, the channel will go silent at this exact tick.
-    DelayTypeDSPClockEnd,
-    /// Time the sound should pause. If this is non-zero, the channel will pause at this exact tick.
-    DelayTypeDSPClockPause,
-    /// Maximum number of tag datatypes supported.
-    DelayTypeMax,
-    /// Makes sure this enum is signed 32bit.
-    DelayTypeForceInt = 65536
+pub mod delay_type {
+    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// Types of delay that can be used with [`Channel::set_delay`](../../struct.Channel.html#method.set_delay) / [`Channel::get_delay`](../../struct.Channel.html#method.get_delay).
+    pub enum DelayType {
+        /// Delay at the end of the sound in milliseconds. Use delayhi only. [`Channel::is_playing`](../../struct.Channel.html#method.is_playing) will remain true until this delay has passed even though the sound itself has stopped playing.
+        EndMS,
+        /// Time the sound started if [`Channel::get_delay`](../../struct.Channel.html#method.get_delay) is used, or if [`Channel::set_delay`](../../struct.Channel.html#method.set_delay) is used, the sound will delay playing until this exact tick.
+        DSPClockStart,
+        /// Time the sound should end. If this is non-zero, the channel will go silent at this exact tick.
+        DSPClockEnd,
+        /// Time the sound should pause. If this is non-zero, the channel will pause at this exact tick.
+        DSPClockPause,
+        /// Maximum number of tag datatypes supported.
+        Max,
+        /// Makes sure this enum is signed 32bit.
+        ForceInt = 65536
+    }
 }
 
-#[deriving(Clone, PartialEq, PartialOrd, Show)]
-#[repr(C)]
-/// These output types are used with [`FmodSys::set_output`](../../struct.FmodSys.html#method.set_output) / [`FmodSys::get_output`](../../struct.FmodSys.html#method.get_output), to choose which output method to use.
-pub enum OutputType {
-    /// Picks the best output mode for the platform. This is the default.
-    OutputTypeAutoDetect,
-    /// All             - 3rd party plugin, unknown. This is for use with [`FmodSys::get_output`](../../struct.FmodSys.html#method.get_output) only.
-    OutputTypeUnknown,
-    /// All             - All calls in this mode succeed but make no sound.
-    OutputTypeNoSound,
-    /// All             - Writes output to fmodoutput.wav by default. Use the 'extradriverdata' parameter in [`FmodSys::init`](../../struct.FmodSys.html#method.init), by simply passing the filename as a string, to set the wav filename.
-    OutputTypeWAVWriter,
-    /// All             - Non-realtime version of FMOD_OUTPUTTYPE_NOSOUND. User can drive mixer with [`FmodSys::update`](../../struct.FmodSys.html#method.update) at whatever rate they want.
-    OutputTypeNoSoundNRT,
-    /// All             - Non-realtime version of FMOD_OUTPUTTYPE_WAVWRITER. User can drive mixer with [`FmodSys::update`](../../struct.FmodSys.html#method.update) at whatever rate they want.
-    OutputTypeWAVWriterNRT,
-    /// Win32/Win64     - DirectSound output.                     (Default on Windows XP and below)
-    OutputTypeDSound,
-    /// Win32/Win64     - Windows Multimedia output.
-    OutputTypeWinMM,
-    /// Win32           - Windows Audio Session API.              (Default on Windows Vista and above)
-    OutputTypeWASAPI,
-    /// Win32           - Low latency ASIO 2.0 driver.
-    OutputTypeASIO,
-    /// Linux/Linux64   - Open Sound System output.               (Default on Linux, third preference)
-    OutputTypeOSS,
-    /// Linux/Linux64   - Advanced Linux Sound Architecture output. (Default on Linux, second preference if available)
-    OutputTypeALSA,
-    /// Linux/Linux64   - Enlightment Sound Daemon output.
-    OutputTypeESD,
-    /// Linux/Linux64   - PulseAudio output.                      (Default on Linux, first preference if available)
-    OutputTypePulseAudio,
-    /// Mac             - Macintosh CoreAudio output.             (Default on Mac)
-    OutputTypeCoreAudio,
-    /// Xbox 360        - Native Xbox360 output.                  (Default on Xbox 360)
-    OutputTypeXbox360,
-    /// PSP             - Native PSP output.                      (Default on PSP)
-    OutputTypePSP,
-    /// PS3             - Native PS3 output.                      (Default on PS3)
-    OutputTypePS3,
-    /// NGP             - Native NGP output.                      (Default on NGP)
-    OutputTypeNGP,
-    /// Wii             - Native Wii output.                      (Default on Wii)
-    OutputTypeWii,
-    /// 3DS             - Native 3DS output                         (Default on 3DS)
-    OutputType3DS,
-    /// Android         - Java Audio Track output.                (Default on Android 2.2 and below)
-    OutputTypeAudioTrack,
-    /// Android         - OpenSL ES output.                       (Default on Android 2.3 and above)
-    OutputTypeOpenSL,
-    /// Native Client   - Native Client output.                   (Default on Native Client)
-    OutputTypeNACL,
-    /// Wii U           - Native Wii U output.                    (Default on Wii U)
-    OutputTypeWiiU,
-    /// BlackBerry      - Native BlackBerry asound output.        (Default on BlackBerry)
-    OutputTypeASound,
-    /// Orbis           - Audio Out output.                       (Default on Orbis)
-    OutputTypeAudioOut,
-    /// Durango         - XAudio2 output.
-    OutputTypeXAudio,
-    /// Maximum number of output types supported.
-    OutputTypeMax,
-    /// Makes sure this enum is signed 32bit.
-    OutputTypeForceInt = 65536
+pub mod output_type {
+    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// These output types are used with [`FmodSys::set_output`](../../struct.FmodSys.html#method.set_output) / [`FmodSys::get_output`](../../struct.FmodSys.html#method.get_output), to choose which output method to use.
+    pub enum OutputType {
+        /// Picks the best output mode for the platform. This is the default.
+        AutoDetect,
+        /// All             - 3rd party plugin, unknown. This is for use with [`FmodSys::get_output`](../../struct.FmodSys.html#method.get_output) only.
+        Unknown,
+        /// All             - All calls in this mode succeed but make no sound.
+        NoSound,
+        /// All             - Writes output to fmodoutput.wav by default. Use the 'extradriverdata' parameter in [`FmodSys::init`](../../struct.FmodSys.html#method.init), by simply passing the filename as a string, to set the wav filename.
+        WAVWriter,
+        /// All             - Non-realtime version of FMOD_OUTPUTYPE_NOSOUND. User can drive mixer with [`FmodSys::update`](../../struct.FmodSys.html#method.update) at whatever rate they want.
+        NoSoundNRT,
+        /// All             - Non-realtime version of FMOD_OUTPUTYPE_WAVWRITER. User can drive mixer with [`FmodSys::update`](../../struct.FmodSys.html#method.update) at whatever rate they want.
+        WAVWriterNRT,
+        /// Win32/Win64     - DirectSound output.                     (Default on Windows XP and below)
+        DSound,
+        /// Win32/Win64     - Windows Multimedia output.
+        WinMM,
+        /// Win32           - Windows Audio Session API.              (Default on Windows Vista and above)
+        WASAPI,
+        /// Win32           - Low latency ASIO 2.0 driver.
+        ASIO,
+        /// Linux/Linux64   - Open Sound System output.               (Default on Linux, third preference)
+        OSS,
+        /// Linux/Linux64   - Advanced Linux Sound Architecture output. (Default on Linux, second preference if available)
+        ALSA,
+        /// Linux/Linux64   - Enlightment Sound Daemon output.
+        ESD,
+        /// Linux/Linux64   - PulseAudio output.                      (Default on Linux, first preference if available)
+        PulseAudio,
+        /// Mac             - Macintosh CoreAudio output.             (Default on Mac)
+        CoreAudio,
+        /// Xbox 360        - Native Xbox360 output.                  (Default on Xbox 360)
+        Xbox360,
+        /// PSP             - Native PSP output.                      (Default on PSP)
+        PSP,
+        /// PS3             - Native PS3 output.                      (Default on PS3)
+        PS3,
+        /// NGP             - Native NGP output.                      (Default on NGP)
+        NGP,
+        /// Wii             - Native Wii output.                      (Default on Wii)
+        Wii,
+        /// 3DS             - Native 3DS output                       (Default on 3DS)
+        _3DS,
+        /// Android         - Java Audio Track output.                (Default on Android 2.2 and below)
+        AudioTrack,
+        /// Android         - OpenSL ES output.                       (Default on Android 2.3 and above)
+        OpenSL,
+        /// Native Client   - Native Client output.                   (Default on Native Client)
+        NACL,
+        /// Wii U           - Native Wii U output.                    (Default on Wii U)
+        WiiU,
+        /// BlackBerry      - Native BlackBerry asound output.        (Default on BlackBerry)
+        ASound,
+        /// Orbis           - Audio Out output.                       (Default on Orbis)
+        AudioOut,
+        /// Durango         - XAudio2 output.
+        XAudio,
+        /// Maximum number of output types supported.
+        Max,
+        /// Makes sure this enum is signed 32bit.
+        ForceInt = 65536
+    }
 }
 
-#[deriving(Clone, PartialEq, PartialOrd, Show)]
-#[repr(C)]
-//FIXME
-/// These are speaker types defined for use with the [`Channel::set_speaker_level`](../../struct.Channel.html#method.set_speaker_level) command.
-/// It can also be used for speaker placement in the [`FmodSys::set_3D_speaker_position`](../../struct.FmodSys.html#method.set_3D_speaker_position) command.
-pub enum Speaker {
-    SpeakerFrontLeft,
-    SpeakerFrontRight,
-    SpeakerFrontCenter,
-    SpeakerLowFrequency,
-    SpeakerBackLeft,
-    SpeakerBackRight,
-    SpeakerSideLeft,
-    SpeakerSideRight,
-    /// Maximum number of speaker types supported.
-    SpeakerMax,
-    //SpeakerMono        = 0,     /* For use withSpeakerMODE_MONO and Channel::SetSpeakerLevels. Mapped to same value asSpeaker_FRONT_LEFT. */
-    /// A non speaker. Use this with ASIO mapping to ignore a speaker.
-    SpeakerNull        = 65535,
-    //SpeakerSBL         = 6,     /* For use withSpeakerMODE_7POINT1 on PS3 where the extra speakers are surround back inside of side speakers. */
-    //SpeakerSBR         = 7,     /* For use withSpeakerMODE_7POINT1 on PS3 where the extra speakers are surround back inside of side speakers. */
-    /// Makes sure this enum is signed 32bit.
-    SpeakerForceInt    = 65536
+pub mod speaker {
+    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    // FIXME
+    /// These are speaker types defined for use with the [`Channel::set_speaker_level`](../../struct.Channel.html#method.set_speaker_level) command.
+    /// It can also be used for speaker placement in the [`FmodSys::set_3D_speaker_position`](../../struct.FmodSys.html#method.set_3D_speaker_position) command.
+    pub enum Speaker {
+        FrontLeft,
+        FrontRight,
+        FrontCenter,
+        LowFrequency,
+        BackLeft,
+        BackRight,
+        SideLeft,
+        SideRight,
+        /// Maximum number of speaker types supported.
+        Max,
+        //SpeakerMono        = 0,     /* For use with_MONO and Channel::SetSpeakerLevels. Mapped to same value asSpeaker_FRONT_LEFT. */
+        /// A non speaker. Use this with ASIO mapping to ignore a speaker.
+        Null        = 65535,
+        //SpeakerSBL         = 6,     /* For use with_7POINT1 on PS3 where the extra speakers are surround back inside of side speakers. */
+        //SpeakerSBR         = 7,     /* For use with_7POINT1 on PS3 where the extra speakers are surround back inside of side speakers. */
+        /// Makes sure this enum is signed 32bit.
+        ForceInt    = 65536
+    }
 }
 
-#[deriving(Clone, PartialEq, PartialOrd, Show)]
-#[repr(C)]
-/// These are speaker types defined for use with the [`FmodSys::set_speaker_mode`](../../struct.FmodSys.html#method.set_speaker_mode) or [`FmodSys::get_speaker_mode`](../../struct.FmodSys.html#method.get_speaker_mode) command.
-pub enum SpeakerMode {
-    /// There is no specific speakermode. Sound channels are mapped in order of input to output. Use [`FmodSys::set_software_format`](../../struct.FmodSys.html#method.set_software_format) to specify speaker count. See remarks for more information.
-    SpeakerModeRaw,
-    /// The speakers are monaural.
-    SpeakerModeMono,
-    /// The speakers are stereo (DEFAULT).
-    SpeakerModeStereo,
-    /// 4 speaker setup. This includes front left, front right, rear left, rear right.
-    SpeakerModeQuad,
-    /// 5 speaker setup. This includes front left, front right, center, rear left, rear right.
-    SpeakerModeSurround,
-    /// 5.1 speaker setup. This includes front left, front right, center, rear left, rear right and a subwoofer.
-    SpeakerMode5Point1,
-    /// 7.1 speaker setup. This includes front left, front right, center, rear left, rear right, side left, side right and a subwoofer.
-    SpeakerMode7Point1,
-    /// Stereo compatible output, embedded with surround information. SRS 5.1/Prologic/Prologic2 decoders will split the signal into a 5.1 speaker set-up or SRS virtual surround will decode into a 2-speaker/headphone setup. See remarks about limitations.
-    SpeakerModeSRS5_1_Matrix,
-    /// Stereo compatible output, embedded with surround information. Dolby Pro Logic II decoders will split the signal into a 5.1 speaker set-up.
-    SpeakerModeDOLBY5_1_Matrix,
-    /// Stereo output, but data is encoded using personalized HRTF algorithms. See myears.net.au
-    SpeakerModeMYears,
+pub mod speaker_mode {
+    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// These are speaker types defined for use with the [`FmodSys::set_speaker_mode`](../../struct.FmodSys.html#method.set_speaker_mode) or [`FmodSys::get_speaker_mode`](../../struct.FmodSys.html#method.get_speaker_mode) command.
+    pub enum SpeakerMode {
+        /// There is no specific . Sound channels are mapped in order of input to output. Use [`FmodSys::set_software_format`](../../struct.FmodSys.html#method.set_software_format) to specify speaker count. See remarks for more information.
+        Raw,
+        /// The speakers are monaural.
+        Mono,
+        /// The speakers are stereo (DEFAULT).
+        Stereo,
+        /// 4 speaker setup. This includes front left, front right, rear left, rear right.
+        Quad,
+        /// 5 speaker setup. This includes front left, front right, center, rear left, rear right.
+        Surround,
+        /// 5.1 speaker setup. This includes front left, front right, center, rear left, rear right and a subwoofer.
+        _5Point1,
+        /// 7.1 speaker setup. This includes front left, front right, center, rear left, rear right, side left, side right and a subwoofer.
+        _7Point1,
+        /// Stereo compatible output, embedded with surround information. SRS 5.1/Prologic/Prologic2 decoders will split the signal into a 5.1 speaker set-up or SRS virtual surround will decode into a 2-speaker/headphone setup. See remarks about limitations.
+        SRS5_1_Matrix,
+        /// Stereo compatible output, embedded with surround information. Dolby Pro Logic II decoders will split the signal into a 5.1 speaker set-up.
+        DOLBY5_1_Matrix,
+        /// Stereo output, but data is encoded using personalized HRTF algorithms. See myears.net.au
+        MYears,
 
-    /// Maximum number of speaker modes supported.
-    SpeakerModeMax,
-    /// Makes sure this enum is signed 32bit.
-    SpeakerModeForceInt = 65536
+        /// Maximum number of speaker modes supported.
+        Max,
+        /// Makes sure this enum is signed 32bit.
+        ForceInt = 65536
+    }
 }
 
-#[deriving(Clone, PartialEq, PartialOrd, Show)]
-#[repr(C)]
-/// List of interpolation types that the FMOD Ex software mixer supports.
-pub enum DSPResampler {
-    /// No interpolation. High frequency aliasing hiss will be audible depending on the sample rate of the sound.
-    DSPResamplerNoInterp,
-    /// Linear interpolation (default method). Fast and good quality, causes very slight lowpass effect on low frequency sounds.
-    DSPResamplerLinear,
-    /// Cubic interpolation. Slower than linear interpolation but better quality.
-    DSPResamplerCubic,
-    /// 5 point spline interpolation. Slowest resampling method but best quality.
-    DSPResamplerSpline,
-    /// Maximum number of resample methods supported.
-    DSPResamplerMax,
-    /// Makes sure this enum is signed 32bit.
-    DSPResamplerForceInt = 65536
+pub mod dsp_resampler {
+    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// List of interpolation types that the FMOD Ex software mixer supports.
+    pub enum DspResampler {
+        /// No interpolation. High frequency aliasing hiss will be audible depending on the sample rate of the sound.
+        NoInterp,
+        /// Linear interpolation (default method). Fast and good quality, causes very slight lowpass effect on low frequency sounds.
+        Linear,
+        /// Cubic interpolation. Slower than linear interpolation but better quality.
+        Cubic,
+        /// 5 point spline interpolation. Slowest resampling method but best quality.
+        Spline,
+        /// Maximum number of resample methods supported.
+        Max,
+        /// Makes sure this enum is signed 32bit.
+        ForceInt = 65536
+    }
 }
 
-#[deriving(Clone, PartialEq, PartialOrd, Show)]
-#[repr(C)]
-/// These are plugin types defined for use with the [`FmodSys::get_num_plugins`](../../struct.FmodSys.html#method.get_num_plugins), [`FmodSys::get_plugin_info`](../../struct.FmodSys.html#method.get_plugin_info) and [`FmodSys::unload_plugin`](../../struct.FmodSys.html#method.unload_plugin) functions.
-pub enum PluginType {
-    /// The plugin type is an output module. FMOD mixed audio will play through one of these devices
-    PluginTypeOutput,
-    /// The plugin type is a file format codec. FMOD will use these codecs to load file formats for playback.
-    PluginTypeCodec,
-    /// The plugin type is a DSP unit. FMOD will use these plugins as part of its DSP network to apply effects to output or generate sound in realtime.
-    PluginTypeDSP,
-    /// Maximum number of plugin types supported.
-    PluginTypeMax,
-    /// Makes sure this enum is signed 32bit.
-    PluginTypeForceInt = 65536
+pub mod plugin_type {
+    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// These are plugin types defined for use with the [`FmodSys::get_num_plugins`](../../struct.FmodSys.html#method.get_num_plugins), [`FmodSys::get_plugin_info`](../../struct.FmodSys.html#method.get_plugin_info) and [`FmodSys::unload_plugin`](../../struct.FmodSys.html#method.unload_plugin) functions.
+    pub enum PluginType {
+        /// The plugin type is an output module. FMOD mixed audio will play through one of these devices
+        Output,
+        /// The plugin type is a file format codec. FMOD will use these codecs to load file formats for playback.
+        Codec,
+        /// The plugin type is a DSP unit. FMOD will use these plugins as part of its DSP network to apply effects to output or generate sound in realtime.
+        DSP,
+        /// Maximum number of plugin types supported.
+        Max,
+        /// Makes sure this enum is signed 32bit.
+        ForceInt = 65536
+    }
 }
 
-#[deriving(Clone, PartialEq, PartialOrd, Show)]
-#[repr(C)]
-/// These values describe what state a sound is in after FMOD_NONBLOCKING has been used to open it.
-pub enum OpenState
-{
-    /// Opened and ready to play.
-    OpenStateReady = 0,
-    /// Initial load in progress.
-    OpenStateLoading,
-    /// Failed to open - file not found, out of memory etc. See return value of [`Sound::get_open_state`](../../struct.Sound.html#method.get_open_state) for what happened.
-    OpenStateError,
-    /// Connecting to remote host (internet sounds only).
-    OpenStateConnecting,
-    /// Buffering data.
-    OpenStateBuffering,
-    /// Seeking to subsound and re-flushing stream buffer.
-    OpenStateSeeking,
-    /// Ready and playing, but not possible to release at this time without stalling the main thread.
-    OpenStatePlaying,
-    /// Seeking within a stream to a different position.
-    OpenStateSetPosition,
-    /// Maximum number of open state types.
-    OpenStateMax,
-    /// Makes sure this enum is signed 32bit.
-    OpenStateForceInt = 65536
+pub mod open_state {
+    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// These values describe what state a sound is in after FMOD_NONBLOCKING has been used to open it.
+    pub enum OpenState {
+        /// Opened and ready to play.
+        Ready = 0,
+        /// Initial load in progress.
+        Loading,
+        /// Failed to open - file not found, out of memory etc. See return value of [`Sound::get_open_state`](../../struct.Sound.html#method.get_open_state) for what happened.
+        Error,
+        /// Connecting to remote host (internet sounds only).
+        Connecting,
+        /// Buffering data.
+        Buffering,
+        /// Seeking to subsound and re-flushing stream buffer.
+        Seeking,
+        /// Ready and playing, but not possible to release at this time without stalling the main thread.
+        Playing,
+        /// Seeking within a stream to a different position.
+        SetPosition,
+        /// Maximum number of open state types.
+        Max,
+        /// Makes sure this enum is signed 32bit.
+        ForceInt = 65536
+    }
 }
 
-#[deriving(Clone, PartialEq, PartialOrd, Show)]
-#[repr(C)]
-/// These callback types are used with [`Channel::set_callback`](../../struct.Channel.html#method.set_callback).
-pub enum SystemCallbackType {
-    /// Called from [`FmodSys::update`](../../struct.FmodSys.html#method.update) when the enumerated list of devices has changed.
-    SystemCallbackTypeDeviceListChanged,
-    /// Called from [`FmodSys::update`](../../struct.FmodSys.html#method.update) when an output device has been lost due to control panel parameter changes and FMOD cannot automatically recover.
-    SystemCallbackTypeDeviceLost,
-    /// Called directly when a memory allocation fails somewhere in FMOD. (NOTE - 'system' will be NULL in this callback type.)
-    SystemCallbackTypeMemoryAllocationFailed,
-    /// Called directly when a thread is created.
-    SystemCallbackTypeThreadCreated,
-    /// Called when a bad connection was made with [`Dsp::add_input`](../../struct.Dsp.html#method.add_input). Usually called from mixer thread because that is where the connections are made.
-    SystemCallbackTypeBadDSPConnection,
-    /// Called when too many effects were added exceeding the maximum tree depth of 128. This is most likely caused by accidentally adding too many DSP effects. Usually called from mixer thread because that is where the connections are made.
-    SystemCallbackTypeBadDSPLevel,
-    /// Called directly when a thread is destroyed.
-    SystemCallbackTypeThreadDestroyed,
-    /// Maximum number of callback types supported.
-    SystemCallbackTypeMax,
-    /// Makes sure this enum is signed 32bit.
-    SystemCallbackTypeForceInt = 65536
+pub mod system_callback_type {
+    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// These callback types are used with [`Channel::set_callback`](../../struct.Channel.html#method.set_callback).
+    pub enum SystemCallbackType {
+        /// Called from [`FmodSys::update`](../../struct.FmodSys.html#method.update) when the enumerated list of devices has changed.
+        DeviceListChanged,
+        /// Called from [`FmodSys::update`](../../struct.FmodSys.html#method.update) when an output device has been lost due to control panel parameter changes and FMOD cannot automatically recover.
+        DeviceLost,
+        /// Called directly when a memory allocation fails somewhere in FMOD. (NOTE - 'system' will be NULL in this callback type.)
+        MemoryAllocationFailed,
+        /// Called directly when a thread is created.
+        ThreadCreated,
+        /// Called when a bad connection was made with [`Dsp::add_input`](../../struct.Dsp.html#method.add_input). Usually called from mixer thread because that is where the connections are made.
+        BadDSPConnection,
+        /// Called when too many effects were added exceeding the maximum tree depth of 128. This is most likely caused by accidentally adding too many DSP effects. Usually called from mixer thread because that is where the connections are made.
+        BadDSPLevel,
+        /// Called directly when a thread is destroyed.
+        ThreadDestroyed,
+        /// Maximum number of callback types supported.
+        Max,
+        /// Makes sure this enum is signed 32bit.
+        ForceInt = 65536
+    }
 }
 
-#[deriving(Clone, PartialEq, PartialOrd, Show)]
-#[repr(C)]
-/// These flags are used with [`SoundGroup::set_max_audible_behavior`](../../struct.SoundGroup.html#method.set_max_audible_behavior) to determine what happens when more sounds are played than are specified with [`SoundGroup::set_max_audible`](../../struct.SoundGroup.html#method.set_max_audible).
-pub enum SoundGroupBehavior {
-    /// Any sound played that puts the sound count over the [`SoundGroup::set_max_audible`](../../struct.SoundGroup.html#method.set_max_audible) setting, will simply fail during [`Sound::play`](../../struct.Sound.html#method.play).
-    SoundGroupBehaviorFail,
-    /// Any sound played that puts the sound count over the [`SoundGroup::set_max_audible`](../../struct.SoundGroup.html#method.set_max_audible) setting, will be silent, then if another sound in the group stops the sound that was silent before becomes audible again.
-    SoundGroupBehaviorMute,
-    /// Any sound played that puts the sound count over the [`SoundGroup::set_max_audible`](../../struct.SoundGroup.html#method.set_max_audible) setting, will steal the quietest / least important sound playing in the group.
-    SoundGroupBehaviorStealLowest,
-    /// Maximum number of open state types.
-    SoundGroupBehaviorMax,
-    /// Makes sure this enum is signed 32bit.
-    SoundGroupBehaviorForceInt = 65536
+pub mod sound_group_behavior {
+    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// These flags are used with [`SoundGroup::set_max_audible_behavior`](../../struct.SoundGroup.html#method.set_max_audible_behavior) to determine what happens when more sounds are played than are specified with [`SoundGroup::set_max_audible`](../../struct.SoundGroup.html#method.set_max_audible).
+    pub enum SoundGroupBehavior {
+        /// Any sound played that puts the sound count over the [`SoundGroup::set_max_audible`](../../struct.SoundGroup.html#method.set_max_audible) setting, will simply fail during [`Sound::play`](../../struct.Sound.html#method.play).
+        Fail,
+        /// Any sound played that puts the sound count over the [`SoundGroup::set_max_audible`](../../struct.SoundGroup.html#method.set_max_audible) setting, will be silent, then if another sound in the group stops the sound that was silent before becomes audible again.
+        Mute,
+        /// Any sound played that puts the sound count over the [`SoundGroup::set_max_audible`](../../struct.SoundGroup.html#method.set_max_audible) setting, will steal the quietest / least important sound playing in the group.
+        StealLowest,
+        /// Maximum number of open state types.
+        Max,
+        /// Makes sure this enum is signed 32bit.
+        ForceInt = 65536
+    }
 }
 
-#[deriving(Clone, PartialEq, PartialOrd, Show)]
-#[repr(C)]
-/// These definitions can be used for creating FMOD defined special effects or DSP units.
-/// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
-pub enum DspType {
-    /// This unit was created via a non FMOD plugin so has an unknown purpose.
-    Unknown,
-    /// This unit does nothing but take inputs and mix them together then feed the result to the soundcard unit.
-    Mixer,
-    /// This unit generates sine/square/saw/triangle or noise tones.
-    Oscillator,
-    /// This unit filters sound using a high quality, resonant lowpass filter algorithm but consumes more CPU time.
-    LowPass,
-    /// This unit filters sound using a resonant lowpass filter algorithm that is used in Impulse Tracker, but with limited Cutoff range (0 to 8060hz).
-    ITLowPass,
-    /// This unit filters sound using a resonant highpass filter algorithm.
-    HighPass,
-    /// This unit produces an echo on the sound and fades out at the desired rate.
-    Echo,
-    /// This unit produces a flange effect on the sound.
-    Flange,
-    /// This unit distorts the sound.
-    Distortion,
-    /// This unit normalizes or amplifies the sound to a certain level.
-    Normalize,
-    /// This unit attenuates or amplifies a selected frequency range.
-    Parameq,
-    /// This unit bends the pitch of a sound without changing the speed of playback.
-    PitchShift,
-    /// This unit produces a chorus effect on the sound.
-    Chorus,
-    /// This unit allows the use of Steinberg VST plugins
-    VSTPlugin,
-    /// This unit allows the use of Nullsoft Winamp plugins
-    WinampPlugin,
-    /// This unit produces an echo on the sound and fades out at the desired rate as is used in Impulse Tracker.
-    ITEcho,
-    /// This unit implements dynamic compression (linked multichannel, wideband)
-    Compressor,
-    /// This unit implements SFX reverb
-    SFXReverb,
-    /// This unit filters sound using a simple lowpass with no resonance, but has flexible Cutoff and is fast.
-    LowPassSimple,
-    /// This unit produces different delays on individual channels of the sound.
-    Delay,
-    /// This unit produces a tremolo / chopper effect on the sound.
-    Tremolo,
-    /// This unit allows the use of LADSPA standard plugins.
-    LADSPAPlugin,
-    /// This unit filters sound using a simple highpass with no resonance, but has flexible Cutoff and is fast.
-    HighPassSimple,
-    /// Offset that platform specific FMOD_HARDWARE DSPs will start at.
-    Hardware = 1000,
-    /// Makes sure this enum is signed 32bit.
-    ForceInt = 65536
+pub mod dsp_type {
+    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[repr(C)]
+    /// These definitions can be used for creating FMOD defined special effects or DSP units.
+    /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
+    pub enum DspType {
+        /// This unit was created via a non FMOD plugin so has an unknown purpose.
+        Unknown,
+        /// This unit does nothing but take inputs and mix them together then feed the result to the soundcard unit.
+        Mixer,
+        /// This unit generates sine/square/saw/triangle or noise tones.
+        Oscillator,
+        /// This unit filters sound using a high quality, resonant lowpass filter algorithm but consumes more CPU time.
+        LowPass,
+        /// This unit filters sound using a resonant lowpass filter algorithm that is used in Impulse Tracker, but with limited Cutoff range (0 to 8060hz).
+        ITLowPass,
+        /// This unit filters sound using a resonant highpass filter algorithm.
+        HighPass,
+        /// This unit produces an echo on the sound and fades out at the desired rate.
+        Echo,
+        /// This unit produces a flange effect on the sound.
+        Flange,
+        /// This unit distorts the sound.
+        Distortion,
+        /// This unit normalizes or amplifies the sound to a certain level.
+        Normalize,
+        /// This unit attenuates or amplifies a selected frequency range.
+        Parameq,
+        /// This unit bends the pitch of a sound without changing the speed of playback.
+        PitchShift,
+        /// This unit produces a chorus effect on the sound.
+        Chorus,
+        /// This unit allows the use of Steinberg VST plugins
+        VSTPlugin,
+        /// This unit allows the use of Nullsoft Winamp plugins
+        WinampPlugin,
+        /// This unit produces an echo on the sound and fades out at the desired rate as is used in Impulse Tracker.
+        ITEcho,
+        /// This unit implements dynamic compression (linked multichannel, wideband)
+        Compressor,
+        /// This unit implements SFX reverb
+        SFXReverb,
+        /// This unit filters sound using a simple lowpass with no resonance, but has flexible Cutoff and is fast.
+        LowPassSimple,
+        /// This unit produces different delays on individual channels of the sound.
+        Delay,
+        /// This unit produces a tremolo / chopper effect on the sound.
+        Tremolo,
+        /// This unit allows the use of LADSPA standard plugins.
+        LADSPAPlugin,
+        /// This unit filters sound using a simple highpass with no resonance, but has flexible Cutoff and is fast.
+        HighPassSimple,
+        /// Offset that platform specific FMOD_HARDWARE DSPs will start at.
+        Hardware = 1000,
+        /// Makes sure this enum is signed 32bit.
+        ForceInt = 65536
+    }
 }
 
 #[deriving(Clone, PartialEq, PartialOrd, Show)]
@@ -1126,7 +1161,7 @@ pub const FMOD_INIT_WASAPI_EXCLUSIVE          : c_uint = 0x00000100;
 pub const FMOD_INIT_PS3_PREFERDTS             : c_uint = 0x00800000;
 /// PS3 only - Force PS3 system output mode to 2 channel LPCM.
 pub const FMOD_INIT_PS3_FORCE2CHLPCM          : c_uint = 0x01000000;
-/// Wii / 3DS - Disable Dolby Pro Logic surround. Speakermode will be set to STEREO even if user has selected surround in the system settings.
+/// Wii / 3DS - Disable Dolby Pro Logic surround.  will be set to STEREO even if user has selected surround in the system settings.
 pub const FMOD_INIT_DISABLEDOLBY              : c_uint = 0x00100000;
 /// Xbox 360 / PS3 - The "music" channelgroup which by default pauses when custom 360 dashboard / PS3 BGM music is played, can be changed to mute (therefore continues playing) instead of pausing, by using this flag.
 pub const FMOD_INIT_SYSTEM_MUSICMUTENOTPAUSE  : c_uint = 0x00200000;
@@ -1134,7 +1169,7 @@ pub const FMOD_INIT_SYSTEM_MUSICMUTENOTPAUSE  : c_uint = 0x00200000;
 pub const FMOD_INIT_SYNCMIXERWITHUPDATE       : c_uint = 0x00400000;
 /// All platforms - With the geometry engine, only process the closest polygon rather than accumulating all polygons the sound to listener line intersects.
 pub const FMOD_INIT_GEOMETRY_USECLOSEST       : c_uint = 0x04000000;
-/// Win32 - Disables automatic setting of of FMOD_SPEAKERMODE_STEREO to FMOD_SPEAKERMODE_MYEARS if the MyEars profile exists on the PC. MyEars is HRTF 7.1 downmixing through headphones.
+/// Win32 - Disables automatic setting of of FMOD__STEREO to FMOD__MYEARS if the MyEars profile exists on the PC. MyEars is HRTF 7.1 downmixing through headphones.
 pub const FMOD_INIT_DISABLE_MYEARS_AUTODETECT : c_uint = 0x08000000;
 /// PS3 only - Disable DTS output mode selection
 pub const FMOD_INIT_PS3_DISABLEDTS            : c_uint = 0x10000000;

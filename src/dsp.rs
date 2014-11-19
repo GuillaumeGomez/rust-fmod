@@ -24,7 +24,6 @@
 
 use ffi;
 use types::*;
-use enums;
 use callbacks::*;
 use dsp_connection;
 use fmod_sys;
@@ -36,7 +35,7 @@ use std::c_str::CString;
 use std::default::Default;
 use std::string;
 
-extern "C" fn create_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> enums::Result {
+extern "C" fn create_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> ::Result {
     unsafe {
         if dsp_state.is_not_null() && (*dsp_state).instance.is_not_null() {
             let mut tmp = ::std::ptr::null_mut();
@@ -47,18 +46,18 @@ extern "C" fn create_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> enums::Res
 
                 match callbacks.callbacks.create_callback {
                     Some(p) => p(&from_state_ptr(*dsp_state)),
-                    None => enums::Result::Ok
+                    None => ::Result::Ok
                 }
             } else {
-              enums::Result::Ok
+              ::Result::Ok
             }
         } else {
-           enums::Result::Ok
+           ::Result::Ok
         }
     }
 }
 
-extern "C" fn release_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> enums::Result {
+extern "C" fn release_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> ::Result {
     unsafe {
         if dsp_state.is_not_null() && (*dsp_state).instance.is_not_null() {
             let mut tmp = ::std::ptr::null_mut();
@@ -69,18 +68,18 @@ extern "C" fn release_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> enums::Re
                 
                 match callbacks.callbacks.release_callback {
                     Some(p) => p(&from_state_ptr(*dsp_state)),
-                    None => enums::Result::Ok
+                    None => ::Result::Ok
                 }
             } else {
-              enums::Result::Ok
+              ::Result::Ok
             }
         } else {
-           enums::Result::Ok
+           ::Result::Ok
         }
     }
 }
 
-extern "C" fn reset_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> enums::Result {
+extern "C" fn reset_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> ::Result {
     unsafe {
         if dsp_state.is_not_null() && (*dsp_state).instance.is_not_null() {
             let mut tmp = ::std::ptr::null_mut();
@@ -91,19 +90,19 @@ extern "C" fn reset_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> enums::Resu
                 
                 match callbacks.callbacks.reset_callback {
                     Some(p) => p(&from_state_ptr(*dsp_state)),
-                    None => enums::Result::Ok
+                    None => ::Result::Ok
                 }
             } else {
-              enums::Result::Ok
+              ::Result::Ok
             }
         } else {
-           enums::Result::Ok
+           ::Result::Ok
         }
     }
 }
 
 extern "C" fn read_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, in_buffer: *mut c_float, out_buffer: *mut c_float, length: c_uint,
-    in_channels: c_int, out_channels: c_int) -> enums::Result {
+    in_channels: c_int, out_channels: c_int) -> ::Result {
     unsafe {
         if dsp_state.is_not_null() && (*dsp_state).instance.is_not_null() {
             let mut tmp = ::std::ptr::null_mut();
@@ -135,18 +134,18 @@ extern "C" fn read_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, in_buffer: *mut
                         }
                         ret
                     },
-                    None => enums::Result::Ok
+                    None => ::Result::Ok
                 }
             } else {
-              enums::Result::Ok
+              ::Result::Ok
             }
         } else {
-           enums::Result::Ok
+           ::Result::Ok
         }
     }
 }
 
-extern "C" fn set_position_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, pos: c_uint) -> enums::Result {
+extern "C" fn set_position_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, pos: c_uint) -> ::Result {
     unsafe {
         if dsp_state.is_not_null() && (*dsp_state).instance.is_not_null() {
             let mut tmp = ::std::ptr::null_mut();
@@ -157,18 +156,18 @@ extern "C" fn set_position_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, pos: c_
                 
                 match callbacks.callbacks.set_pos_callback {
                     Some(p) => p(&from_state_ptr(*dsp_state), pos as u32),
-                    None => enums::Result::Ok
+                    None => ::Result::Ok
                 }
             } else {
-              enums::Result::Ok
+              ::Result::Ok
             }
         } else {
-           enums::Result::Ok
+           ::Result::Ok
         }
     }
 }
 
-extern "C" fn set_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index: c_int, value: c_float) -> enums::Result {
+extern "C" fn set_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index: c_int, value: c_float) -> ::Result {
     unsafe {
         if dsp_state.is_not_null() && (*dsp_state).instance.is_not_null() {
             let mut tmp = ::std::ptr::null_mut();
@@ -179,18 +178,18 @@ extern "C" fn set_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index:
                 
                 match callbacks.callbacks.set_param_callback {
                     Some(p) => p(&from_state_ptr(*dsp_state), index as i32, value),
-                    None => enums::Result::Ok
+                    None => ::Result::Ok
                 }
             } else {
-              enums::Result::Ok
+              ::Result::Ok
             }
         } else {
-           enums::Result::Ok
+           ::Result::Ok
         }
     }
 }
 
-extern "C" fn get_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index: c_int, value: *mut c_float, value_str: *mut c_char) -> enums::Result {
+extern "C" fn get_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index: c_int, value: *mut c_float, value_str: *mut c_char) -> ::Result {
     unsafe {
         if dsp_state.is_not_null() && (*dsp_state).instance.is_not_null() {
             let mut tmp = ::std::ptr::null_mut();
@@ -209,20 +208,20 @@ extern "C" fn get_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index:
                         *value = t_value;
                         ret
                     },
-                    None => enums::Result::Ok
+                    None => ::Result::Ok
                 }
             } else {
-              enums::Result::Ok
+              ::Result::Ok
             }
         } else {
-           enums::Result::Ok
+           ::Result::Ok
         }
     }
 }
 
 #[allow(unused_variables)]
-extern "C" fn config_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, hwnd: *mut c_void, show: c_int) -> enums::Result {
-   enums::Result::Ok
+extern "C" fn config_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, hwnd: *mut c_void, show: c_int) -> ::Result {
+   ::Result::Ok
 }
 
 struct UserData {
@@ -565,44 +564,44 @@ impl Drop for Dsp {
 }
 
 impl Dsp {
-    pub fn get_system_object(&self) -> Result<FmodSys, enums::Result> {
+    pub fn get_system_object(&self) -> Result<FmodSys, ::Result> {
         let mut system = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_DSP_GetSystemObject(self.dsp, &mut system) } {
-            enums::Result::Ok => Ok(ffi::FFI::wrap(system)),
+            ::Result::Ok => Ok(ffi::FFI::wrap(system)),
             e => Err(e)
         }
     }
 
-    pub fn release(&mut self) -> enums::Result {
+    pub fn release(&mut self) -> ::Result {
         if self.can_be_deleted && self.dsp.is_not_null() {
             match unsafe { ffi::FMOD_DSP_Release(self.dsp) } {
-               enums::Result::Ok => {
+               ::Result::Ok => {
                     self.dsp =::std::ptr::null_mut();
-                   enums::Result::Ok
+                   ::Result::Ok
                 }
                 e => e
             }
         } else {
-           enums::Result::Ok
+           ::Result::Ok
         }
     }
 
-    pub fn play(&self) -> Result<channel::Channel, enums::Result> {
+    pub fn play(&self) -> Result<channel::Channel, ::Result> {
         let mut channel = ::std::ptr::null_mut();
 
         match match self.get_system_object() {
             Ok(s) => { 
-                unsafe { ffi::FMOD_System_PlayDSP(ffi::FFI::unwrap(&s), enums::ChannelIndex::ChannelFree, self.dsp, 0, &mut channel) }
+                unsafe { ffi::FMOD_System_PlayDSP(ffi::FFI::unwrap(&s), ::ChannelIndex::Free, self.dsp, 0, &mut channel) }
             }
             Err(e) => e
         } {
-            enums::Result::Ok => Ok(ffi::FFI::wrap(channel)),
+            ::Result::Ok => Ok(ffi::FFI::wrap(channel)),
             e => Err(e)
         }
     }
 
-    pub fn play_with_parameters(&self, channel_id: enums::ChannelIndex) -> Result<channel::Channel, enums::Result> {
+    pub fn play_with_parameters(&self, channel_id: ::ChannelIndex) -> Result<channel::Channel, ::Result> {
         let mut channel = ::std::ptr::null_mut();
         
         match match self.get_system_object() {
@@ -611,25 +610,25 @@ impl Dsp {
             }
             Err(e) => e
         } {
-            enums::Result::Ok => Ok(ffi::FFI::wrap(channel)),
+            ::Result::Ok => Ok(ffi::FFI::wrap(channel)),
             e => Err(e)
         }
     }
 
-    pub fn add_input(&self, target: Dsp) -> Result<dsp_connection::DspConnection, enums::Result> {
+    pub fn add_input(&self, target: Dsp) -> Result<dsp_connection::DspConnection, ::Result> {
         let mut connection = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_DSP_AddInput(self.dsp, target.dsp, &mut connection) } {
-            enums::Result::Ok => Ok(ffi::FFI::wrap(connection)),
+            ::Result::Ok => Ok(ffi::FFI::wrap(connection)),
             e => Err(e)
         }
     }
 
-    pub fn disconnect_from(&self, target: Dsp) -> enums::Result {
+    pub fn disconnect_from(&self, target: Dsp) -> ::Result {
         unsafe { ffi::FMOD_DSP_DisconnectFrom(self.dsp, target.dsp) }
     }
 
-    pub fn disconnect_all(&self, inputs: bool, outputs: bool) -> enums::Result {
+    pub fn disconnect_all(&self, inputs: bool, outputs: bool) -> ::Result {
         let t_inputs = if inputs == true {
             1
         } else {
@@ -644,49 +643,49 @@ impl Dsp {
         unsafe { ffi::FMOD_DSP_DisconnectAll(self.dsp, t_inputs, t_outputs) }
     }
 
-    pub fn remove(&self) -> enums::Result {
+    pub fn remove(&self) -> ::Result {
         unsafe { ffi::FMOD_DSP_Remove(self.dsp) }
     }
 
-    pub fn get_num_inputs(&self) -> Result<i32, enums::Result> {
+    pub fn get_num_inputs(&self) -> Result<i32, ::Result> {
         let mut inputs = 0i32;
 
         match unsafe { ffi::FMOD_DSP_GetNumInputs(self.dsp, &mut inputs) } {
-            enums::Result::Ok => Ok(inputs),
+            ::Result::Ok => Ok(inputs),
             e => Err(e)
         }
     }
 
-    pub fn get_num_outputs(&self) -> Result<i32, enums::Result> {
+    pub fn get_num_outputs(&self) -> Result<i32, ::Result> {
         let mut outputs = 0i32;
 
         match unsafe { ffi::FMOD_DSP_GetNumOutputs(self.dsp, &mut outputs) } {
-            enums::Result::Ok => Ok(outputs),
+            ::Result::Ok => Ok(outputs),
             e => Err(e)
         }
     }
 
-    pub fn get_input(&self, index: i32) -> Result<(Dsp, dsp_connection::DspConnection), enums::Result> {
+    pub fn get_input(&self, index: i32) -> Result<(Dsp, dsp_connection::DspConnection), ::Result> {
         let mut input = ::std::ptr::null_mut();
         let mut input_connection = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_DSP_GetInput(self.dsp, index, &mut input, &mut input_connection) } {
-            enums::Result::Ok => Ok((ffi::FFI::wrap(input), ffi::FFI::wrap(input_connection))),
+            ::Result::Ok => Ok((ffi::FFI::wrap(input), ffi::FFI::wrap(input_connection))),
             e => Err(e)
         }
     }
 
-    pub fn get_output(&self, index: i32) -> Result<(Dsp, dsp_connection::DspConnection), enums::Result> {
+    pub fn get_output(&self, index: i32) -> Result<(Dsp, dsp_connection::DspConnection), ::Result> {
         let mut output = ::std::ptr::null_mut();
         let mut output_connection = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_DSP_GetOutput(self.dsp, index, &mut output, &mut output_connection) } {
-            enums::Result::Ok => Ok((ffi::FFI::wrap(output), ffi::FFI::wrap(output_connection ))),
+            ::Result::Ok => Ok((ffi::FFI::wrap(output), ffi::FFI::wrap(output_connection ))),
             e => Err(e)
         }
     }
 
-    pub fn set_active(&self, active: bool) -> enums::Result {
+    pub fn set_active(&self, active: bool) -> ::Result {
         let t_active = if active == true {
             1
         } else {
@@ -696,16 +695,16 @@ impl Dsp {
         unsafe { ffi::FMOD_DSP_SetActive(self.dsp, t_active) }
     }
 
-    pub fn get_active(&self) -> Result<bool, enums::Result> {
+    pub fn get_active(&self) -> Result<bool, ::Result> {
         let mut active = 0i32;
 
         match unsafe { ffi::FMOD_DSP_GetActive(self.dsp, &mut active) } {
-            enums::Result::Ok => Ok(active != 0i32),
+            ::Result::Ok => Ok(active != 0i32),
             e => Err(e)
         }
     }
 
-    pub fn set_bypass(&self, bypass: bool) -> enums::Result {
+    pub fn set_bypass(&self, bypass: bool) -> ::Result {
         let t_bypass = if bypass == true {
             1i32
         } else {
@@ -715,16 +714,16 @@ impl Dsp {
         unsafe { ffi::FMOD_DSP_SetBypass(self.dsp, t_bypass) }
     }
 
-    pub fn get_bypass(&self) -> Result<bool, enums::Result> {
+    pub fn get_bypass(&self) -> Result<bool, ::Result> {
         let mut bypass = 0i32;
 
         match unsafe { ffi::FMOD_DSP_GetBypass(self.dsp, &mut bypass) } {
-            enums::Result::Ok => Ok(bypass == 1i32),
+            ::Result::Ok => Ok(bypass == 1i32),
             e => Err(e)
         }
     }
 
-    pub fn set_speaker_active(&self, speaker: enums::Speaker, active: bool) -> enums::Result {
+    pub fn set_speaker_active(&self, speaker: ::Speaker, active: bool) -> ::Result {
         let t_active = if active == true {
             1
         } else {
@@ -734,16 +733,16 @@ impl Dsp {
         unsafe { ffi::FMOD_DSP_SetSpeakerActive(self.dsp, speaker, t_active) }
     }
 
-    pub fn get_speaker_active(&self, speaker: enums::Speaker) -> Result<bool, enums::Result> {
+    pub fn get_speaker_active(&self, speaker: ::Speaker) -> Result<bool, ::Result> {
         let mut active = 0i32;
 
         match unsafe { ffi::FMOD_DSP_GetSpeakerActive(self.dsp, speaker, &mut active) } {
-            enums::Result::Ok => Ok(active == 1i32),
+            ::Result::Ok => Ok(active == 1i32),
             e => Err(e)
         }
     }
 
-    pub fn reset(&self) -> enums::Result {
+    pub fn reset(&self) -> ::Result {
         unsafe { ffi::FMOD_DSP_Reset(self.dsp) }
     }
 
@@ -769,7 +768,7 @@ impl Dsp {
     /// * [`DspSfxReverb`](enums/fmod/type.DspSfxReverb.html)
     /// * [`DspLowPassSimple`](enums/fmod/type.DspLowPassSimple.html)
     /// * [`DspHighPassSimple`](enums/fmod/type.DspHighPassSimple.html)
-    pub fn set_parameter(&self, index: i32, value: f32) -> enums::Result {
+    pub fn set_parameter(&self, index: i32, value: f32) -> ::Result {
         unsafe { ffi::FMOD_DSP_SetParameter(self.dsp, index, value) }
     }
 
@@ -795,28 +794,28 @@ impl Dsp {
     /// * [`DspSfxReverb`](enums/fmod/type.DspSfxReverb.html)
     /// * [`DspLowPassSimple`](enums/fmod/type.DspLowPassSimple.html)
     /// * [`DspHighPassSimple`](enums/fmod/type.DspHighPassSimple.html)
-    pub fn get_parameter(&self, index: i32, value_str_len: u32) -> Result<(f32, String), enums::Result> {
+    pub fn get_parameter(&self, index: i32, value_str_len: u32) -> Result<(f32, String), ::Result> {
         let tmp_v = String::with_capacity(value_str_len as uint);
         let mut value = 0f32;
 
         tmp_v.with_c_str(|c_str|{
             match unsafe { ffi::FMOD_DSP_GetParameter(self.dsp, index, &mut value, c_str as *mut c_char, value_str_len as i32) } {
-               enums::Result::Ok => Ok((value, unsafe {string::raw::from_buf(c_str as *const u8).clone() })),
+               ::Result::Ok => Ok((value, unsafe {string::raw::from_buf(c_str as *const u8).clone() })),
                 e => Err(e)
             }
         })
     }
 
-    pub fn get_num_parameters(&self) -> Result<i32, enums::Result> {
+    pub fn get_num_parameters(&self) -> Result<i32, ::Result> {
         let mut num_param = 0i32;
 
         match unsafe { ffi::FMOD_DSP_GetNumParameters(self.dsp, &mut num_param) } {
-            enums::Result::Ok => Ok(num_param),
+            ::Result::Ok => Ok(num_param),
             e => Err(e)
         }
     }
 
-    pub fn get_parameter_info(&self, index: i32, name: &String, label: &String, description_len: u32) -> Result<(String, f32, f32), enums::Result> {
+    pub fn get_parameter_info(&self, index: i32, name: &String, label: &String, description_len: u32) -> Result<(String, f32, f32), ::Result> {
         let mut min = 0f32;
         let mut max = 0f32;
         let tmp_d = String::with_capacity(description_len as uint);
@@ -828,7 +827,7 @@ impl Dsp {
                 t_label.with_c_str(|c_label|{
                     match unsafe { ffi::FMOD_DSP_GetParameterInfo(self.dsp, index, c_name as *mut c_char, c_label as *mut c_char,
                         c_description as *mut c_char, description_len as i32, &mut min, &mut max) } {
-                       enums::Result::Ok => Ok((unsafe {string::raw::from_buf(c_description as *const u8).clone() }, min, max)),
+                       ::Result::Ok => Ok((unsafe {string::raw::from_buf(c_description as *const u8).clone() }, min, max)),
                         e => Err(e)
                     }
                 })
@@ -836,7 +835,7 @@ impl Dsp {
         })
     }
 
-    pub fn get_info(&self, name: &String) -> Result<(u32, i32, i32, i32), enums::Result> {
+    pub fn get_info(&self, name: &String) -> Result<(u32, i32, i32, i32), ::Result> {
         let mut version = 0u32;
         let mut channels = 0i32;
         let mut config_width = 0i32;
@@ -845,54 +844,54 @@ impl Dsp {
 
         tmp_n.with_c_str(|c_name| {
             match unsafe { ffi::FMOD_DSP_GetInfo(self.dsp, c_name as *mut c_char, &mut version, &mut channels, &mut config_width, &mut config_height) } {
-               enums::Result::Ok => Ok((version, channels, config_width, config_height)),
+               ::Result::Ok => Ok((version, channels, config_width, config_height)),
                 e => Err(e)
             }
         })
     }
 
-    pub fn set_defaults(&self, frequency: f32, volume: f32, pan: f32, priority: i32) -> enums::Result {
+    pub fn set_defaults(&self, frequency: f32, volume: f32, pan: f32, priority: i32) -> ::Result {
         unsafe { ffi::FMOD_DSP_SetDefaults(self.dsp, frequency, volume, pan, priority) }
     }
 
-    pub fn get_type(&self) -> Result<enums::DspType, enums::Result> {
-        let mut _type = enums::DspType::Unknown;
+    pub fn get_type(&self) -> Result<::DspType, ::Result> {
+        let mut _type = ::DspType::Unknown;
 
         match unsafe { ffi::FMOD_DSP_GetType(self.dsp, &mut _type) } {
-            enums::Result::Ok => Ok(_type),
+            ::Result::Ok => Ok(_type),
             e => Err(e)
         }
     }
 
-    pub fn get_defaults(&self) -> Result<(f32, f32, f32, i32), enums::Result> {
+    pub fn get_defaults(&self) -> Result<(f32, f32, f32, i32), ::Result> {
         let mut frequency = 0f32;
         let mut volume = 0f32;
         let mut pan = 0f32;
         let mut priority = 0i32;
 
         match unsafe { ffi::FMOD_DSP_GetDefaults(self.dsp, &mut frequency, &mut volume, &mut pan, &mut priority) } {
-            enums::Result::Ok => Ok((frequency, volume, pan, priority)),
+            ::Result::Ok => Ok((frequency, volume, pan, priority)),
             e => Err(e)
         }
     }
 
     pub fn get_memory_info(&self, FmodMemoryBits(memory_bits): FmodMemoryBits,
-        FmodEventMemoryBits(event_memory_bits): FmodEventMemoryBits) -> Result<(u32, FmodMemoryUsageDetails), enums::Result> {
+        FmodEventMemoryBits(event_memory_bits): FmodEventMemoryBits) -> Result<(u32, FmodMemoryUsageDetails), ::Result> {
         let mut details = fmod_sys::get_memory_usage_details_ffi(Default::default());
         let mut memory_used = 0u32;
 
         match unsafe { ffi::FMOD_DSP_GetMemoryInfo(self.dsp, memory_bits, event_memory_bits, &mut memory_used, &mut details) } {
-            enums::Result::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
+            ::Result::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
             e => Err(e)
         }
     }
 
-    pub fn set_user_data<T>(&mut self, user_data: &mut T) -> enums::Result {
+    pub fn set_user_data<T>(&mut self, user_data: &mut T) -> ::Result {
         let mut data : *mut c_void = ::std::ptr::null_mut();
 
         unsafe {
             match ffi::FMOD_DSP_GetUserData(self.dsp, &mut data) {
-               enums::Result::Ok => {
+               ::Result::Ok => {
                     if data.is_null() {
                         self.user_data.user_data = ::std::ptr::null_mut();
 
@@ -913,19 +912,19 @@ impl Dsp {
         }
     }
 
-    pub fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, enums::Result> {
+    pub fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, ::Result> {
         unsafe {
             let mut user_data : *mut c_void = ::std::ptr::null_mut();
 
             match ffi::FMOD_DSP_GetUserData(self.dsp, &mut user_data) {
-               enums::Result::Ok => {
+               ::Result::Ok => {
                     if user_data.is_not_null() {
                         let tmp : &mut UserData = transmute::<*mut c_void, &mut UserData>(user_data);
                         let tmp2 : &mut T = transmute::<*mut c_void, &mut T>(tmp.user_data);
                         
                         Ok(tmp2)
                     } else {
-                        Err(enums::Result::Ok)
+                        Err(::Result::Ok)
                     }
                 },
                 e => Err(e)
