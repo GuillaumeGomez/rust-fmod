@@ -22,13 +22,9 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#![feature(globs)]
-
 extern crate libc;
 extern crate rfmod;
 
-use rfmod::types::*;
-use rfmod::*;
 use std::os;
 use std::io::timer::sleep;
 use std::time::duration::Duration;
@@ -54,7 +50,7 @@ fn get_key() -> Result<int, std::io::IoError> {
     }
 }
 
-fn switch_dsp_state(dsp: &Dsp, fmod: &FmodSys, dsp_type: int) {
+fn switch_dsp_state(dsp: &rfmod::Dsp, fmod: &rfmod::FmodSys, dsp_type: int) {
     if match dsp.get_active() {
         Ok(c) => c,
         Err(_) => return
@@ -63,11 +59,15 @@ fn switch_dsp_state(dsp: &Dsp, fmod: &FmodSys, dsp_type: int) {
     } else {
         fmod.add_DSP(dsp).unwrap();
         match dsp_type {
-            3 => {dsp.set_parameter(enums::DspTypeEchoDelay as i32, 50f32);},
-            5 => {dsp.set_parameter(enums::DspDistortionLevel as i32, 0.8f32);},
+            3 => {
+                dsp.set_parameter(rfmod::DspTypeEcho::Delay as i32, 50f32);
+            },
+            5 => {
+                dsp.set_parameter(rfmod::DspDistortion::Level as i32, 0.8f32);
+            },
             7 => {
-                dsp.set_parameter(enums::DspTypeParameqCenter as i32, 5000f32);
-                dsp.set_parameter(enums::DspTypeParameqGain as i32, 0f32);
+                dsp.set_parameter(rfmod::DspTypeParameq::Center as i32, 5000f32);
+                dsp.set_parameter(rfmod::DspTypeParameq::Gain as i32, 0f32);
             }
             _ => {}
         };
@@ -81,15 +81,15 @@ fn main() {
     if tmp.len() < 1 {
         panic!("USAGE: ./effects [music_file]");
     }
-    let fmod = match FmodSys::new() {
+    let fmod = match rfmod::FmodSys::new() {
         Ok(f) => f,
         Err(e) => {
             panic!("FmodSys.new : {}", e);
         }
     };
 
-    match fmod.init_with_parameters(32i32, FmodInitFlag(enums::FMOD_INIT_NORMAL)) {
-        enums::Ok => {}
+    match fmod.init_with_parameters(32i32, rfmod::FmodInitFlag(rfmod::FMOD_INIT_NORMAL)) {
+        rfmod::Result::Ok => {}
         e => {
             panic!("FmodSys.init failed : {}", e);
         }
@@ -100,42 +100,42 @@ fn main() {
     println!("==============================================");
 
     let arg1 = tmp.get(0).unwrap();
-    let sound = match fmod.create_sound((*arg1).as_slice(), Some(FmodMode(enums::FMOD_SOFTWARE)), None) {
+    let sound = match fmod.create_sound((*arg1).as_slice(), Some(rfmod::FmodMode(rfmod::FMOD_SOFTWARE)), None) {
         Ok(s) => s,
         Err(e) => panic!("create sound error: {}", e)
     };
-    sound.set_mode(FmodMode(enums::FMOD_LOOP_NORMAL));
+    sound.set_mode(rfmod::FmodMode(rfmod::FMOD_LOOP_NORMAL));
 
     match sound.play() {
         Ok(_) => {},
         Err(e) => panic!("sound.play error: {}", e)
     };
     let mut dsps = Vec::new();
-    dsps.push(match fmod.create_DSP_by_type(enums::LowPass) {
+    dsps.push(match fmod.create_DSP_by_type(rfmod::DspType::LowPass) {
         Ok(r) => r,
         Err(e) => panic!("fmod.create_DSP_by_type low_pass error: {}", e)
     });
-    dsps.push(match fmod.create_DSP_by_type(enums::HighPass) {
+    dsps.push(match fmod.create_DSP_by_type(rfmod::DspType::HighPass) {
         Ok(r) => r,
         Err(e) => panic!("fmod.create_DSP_by_type high_pass error: {}", e)
     });
-    dsps.push(match fmod.create_DSP_by_type(enums::Echo) {
+    dsps.push(match fmod.create_DSP_by_type(rfmod::DspType::Echo) {
         Ok(r) => r,
         Err(e) => panic!("fmod.create_DSP_by_type echo error: {}", e)
     });
-    dsps.push(match fmod.create_DSP_by_type(enums::Flange) {
+    dsps.push(match fmod.create_DSP_by_type(rfmod::DspType::Flange) {
         Ok(r) => r,
         Err(e) => panic!("fmod.create_DSP_by_type flange error: {}", e)
     });
-    dsps.push(match fmod.create_DSP_by_type(enums::Distortion) {
+    dsps.push(match fmod.create_DSP_by_type(rfmod::DspType::Distortion) {
         Ok(r) => r,
         Err(e) => panic!("fmod.create_DSP_by_type distortion error: {}", e)
     });
-    dsps.push(match fmod.create_DSP_by_type(enums::Chorus) {
+    dsps.push(match fmod.create_DSP_by_type(rfmod::DspType::Chorus) {
         Ok(r) => r,
         Err(e) => panic!("fmod.create_DSP_by_type chorus error: {}", e)
     });
-    dsps.push(match fmod.create_DSP_by_type(enums::Parameq) {
+    dsps.push(match fmod.create_DSP_by_type(rfmod::DspType::Parameq) {
         Ok(r) => r,
         Err(e) => panic!("fmod.create_DSP_by_type parameq error: {}", e)
     });

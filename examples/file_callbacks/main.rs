@@ -22,8 +22,6 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#![feature(globs)]
-
 extern crate libc;
 extern crate rfmod;
 
@@ -31,13 +29,11 @@ use std::io::timer::sleep;
 use std::os;
 use std::io::SeekSet;
 use std::time::duration::Duration;
-use rfmod::{FmodFile, FmodSys, FmodUserData, enums};
-use rfmod::types::{FmodMode, FmodInitFlag};
 
 #[allow(unused_variables)]
-fn my_open(music_name: &str, unicode: i32) -> Option<(FmodFile, Option<FmodUserData>)> {
+fn my_open(music_name: &str, unicode: i32) -> Option<(rfmod::FmodFile, Option<rfmod::FmodUserData>)> {
     println!("Let's start !");
-    let file = match FmodFile::open(music_name) {
+    let file = match rfmod::FmodFile::open(music_name) {
         Some(f) => f,
         None => panic!("Couldn't open: {}", music_name)
     };
@@ -46,18 +42,18 @@ fn my_open(music_name: &str, unicode: i32) -> Option<(FmodFile, Option<FmodUserD
 }
 
 #[allow(unused_variables)]
-fn my_close(music_file: &mut FmodFile, user_data: Option<&mut FmodUserData>) {
+fn my_close(music_file: &mut rfmod::FmodFile, user_data: Option<&mut rfmod::FmodUserData>) {
     println!("This is the end !");
     music_file.close();
 }
 
 #[allow(unused_variables)]
-fn my_read(handle: &mut FmodFile, buffer: &mut [u8], size_to_read: u32, user_data: Option<&mut FmodUserData>) -> uint {
+fn my_read(handle: &mut rfmod::FmodFile, buffer: &mut [u8], size_to_read: u32, user_data: Option<&mut rfmod::FmodUserData>) -> uint {
     handle.read(buffer)
 }
 
 #[allow(unused_variables)]
-fn my_seek(handle: &mut FmodFile, pos: u32, user_data: Option<&mut FmodUserData>) {
+fn my_seek(handle: &mut rfmod::FmodFile, pos: u32, user_data: Option<&mut rfmod::FmodUserData>) {
     handle.seek(pos as i64, SeekSet);
 }
 
@@ -68,22 +64,22 @@ fn main() {
     if tmp.len() < 1 {
         panic!("USAGE: ./file_callback [music_file]");
     }
-    let fmod = match FmodSys::new() {
+    let fmod = match rfmod::FmodSys::new() {
         Ok(f) => f,
         Err(e) => {
             panic!("FmodSys.new : {}", e);
         }
     };
 
-    match fmod.init_with_parameters(1i32, FmodInitFlag(enums::FMOD_INIT_NORMAL)) {
-        enums::Ok => {}
+    match fmod.init_with_parameters(1i32, rfmod::FmodInitFlag(rfmod::FMOD_INIT_NORMAL)) {
+        rfmod::Result::Ok => {}
         e => {
             panic!("FmodSys.init failed : {}", e);
         }
     };
 
     match fmod.set_file_system(Some(my_open), Some(my_close), Some(my_read), Some(my_seek), 2048i32) {
-        enums::Ok => {}
+        rfmod::Result::Ok => {}
         e => {
             panic!("FmodSys.set_file_system failed : {}", e);
         }
@@ -94,7 +90,8 @@ fn main() {
     println!("============================================================================");
 
     let arg1 = tmp.get(0).unwrap();
-    let sound = match fmod.create_stream((*arg1).as_slice(), Some(FmodMode(enums::FMOD_2D | enums::FMOD_HARDWARE | enums::FMOD_LOOP_OFF)), None)
+    let sound = match fmod.create_stream((*arg1).as_slice(),
+        Some(rfmod::FmodMode(rfmod::FMOD_2D | rfmod::FMOD_HARDWARE | rfmod::FMOD_LOOP_OFF)), None)
     {
         Ok(s) => s,
         Err(e) => panic!("create sound error: {}", e)
@@ -105,9 +102,9 @@ fn main() {
         Err(e) => panic!("sound.play error: {}", e)
     };
 
-    let length = sound.get_length(enums::FMOD_TIMEUNIT_MS).unwrap();
+    let length = sound.get_length(rfmod::FMOD_TIMEUNIT_MS).unwrap();
     while chan.is_playing().unwrap() {
-        let position = chan.get_position(enums::FMOD_TIMEUNIT_MS).unwrap();
+        let position = chan.get_position(rfmod::FMOD_TIMEUNIT_MS).unwrap();
 
         print!("{:02u}:{:02u} / {:02u}:{:02u}\r", position / 1000 / 60, position / 1000 % 60, length / 1000 / 60, length / 1000 % 60);
         sleep(Duration::milliseconds(30))

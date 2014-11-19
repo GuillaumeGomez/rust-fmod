@@ -22,17 +22,15 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#![feature(globs)]
 
 extern crate rfmod;
 
-use rfmod::*;
 use std::os;
 use std::io::timer::sleep;
 use std::time::duration::Duration;
 
-fn play_to_the_end(sound: Sound, len: uint) -> enums::Result {
-    let length = match sound.get_length(enums::FMOD_TIMEUNIT_MS) {
+fn play_to_the_end(sound: rfmod::Sound, len: uint) -> rfmod::Result {
+    let length = match sound.get_length(rfmod::FMOD_TIMEUNIT_MS) {
         Ok(l) => l,
         Err(e) => panic!("sound.get_length error: {}", e)
     };
@@ -48,11 +46,12 @@ fn play_to_the_end(sound: Sound, len: uint) -> enums::Result {
                 match chan.is_playing() {
                     Ok(b) => {
                         if b == true {
-                            let position = chan.get_position(enums::FMOD_TIMEUNIT_MS).unwrap();
+                            let position = chan.get_position(rfmod::FMOD_TIMEUNIT_MS).unwrap();
 
                             if position != old_position {
                                 old_position = position;
-                                print!("\r{} : {:02u}:{:02u} / {:02u}:{:02u}", name, position / 1000 / 60, position / 1000 % 60, length / 1000 / 60, length / 1000 % 60);
+                                print!("\r{} : {:02u}:{:02u} / {:02u}:{:02u}", name, position / 1000 / 60, position / 1000 % 60,
+                                    length / 1000 / 60, length / 1000 % 60);
                             }
                             sleep(Duration::milliseconds(30))
                         } else {
@@ -62,7 +61,7 @@ fn play_to_the_end(sound: Sound, len: uint) -> enums::Result {
                     Err(e) => return e,
                 }
             }
-            enums::Ok
+            rfmod::Result::Ok
         }
         Err(err) => err,
     }
@@ -75,7 +74,7 @@ fn main() {
     if tmp.len() < 1 {
         panic!("USAGE: ./simple_music_player [music_file]");
     }
-    let fmod = match FmodSys::new() {
+    let fmod = match rfmod::FmodSys::new() {
         Ok(f) => f,
         Err(e) => {
             panic!("FmodSys.new : {}", e);
@@ -83,7 +82,7 @@ fn main() {
     };
 
     match fmod.init() {
-        enums::Ok => {}
+        rfmod::Result::Ok => {}
         e => {
             panic!("FmodSys.init failed : {}", e);
         }
@@ -93,11 +92,17 @@ fn main() {
 
     let sound = match fmod.create_sound((*arg1).as_slice(), None, None) {
         Ok(s) => s,
-        Err(err) => {panic!("FmodSys.create_sound failed : {}", err);},
+        Err(err) => {
+            panic!("FmodSys.create_sound failed : {}", err);
+        },
     };
 
     match play_to_the_end(sound, arg1.len()) {
-        enums::Ok => {println!("Ok !");},
-        err => {panic!("FmodSys.play_to_the_end : {}", err);}
+        rfmod::Result::Ok => {
+            println!("Ok !");
+        },
+        err => {
+            panic!("FmodSys.play_to_the_end : {}", err);
+        }
     };
 }

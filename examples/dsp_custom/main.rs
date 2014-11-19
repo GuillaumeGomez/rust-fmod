@@ -22,14 +22,11 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#![feature(globs)]
 #![allow(non_snake_case)]
 #![allow(unused_variables)]
 
 extern crate rfmod;
 
-use rfmod::types::FmodMode;
-use rfmod::{FmodSys, DspDescription, DspState, enums};
 use std::os;
 use std::default::Default;
 
@@ -43,13 +40,13 @@ fn get_key() -> u8 {
     }
 }
 
-fn my_DSP_callback(dsp_state: &DspState, inbuffer: &mut Vec<f32>, outbuffer: &mut Vec<f32>, length: u32, inchannels: i32,
-    outchannels: i32) -> enums::Result {
+fn my_DSP_callback(dsp_state: &rfmod::DspState, inbuffer: &mut Vec<f32>, outbuffer: &mut Vec<f32>, length: u32, inchannels: i32,
+    outchannels: i32) -> rfmod::Result {
     for it in range(0u, inbuffer.len() - 1u) {
         outbuffer[it] = inbuffer[it] * 0.2f32;
     }
 
-    enums::Ok
+    rfmod::Result::Ok
 }
 
 fn main() {
@@ -59,7 +56,7 @@ fn main() {
     if tmp.len() < 1 {
         panic!("USAGE: ./dsp_custom [music_file]");
     }
-    let fmod = match FmodSys::new() {
+    let fmod = match rfmod::FmodSys::new() {
         Ok(f) => f,
         Err(e) => {
             panic!("FmodSys.new : {}", e);
@@ -67,7 +64,7 @@ fn main() {
     };
 
     match fmod.init() {
-        enums::Ok => {}
+        rfmod::Result::Ok => {}
         e => {
             panic!("FmodSys.init failed : {}", e);
         }
@@ -75,9 +72,12 @@ fn main() {
 
     let arg1 = tmp.get(0).unwrap();
 
-    let sound = match fmod.create_sound((*arg1).as_slice(), Some(FmodMode(enums::FMOD_SOFTWARE | enums::FMOD_LOOP_NORMAL)), None) {
+    let sound = match fmod.create_sound((*arg1).as_slice(),
+        Some(rfmod::FmodMode(rfmod::FMOD_SOFTWARE | rfmod::FMOD_LOOP_NORMAL)), None) {
         Ok(s) => s,
-        Err(err) => {panic!("FmodSys.create_sound failed : {}", err);}
+        Err(err) => {
+            panic!("FmodSys.create_sound failed : {}", err);
+        }
     };
 
     println!("============================");
@@ -88,22 +88,29 @@ fn main() {
 
     let channel = match sound.play() {
         Ok(c) => c,
-        Err(e) => {panic!("Sound.play failed : {}", e);}
+        Err(e) => {
+            panic!("Sound.play failed : {}", e);
+        }
     };
 
-    let mut description : DspDescription = Default::default();
+    let mut description : rfmod::DspDescription = Default::default();
+
     description.read = Some(my_DSP_callback);
     description.name = String::from_str("test");
 
     let dsp = match fmod.create_DSP_with_description(&mut description) {
         Ok(dsp) => dsp,
-        Err(e) => {panic!("FmodSys.create_DSP_with_description failed : {}", e);}
+        Err(e) => {
+            panic!("FmodSys.create_DSP_with_description failed : {}", e);
+        }
     };
 
     dsp.set_bypass(true);
     let connection = match fmod.add_DSP(&dsp) {
         Ok(c) => c,
-        Err(e) => {panic!("FmodSys.add_DSP failed : {}", e);}
+        Err(e) => {
+            panic!("FmodSys.add_DSP failed : {}", e);
+        }
     };
 
     let mut active = false;

@@ -22,13 +22,9 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#![feature(globs)]
-
 extern crate libc;
 extern crate rfmod;
 
-use rfmod::types::*;
-use rfmod::*;
 use std::default::Default;
 use std::io::timer::sleep;
 use std::os;
@@ -42,15 +38,15 @@ fn main() {
     if tmp.len() < 1 {
         panic!("USAGE: ./3d [music_file]");
     }
-    let fmod = match FmodSys::new() {
+    let fmod = match rfmod::FmodSys::new() {
         Ok(f) => f,
         Err(e) => {
             panic!("FmodSys.new : {}", e);
         }
     };
 
-    match fmod.init_with_parameters(10i32, FmodInitFlag(enums::FMOD_INIT_NORMAL)) {
-        enums::Ok => {}
+    match fmod.init_with_parameters(10i32, rfmod::FmodInitFlag(rfmod::FMOD_INIT_NORMAL)) {
+        rfmod::Result::Ok => {}
         e => {
             panic!("FmodSys.init failed : {}", e);
         }
@@ -61,29 +57,29 @@ fn main() {
     println!("=========================================");
 
     let arg1 = tmp.get(0).unwrap();
-    let sound = match fmod.create_sound((*arg1).as_slice(), Some(FmodMode(enums::FMOD_3D | enums::FMOD_SOFTWARE)), None) {
+    let sound = match fmod.create_sound((*arg1).as_slice(), Some(rfmod::FmodMode(rfmod::FMOD_3D | rfmod::FMOD_SOFTWARE)), None) {
         Ok(s) => s,
         Err(e) => panic!("create sound error: {}", e)
     };
     sound.set_3D_min_max_distance(4f32, 10000f32);
-    sound.set_mode(FmodMode(enums::FMOD_LOOP_NORMAL));
+    sound.set_mode(rfmod::FmodMode(rfmod::FMOD_LOOP_NORMAL));
 
     let chan = match sound.play() {
         Ok(c) => c,
         Err(e) => panic!("sound.play error: {}", e)
     };
-    chan.set_3D_attributes(&FmodVector{x: -10f32, y: 0f32, z: 0f32}, &Default::default());
+    chan.set_3D_attributes(&rfmod::FmodVector{x: -10f32, y: 0f32, z: 0f32}, &Default::default());
 
-    let mut last_pos = FmodVector::new();
-    let mut listener_pos = FmodVector::new();
+    let mut last_pos = rfmod::FmodVector::new();
+    let mut listener_pos = rfmod::FmodVector::new();
     let mut t = 0f32;
     let interface_update_time = 50f32;
     let compensate_time = 1000f32 / interface_update_time;
 
     while chan.is_playing().unwrap() {
-        let forward = FmodVector{x: 0f32, y: 0f32, z: 1f32};
-        let up = FmodVector{x: 0f32, y: 1f32, z: 0f32};
-        let mut vel = FmodVector::new();
+        let forward = rfmod::FmodVector{x: 0f32, y: 0f32, z: 1f32};
+        let up = rfmod::FmodVector{x: 0f32, y: 1f32, z: 0f32};
+        let mut vel = rfmod::FmodVector::new();
 
         listener_pos.x = (t * 0.05f32).sin() * 33f32; // left right ping-pong
         vel.x = (listener_pos.x - last_pos.x) * compensate_time;

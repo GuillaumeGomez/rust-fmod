@@ -22,13 +22,9 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#![feature(globs)]
-
 extern crate libc;
 extern crate rfmod;
 
-use rfmod::types::*;
-use rfmod::*;
 use std::io::timer::sleep;
 use std::mem;
 use std::default::Default;
@@ -55,7 +51,7 @@ fn get_key() -> Result<int, std::io::IoError> {
 }
 
 fn main() {
-    let fmod = match FmodSys::new() {
+    let fmod = match rfmod::FmodSys::new() {
         Ok(f) => f,
         Err(e) => {
             panic!("FmodSys.new : {}", e);
@@ -77,10 +73,10 @@ fn main() {
         match get_key() {
             Ok(n) => {
                 match match n {
-                    1 => Some(fmod.set_output(enums::OutputTypeOSS)),
-                    2 => Some(fmod.set_output(enums::OutputTypeALSA)),
-                    3 => Some(fmod.set_output(enums::OutputTypeESD)),
-                    4 => Some(fmod.set_output(enums::OutputTypePulseAudio)),
+                    1 => Some(fmod.set_output(rfmod::OutputType::OSS)),
+                    2 => Some(fmod.set_output(rfmod::OutputType::ALSA)),
+                    3 => Some(fmod.set_output(rfmod::OutputType::ESD)),
+                    4 => Some(fmod.set_output(rfmod::OutputType::PulseAudio)),
                     -1 => {
                         return;
                     }
@@ -136,21 +132,22 @@ fn main() {
     }
 
     match fmod.init() {
-        enums::Ok => {}
+        rfmod::Result::Ok => {}
         e => {
             panic!("FmodSys.init failed : {}", e);
         }
     };
 
-    let mut exinfo : FmodCreateSoundexInfo = Default::default();
+    let mut exinfo : rfmod::FmodCreateSoundexInfo = Default::default();
     let secs = 5i32;
 
     exinfo.num_channels      = 2;
-    exinfo.format            = enums::SoundFormatPCM16;
+    exinfo.format            = rfmod::SoundFormat::PCM16;
     exinfo.default_frequency = 44100;
     exinfo.length            = (exinfo.default_frequency * mem::size_of::<i16>() as i32 * exinfo.num_channels * secs) as u32;
 
-    let sound = match fmod.create_sound("", Some(FmodMode(enums::FMOD_2D | enums::FMOD_SOFTWARE | enums::FMOD_OPENUSER)), Some(&mut exinfo)) {
+    let sound = match fmod.create_sound("", Some(rfmod::FmodMode(rfmod::FMOD_2D | rfmod::FMOD_SOFTWARE | rfmod::FMOD_OPENUSER)),
+        Some(&mut exinfo)) {
         Ok(s) => s,
         Err(e) => panic!("create sound error: {}", e)
     };
@@ -170,13 +167,13 @@ fn main() {
                 match match nb {
                     0 => {
                         match fmod.start_record(record_driver, &sound, false) {
-                            enums::Ok => {
+                            rfmod::Result::Ok => {
                                 while fmod.is_recording(record_driver).unwrap() == true {
                                     print!("\rRecording : {}", fmod.get_record_position(record_driver).unwrap());
                                     fmod.update();
                                     sleep(Duration::milliseconds(15));
                                 }
-                                Some(enums::Ok)
+                                Some(rfmod::Result::Ok)
                             }
                             e => Some(e)
                         }
@@ -186,12 +183,12 @@ fn main() {
                             Ok(chan) => {
                                 fmod.update();
                                 while chan.is_playing().unwrap() == true {
-                                    print!("\rPlaying : {} / {}", chan.get_position(enums::FMOD_TIMEUNIT_MS).unwrap(),
-                                        sound.get_length(enums::FMOD_TIMEUNIT_MS).unwrap());
+                                    print!("\rPlaying : {} / {}", chan.get_position(rfmod::FMOD_TIMEUNIT_MS).unwrap(),
+                                        sound.get_length(rfmod::FMOD_TIMEUNIT_MS).unwrap());
                                     fmod.update();
                                     sleep(Duration::milliseconds(15));
                                 }
-                                Some(enums::Ok)
+                                Some(rfmod::Result::Ok)
                             }
                             Err(e) => Some(e)
                         }
@@ -223,7 +220,7 @@ fn main() {
                     -1 => break,
                     _ => None
                 } {
-                    Some(r) if r == enums::Ok => {}
+                    Some(r) if r == rfmod::Result::Ok => {}
                     Some(e) => {
                         println!("Error : {}", e);
                         break;
