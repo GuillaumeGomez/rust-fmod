@@ -25,7 +25,6 @@
 use libc::{c_void, c_uint, c_int, c_char, c_short};
 use ffi;
 use types::*;
-use enums;
 use sound;
 use sound::Sound;
 use sound_group;
@@ -945,7 +944,7 @@ impl FmodSys {
     }
 
     pub fn init(&self) -> ::Result {
-        unsafe { ffi::FMOD_System_Init(self.system, 1, enums::FMOD_INIT_NORMAL, ::std::ptr::null_mut()) }
+        unsafe { ffi::FMOD_System_Init(self.system, 1, ::FMOD_INIT_NORMAL, ::std::ptr::null_mut()) }
     }
 
     pub fn init_with_parameters(&self, max_channels: i32, FmodInitFlag(flag): FmodInitFlag) -> ::Result {
@@ -981,7 +980,7 @@ impl FmodSys {
         let mut sound = sound::from_ptr_first(::std::ptr::null_mut());
         let op = match options {
             Some(FmodMode(t)) => t,
-            None => enums::FMOD_SOFTWARE | enums::FMOD_LOOP_OFF | enums::FMOD_2D | enums::FMOD_CREATESTREAM
+            None => ::FMOD_SOFTWARE | ::FMOD_LOOP_OFF | ::FMOD_2D | ::FMOD_CREATESTREAM
         };
         let ex = match exinfo {
             Some(e) => {
@@ -1015,7 +1014,7 @@ impl FmodSys {
         let mut sound = sound::from_ptr_first(::std::ptr::null_mut());
         let op = match options {
             Some(FmodMode(t)) => t,
-            None => enums::FMOD_SOFTWARE | enums::FMOD_LOOP_OFF | enums::FMOD_2D | enums::FMOD_CREATESTREAM
+            None => ::FMOD_SOFTWARE | ::FMOD_LOOP_OFF | ::FMOD_2D | ::FMOD_CREATESTREAM
         };
         let ex = match exinfo {
             Some(e) => {

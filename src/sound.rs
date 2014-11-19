@@ -22,7 +22,6 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-use enums;
 use types::*;
 use libc::{c_int, c_uint, c_char, c_ushort, c_void};
 use ffi;
@@ -679,7 +678,7 @@ impl Sound {
             let mut channels = 0i32;
             let mut bits = 0i32;
             let mut rate = 0f32;
-            let len_bytes = match self.get_length(enums::FMOD_TIMEUNIT_PCMBYTES) {
+            let len_bytes = match self.get_length(::FMOD_TIMEUNIT_PCMBYTES) {
                 Ok(l) => l,
                 Err(e) => return Err(format!("{}", e))
             };
