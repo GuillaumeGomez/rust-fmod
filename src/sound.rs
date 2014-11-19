@@ -96,8 +96,8 @@ pub struct FmodTag {
 impl Default for FmodTag {
     fn default() -> FmodTag {
         FmodTag {
-            _type: enums::TagTypeUnknown,
-            data_type: enums::TagDataTypeBinary,
+            _type: enums::TagType::TagTypeUnknown,
+            data_type: enums::TagDataType::TagDataTypeBinary,
             name: String::new(),
             data: ::std::ptr::null_mut(),
             data_len: 0u32,
@@ -188,7 +188,7 @@ impl Sound {
         let mut system = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_Sound_GetSystemObject(self.sound, &mut system) } {
-            enums::Ok => Ok(ffi::FFI::wrap(system)),
+            enums::Result::Ok => Ok(ffi::FFI::wrap(system)),
             e => Err(e)
         }
     }
@@ -196,14 +196,14 @@ impl Sound {
     pub fn release(&mut self) -> enums::Result {
         if self.can_be_deleted && self.sound.is_not_null() {
             match unsafe { ffi::FMOD_Sound_Release(self.sound) } {
-               enums::Ok => {
+               enums::Result::Ok => {
                     self.sound = ::std::ptr::null_mut();
-                   enums::Ok
+                   enums::Result::Ok
                 }
                 e => e
             }
         } else {
-            enums::Ok
+            enums::Result::Ok
         }
     }
 
@@ -212,11 +212,11 @@ impl Sound {
 
         match match self.get_system_object() {
             Ok(s) => { 
-                unsafe { ffi::FMOD_System_PlaySound(ffi::FFI::unwrap(&s), enums::ChannelFree, self.sound, 0, &mut channel) }
+                unsafe { ffi::FMOD_System_PlaySound(ffi::FFI::unwrap(&s), enums::ChannelIndex::ChannelFree, self.sound, 0, &mut channel) }
             }
             Err(e) => e
         } {
-            enums::Ok => Ok(ffi::FFI::wrap(channel)),
+            enums::Result::Ok => Ok(ffi::FFI::wrap(channel)),
             e => Err(e)
         }
     }
@@ -226,7 +226,7 @@ impl Sound {
         
         match self.get_system_object() {
             Ok(s) => { 
-                unsafe { ffi::FMOD_System_PlaySound(ffi::FFI::unwrap(&s), enums::ChannelReUse, self.sound, match paused {
+                unsafe { ffi::FMOD_System_PlaySound(ffi::FFI::unwrap(&s), enums::ChannelIndex::ChannelReUse, self.sound, match paused {
                     true => 1,
                     false => 0
                 }, &mut chan) }
@@ -251,7 +251,7 @@ impl Sound {
                     }
                 }
                 chan.release();
-                enums::Ok
+                enums::Result::Ok
             }
             Err(err) => err,
         }
@@ -268,7 +268,7 @@ impl Sound {
         let mut priority = 0i32;
 
         match unsafe { ffi::FMOD_Sound_GetDefaults(self.sound, &mut frequency, &mut volume, &mut pan, &mut priority) } {
-            enums::Ok => Ok((frequency, volume, pan, priority)),
+            enums::Result::Ok => Ok((frequency, volume, pan, priority)),
             e => Err(e)
         }
     }
@@ -283,7 +283,7 @@ impl Sound {
         let mut pan_var = 0f32;
 
         match unsafe { ffi::FMOD_Sound_GetVariations(self.sound, &mut frequency_var, &mut volume_var, &mut pan_var) } {
-            enums::Ok => Ok((frequency_var, volume_var, pan_var)),
+            enums::Result::Ok => Ok((frequency_var, volume_var, pan_var)),
             e => Err(e)
         }
     }
@@ -297,7 +297,7 @@ impl Sound {
         let mut min = 0f32;
 
         match unsafe { ffi::FMOD_Sound_Get3DMinMaxDistance(self.sound, &mut min, &mut max) } {
-            enums::Ok => Ok((min, max)),
+            enums::Result::Ok => Ok((min, max)),
             e => Err(e)
         }
     }
@@ -312,7 +312,7 @@ impl Sound {
         let mut outside_volume = 0f32;
 
         match unsafe { ffi::FMOD_Sound_Get3DConeSettings(self.sound, &mut inside_cone_angle, &mut outside_cone_angle, &mut outside_volume) } {
-            enums::Ok => Ok((inside_cone_angle, outside_cone_angle, outside_volume)),
+            enums::Result::Ok => Ok((inside_cone_angle, outside_cone_angle, outside_volume)),
             e => Err(e)
         }
     }
@@ -332,7 +332,7 @@ impl Sound {
         let mut pointer = points_vec.as_mut_ptr();
 
         match unsafe { ffi::FMOD_Sound_Get3DCustomRolloff(self.sound, &mut pointer, num_points as i32) } {
-            enums::Ok => {
+            enums::Result::Ok => {
                 let mut points = Vec::with_capacity(points_vec.len());
 
                 for tmp in points_vec.into_iter() {
@@ -352,7 +352,7 @@ impl Sound {
         let mut sub_sound = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_Sound_GetSubSound(self.sound, index, &mut sub_sound) } {
-            enums::Ok => Ok(ffi::FFI::wrap(sub_sound)),
+            enums::Result::Ok => Ok(ffi::FFI::wrap(sub_sound)),
             e => Err(e)
         }
     }
@@ -362,7 +362,7 @@ impl Sound {
 
         name.with_c_str(|c_name|{
             match unsafe { ffi::FMOD_Sound_GetName(self.sound, c_name as *mut c_char, name_len as i32) } {
-               enums::Ok => Ok(unsafe {string::raw::from_buf(c_name as *const u8).clone() }),
+               enums::Result::Ok => Ok(unsafe {string::raw::from_buf(c_name as *const u8).clone() }),
                 e => Err(e)
             }
         })
@@ -372,19 +372,19 @@ impl Sound {
         let mut length = 0u32;
 
         match unsafe { ffi::FMOD_Sound_GetLength(self.sound, &mut length, length_type) } {
-            enums::Ok => Ok(length),
+            enums::Result::Ok => Ok(length),
             e => Err(e)
         }
     }
 
     pub fn get_format(&self) -> Result<(enums::SoundType, enums::SoundFormat, i32, i32), enums::Result> {
-        let mut _type = enums::SoundTypeUnknown;
-        let mut format = enums::SoundFormatNone;
+        let mut _type = enums::SoundType::SoundTypeUnknown;
+        let mut format = enums::SoundFormat::SoundFormatNone;
         let mut channels = 0i32;
         let mut bits = 0i32;
 
         match unsafe { ffi::FMOD_Sound_GetFormat(self.sound, &mut _type, &mut format, &mut channels, &mut bits) } {
-            enums::Ok => Ok((_type, format, channels, bits)),
+            enums::Result::Ok => Ok((_type, format, channels, bits)),
             e => Err(e)
         }
     }
@@ -393,7 +393,7 @@ impl Sound {
         let mut num_sub_sound = 0i32;
 
         match unsafe { ffi::FMOD_Sound_GetNumSubSounds(self.sound, &mut num_sub_sound) } {
-            enums::Ok => Ok(num_sub_sound),
+            enums::Result::Ok => Ok(num_sub_sound),
             e => Err(e)
         }
     }
@@ -403,38 +403,46 @@ impl Sound {
         let mut num_tags_updated = 0i32;
 
         match unsafe { ffi::FMOD_Sound_GetNumTags(self.sound, &mut num_tags, &mut num_tags_updated) } {
-            enums::Ok => Ok((num_tags, num_tags_updated)),
+            enums::Result::Ok => Ok((num_tags, num_tags_updated)),
             e => Err(e)
         }
     }
 
     //to test if tag's data needs to be filled by user
     pub fn get_tag(&self, name: String, index: i32) -> Result<FmodTag, enums::Result> {
-        let mut tag = ffi::FMOD_TAG{_type: enums::TagTypeUnknown, datatype: enums::TagDataTypeBinary, name: ::std::ptr::null_mut(),
-            data: ::std::ptr::null_mut(), datalen: 0, updated: 0};
+        let mut tag = ffi::FMOD_TAG {
+            _type: enums::TagType::TagTypeUnknown,
+            datatype: enums::TagDataType::TagDataTypeBinary,
+            name: ::std::ptr::null_mut(),
+            data: ::std::ptr::null_mut(),
+            datalen: 0,
+            updated: 0
+        };
 
         match unsafe { ffi::FMOD_Sound_GetTag(self.sound, name.into_string().with_c_str(|c_name|{c_name}), index, &mut tag) } {
-            enums::Ok => Ok(FmodTag::from_ptr(tag)),
+            enums::Result::Ok => Ok(FmodTag::from_ptr(tag)),
             e => Err(e)
         }
     }
 
     pub fn get_open_state(&self) -> Result<(enums::OpenState, u32, bool, bool), enums::Result> {
-        let mut open_state = enums::OpenStateReady;
+        let mut open_state = enums::OpenState::OpenStateReady;
         let mut percent_buffered = 0u32;
         let mut starving = 0;
         let mut disk_busy = 0;
 
         match unsafe { ffi::FMOD_Sound_GetOpenState(self.sound, &mut open_state, &mut percent_buffered, &mut starving, &mut disk_busy) } {
-            enums::Ok => Ok((open_state, percent_buffered, if starving == 1 {
-                            true
-                            } else {
-                                false
-                            }, if disk_busy == 1 {
-                                true
-                            } else {
-                                false
-                            })),
+            enums::Result::Ok => Ok((open_state, percent_buffered,
+                if starving == 1 {
+                    true
+                } else {
+                    false
+                },
+                if disk_busy == 1 {
+                    true
+                } else {
+                    false
+                })),
             e => Err(e)
         }
     }
@@ -447,7 +455,7 @@ impl Sound {
         let mut sound_group = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_Sound_GetSoundGroup(self.sound, &mut sound_group) } {
-            enums::Ok => Ok(ffi::FFI::wrap(sound_group)),
+            enums::Result::Ok => Ok(ffi::FFI::wrap(sound_group)),
             e => Err(e)
         }
     }
@@ -456,7 +464,7 @@ impl Sound {
         let mut num_sync_points = 0i32;
 
         match unsafe { ffi::FMOD_Sound_GetNumSyncPoints(self.sound, &mut num_sync_points) } {
-            enums::Ok => Ok(num_sync_points),
+            enums::Result::Ok => Ok(num_sync_points),
             e => Err(e)
         }
     }
@@ -465,7 +473,7 @@ impl Sound {
         let mut sync_point = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_Sound_GetSyncPoint(self.sound, index, &mut sync_point) } {
-            enums::Ok => Ok(FmodSyncPoint::from_ptr(sync_point)),
+            enums::Result::Ok => Ok(FmodSyncPoint::from_ptr(sync_point)),
             e => Err(e)
         }
     }
@@ -476,7 +484,7 @@ impl Sound {
 
         match unsafe { ffi::FMOD_Sound_GetSyncPointInfo(self.sound, sync_point.sync_point, name.with_c_str(|c_name|{c_name as *mut c_char}),
             name_len as i32, &mut offset, offset_type) } {
-            enums::Ok => Ok((name.clone(), offset)),
+            enums::Result::Ok => Ok((name.clone(), offset)),
             e => Err(e)
         }
     }
@@ -485,7 +493,7 @@ impl Sound {
         let mut sync_point = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_Sound_AddSyncPoint(self.sound, offset, offset_type, name.into_string().with_c_str(|c_name|{c_name}), &mut sync_point) } {
-            enums::Ok => Ok(FmodSyncPoint::from_ptr(sync_point)),
+            enums::Result::Ok => Ok(FmodSyncPoint::from_ptr(sync_point)),
             e => Err(e)
         }
     }
@@ -502,7 +510,7 @@ impl Sound {
         let mut mode = 0u32;
 
         match unsafe { ffi::FMOD_Sound_GetMode(self.sound, &mut mode) } {
-            enums::Ok => Ok(FmodMode(mode)),
+            enums::Result::Ok => Ok(FmodMode(mode)),
             e => Err(e)
         }
     }
@@ -515,7 +523,7 @@ impl Sound {
         let mut loop_count = 0i32;
 
         match unsafe { ffi::FMOD_Sound_GetLoopCount(self.sound, &mut loop_count) } {
-            enums::Ok => Ok(loop_count),
+            enums::Result::Ok => Ok(loop_count),
             e => Err(e)
         }
     }
@@ -530,7 +538,7 @@ impl Sound {
         let mut loop_end = 0u32;
 
         match unsafe { ffi::FMOD_Sound_GetLoopPoints(self.sound, &mut loop_start, loop_start_type, &mut loop_end, loop_end_type) } {
-            enums::Ok => Ok((loop_start, loop_end)),
+            enums::Result::Ok => Ok((loop_start, loop_end)),
             e => Err(e)
         }
     }
@@ -539,7 +547,7 @@ impl Sound {
         let mut num_channels = 0i32;
 
         match unsafe { ffi::FMOD_Sound_GetMusicNumChannels(self.sound, &mut num_channels) } {
-            enums::Ok => Ok(num_channels),
+            enums::Result::Ok => Ok(num_channels),
             e => Err(e)
         }
     }
@@ -554,7 +562,7 @@ impl Sound {
         let mut volume = 0f32;
 
         match unsafe { ffi::FMOD_Sound_GetMusicChannelVolume(self.sound, channel, &mut volume) } {
-            enums::Ok => Ok(volume),
+            enums::Result::Ok => Ok(volume),
             e => Err(e)
         }
     }
@@ -567,7 +575,7 @@ impl Sound {
         let mut speed = 0f32;
 
         match unsafe { ffi::FMOD_Sound_GetMusicSpeed(self.sound, &mut speed) } {
-            enums::Ok => Ok(speed),
+            enums::Result::Ok => Ok(speed),
             e => Err(e)
         }
     }
@@ -586,7 +594,7 @@ impl Sound {
         let mut memory_used = 0u32;
 
         match unsafe { ffi::FMOD_Sound_GetMemoryInfo(self.sound, memory_bits, event_memory_bits, &mut memory_used, &mut details) } {
-            enums::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
+            enums::Result::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
             e => Err(e)
         }
     }
@@ -598,7 +606,7 @@ impl Sound {
         let mut ptr2 =::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_Sound_Lock(self.sound, offset, length, &mut ptr1, &mut ptr2, &mut len1, &mut len2) } {
-            enums::Ok => {
+            enums::Result::Ok => {
                 let mut v_ptr1 = Vec::new();
                 let mut v_ptr2 = Vec::new();
 
@@ -624,7 +632,7 @@ impl Sound {
 
         unsafe {
             match ffi::FMOD_Sound_GetUserData(self.sound, &mut data) {
-               enums::Ok => {
+               enums::Result::Ok => {
                     if data.is_null() {
                         self.user_data.user_data = ::std::ptr::null_mut();
 
@@ -650,7 +658,7 @@ impl Sound {
             let mut user_data : *mut c_void = ::std::ptr::null_mut();
 
             match ffi::FMOD_Sound_GetUserData(self.sound, &mut user_data) {
-               enums::Ok => {
+               enums::Result::Ok => {
                     if user_data.is_not_null() {
                         let tmp : &mut ffi::SoundData = transmute::<*mut c_void, &mut ffi::SoundData>(user_data);
                         let tmp2 : &mut T = transmute::<*mut c_void, &mut T>(tmp.user_data);
@@ -658,7 +666,7 @@ impl Sound {
                         Ok(tmp2)
                     } else {
                         // ?
-                        Err(enums::Ok)
+                        Err(enums::Result::Ok)
                     }
                 },
                 e => Err(e)
@@ -681,8 +689,8 @@ impl Sound {
             let mut ptr2: *mut c_void =::std::ptr::null_mut();
 
             match ffi::FMOD_Sound_GetFormat(self.sound, ::std::ptr::null_mut(), ::std::ptr::null_mut(), &mut channels, &mut bits) {
-               enums::Ok => match ffi::FMOD_Sound_GetDefaults(self.sound, &mut rate, ::std::ptr::null_mut(), ::std::ptr::null_mut(), ::std::ptr::null_mut()) {
-                   enums::Ok => {}
+               enums::Result::Ok => match ffi::FMOD_Sound_GetDefaults(self.sound, &mut rate, ::std::ptr::null_mut(), ::std::ptr::null_mut(), ::std::ptr::null_mut()) {
+                   enums::Result::Ok => {}
                     e => return Err(format!("{}", e))
                 },
                 e => return Err(format!("{}", e))

@@ -59,14 +59,14 @@ impl SoundGroup {
     pub fn release(&mut self) -> enums::Result {
         if self.sound_group.is_not_null() {
             match unsafe { ffi::FMOD_SoundGroup_Release(self.sound_group) } {
-               enums::Ok => {
+               enums::Result::Ok => {
                     self.sound_group =::std::ptr::null_mut();
-                   enums::Ok
+                   enums::Result::Ok
                 }
                 e => e
             }
         } else {
-           enums::Ok
+           enums::Result::Ok
         }
     }
 
@@ -78,7 +78,7 @@ impl SoundGroup {
         let mut max_audible = 0i32;
 
         match unsafe { ffi::FMOD_SoundGroup_GetMaxAudible(self.sound_group, &mut max_audible) } {
-            enums::Ok => Ok(max_audible),
+            enums::Result::Ok => Ok(max_audible),
             e => Err(e)
         }
     }
@@ -88,10 +88,10 @@ impl SoundGroup {
     }
 
     pub fn get_max_audible_behavior(&self) -> Result<enums::SoundGroupBehavior, enums::Result> {
-        let mut max_audible_behavior = enums::SoundGroupBehaviorFail;
+        let mut max_audible_behavior = enums::SoundGroupBehavior::SoundGroupBehaviorFail;
 
         match unsafe { ffi::FMOD_SoundGroup_GetMaxAudibleBehavior(self.sound_group, &mut max_audible_behavior) } {
-            enums::Ok => Ok(max_audible_behavior),
+            enums::Result::Ok => Ok(max_audible_behavior),
             e => Err(e)
         }
     }
@@ -104,7 +104,7 @@ impl SoundGroup {
         let mut speed = 0f32;
 
         match unsafe { ffi::FMOD_SoundGroup_GetMuteFadeSpeed(self.sound_group, &mut speed) } {
-            enums::Ok => Ok(speed),
+            enums::Result::Ok => Ok(speed),
             e => Err(e)
         }
     }
@@ -117,7 +117,7 @@ impl SoundGroup {
         let mut volume = 0f32;
 
         match unsafe { ffi::FMOD_SoundGroup_GetVolume(self.sound_group, &mut volume) } {
-            enums::Ok => Ok(volume),
+            enums::Result::Ok => Ok(volume),
             e => Err(e)
         }
     }
@@ -131,7 +131,7 @@ impl SoundGroup {
 
         name.with_c_str(|c_name|{
             match unsafe { ffi::FMOD_SoundGroup_GetName(self.sound_group, c_name as *mut c_char, name_len as i32) } {
-               enums::Ok => Ok(unsafe {string::raw::from_buf(c_name as *const u8).clone() }),
+               enums::Result::Ok => Ok(unsafe {string::raw::from_buf(c_name as *const u8).clone() }),
                 e => Err(e)
             }
         })
@@ -141,7 +141,7 @@ impl SoundGroup {
         let mut num_sounds = 0i32;
 
         match unsafe { ffi::FMOD_SoundGroup_GetNumSounds(self.sound_group, &mut num_sounds) } {
-            enums::Ok => Ok(num_sounds),
+            enums::Result::Ok => Ok(num_sounds),
             e => Err(e)
         }
     }
@@ -150,7 +150,7 @@ impl SoundGroup {
         let mut sound = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_SoundGroup_GetSound(self.sound_group, index, &mut sound) } {
-            enums::Ok => Ok(ffi::FFI::wrap(sound)),
+            enums::Result::Ok => Ok(ffi::FFI::wrap(sound)),
             e => Err(e)
         }
     }
@@ -159,7 +159,7 @@ impl SoundGroup {
         let mut num_playing = 0i32;
 
         match unsafe { ffi::FMOD_SoundGroup_GetNumPlaying(self.sound_group, &mut num_playing) } {
-            enums::Ok => Ok(num_playing),
+            enums::Result::Ok => Ok(num_playing),
             e => Err(e)
         }
     }
@@ -170,7 +170,7 @@ impl SoundGroup {
         let mut memory_used = 0u32;
 
         match unsafe { ffi::FMOD_SoundGroup_GetMemoryInfo(self.sound_group, memory_bits, event_memory_bits, &mut memory_used, &mut details) } {
-            enums::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
+            enums::Result::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
             e => Err(e)
         }
     }
@@ -184,7 +184,7 @@ impl SoundGroup {
             let mut user_data : *mut c_void = ::std::ptr::null_mut();
 
             match ffi::FMOD_SoundGroup_GetUserData(self.sound_group, &mut user_data) {
-               enums::Ok => {
+               enums::Result::Ok => {
                     let tmp : &mut T = transmute::<*mut c_void, &mut T>(user_data);
                     
                     Ok(tmp)

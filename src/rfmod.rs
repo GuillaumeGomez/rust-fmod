@@ -74,7 +74,7 @@ fn main() {
     };
 
     match fmod.init() {
-       enums::Ok => {}
+       enums::Result::Ok => {}
         e => {
             fmod.release();
             panic!("FmodSys.init failed : {}", e);
@@ -82,12 +82,12 @@ fn main() {
     };
 
     let mut sound = match fmod.create_sound(StrBuf::from_str("music.mp3"), None, None) {
-                      enums::Ok(s) => s,
+                      enums::Result::Ok(s) => s,
                       Err(err) => {panic!("Error code : {}", err);},
                     };
 
     match sound.play_to_the_end() {
-       enums::Ok => {println!("Ok !");}
+       enums::Result::Ok => {println!("Ok !");}
         err => {panic!("Error code : {}", err);}
     };
 }
@@ -151,8 +151,8 @@ mod vector;
 mod reverb;
 mod reverb_properties;
 mod file;
-pub mod types;
 pub mod enums;
+pub mod types;
 pub mod callbacks;
 pub mod error;
 

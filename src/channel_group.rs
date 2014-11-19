@@ -62,14 +62,14 @@ impl ChannelGroup {
     pub fn release(&mut self) -> enums::Result {
         if self.channel_group.is_not_null() {
             match unsafe { ffi::FMOD_ChannelGroup_Release(self.channel_group) } {
-               enums::Ok => {
+               enums::Result::Ok => {
                     self.channel_group = ::std::ptr::null_mut();
-                   enums::Ok
+                   enums::Result::Ok
                 }
                 e => e
             }
         } else {
-           enums::Ok
+           enums::Result::Ok
         }
     }
 
@@ -81,7 +81,7 @@ impl ChannelGroup {
         let mut volume = 0f32;
 
         match unsafe { ffi::FMOD_ChannelGroup_GetVolume(self.channel_group, &mut volume) } {
-            enums::Ok => Ok(volume),
+            enums::Result::Ok => Ok(volume),
             e => Err(e)
         }
     }
@@ -94,7 +94,7 @@ impl ChannelGroup {
         let mut pitch = 0f32;
 
         match unsafe { ffi::FMOD_ChannelGroup_GetPitch(self.channel_group, &mut pitch) } {
-            enums::Ok => Ok(pitch),
+            enums::Result::Ok => Ok(pitch),
             e => Err(e)
         }
     }
@@ -112,7 +112,7 @@ impl ChannelGroup {
         let mut paused = 0;
 
         match unsafe { ffi::FMOD_ChannelGroup_GetPaused(self.channel_group, &mut paused) } {
-            enums::Ok => Ok(match paused {
+            enums::Result::Ok => Ok(match paused {
                 1 => true,
                 _ => false
             }),
@@ -133,7 +133,7 @@ impl ChannelGroup {
         let mut mute = 0;
 
         match unsafe { ffi::FMOD_ChannelGroup_GetMute(self.channel_group, &mut mute) } {
-            enums::Ok => Ok(match mute {
+            enums::Result::Ok => Ok(match mute {
                 1 => true,
                 _ => false
             }),
@@ -150,7 +150,7 @@ impl ChannelGroup {
         let mut reverb_occlusion = 0f32;
 
         match unsafe { ffi::FMOD_ChannelGroup_Get3DOcclusion(self.channel_group, &mut direct_occlusion, &mut reverb_occlusion) } {
-            enums::Ok => Ok((direct_occlusion, reverb_occlusion)),
+            enums::Result::Ok => Ok((direct_occlusion, reverb_occlusion)),
             e => Err(e)
         }
     }
@@ -202,7 +202,7 @@ impl ChannelGroup {
         let mut index = 0i32;
 
         match unsafe { ffi::FMOD_ChannelGroup_GetNumGroups(self.channel_group, &mut index) } {
-            enums::Ok => Ok(index),
+            enums::Result::Ok => Ok(index),
             e => Err(e)
         }
     }
@@ -211,7 +211,7 @@ impl ChannelGroup {
         let mut group = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_ChannelGroup_GetGroup(self.channel_group, index, &mut group) } {
-            enums::Ok => Ok(ChannelGroup{channel_group: group}),
+            enums::Result::Ok => Ok(ChannelGroup{channel_group: group}),
             e => Err(e)
         }
     }
@@ -220,7 +220,7 @@ impl ChannelGroup {
         let mut parent_group = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_ChannelGroup_GetParentGroup(self.channel_group, &mut parent_group) } {
-            enums::Ok => Ok(ChannelGroup{channel_group: parent_group}),
+            enums::Result::Ok => Ok(ChannelGroup{channel_group: parent_group}),
             e => Err(e)
         }
     }
@@ -229,7 +229,7 @@ impl ChannelGroup {
         let mut dsp = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_ChannelGroup_GetDSPHead(self.channel_group, &mut dsp) } {
-            enums::Ok => Ok(ffi::FFI::wrap(dsp)),
+            enums::Result::Ok => Ok(ffi::FFI::wrap(dsp)),
             e => Err(e)
         }
     }
@@ -238,7 +238,7 @@ impl ChannelGroup {
         let mut dsp_connection = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_ChannelGroup_AddDSP(self.channel_group, ffi::FFI::unwrap(dsp), &mut dsp_connection) } {
-            enums::Ok => Ok(ffi::FFI::wrap(dsp_connection)),
+            enums::Result::Ok => Ok(ffi::FFI::wrap(dsp_connection)),
             e => Err(e)
         }
     }
@@ -248,7 +248,7 @@ impl ChannelGroup {
 
         name.with_c_str(|c_name|{
             match unsafe { ffi::FMOD_ChannelGroup_GetName(self.channel_group, c_name as *mut c_char, name_len as i32) } {
-               enums::Ok => Ok(unsafe {string::raw::from_buf(c_name as *const u8).clone() }),
+               enums::Result::Ok => Ok(unsafe {string::raw::from_buf(c_name as *const u8).clone() }),
                 e => Err(e)
             }
         })
@@ -258,7 +258,7 @@ impl ChannelGroup {
         let mut num_channels = 0i32;
 
         match unsafe { ffi::FMOD_ChannelGroup_GetNumChannels(self.channel_group, &mut num_channels) } {
-            enums::Ok => Ok(num_channels as u32),
+            enums::Result::Ok => Ok(num_channels as u32),
             e => Err(e)
         }
     }
@@ -267,7 +267,7 @@ impl ChannelGroup {
         let mut channel = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_ChannelGroup_GetChannel(self.channel_group, index, &mut channel) } {
-            enums::Ok => Ok(ffi::FFI::wrap(channel)),
+            enums::Result::Ok => Ok(ffi::FFI::wrap(channel)),
             e => Err(e)
         }
     }
@@ -276,7 +276,7 @@ impl ChannelGroup {
         let mut ptr = Vec::from_elem(spectrum_size, 0f32);
         let c_window_type = match window_type {
             Some(wt) => wt,
-            None => enums::DSP_FFT_WindowRect
+            None => enums::DSP_FFT_Window::DSP_FFT_WindowRect
         };
         let c_channel_offset = match channel_offset {
             Some(co) => co,
@@ -284,7 +284,7 @@ impl ChannelGroup {
         };
 
         match unsafe { ffi::FMOD_ChannelGroup_GetSpectrum(self.channel_group, ptr.as_mut_ptr(), spectrum_size as c_int, c_channel_offset, c_window_type) } {
-            enums::Ok => Ok(ptr),
+            enums::Result::Ok => Ok(ptr),
             e => Err(e),
         }
     }
@@ -293,7 +293,7 @@ impl ChannelGroup {
         let mut ptr = Vec::from_elem(wave_size, 0f32);
 
         match unsafe { ffi::FMOD_ChannelGroup_GetWaveData(self.channel_group, ptr.as_mut_ptr(), wave_size as c_int, channel_offset) } {
-            enums::Ok => Ok(ptr),
+            enums::Result::Ok => Ok(ptr),
             e => Err(e)
         }
     }
@@ -304,7 +304,7 @@ impl ChannelGroup {
         let mut memory_used = 0u32;
 
         match unsafe { ffi::FMOD_ChannelGroup_GetMemoryInfo(self.channel_group, memory_bits, event_memory_bits, &mut memory_used, &mut details) } {
-            enums::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
+            enums::Result::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
             e => Err(e)
         }
     }
@@ -318,7 +318,7 @@ impl ChannelGroup {
             let mut user_data : *mut c_void = ::std::ptr::null_mut();
 
             match ffi::FMOD_ChannelGroup_GetUserData(self.channel_group, &mut user_data) {
-               enums::Ok => {
+               enums::Result::Ok => {
                     let tmp : &mut T = transmute::<*mut c_void, &mut T>(user_data);
                     
                     Ok(tmp)

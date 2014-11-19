@@ -62,7 +62,7 @@ impl DspConnection {
         let mut input = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_DSPConnection_GetInput(self.dsp_connection, &mut input) } {
-            enums::Ok => Ok(ffi::FFI::wrap(input)),
+            enums::Result::Ok => Ok(ffi::FFI::wrap(input)),
             e => Err(e)
         }
     }
@@ -71,7 +71,7 @@ impl DspConnection {
         let mut output = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_DSPConnection_GetOutput(self.dsp_connection, &mut output) } {
-            enums::Ok => Ok(ffi::FFI::wrap(output)),
+            enums::Result::Ok => Ok(ffi::FFI::wrap(output)),
             e => Err(e)
         }
     }
@@ -84,7 +84,7 @@ impl DspConnection {
         let mut volume = 0f32;
 
         match unsafe { ffi::FMOD_DSPConnection_GetMix(self.dsp_connection, &mut volume) } {
-            enums::Ok => Ok(volume),
+            enums::Result::Ok => Ok(volume),
             e => Err(e)
         }
     }
@@ -97,7 +97,7 @@ impl DspConnection {
         let mut levels = Vec::from_elem(num_levels, 0f32);
 
         match unsafe { ffi::FMOD_DSPConnection_GetLevels(self.dsp_connection, speaker, levels.as_mut_ptr(), levels.len() as c_int) } {
-            enums::Ok => Ok(levels),
+            enums::Result::Ok => Ok(levels),
             e => Err(e)
         }
     }
@@ -108,7 +108,7 @@ impl DspConnection {
         let mut memory_used = 0u32;
 
         match unsafe { ffi::FMOD_DSPConnection_GetMemoryInfo(self.dsp_connection, memory_bits, event_memory_bits, &mut memory_used, &mut details) } {
-            enums::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
+            enums::Result::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
             e => Err(e)
         }
     }
@@ -122,7 +122,7 @@ impl DspConnection {
             let mut user_data : *mut c_void = ::std::ptr::null_mut();
 
             match ffi::FMOD_DSPConnection_GetUserData(self.dsp_connection, &mut user_data) {
-               enums::Ok => {
+               enums::Result::Ok => {
                     let tmp : &mut T = transmute::<*mut c_void, &mut T>(user_data);
                     
                     Ok(tmp)

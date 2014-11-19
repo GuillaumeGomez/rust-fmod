@@ -58,14 +58,14 @@ impl Reverb {
     pub fn release(&mut self) -> enums::Result {
         if self.reverb !=::std::ptr::null_mut() {
             match unsafe { ffi::FMOD_Reverb_Release(self.reverb) } {
-                enums::Ok => {
+                enums::Result::Ok => {
                     self.reverb = ::std::ptr::null_mut();
-                    enums::Ok
+                    enums::Result::Ok
                 }
                 e => e
             }
         } else {
-            enums::Ok
+            enums::Result::Ok
         }
     }
 
@@ -81,7 +81,7 @@ impl Reverb {
         let mut max_distance = 0f32;
 
         match unsafe { ffi::FMOD_Reverb_Get3DAttributes(self.reverb, &mut position, &mut min_distance, &mut max_distance) } {
-            enums::Ok => Ok((vector::from_ptr(position), min_distance, max_distance)),
+            enums::Result::Ok => Ok((vector::from_ptr(position), min_distance, max_distance)),
             e => Err(e)
         }
     }
@@ -96,7 +96,7 @@ impl Reverb {
         let mut t_reverb_properties = reverb_properties::get_ffi(reverb_properties);
 
         match unsafe { ffi::FMOD_Reverb_GetProperties(self.reverb, &mut t_reverb_properties) } {
-            enums::Ok => Ok(reverb_properties::from_ptr(t_reverb_properties)),
+            enums::Result::Ok => Ok(reverb_properties::from_ptr(t_reverb_properties)),
             e => Err(e)
         }
     }
@@ -115,7 +115,7 @@ impl Reverb {
         let mut active = 0i32;
 
         match unsafe { ffi::FMOD_Reverb_GetActive(self.reverb, &mut active) } {
-            enums::Ok => Ok(active == 1),
+            enums::Result::Ok => Ok(active == 1),
             e => Err(e)
         }
     }
@@ -126,7 +126,7 @@ impl Reverb {
         let mut memory_used = 0u32;
 
         match unsafe { ffi::FMOD_Reverb_GetMemoryInfo(self.reverb, memory_bits, event_memory_bits, &mut memory_used, &mut details) } {
-            enums::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
+            enums::Result::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
             e => Err(e)
         }
     }
@@ -140,7 +140,7 @@ impl Reverb {
             let mut user_data : *mut c_void = ::std::ptr::null_mut();
 
             match ffi::FMOD_Reverb_GetUserData(self.reverb, &mut user_data) {
-                enums::Ok => {
+                enums::Result::Ok => {
                     let tmp : &mut T = transmute::<*mut c_void, &mut T>(user_data);
                     
                     Ok(tmp)

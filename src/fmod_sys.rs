@@ -97,7 +97,7 @@ extern "C" fn file_open_callback(name: *mut c_char, unicode: c_int, file_size: *
                             None => ::std::ptr::null_mut()
                         };
                     }
-                   enums::Ok
+                   enums::Result::Ok
                 }
                 None => {
                     unsafe {
@@ -105,7 +105,7 @@ extern "C" fn file_open_callback(name: *mut c_char, unicode: c_int, file_size: *
                         *handle = std::ptr::null_mut();
                         *user_data = std::ptr::null_mut();
                     }
-                    enums::FileNotFound
+                    enums::Result::FileNotFound
                 }
             }
         },
@@ -115,7 +115,7 @@ extern "C" fn file_open_callback(name: *mut c_char, unicode: c_int, file_size: *
                 *handle = std::ptr::null_mut();
                 *user_data = std::ptr::null_mut();
             }
-            enums::Ok
+            enums::Result::Ok
         }
     }
 }
@@ -132,9 +132,9 @@ extern "C" fn file_close_callback(handle: *mut c_void, user_data: *mut c_void) -
                     Some(std::mem::transmute(user_data))
                 });
             }
-            enums::Ok
+            enums::Result::Ok
         }
-        None => enums::Ok
+        None => enums::Result::Ok
     }
 }
 
@@ -154,13 +154,13 @@ extern "C" fn file_read_callback(handle: *mut c_void, buffer: *mut c_void, size_
                 });
                 *bytes_read = read_bytes as u32;
                 if read_bytes < size_bytes as uint {
-                    enums::FileEOF
+                    enums::Result::FileEOF
                 } else {
-                   enums::Ok
+                   enums::Result::Ok
                 }
             }
         }
-        None => enums::Ok
+        None => enums::Result::Ok
     }
 }
 
@@ -176,9 +176,9 @@ extern "C" fn file_seek_callback(handle: *mut c_void, pos: c_uint, user_data: *m
                     Some(std::mem::transmute(user_data))
                 });
             }
-            enums::Ok
+            enums::Result::Ok
         }
-        None => enums::Ok
+        None => enums::Result::Ok
     }
 }
 
@@ -199,13 +199,13 @@ extern "C" fn pcm_read_callback(sound: *mut ffi::FMOD_SOUND, data: *mut c_void, 
                         let ret = p(&ffi::FFI::wrap(sound), data_vec.as_mut_slice());
                         ret
                     },
-                    None => enums::Ok
+                    None => enums::Result::Ok
                 }
             } else {
-               enums::Ok
+               enums::Result::Ok
             }
         } else {
-            enums::Ok
+            enums::Result::Ok
         }
     }
 }
@@ -221,13 +221,13 @@ extern "C" fn non_block_callback(sound: *mut ffi::FMOD_SOUND, result: enums::Res
 
                 match callbacks.non_block {
                     Some(p) => p(&ffi::FFI::wrap(sound), result),
-                    None => enums::Ok
+                    None => enums::Result::Ok
                 }
             } else {
-               enums::Ok
+               enums::Result::Ok
             }
         } else {
-            enums::Ok
+            enums::Result::Ok
         }
     }
 }
@@ -243,13 +243,13 @@ extern "C" fn pcm_set_pos_callback(sound: *mut ffi::FMOD_SOUND, sub_sound: c_int
 
                 match callbacks.pcm_set_pos {
                     Some(p) => p(&ffi::FFI::wrap(sound), sub_sound, position, FmodTimeUnit(postype)),
-                    None => enums::Ok
+                    None => enums::Result::Ok
                 }
             } else {
-               enums::Ok
+               enums::Result::Ok
             }
         } else {
-            enums::Ok
+            enums::Result::Ok
         }
     }
 }
@@ -320,10 +320,10 @@ impl Default for FmodSoftwareFormat {
     fn default() -> FmodSoftwareFormat {
         FmodSoftwareFormat {
             sample_rate: 0i32,
-            format: enums::SoundFormatNone,
+            format: enums::SoundFormat::SoundFormatNone,
             num_output_channels: 0i32,
             max_input_channels: 0i32,
-            resample_method: enums::DSPResamplerNoInterp,
+            resample_method: enums::DSPResampler::DSPResamplerNoInterp,
             bits: 0i32
         }
     }
@@ -506,7 +506,7 @@ impl Default for FmodCreateSoundexInfo {
             file_offset: 0u32,
             num_channels: 0i32,
             default_frequency: 0i32,
-            format: enums::SoundFormatNone,
+            format: enums::SoundFormat::SoundFormatNone,
             decode_buffer_size: 0u32,
             initial_subsound: 0i32,
             num_subsounds: 0i32,
@@ -518,14 +518,14 @@ impl Default for FmodCreateSoundexInfo {
             encryption_key: String::new(),
             max_polyphony: 0i32,
             user_data: box ffi::SoundData::new(),
-            suggested_sound_type: enums::SoundTypeUnknown,
+            suggested_sound_type: enums::SoundType::SoundTypeUnknown,
             user_open: None,
             user_close: None,
             user_read: None,
             user_seek: None,
             user_async_read: None,
             user_async_cancel: None,
-            speaker_map: enums::SpeakerMapTypeDefault,
+            speaker_map: enums::SpeakerMapType::SpeakerMapTypeDefault,
             initial_sound_group: ffi::FFI::wrap(::std::ptr::null_mut()),
             initial_seek_position: 0u32,
             initial_seek_pos_type: FmodTimeUnit(0u32),
@@ -939,7 +939,7 @@ impl FmodSys {
         let mut tmp = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_System_Create(&mut tmp) } {
-            enums::Ok => Ok(FmodSys{system: tmp, is_first: true}),
+            enums::Result::Ok => Ok(FmodSys{system: tmp, is_first: true}),
             err => Err(err)
         }
     }
@@ -960,19 +960,19 @@ impl FmodSys {
         if self.is_first && self.system.is_not_null() {
             unsafe {
                 match match ffi::FMOD_System_Close(self.system) {
-                    enums::Ok => ffi::FMOD_System_Release(self.system),
+                    enums::Result::Ok => ffi::FMOD_System_Release(self.system),
                     e => e
                 } {
-                    enums::Ok => {
+                    enums::Result::Ok => {
                         self.system = ::std::ptr::null_mut();
-                       enums::Ok
+                       enums::Result::Ok
                     }
                     e => e
                 }
                 
             }
         } else {
-            enums::Ok
+            enums::Result::Ok
         }
     }
 
@@ -1004,7 +1004,7 @@ impl FmodSys {
         } else {
             unsafe { ffi::FMOD_System_CreateSound(self.system, ::std::ptr::null(), op, ex, sound::get_fffi(&mut sound)) }
         } {
-            enums::Ok => {
+            enums::Result::Ok => {
                 Ok(sound)
             },
             e => Err(e)
@@ -1038,7 +1038,7 @@ impl FmodSys {
         } else {
             unsafe { ffi::FMOD_System_CreateStream(self.system, ::std::ptr::null(), op, ex, sound::get_fffi(&mut sound)) }
         } {
-            enums::Ok => Ok(sound),
+            enums::Result::Ok => Ok(sound),
             err => Err(err)
         }
     }
@@ -1049,7 +1049,7 @@ impl FmodSys {
 
         t_group_name.with_c_str(|c_str|{
             match unsafe { ffi::FMOD_System_CreateChannelGroup(self.system, c_str, &mut channel_group) } {
-                enums::Ok => Ok(ffi::FFI::wrap(channel_group)),
+                enums::Result::Ok => Ok(ffi::FFI::wrap(channel_group)),
                 e => Err(e)
             }
         })
@@ -1061,7 +1061,7 @@ impl FmodSys {
 
         t_group_name.with_c_str(|c_str|{
             match unsafe { ffi::FMOD_System_CreateSoundGroup(self.system, c_str, &mut sound_group) } {
-                enums::Ok => Ok(ffi::FFI::wrap(sound_group)),
+                enums::Result::Ok => Ok(ffi::FFI::wrap(sound_group)),
                 e => Err(e)
             }
         })
@@ -1071,7 +1071,7 @@ impl FmodSys {
         let mut t_reverb = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_System_CreateReverb(self.system, &mut t_reverb) } {
-            enums::Ok => Ok(ffi::FFI::wrap(t_reverb)),
+            enums::Result::Ok => Ok(ffi::FFI::wrap(t_reverb)),
             e => Err(e)
         }
     }
@@ -1080,7 +1080,7 @@ impl FmodSys {
         let mut t_dsp = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_System_CreateDSP(self.system, ::std::ptr::null_mut(), &mut t_dsp) } {
-            enums::Ok => Ok(dsp::from_ptr_first(t_dsp)),
+            enums::Result::Ok => Ok(dsp::from_ptr_first(t_dsp)),
             e => Err(e)
         }
     }
@@ -1090,7 +1090,7 @@ impl FmodSys {
         let mut t_description = dsp::get_description_ffi(description);
 
         match unsafe { ffi::FMOD_System_CreateDSP(self.system, &mut t_description, &mut t_dsp) } {
-            enums::Ok => Ok(dsp::from_ptr_first(t_dsp)),
+            enums::Result::Ok => Ok(dsp::from_ptr_first(t_dsp)),
             e => Err(e)
         }
     }
@@ -1099,7 +1099,7 @@ impl FmodSys {
         let mut t_dsp = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_System_CreateDSPByType(self.system, _type, &mut t_dsp) } {
-            enums::Ok => Ok(dsp::from_ptr_first(t_dsp)),
+            enums::Result::Ok => Ok(dsp::from_ptr_first(t_dsp)),
             e => Err(e)
         }
     }
@@ -1109,10 +1109,10 @@ impl FmodSys {
     }
 
     pub fn get_output(&self) -> Result<enums::OutputType, enums::Result> {
-        let mut output_type = enums::OutputTypeAutoDetect;
+        let mut output_type = enums::OutputType::OutputTypeAutoDetect;
         
         match unsafe { ffi::FMOD_System_GetOutput(self.system, &mut output_type) } {
-            enums::Ok => Ok(output_type),
+            enums::Result::Ok => Ok(output_type),
             e => Err(e)
         }
     }
@@ -1121,7 +1121,7 @@ impl FmodSys {
         let mut num_drivers = 0i32;
 
         match unsafe { ffi::FMOD_System_GetNumDrivers(self.system, &mut num_drivers) } {
-            enums::Ok => Ok(num_drivers),
+            enums::Result::Ok => Ok(num_drivers),
             e => Err(e)
         }
     }
@@ -1132,7 +1132,7 @@ impl FmodSys {
 
         tmp_v.with_c_str(|c_str|{
             match unsafe { ffi::FMOD_System_GetDriverInfo(self.system, id, c_str as *mut c_char, name_len as i32, &mut guid) } {
-                enums::Ok => Ok((FmodGuid{data1: guid.Data1, data2: guid.Data2, data3: guid.Data3, data4: guid.Data4},
+                enums::Result::Ok => Ok((FmodGuid{data1: guid.Data1, data2: guid.Data2, data3: guid.Data3, data4: guid.Data4},
                     unsafe {string::raw::from_buf(c_str as *const u8).clone() })),
                 e => Err(e)
             }
@@ -1141,11 +1141,11 @@ impl FmodSys {
 
     pub fn get_driver_caps(&self, id: i32) -> Result<(FmodCaps, i32, enums::SpeakerMode), enums::Result> {
         let mut fmod_caps = 0u32;
-        let mut speaker_mode = enums::SpeakerModeRaw;
+        let mut speaker_mode = enums::SpeakerMode::SpeakerModeRaw;
         let mut control_panel_output_rate = 0i32;
 
         match unsafe { ffi::FMOD_System_GetDriverCaps(self.system, id, &mut fmod_caps, &mut control_panel_output_rate, &mut speaker_mode) } {
-            enums::Ok => Ok((FmodCaps(fmod_caps), control_panel_output_rate, speaker_mode)),
+            enums::Result::Ok => Ok((FmodCaps(fmod_caps), control_panel_output_rate, speaker_mode)),
             e => Err(e)
         }
     }
@@ -1158,7 +1158,7 @@ impl FmodSys {
         let mut driver = 0i32;
 
         match unsafe { ffi::FMOD_System_GetDriver(self.system, &mut driver) } {
-            enums::Ok => Ok(driver),
+            enums::Result::Ok => Ok(driver),
             e => Err(e)
         }
     }
@@ -1171,7 +1171,7 @@ impl FmodSys {
         let mut num_hardware_channels = 0i32;
 
         match unsafe { ffi::FMOD_System_GetHardwareChannels(self.system, &mut num_hardware_channels) } {
-            enums::Ok => Ok(num_hardware_channels),
+            enums::Result::Ok => Ok(num_hardware_channels),
             e => Err(e)
         }
     }
@@ -1184,7 +1184,7 @@ impl FmodSys {
         let mut num_software_channels = 0i32;
 
         match unsafe { ffi::FMOD_System_GetSoftwareChannels(self.system, &mut num_software_channels) } {
-            enums::Ok => Ok(num_software_channels),
+            enums::Result::Ok => Ok(num_software_channels),
             e => Err(e)
         }
     }
@@ -1196,12 +1196,18 @@ impl FmodSys {
     }
 
     pub fn get_software_format(&self) -> Result<FmodSoftwareFormat, enums::Result> {
-        let mut t = FmodSoftwareFormat{sample_rate: 0, format: enums::SoundFormatNone, num_output_channels: 0,
-            max_input_channels: 0, resample_method: enums::DSPResamplerNoInterp, bits: 0};
+        let mut t = FmodSoftwareFormat {
+            sample_rate: 0,
+            format: enums::SoundFormat::SoundFormatNone,
+            num_output_channels: 0,
+            max_input_channels: 0,
+            resample_method: enums::DSPResampler::DSPResamplerNoInterp,
+            bits: 0
+        };
 
         match unsafe { ffi::FMOD_System_GetSoftwareFormat(self.system, &mut t.sample_rate, &mut t.format,
             &mut t.num_output_channels, &mut t.max_input_channels, &mut t.resample_method, &mut t.bits) } {
-            enums::Ok => Ok(t),
+            enums::Result::Ok => Ok(t),
             e => Err(e)
         }
     }
@@ -1215,7 +1221,7 @@ impl FmodSys {
         let mut num_buffers = 0i32;
 
         match unsafe { ffi::FMOD_System_GetDSPBufferSize(self.system, &mut buffer_length, &mut num_buffers) } {
-            enums::Ok => Ok((buffer_length, num_buffers)),
+            enums::Result::Ok => Ok((buffer_length, num_buffers)),
             e => Err(e)
         }
     }
@@ -1290,7 +1296,7 @@ impl FmodSys {
         };
 
         match unsafe { ffi::FMOD_System_GetAdvancedSettings(self.system, &mut advanced_settings) } {
-            enums::Ok => {
+            enums::Result::Ok => {
                 let mut converted_ASIO_channel_vec = Vec::new();
                 let mut converted_ASIO_speaker_vec = Vec::new();
 
@@ -1312,7 +1318,7 @@ impl FmodSys {
                         loop {
                             let tmp = advanced_settings.ASIOSpeakerList.offset(it);
 
-                            if *tmp == enums::SpeakerNull {
+                            if *tmp == enums::Speaker::SpeakerNull {
                                 break;
                             }
                             converted_ASIO_speaker_vec.push(*tmp);
@@ -1364,10 +1370,10 @@ impl FmodSys {
     }
 
     pub fn get_speaker_mode(&self) -> Result<enums::SpeakerMode, enums::Result> {
-        let mut speaker_mode = enums::SpeakerModeRaw;
+        let mut speaker_mode = enums::SpeakerMode::SpeakerModeRaw;
 
         match unsafe { ffi::FMOD_System_GetSpeakerMode(self.system, &mut speaker_mode) } {
-            enums::Ok => Ok(speaker_mode),
+            enums::Result::Ok => Ok(speaker_mode),
             e => Err(e)
         }
     }
@@ -1386,7 +1392,7 @@ impl FmodSys {
 
         tmp_v.with_c_str(|c_str|{
             match unsafe { ffi::FMOD_System_LoadPlugin(self.system, c_str, &mut handle, priority) } {
-                enums::Ok => Ok(FmodPluginHandle(handle)),
+                enums::Result::Ok => Ok(FmodPluginHandle(handle)),
                 e => Err(e)
             }
         })
@@ -1400,7 +1406,7 @@ impl FmodSys {
         let mut num_plugins = 0i32;
 
         match unsafe { ffi::FMOD_System_GetNumPlugins(self.system, plugin_type, &mut num_plugins) } {
-            enums::Ok => Ok(num_plugins),
+            enums::Result::Ok => Ok(num_plugins),
             e => Err(e)
         }
     }
@@ -1409,19 +1415,19 @@ impl FmodSys {
         let mut handle = 0u32;
 
         match unsafe { ffi::FMOD_System_GetPluginHandle(self.system, plugin_type, index, &mut handle) } {
-            enums::Ok => Ok(FmodPluginHandle(handle)),
+            enums::Result::Ok => Ok(FmodPluginHandle(handle)),
             e => Err(e)
         }
     }
 
     pub fn get_plugin_info(&self, FmodPluginHandle(handle): FmodPluginHandle, name_len: u32) -> Result<(String, enums::PluginType, u32), enums::Result> {
         let name = String::with_capacity(name_len as uint);
-        let mut plugin_type = enums::PluginTypeOutput;
+        let mut plugin_type = enums::PluginType::PluginTypeOutput;
         let mut version = 0u32;
 
         name.with_c_str(|c_str|{
             match unsafe { ffi::FMOD_System_GetPluginInfo(self.system, handle, &mut plugin_type, c_str as *mut c_char, name_len as i32, &mut version) } {
-                enums::Ok => Ok((unsafe {string::raw::from_buf(c_str as *const u8).clone() }, plugin_type, version)),
+                enums::Result::Ok => Ok((unsafe {string::raw::from_buf(c_str as *const u8).clone() }, plugin_type, version)),
                 e => Err(e)
             }
         })
@@ -1435,7 +1441,7 @@ impl FmodSys {
         let mut handle = 0u32;
 
         match unsafe { ffi::FMOD_System_GetOutputByPlugin(self.system, &mut handle) } {
-            enums::Ok => Ok(FmodPluginHandle(handle)),
+            enums::Result::Ok => Ok(FmodPluginHandle(handle)),
             e => Err(e)
         }
     }
@@ -1444,7 +1450,7 @@ impl FmodSys {
         let mut dsp = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_System_CreateDSPByPlugin(self.system, handle, &mut dsp) } {
-            enums::Ok => Ok(dsp::from_ptr_first(dsp)),
+            enums::Result::Ok => Ok(dsp::from_ptr_first(dsp)),
             e => Err(e)
         }
     }
@@ -1457,7 +1463,7 @@ impl FmodSys {
         let mut num_listeners = 0i32;
 
         match unsafe { ffi::FMOD_System_Get3DNumListeners(self.system, &mut num_listeners) } {
-            enums::Ok => Ok(num_listeners),
+            enums::Result::Ok => Ok(num_listeners),
             e => Err(e)
         }
     }
@@ -1479,7 +1485,7 @@ impl FmodSys {
         let mut up = vector::get_ffi(&vector::FmodVector::new());
 
         match unsafe { ffi::FMOD_System_Get3DListenerAttributes(self.system, listener, &mut pos, &mut vel, &mut forward, &mut up) } {
-            enums::Ok => Ok((vector::from_ptr(pos), vector::from_ptr(vel), vector::from_ptr(forward), vector::from_ptr(up))),
+            enums::Result::Ok => Ok((vector::from_ptr(pos), vector::from_ptr(vel), vector::from_ptr(forward), vector::from_ptr(up))),
             e => Err(e)
         }
     }
@@ -1498,7 +1504,7 @@ impl FmodSys {
         let mut active = 0i32;
 
         match unsafe { ffi::FMOD_System_Get3DSpeakerPosition(self.system, speaker, &mut x, &mut y, &mut active) } {
-            enums::Ok => Ok((x, y, match active {
+            enums::Result::Ok => Ok((x, y, match active {
                 1 => true,
                 _ => false
             })),
@@ -1516,7 +1522,7 @@ impl FmodSys {
         let mut roll_off_scale = 0f32;
 
         match unsafe { ffi::FMOD_System_Get3DSettings(self.system, &mut doppler_scale, &mut distance_factor, &mut roll_off_scale) } {
-            enums::Ok => Ok((doppler_scale, distance_factor, roll_off_scale)),
+            enums::Result::Ok => Ok((doppler_scale, distance_factor, roll_off_scale)),
             e => Err(e)
         }
     }
@@ -1530,7 +1536,7 @@ impl FmodSys {
         let mut file_buffer_size_type = 0u32;
 
         match unsafe { ffi::FMOD_System_GetStreamBufferSize(self.system, &mut file_buffer_size, &mut file_buffer_size_type) } {
-            enums::Ok => Ok((file_buffer_size, FmodTimeUnit(file_buffer_size_type))),
+            enums::Result::Ok => Ok((file_buffer_size, FmodTimeUnit(file_buffer_size_type))),
             e => Err(e)
         }
     }
@@ -1539,7 +1545,7 @@ impl FmodSys {
         let mut version = 0u32;
 
         match unsafe { ffi::FMOD_System_GetVersion(self.system, &mut version) } {
-            enums::Ok => Ok(version),
+            enums::Result::Ok => Ok(version),
             e => Err(e)
         }
     }
@@ -1548,7 +1554,7 @@ impl FmodSys {
         let mut output_h = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_System_GetOutputHandle(self.system, &mut output_h) } {
-            enums::Ok => Ok(FmodOutputHandle{handle: output_h}),
+            enums::Result::Ok => Ok(FmodOutputHandle{handle: output_h}),
             e => Err(e)
         }
     }
@@ -1557,7 +1563,7 @@ impl FmodSys {
         let mut playing_chans = 0i32;
 
         match unsafe { ffi::FMOD_System_GetChannelsPlaying(self.system, &mut playing_chans) } {
-            enums::Ok => Ok(playing_chans),
+            enums::Result::Ok => Ok(playing_chans),
             e => Err(e)
         }
     }
@@ -1570,7 +1576,7 @@ impl FmodSys {
         let mut total = 0f32;
 
         match unsafe { ffi::FMOD_System_GetCPUUsage(self.system, &mut dsp, &mut stream, &mut geometry, &mut update, &mut total) } {
-            enums::Ok => Ok((dsp, stream, geometry, update, total)),
+            enums::Result::Ok => Ok((dsp, stream, geometry, update, total)),
             e => Err(e)
         }
     }
@@ -1581,7 +1587,7 @@ impl FmodSys {
         let mut total = 0i32;
 
         match unsafe { ffi::FMOD_System_GetSoundRAM(self.system, &mut current_alloced, &mut max_alloced, &mut total) } {
-            enums::Ok => Ok((current_alloced, max_alloced, total)),
+            enums::Result::Ok => Ok((current_alloced, max_alloced, total)),
             e => Err(e)
         }
     }
@@ -1590,7 +1596,7 @@ impl FmodSys {
         let mut num_drives = 0i32;
 
         match unsafe { ffi::FMOD_System_GetNumCDROMDrives(self.system, &mut num_drives) } {
-            enums::Ok => Ok(num_drives),
+            enums::Result::Ok => Ok(num_drives),
             e => Err(e)
         }
     }
@@ -1605,7 +1611,7 @@ impl FmodSys {
                 device_name.with_c_str(|c_device_name|{
                     match unsafe { ffi::FMOD_System_GetCDROMDriveName(self.system, drive, c_drive_name as *mut c_char, drive_name_len as i32, c_scsi_name as *mut c_char,
                         scsi_name_len as i32, c_device_name as *mut c_char, device_name_len as i32) } {
-                        enums::Ok => Ok((unsafe {string::raw::from_buf(c_drive_name as *const u8).clone() },
+                        enums::Result::Ok => Ok((unsafe {string::raw::from_buf(c_drive_name as *const u8).clone() },
                                         unsafe {string::raw::from_buf(c_scsi_name as *const u8).clone() },
                                         unsafe {string::raw::from_buf(c_device_name as *const u8).clone() })),
                         e => Err(e)
@@ -1619,7 +1625,7 @@ impl FmodSys {
         let mut ptr = Vec::from_elem(spectrum_size, 0f32);
         let c_window_type = match window_type {
             Some(wt) => wt,
-            None => enums::DSP_FFT_WindowRect
+            None => enums::DSP_FFT_Window::DSP_FFT_WindowRect
         };
         let c_channel_offset = match channel_offset {
             Some(co) => co,
@@ -1627,7 +1633,7 @@ impl FmodSys {
         };
 
         match unsafe { ffi::FMOD_System_GetSpectrum(self.system, ptr.as_mut_ptr(), spectrum_size as c_int, c_channel_offset, c_window_type) } {
-            enums::Ok => Ok(ptr),
+            enums::Result::Ok => Ok(ptr),
             e => Err(e),
         }
     }
@@ -1636,7 +1642,7 @@ impl FmodSys {
         let mut ptr = Vec::from_elem(wave_size, 0f32);
 
         match unsafe { ffi::FMOD_System_GetWaveData(self.system, ptr.as_mut_ptr(), wave_size as c_int, channel_offset) } {
-            enums::Ok => Ok(ptr),
+            enums::Result::Ok => Ok(ptr),
             e => Err(e)
         }
     }
@@ -1645,7 +1651,7 @@ impl FmodSys {
         let mut channel = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_System_GetChannel(self.system, channel_id, &mut channel) } {
-            enums::Ok => Ok(ffi::FFI::wrap(channel)),
+            enums::Result::Ok => Ok(ffi::FFI::wrap(channel)),
             e => Err(e)
         }
     }
@@ -1654,7 +1660,7 @@ impl FmodSys {
         let mut channel_group = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_System_GetMasterChannelGroup(self.system, &mut channel_group) } {
-            enums::Ok => Ok(ffi::FFI::wrap(channel_group)),
+            enums::Result::Ok => Ok(ffi::FFI::wrap(channel_group)),
             e => Err(e)
         }
     }
@@ -1663,7 +1669,7 @@ impl FmodSys {
         let mut sound_group = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_System_GetMasterSoundGroup(self.system, &mut sound_group) } {
-            enums::Ok => Ok(ffi::FFI::wrap(sound_group)),
+            enums::Result::Ok => Ok(ffi::FFI::wrap(sound_group)),
             e => Err(e)
         }
     }
@@ -1678,7 +1684,7 @@ impl FmodSys {
         let mut properties = reverb_properties::get_ffi(Default::default());
 
         match unsafe { ffi::FMOD_System_GetReverbProperties(self.system, &mut properties) } {
-            enums::Ok => Ok(reverb_properties::from_ptr(properties)),
+            enums::Result::Ok => Ok(reverb_properties::from_ptr(properties)),
             e => Err(e)
         }
     }
@@ -1693,7 +1699,7 @@ impl FmodSys {
         let mut properties = reverb_properties::get_ffi(Default::default());
 
         match unsafe { ffi::FMOD_System_GetReverbAmbientProperties(self.system, &mut properties) } {
-            enums::Ok => Ok(reverb_properties::from_ptr(properties)),
+            enums::Result::Ok => Ok(reverb_properties::from_ptr(properties)),
             e => Err(e)
         }
     }
@@ -1702,7 +1708,7 @@ impl FmodSys {
         let mut head = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_System_GetDSPHead(self.system, &mut head) } {
-            enums::Ok => Ok(ffi::FFI::wrap(head)),
+            enums::Result::Ok => Ok(ffi::FFI::wrap(head)),
             e => Err(e)
         }
     }
@@ -1711,7 +1717,7 @@ impl FmodSys {
         let mut t_connection = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_System_AddDSP(self.system, ffi::FFI::unwrap(dsp), &mut t_connection) } {
-            enums::Ok => Ok(ffi::FFI::wrap(t_connection)),
+            enums::Result::Ok => Ok(ffi::FFI::wrap(t_connection)),
             e => Err(e)
         }
     }
@@ -1729,7 +1735,7 @@ impl FmodSys {
         let mut lo = 0u32;
 
         match unsafe { ffi::FMOD_System_GetDSPClock(self.system, &mut hi, &mut lo) } {
-            enums::Ok => Ok((hi, lo)),
+            enums::Result::Ok => Ok((hi, lo)),
             e => Err(e)
         }
     }
@@ -1738,7 +1744,7 @@ impl FmodSys {
         let mut num_drivers = 0i32;
 
         match unsafe { ffi::FMOD_System_GetRecordNumDrivers(self.system, &mut num_drivers) } {
-            enums::Ok => Ok(num_drivers),
+            enums::Result::Ok => Ok(num_drivers),
             e => Err(e)
         }
     }
@@ -1749,7 +1755,7 @@ impl FmodSys {
 
         tmp_v.with_c_str(|c_str|{
             match unsafe { ffi::FMOD_System_GetRecordDriverInfo(self.system, id, c_str as *mut c_char, name_len as i32, &mut guid) } {
-                enums::Ok => Ok((FmodGuid{data1: guid.Data1, data2: guid.Data2, data3: guid.Data3, data4: guid.Data4},
+                enums::Result::Ok => Ok((FmodGuid{data1: guid.Data1, data2: guid.Data2, data3: guid.Data3, data4: guid.Data4},
                     unsafe {string::raw::from_buf(c_str as *const u8).clone() })),
                 e => Err(e)
             }
@@ -1762,7 +1768,7 @@ impl FmodSys {
         let mut max_frequency = 0i32;
 
         match unsafe { ffi::FMOD_System_GetRecordDriverCaps(self.system, id, &mut fmod_caps, &mut min_frequency, &mut max_frequency) } {
-            enums::Ok => Ok((FmodCaps(fmod_caps), min_frequency, max_frequency)),
+            enums::Result::Ok => Ok((FmodCaps(fmod_caps), min_frequency, max_frequency)),
             e => Err(e)
         }
     }
@@ -1771,7 +1777,7 @@ impl FmodSys {
         let mut position = 0u32;
 
         match unsafe { ffi::FMOD_System_GetRecordPosition(self.system, id, &mut position) } {
-            enums::Ok => Ok(position),
+            enums::Result::Ok => Ok(position),
             e => Err(e)
         }
     }
@@ -1793,7 +1799,7 @@ impl FmodSys {
         let mut is_recording = 0i32;
         
         match unsafe { ffi::FMOD_System_IsRecording(self.system, id, &mut is_recording) } {
-            enums::Ok => Ok(is_recording == 1),
+            enums::Result::Ok => Ok(is_recording == 1),
             e => Err(e)
         }
     }
@@ -1802,7 +1808,7 @@ impl FmodSys {
         let mut geometry = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_System_CreateGeometry(self.system, max_polygons, max_vertices, &mut geometry) } {
-            enums::Ok => Ok(ffi::FFI::wrap(geometry)),
+            enums::Result::Ok => Ok(ffi::FFI::wrap(geometry)),
             e => Err(e)
         }
     }
@@ -1815,7 +1821,7 @@ impl FmodSys {
         let mut max_world_size = 0f32;
 
         match unsafe { ffi::FMOD_System_GetGeometrySettings(self.system, &mut max_world_size) } {
-            enums::Ok => Ok(max_world_size),
+            enums::Result::Ok => Ok(max_world_size),
             e => Err(e)
         }
     }
@@ -1827,7 +1833,7 @@ impl FmodSys {
         let mut reverb = 0f32;
 
         match unsafe { ffi::FMOD_System_GetGeometryOcclusion(self.system, &listener, &source, &mut direct, &mut reverb) } {
-            enums::Ok => Ok((vector::from_ptr(listener), vector::from_ptr(source), direct, reverb)),
+            enums::Result::Ok => Ok((vector::from_ptr(listener), vector::from_ptr(source), direct, reverb)),
             e => Err(e)
         }
     }
@@ -1838,7 +1844,7 @@ impl FmodSys {
         let mut memory_used = 0u32;
 
         match unsafe { ffi::FMOD_System_GetMemoryInfo(self.system, memory_bits, event_memory_bits, &mut memory_used, &mut details) } {
-            enums::Ok => Ok((memory_used, from_memory_usage_details_ptr(details))),
+            enums::Result::Ok => Ok((memory_used, from_memory_usage_details_ptr(details))),
             e => Err(e)
         }
     }

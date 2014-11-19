@@ -28,8 +28,7 @@ use libc::c_uint;
 #[deriving(Clone, PartialEq, PartialOrd, Show)]
 #[repr(C)]
 /// Error codes. Returned from every function.
-pub enum Result
-{
+pub enum Result {
     /// No errors.
     Ok,
     /// Tried to call lock a second time before unlock was called.
@@ -232,8 +231,7 @@ pub enum Result
 /// * For example a 6 channel sound will default to one channel per 5.1 output speaker.
 /// * Another example is a stereo sound. It will default to left = front left, right = front right.
 /// * This is for sounds that are not 'default'. For example you might have a sound that is 6 channels but actually made up of 3 stereo pairs, that should all be located in front left, front right only.
-pub enum SpeakerMapType
-{
+pub enum SpeakerMapType {
     /// This is the default, and just means FMOD decides which speakers it puts the source channels.
     SpeakerMapTypeDefault,
     /// This means the sound is made up of all mono sounds. All voices will be panned to the front center by default in this case.
@@ -247,8 +245,7 @@ pub enum SpeakerMapType
 #[deriving(Clone, PartialEq, PartialOrd, Show)]
 #[repr(C)]
 /// These definitions describe the native format of the hardware or software buffer that will be used.
-pub enum SoundFormat
-{
+pub enum SoundFormat {
     /// Uninitialized / unknown.
     SoundFormatNone,
     /// 8bit integer PCM data.
@@ -290,8 +287,7 @@ pub enum SoundFormat
 #[deriving(Clone, PartialEq, PartialOrd, Show)]
 #[repr(C)]
 /// These definitions describe the type of song being played.
-pub enum SoundType
-{
+pub enum SoundType {
     /// 3rd party / unknown plugin format.
     SoundTypeUnknown,
     /// AIFF.
@@ -359,8 +355,7 @@ pub enum SoundType
 #[deriving(Clone, PartialEq, PartialOrd, Show)]
 #[repr(C)]
 /// List of tag types that could be stored within a sound. These include id3 tags, metadata from netstreams and vorbis/asf data.
-pub enum TagType
-{
+pub enum TagType {
     TagTypeUnknown = 0,
     TagTypeID3V1,
     TagTypeID3V2,
@@ -382,8 +377,7 @@ pub enum TagType
 #[deriving(Clone, PartialEq, PartialOrd, Show)]
 #[repr(C)]
 /// List of data types that can be returned by [`Sound::get_tag`](../../struct.Sound.html#method.get_tag)
-pub enum TagDataType
-{
+pub enum TagDataType {
     TagDataTypeBinary = 0,
     TagDataTypeInt,
     TagDataTypeFloat,
@@ -401,8 +395,7 @@ pub enum TagDataType
 #[deriving(Clone, PartialEq, PartialOrd, Show)]
 #[repr(C)]
 /// Special channel index values for FMOD functions.
-pub enum ChannelIndex
-{
+pub enum ChannelIndex {
     /// For a channel index, FMOD chooses a free voice using the priority system.
     ChannelFree  = -1,
     /// For a channel index, re-use the channel handle that was passed in.
@@ -414,8 +407,7 @@ pub enum ChannelIndex
 /// List of windowing methods used in spectrum analysis to reduce leakage / transient signals intefering with the analysis.
 /// This is a problem with analysis of continuous signals that only have a small portion of the signal sample (the fft window size).
 /// Windowing the signal with a curve or triangle tapers the sides of the fft window to help alleviate this problem.
-pub enum DSP_FFT_Window
-{
+pub enum DSP_FFT_Window {
     /// w[n] = 1.0
     DSP_FFT_WindowRect,
     /// w[n] = TRI(2n/N)
@@ -437,8 +429,7 @@ pub enum DSP_FFT_Window
 #[deriving(Clone, PartialEq, PartialOrd, Show)]
 #[repr(C)]
 /// Types of delay that can be used with [`Channel::set_delay`](../../struct.Channel.html#method.set_delay) / [`Channel::get_delay`](../../struct.Channel.html#method.get_delay).
-pub enum DelayType
-{
+pub enum DelayType {
     /// Delay at the end of the sound in milliseconds. Use delayhi only. [`Channel::is_playing`](../../struct.Channel.html#method.is_playing) will remain true until this delay has passed even though the sound itself has stopped playing.
     DelayTypeEndMS,
     /// Time the sound started if [`Channel::get_delay`](../../struct.Channel.html#method.get_delay) is used, or if [`Channel::set_delay`](../../struct.Channel.html#method.set_delay) is used, the sound will delay playing until this exact tick.
@@ -456,8 +447,7 @@ pub enum DelayType
 #[deriving(Clone, PartialEq, PartialOrd, Show)]
 #[repr(C)]
 /// These output types are used with [`FmodSys::set_output`](../../struct.FmodSys.html#method.set_output) / [`FmodSys::get_output`](../../struct.FmodSys.html#method.get_output), to choose which output method to use.
-pub enum OutputType
-{
+pub enum OutputType {
     /// Picks the best output mode for the platform. This is the default.
     OutputTypeAutoDetect,
     /// All             - 3rd party plugin, unknown. This is for use with [`FmodSys::get_output`](../../struct.FmodSys.html#method.get_output) only.
@@ -525,8 +515,7 @@ pub enum OutputType
 //FIXME
 /// These are speaker types defined for use with the [`Channel::set_speaker_level`](../../struct.Channel.html#method.set_speaker_level) command.
 /// It can also be used for speaker placement in the [`FmodSys::set_3D_speaker_position`](../../struct.FmodSys.html#method.set_3D_speaker_position) command.
-pub enum Speaker
-{
+pub enum Speaker {
     SpeakerFrontLeft,
     SpeakerFrontRight,
     SpeakerFrontCenter,
@@ -549,8 +538,7 @@ pub enum Speaker
 #[deriving(Clone, PartialEq, PartialOrd, Show)]
 #[repr(C)]
 /// These are speaker types defined for use with the [`FmodSys::set_speaker_mode`](../../struct.FmodSys.html#method.set_speaker_mode) or [`FmodSys::get_speaker_mode`](../../struct.FmodSys.html#method.get_speaker_mode) command.
-pub enum SpeakerMode
-{
+pub enum SpeakerMode {
     /// There is no specific speakermode. Sound channels are mapped in order of input to output. Use [`FmodSys::set_software_format`](../../struct.FmodSys.html#method.set_software_format) to specify speaker count. See remarks for more information.
     SpeakerModeRaw,
     /// The speakers are monaural.
@@ -581,8 +569,7 @@ pub enum SpeakerMode
 #[deriving(Clone, PartialEq, PartialOrd, Show)]
 #[repr(C)]
 /// List of interpolation types that the FMOD Ex software mixer supports.
-pub enum DSPResampler
-{
+pub enum DSPResampler {
     /// No interpolation. High frequency aliasing hiss will be audible depending on the sample rate of the sound.
     DSPResamplerNoInterp,
     /// Linear interpolation (default method). Fast and good quality, causes very slight lowpass effect on low frequency sounds.
@@ -600,8 +587,7 @@ pub enum DSPResampler
 #[deriving(Clone, PartialEq, PartialOrd, Show)]
 #[repr(C)]
 /// These are plugin types defined for use with the [`FmodSys::get_num_plugins`](../../struct.FmodSys.html#method.get_num_plugins), [`FmodSys::get_plugin_info`](../../struct.FmodSys.html#method.get_plugin_info) and [`FmodSys::unload_plugin`](../../struct.FmodSys.html#method.unload_plugin) functions.
-pub enum PluginType
-{
+pub enum PluginType {
     /// The plugin type is an output module. FMOD mixed audio will play through one of these devices
     PluginTypeOutput,
     /// The plugin type is a file format codec. FMOD will use these codecs to load file formats for playback.
@@ -644,8 +630,7 @@ pub enum OpenState
 #[deriving(Clone, PartialEq, PartialOrd, Show)]
 #[repr(C)]
 /// These callback types are used with [`Channel::set_callback`](../../struct.Channel.html#method.set_callback).
-pub enum SystemCallbackType
-{
+pub enum SystemCallbackType {
     /// Called from [`FmodSys::update`](../../struct.FmodSys.html#method.update) when the enumerated list of devices has changed.
     SystemCallbackTypeDeviceListChanged,
     /// Called from [`FmodSys::update`](../../struct.FmodSys.html#method.update) when an output device has been lost due to control panel parameter changes and FMOD cannot automatically recover.
@@ -669,8 +654,7 @@ pub enum SystemCallbackType
 #[deriving(Clone, PartialEq, PartialOrd, Show)]
 #[repr(C)]
 /// These flags are used with [`SoundGroup::set_max_audible_behavior`](../../struct.SoundGroup.html#method.set_max_audible_behavior) to determine what happens when more sounds are played than are specified with [`SoundGroup::set_max_audible`](../../struct.SoundGroup.html#method.set_max_audible).
-pub enum SoundGroupBehavior
-{
+pub enum SoundGroupBehavior {
     /// Any sound played that puts the sound count over the [`SoundGroup::set_max_audible`](../../struct.SoundGroup.html#method.set_max_audible) setting, will simply fail during [`Sound::play`](../../struct.Sound.html#method.play).
     SoundGroupBehaviorFail,
     /// Any sound played that puts the sound count over the [`SoundGroup::set_max_audible`](../../struct.SoundGroup.html#method.set_max_audible) setting, will be silent, then if another sound in the group stops the sound that was silent before becomes audible again.
@@ -687,8 +671,7 @@ pub enum SoundGroupBehavior
 #[repr(C)]
 /// These definitions can be used for creating FMOD defined special effects or DSP units.
 /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
-pub enum DspType
-{
+pub enum DspType {
     /// This unit was created via a non FMOD plugin so has an unknown purpose.
     Unknown,
     /// This unit does nothing but take inputs and mix them together then feed the result to the soundcard unit.
@@ -745,8 +728,7 @@ pub enum DspType
 #[repr(C)]
 /// Parameter types for the FMOD_DSP_TYPE_OSCILLATOR filter.
 /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
-pub enum DspOscillator
-{
+pub enum DspOscillator {
     /// Waveform type. 0 = sine. 1 = square. 2 = sawup. 3 = sawdown. 4 = triangle. 5 = noise.
     DspOscillatorType,
     /// Frequency of the sinewave in hz. 1.0 to 22000.0. Default = 220.0.
@@ -757,8 +739,7 @@ pub enum DspOscillator
 #[repr(C)]
 /// Parameter types for the FMOD_DSP_TYPE_LOWPASS filter.
 /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
-pub enum DspLowPass
-{
+pub enum DspLowPass {
     /// Lowpass Cutoff frequency in hz. 10.0 to 22000.0. Default = 5000.0.
     DspLowPassCutoff,
     /// Lowpass resonance Q value. 1.0 to 10.0. Default = 1.0.
@@ -772,8 +753,7 @@ pub enum DspLowPass
 // the filter used to produce the correct sounding playback in .IT files.
 // FMOD Ex's .IT playback uses this filter.
 /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
-pub enum DspITLowPass
-{
+pub enum DspITLowPass {
     /// Lowpass Cutoff frequency in hz. 1.0 to 22000.0. Default = 5000.0
     DspITLowPassCutoff,
     /// Lowpass resonance Q value. 0.0 to 127.0. Default = 1.0.
@@ -784,8 +764,7 @@ pub enum DspITLowPass
 #[repr(C)]
 /// Parameter types for the FMOD_DSP_TYPE_HIGHPASS filter.
 /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
-pub enum DspHighPass
-{
+pub enum DspHighPass {
     /// Highpass Cutoff frequency in hz. 1.0 to output 22000.0. Default = 5000.0.
     DspHighPassCutoff,
     /// Highpass resonance Q value. 1.0 to 10.0. Default = 1.0.
@@ -796,8 +775,7 @@ pub enum DspHighPass
 #[repr(C)]
 /// Parameter types for the DspTypeEcho filter.
 /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
-pub enum DspTypeEcho
-{
+pub enum DspTypeEcho {
     /// Echo delay in ms. 10 to 5000. Default = 500.
     DspTypeEchoDelay,
     /// Echo decay per delay. 0 to 1. 1.0 = No decay, 0.0 = total decay (ie simple 1 line delay). Default = 0.5.
@@ -814,8 +792,7 @@ pub enum DspTypeEcho
 #[repr(C)]
 /// Parameter types for the FMOD_DSP_TYPE_DELAY filter.
 /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
-pub enum DspDelay
-{
+pub enum DspDelay {
     /// Channel #0 Delay in ms. 0  to 10000. Default = 0.
     DspDelayCH0,
     /// Channel #1 Delay in ms. 0  to 10000. Default = 0.
@@ -856,8 +833,7 @@ pub enum DspDelay
 #[repr(C)]
 /// Parameter types for the FMOD_DSP_TYPE_FLANGE filter.
 /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
-pub enum DspFlange
-{
+pub enum DspFlange {
     /// Volume of original signal to pass to output. 0.0 to 1.0. Default = 0.45.
     DspFlangeDryMix,
     /// Volume of flange signal to pass to output. 0.0 to 1.0. Default = 0.55.
@@ -872,8 +848,7 @@ pub enum DspFlange
 #[repr(C)]
 /// Parameter types for the FMOD_DSP_TYPE_TREMOLO filter.
 /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
-pub enum DspTremolo
-{
+pub enum DspTremolo {
     /// LFO frequency in Hz. 0.1 to 20. Default = 4.
     DspTremoloFrequency,
     /// Tremolo depth. 0 to 1. Default = 0.
@@ -896,8 +871,7 @@ pub enum DspTremolo
 #[repr(C)]
 /// Parameter types for the FMOD_DSP_TYPE_DISTORTION filter.
 /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
-pub enum DspDistortion
-{
+pub enum DspDistortion {
     /// Distortion value. 0.0 to 1.0. Default = 0.5.
     DspDistortionLevel,
     /// Useless enum
@@ -908,8 +882,7 @@ pub enum DspDistortion
 #[repr(C)]
 /// Parameter types for the FMOD_DSP_TYPE_NORMALIZE filter.
 /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
-pub enum DspNormalize
-{
+pub enum DspNormalize {
     /// Time to ramp the silence to full in ms. 0.0 to 20000.0. Default = 5000.0.
     DspNormalizeFadeTime,
     /// Lower volume range threshold to ignore. 0.0 to 1.0. Default = 0.1. Raise higher to stop amplification of very quiet signals.
@@ -922,8 +895,7 @@ pub enum DspNormalize
 #[repr(C)]
 /// Parameter types for the DspTypeParameq filter.
 /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
-pub enum DspTypeParameq
-{
+pub enum DspTypeParameq {
     /// Frequency center. 20.0 to 22000.0. Default = 8000.0.
     DspTypeParameqCenter,
     /// Octave range around the center frequency to filter. 0.2 to 5.0. Default = 1.0.
@@ -936,8 +908,7 @@ pub enum DspTypeParameq
 #[repr(C)]
 /// Parameter types for the FMOD_DSP_TYPE_PITCHSHIFT filter.
 /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
-pub enum DspPitchShift
-{
+pub enum DspPitchShift {
     /// Pitch value. 0.5 to 2.0. Default = 1.0. 0.5 = one octave down, 2.0 = one octave up. 1.0 does not change the pitch.
     DspPitchShiftPitch,
     /// FFT window size. 256, 512, 1024, 2048, 4096. Default = 1024. Increase this to reduce 'smearing'. This effect is a warbling sound similar to when an mp3 is encoded at very low bitrates.
@@ -952,8 +923,7 @@ pub enum DspPitchShift
 #[repr(C)]
 /// Parameter types for the FMOD_DSP_TYPE_CHORUS filter.
 /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
-pub enum DspChorus
-{
+pub enum DspChorus {
     /// Volume of original signal to pass to output. 0.0 to 1.0. Default = 0.5.
     DspChorusDryMix,
     /// Volume of 1st chorus tap. 0.0 to 1.0. Default = 0.5.
@@ -975,8 +945,7 @@ pub enum DspChorus
 /// Parameter types for the FMOD_DSP_TYPE_ITECHO filter.
 /// This is effectively a software based echo filter that emulates the DirectX DMO echo effect. Impulse tracker files can support this, and FMOD will produce the effect on ANY platform, not just those that support DirectX effects!
 /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
-pub enum DspITEcho
-{
+pub enum DspITEcho {
     /// Ratio of wet (processed) signal to dry (unprocessed) signal. Must be in the range from 0.0 through 100.0 (all wet). The default value is 50.
     DspITEchoWetDryMix,
     /// Percentage of output fed back into input, in the range from 0.0 through 100.0. The default value is 50.
@@ -994,8 +963,7 @@ pub enum DspITEcho
 /// Parameter types for the FMOD_DSP_TYPE_COMPRESSOR unit.
 /// This is a simple linked multichannel software limiter that is uniform across the whole spectrum.
 /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
-pub enum DspCompressor
-{
+pub enum DspCompressor {
     /// Threshold level (dB) in the range from -60 through 0. The default value is 0.
     DspCompressorThreshold,
     /// Gain reduction attack time (milliseconds), in the range from 10 through 200. The default value is 50.
@@ -1010,8 +978,7 @@ pub enum DspCompressor
 #[repr(C)]
 /// Parameter types for the FMOD_DSP_TYPE_SFXREVERB unit.
 /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
-pub enum DspSfxReverb
-{
+pub enum DspSfxReverb {
     /// Dry Level      : Mix level of dry signal in output in mB. Ranges from -10000.0 to 0.0. Default is 0.
     DspSfxReverbDryLevel,
     /// Room           : Room effect level at low frequencies in mB. Ranges from -10000.0 to 0.0. Default is -10000.0.
@@ -1048,8 +1015,7 @@ pub enum DspSfxReverb
 /// This is a very simple low pass filter, based on two single-pole RC time-constant modules.
 /// The emphasis is on speed rather than accuracy, so this should not be used for task requiring critical filtering.
 /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
-pub enum DspLowPassSimple
-{
+pub enum DspLowPassSimple {
     /// Lowpass Cutoff frequency in hz. 10.0 to 22000.0. Default = 5000.0
     DspLowPassSimpleCutoff,
     /// Useless enum
@@ -1062,8 +1028,7 @@ pub enum DspLowPassSimple
 /// This is a very simple single-order high pass filter.
 /// The emphasis is on speed rather than accuracy, so this should not be used for task requiring critical filtering.
 /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
-pub enum DspHighPassSimple
-{
+pub enum DspHighPassSimple {
     /// Highpass cutoff frequency in hz. 10.0 to 22000.0. Default = 1000.0
     DspHighPassSimpleCutoff,
     /// Useless enum

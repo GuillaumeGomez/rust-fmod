@@ -110,7 +110,7 @@ impl Channel {
         let mut system = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_Channel_GetSystemObject(self.channel, &mut system) } {
-            enums::Ok => Ok(ffi::FFI::wrap(system)),
+            enums::Result::Ok => Ok(ffi::FFI::wrap(system)),
             e => Err(e)
         }
     }
@@ -124,7 +124,7 @@ impl Channel {
         let mut ptr = Vec::from_elem(spectrum_size, 0f32);
         let c_window_type = match window_type {
             Some(wt) => wt,
-            None => enums::DSP_FFT_WindowRect
+            None => enums::DSP_FFT_Window::DSP_FFT_WindowRect
         };
         let c_channel_offset = match channel_offset {
             Some(co) => co,
@@ -132,7 +132,7 @@ impl Channel {
         };
 
         match unsafe { ffi::FMOD_Channel_GetSpectrum(self.channel, ptr.as_mut_ptr(), spectrum_size as c_int, c_channel_offset, c_window_type) } {
-            enums::Ok => Ok(ptr),
+            enums::Result::Ok => Ok(ptr),
             e => Err(e),
         }
     }
@@ -141,7 +141,7 @@ impl Channel {
         let mut ptr = Vec::from_elem(wave_size, 0f32);
 
         match unsafe { ffi::FMOD_Channel_GetWaveData(self.channel, ptr.as_mut_ptr(), wave_size as c_int, channel_offset) } {
-            enums::Ok => Ok(ptr),
+            enums::Result::Ok => Ok(ptr),
             e => Err(e)
         }
     }
@@ -154,7 +154,7 @@ impl Channel {
         let mut is_playing = 0;
 
         match unsafe { ffi::FMOD_Channel_IsPlaying(self.channel, &mut is_playing) } {
-            enums::Ok => Ok(is_playing == 1),
+            enums::Result::Ok => Ok(is_playing == 1),
             err => Err(err),
         }
     }
@@ -163,7 +163,7 @@ impl Channel {
         let mut is_virtual = 0i32;
 
         match unsafe { ffi::FMOD_Channel_IsVirtual(self.channel, &mut is_virtual) } {
-            enums::Ok => Ok(is_virtual == 1),
+            enums::Result::Ok => Ok(is_virtual == 1),
             e => Err(e)
         }
     }
@@ -172,7 +172,7 @@ impl Channel {
         let mut audibility = 0f32;
 
         match unsafe { ffi::FMOD_Channel_GetAudibility(self.channel, &mut audibility) } {
-            enums::Ok => Ok(audibility),
+            enums::Result::Ok => Ok(audibility),
             e => Err(e)
         }
     }
@@ -181,7 +181,7 @@ impl Channel {
         let mut sound = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_Channel_GetCurrentSound(self.channel, &mut sound) } {
-            enums::Ok => Ok(ffi::FFI::wrap(sound)),
+            enums::Result::Ok => Ok(ffi::FFI::wrap(sound)),
             e => Err(e)
         }
     }
@@ -190,7 +190,7 @@ impl Channel {
         let mut index = 0i32;
 
         match unsafe { ffi::FMOD_Channel_GetIndex(self.channel, &mut index) } {
-            enums::Ok => Ok(index),
+            enums::Result::Ok => Ok(index),
             e => Err(e)
         }
     }
@@ -203,7 +203,7 @@ impl Channel {
         let mut volume = 0f32;
 
         match unsafe { ffi::FMOD_Channel_GetVolume(self.channel, &mut volume) } {
-            enums::Ok => Ok(volume),
+            enums::Result::Ok => Ok(volume),
             e => Err(e),
         }
     }
@@ -216,7 +216,7 @@ impl Channel {
         let mut frequency = 0f32;
 
         match unsafe { ffi::FMOD_Channel_GetFrequency(self.channel, &mut frequency) } {
-            enums::Ok => Ok(frequency),
+            enums::Result::Ok => Ok(frequency),
             e => Err(e),
         }
     }
@@ -229,7 +229,7 @@ impl Channel {
         let mut pan = 0f32;
 
         match unsafe { ffi::FMOD_Channel_GetPan(self.channel, &mut pan) } {
-            enums::Ok => Ok(pan),
+            enums::Result::Ok => Ok(pan),
             e => Err(e),
         }
     }
@@ -246,7 +246,7 @@ impl Channel {
         let mut mute = 0;
 
         match unsafe { ffi::FMOD_Channel_GetMute(self.channel, &mut mute) } {
-            enums::Ok => Ok(match mute {
+            enums::Result::Ok => Ok(match mute {
                 1 => true,
                 _ => false,
             }),
@@ -266,7 +266,7 @@ impl Channel {
         let mut t = 0;
 
         match unsafe { ffi::FMOD_Channel_GetPaused(self.channel, &mut t) } {
-            enums::Ok => Ok(match t {
+            enums::Result::Ok => Ok(match t {
                 1 => true,
                 _ => false,
             }),
@@ -283,7 +283,7 @@ impl Channel {
         let mut delayhi = 0u32;
 
         match unsafe { ffi::FMOD_Channel_GetDelay(self.channel, delay_type, &mut delayhi, &mut delaylo) } {
-            enums::Ok => Ok((delay_type, delayhi as uint, delaylo as uint)),
+            enums::Result::Ok => Ok((delay_type, delayhi as uint, delaylo as uint)),
             e => Err(e),
         }
     }
@@ -299,7 +299,7 @@ impl Channel {
 
         match unsafe { ffi::FMOD_Channel_GetSpeakerMix(self.channel, &mut smo.front_left, &mut smo.front_right, &mut smo.center, &mut smo.lfe,
                                                 &mut smo.back_left, &mut smo.back_right, &mut smo.side_left, &mut smo.side_right) } {
-            enums::Ok => Ok(smo),
+            enums::Result::Ok => Ok(smo),
             e => Err(e),
         }
     }
@@ -312,7 +312,7 @@ impl Channel {
         let mut ptr = Vec::from_elem(num_levels, 0f32);
 
         match unsafe { ffi::FMOD_Channel_GetSpeakerLevels(self.channel, speaker, ptr.as_mut_ptr(), num_levels as i32) } {
-            enums::Ok => Ok(ptr),
+            enums::Result::Ok => Ok(ptr),
             e => Err(e),
         }
     }
@@ -325,7 +325,7 @@ impl Channel {
         let mut ptr = Vec::from_elem(num_levels, 0f32);
 
         match unsafe { ffi::FMOD_Channel_GetInputChannelMix(self.channel, ptr.as_mut_ptr(), num_levels as i32) } {
-            enums::Ok => Ok(ptr),
+            enums::Result::Ok => Ok(ptr),
             e => Err(e),
         }
     }
@@ -338,7 +338,7 @@ impl Channel {
         let mut t = 0i32;
 
         match unsafe { ffi::FMOD_Channel_GetPriority(self.channel, &mut t) } {
-            enums::Ok => Ok(t),
+            enums::Result::Ok => Ok(t),
             e => Err(e),
         }
     }
@@ -351,7 +351,7 @@ impl Channel {
         let mut t = 0u32;
 
         match unsafe { ffi::FMOD_Channel_GetPosition(self.channel, &mut t, postype) } {
-            enums::Ok => Ok(t as uint),
+            enums::Result::Ok => Ok(t as uint),
             e => Err(e),
         }
     }
@@ -366,7 +366,7 @@ impl Channel {
         let mut t = ffi::FMOD_REVERB_CHANNELPROPERTIES{Direct: 0, Room: 0, Flags: 0, ConnectionPoint: ::std::ptr::null_mut()};
 
         match unsafe { ffi::FMOD_Channel_GetReverbProperties(self.channel, &mut t) } {
-            enums::Ok => Ok(FmodReverbChannelProperties{
+            enums::Result::Ok => Ok(FmodReverbChannelProperties{
                 direct: t.Direct,
                 room: t.Room,
                 flags: t.Flags,
@@ -383,7 +383,7 @@ impl Channel {
         let mut t = 0f32;
 
         match unsafe { ffi::FMOD_Channel_GetLowPassGain(self.channel, &mut t) } {
-            enums::Ok => Ok(t),
+            enums::Result::Ok => Ok(t),
             e => Err(e),
         }
     }
@@ -396,7 +396,7 @@ impl Channel {
         let mut channel_group = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_Channel_GetChannelGroup(self.channel, &mut channel_group) } {
-            enums::Ok => Ok(ffi::FFI::wrap(channel_group)),
+            enums::Result::Ok => Ok(ffi::FFI::wrap(channel_group)),
             e => Err(e)
         }
     }
@@ -413,7 +413,7 @@ impl Channel {
         let mut velocity = vector::get_ffi(&vector::FmodVector::new());
 
         match unsafe { ffi::FMOD_Channel_Get3DAttributes(self.channel, &mut position, &mut velocity) } {
-            enums::Ok => Ok((vector::from_ptr(position), vector::from_ptr(velocity))),
+            enums::Result::Ok => Ok((vector::from_ptr(position), vector::from_ptr(velocity))),
             e => Err(e)
         }
     }
@@ -427,7 +427,7 @@ impl Channel {
         let mut max_distance = 0f32;
 
         match unsafe { ffi::FMOD_Channel_Get3DMinMaxDistance(self.channel, &mut min_distance, &mut max_distance) } {
-            enums::Ok => Ok((min_distance, max_distance)),
+            enums::Result::Ok => Ok((min_distance, max_distance)),
             e => Err(e)
         }
     }
@@ -442,7 +442,7 @@ impl Channel {
         let mut outside_volume = 0f32;
 
         match unsafe { ffi::FMOD_Channel_Get3DConeSettings(self.channel, &mut inside_cone_angle, &mut outside_cone_angle, &mut outside_volume) } {
-            enums::Ok => Ok((inside_cone_angle, outside_cone_angle, outside_volume)),
+            enums::Result::Ok => Ok((inside_cone_angle, outside_cone_angle, outside_volume)),
             e => Err(e)
         }
     }
@@ -457,7 +457,7 @@ impl Channel {
         let mut orientation = vector::get_ffi(&vector::FmodVector::new());
 
         match unsafe { ffi::FMOD_Channel_Get3DConeOrientation(self.channel, &mut orientation) } {
-            enums::Ok => Ok(vector::from_ptr(orientation)),
+            enums::Result::Ok => Ok(vector::from_ptr(orientation)),
             e => Err(e)
         }
     }
@@ -477,7 +477,7 @@ impl Channel {
 
         unsafe {
             match ffi::FMOD_Channel_Get3DCustomRolloff(self.channel, &mut points, &mut num_points) {
-               enums::Ok => {
+               enums::Result::Ok => {
                     let mut ret_points = Vec::new();
 
                     for it in range(0i32, num_points) {
@@ -499,7 +499,7 @@ impl Channel {
         let mut reverb_occlusion = 0f32;
 
         match unsafe { ffi::FMOD_Channel_Get3DOcclusion(self.channel, &mut direct_occlusion, &mut reverb_occlusion) } {
-            enums::Ok => Ok((direct_occlusion, reverb_occlusion)),
+            enums::Result::Ok => Ok((direct_occlusion, reverb_occlusion)),
             e => Err(e)
         }
     }
@@ -512,7 +512,7 @@ impl Channel {
         let mut angle = 0f32;
 
         match unsafe { ffi::FMOD_Channel_Get3DSpread(self.channel, &mut angle) } {
-            enums::Ok => Ok(angle),
+            enums::Result::Ok => Ok(angle),
             e => Err(e)
         }
     }
@@ -525,7 +525,7 @@ impl Channel {
         let mut level = 0f32;
 
         match unsafe { ffi::FMOD_Channel_Get3DPanLevel(self.channel, &mut level) } {
-            enums::Ok => Ok(level),
+            enums::Result::Ok => Ok(level),
             e => Err(e)
         }
     }
@@ -538,7 +538,7 @@ impl Channel {
         let mut level = 0f32;
 
         match unsafe { ffi::FMOD_Channel_Get3DDopplerLevel(self.channel, &mut level) } {
-            enums::Ok => Ok(level),
+            enums::Result::Ok => Ok(level),
             e => Err(e)
         }
     }
@@ -557,7 +557,7 @@ impl Channel {
         let mut center_freq = 0f32;
 
         match unsafe { ffi::FMOD_Channel_Get3DDistanceFilter(self.channel, &mut custom, &mut custom_level, &mut center_freq) } {
-            enums::Ok => Ok((custom == 1, custom_level, center_freq)),
+            enums::Result::Ok => Ok((custom == 1, custom_level, center_freq)),
             e => Err(e)
         }
     }
@@ -566,7 +566,7 @@ impl Channel {
         let mut dsp = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_Channel_GetDSPHead(self.channel, &mut dsp) } {
-            enums::Ok => Ok(ffi::FFI::wrap(dsp)),
+            enums::Result::Ok => Ok(ffi::FFI::wrap(dsp)),
             e => Err(e)
         }
     }
@@ -575,7 +575,7 @@ impl Channel {
         let mut connection = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_Channel_AddDSP(self.channel, ffi::FFI::unwrap(dsp), &mut connection) } {
-            enums::Ok => Ok(ffi::FFI::wrap(connection)),
+            enums::Result::Ok => Ok(ffi::FFI::wrap(connection)),
             e => Err(e)
         }
     }
@@ -588,7 +588,7 @@ impl Channel {
         let mut mode = 0u32;
 
         match unsafe { ffi::FMOD_Channel_GetMode(self.channel, &mut mode) } {
-            enums::Ok => Ok(FmodMode(mode)),
+            enums::Result::Ok => Ok(FmodMode(mode)),
             e => Err(e)
         }
     }
@@ -601,7 +601,7 @@ impl Channel {
         let mut loop_count = 0i32;
 
         match unsafe { ffi::FMOD_Channel_GetLoopCount(self.channel, &mut loop_count) } {
-            enums::Ok => Ok(loop_count),
+            enums::Result::Ok => Ok(loop_count),
             e => Err(e)
         }
     }
@@ -616,7 +616,7 @@ impl Channel {
         let mut loop_end = 0u32;
 
         match unsafe { ffi::FMOD_Channel_GetLoopPoints(self.channel, &mut loop_start, loop_start_type, &mut loop_end, loop_end_type) } {
-            enums::Ok => Ok((loop_start, loop_end)),
+            enums::Result::Ok => Ok((loop_start, loop_end)),
             e => Err(e)
         }
     }
@@ -630,7 +630,7 @@ impl Channel {
             let mut user_data : *mut c_void = ::std::ptr::null_mut();
 
             match ffi::FMOD_Channel_GetUserData(self.channel, &mut user_data) {
-               enums::Ok => {
+               enums::Result::Ok => {
                     let tmp : &mut T = transmute::<*mut c_void, &mut T>(user_data);
                     
                     Ok(tmp)
@@ -646,7 +646,7 @@ impl Channel {
         let mut memory_used = 0u32;
 
         match unsafe { ffi::FMOD_Channel_GetMemoryInfo(self.channel, memory_bits, event_memory_bits, &mut memory_used, &mut details) } {
-            enums::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
+            enums::Result::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
             e => Err(e)
         }
     }

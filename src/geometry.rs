@@ -57,14 +57,14 @@ impl Geometry {
     pub fn release(&mut self) -> enums::Result {
         if self.geometry !=::std::ptr::null_mut() {
             match unsafe { ffi::FMOD_Geometry_Release(self.geometry) } {
-                enums::Ok => {
+                enums::Result::Ok => {
                     self.geometry = ::std::ptr::null_mut();
-                   enums::Ok
+                   enums::Result::Ok
                 }
                 e => e
             }
         } else {
-            enums::Ok
+            enums::Result::Ok
         }
     }
 
@@ -83,7 +83,7 @@ impl Geometry {
 
         match unsafe { ffi::FMOD_Geometry_AddPolygon(self.geometry, direct_occlusion, reverb_occlusion, t_double_sided, vertices.len() as c_int,
             t_vertices.as_ptr(), &mut index) } {
-            enums::Ok => Ok(index),
+            enums::Result::Ok => Ok(index),
             e => Err(e)
         }
     }
@@ -92,7 +92,7 @@ impl Geometry {
         let mut num = 0i32;
 
         match unsafe { ffi::FMOD_Geometry_GetNumPolygons(self.geometry, &mut num) } {
-            enums::Ok => Ok(num),
+            enums::Result::Ok => Ok(num),
             e => Err(e)
         }
     }
@@ -102,7 +102,7 @@ impl Geometry {
         let mut max_vertices = 0i32;
 
         match unsafe { ffi::FMOD_Geometry_GetMaxPolygons(self.geometry, &mut max_polygons, &mut max_vertices) } {
-            enums::Ok => Ok((max_polygons, max_vertices)),
+            enums::Result::Ok => Ok((max_polygons, max_vertices)),
             e => Err(e)
         }
     }
@@ -111,7 +111,7 @@ impl Geometry {
         let mut num = 0i32;
 
         match unsafe { ffi::FMOD_Geometry_GetPolygonNumVertices(self.geometry, index, &mut num) } {
-            enums::Ok => Ok(num),
+            enums::Result::Ok => Ok(num),
             e => Err(e)
         }
     }
@@ -126,7 +126,7 @@ impl Geometry {
         let mut vertex = vector::get_ffi(&vector::FmodVector::new());
 
         match unsafe { ffi::FMOD_Geometry_GetPolygonVertex(self.geometry, index, vertex_index, &mut vertex) } {
-            enums::Ok => Ok(vector::from_ptr(vertex)),
+            enums::Result::Ok => Ok(vector::from_ptr(vertex)),
             e => Err(e)
         }
     }
@@ -147,7 +147,7 @@ impl Geometry {
         let mut double_sided = 0;
 
         match unsafe { ffi::FMOD_Geometry_GetPolygonAttributes(self.geometry, index, &mut direct_occlusion, &mut reverb_occlusion, &mut double_sided) } {
-            enums::Ok => Ok((direct_occlusion, reverb_occlusion, double_sided == 1)),
+            enums::Result::Ok => Ok((direct_occlusion, reverb_occlusion, double_sided == 1)),
             e => Err(e)
         }
     }
@@ -166,7 +166,7 @@ impl Geometry {
         let mut active = 0;
 
         match unsafe { ffi::FMOD_Geometry_GetActive(self.geometry, &mut active) } {
-            enums::Ok => Ok(active == 1),
+            enums::Result::Ok => Ok(active == 1),
             e => Err(e)
         }
     }
@@ -183,7 +183,7 @@ impl Geometry {
         let mut up = vector::get_ffi(&vector::FmodVector::new());
 
         match unsafe { ffi::FMOD_Geometry_GetRotation(self.geometry, &mut forward, &mut up) } {
-            enums::Ok => Ok((vector::from_ptr(forward), vector::from_ptr(up))),
+            enums::Result::Ok => Ok((vector::from_ptr(forward), vector::from_ptr(up))),
             e => Err(e)
         }
     }
@@ -198,7 +198,7 @@ impl Geometry {
         let mut position = vector::get_ffi(&vector::FmodVector::new());
 
         match unsafe { ffi::FMOD_Geometry_GetPosition(self.geometry, &mut position) } {
-            enums::Ok => Ok(vector::from_ptr(position)),
+            enums::Result::Ok => Ok(vector::from_ptr(position)),
             e => Err(e)
         }
     }
@@ -213,7 +213,7 @@ impl Geometry {
         let mut scale = vector::get_ffi(&vector::FmodVector::new());
 
         match unsafe { ffi::FMOD_Geometry_GetScale(self.geometry, &mut scale) } {
-            enums::Ok => Ok(vector::from_ptr(scale)),
+            enums::Result::Ok => Ok(vector::from_ptr(scale)),
             e => Err(e)
         }
     }
@@ -224,7 +224,7 @@ impl Geometry {
         let mut memory_used = 0u32;
 
         match unsafe { ffi::FMOD_Geometry_GetMemoryInfo(self.geometry, memory_bits, event_memory_bits, &mut memory_used, &mut details) } {
-            enums::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
+            enums::Result::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
             e => Err(e)
         }
     }
@@ -238,7 +238,7 @@ impl Geometry {
             let mut user_data : *mut c_void = ::std::ptr::null_mut();
 
             match ffi::FMOD_Geometry_GetUserData(self.geometry, &mut user_data) {
-                enums::Ok => {
+                enums::Result::Ok => {
                     let tmp : &mut T = transmute::<*mut c_void, &mut T>(user_data);
                     
                     Ok(tmp)
