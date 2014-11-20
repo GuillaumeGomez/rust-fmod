@@ -106,7 +106,7 @@ fn main() {
     while chan.is_playing().unwrap() {
         let position = chan.get_position(rfmod::FMOD_TIMEUNIT_MS).unwrap();
 
-        print!("{:02u}:{:02u} / {:02u}:{:02u}\r", position / 1000 / 60, position / 1000 % 60, length / 1000 / 60, length / 1000 % 60);
+        print!("{:02}:{:02} / {:02}:{:02}\r", position / 1000 / 60, position / 1000 % 60, length / 1000 / 60, length / 1000 % 60);
         sleep(Duration::milliseconds(30))
     }
 }

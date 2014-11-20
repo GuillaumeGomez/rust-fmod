@@ -50,7 +50,7 @@ fn play_to_the_end(sound: rfmod::Sound, len: uint) -> rfmod::Result {
 
                             if position != old_position {
                                 old_position = position;
-                                print!("\r{} : {:02u}:{:02u} / {:02u}:{:02u}", name, position / 1000 / 60, position / 1000 % 60,
+                                print!("\r{} : {:02}:{:02} / {:02}:{:02}", name, position / 1000 / 60, position / 1000 % 60,
                                     length / 1000 / 60, length / 1000 % 60);
                             }
                             sleep(Duration::milliseconds(30))
