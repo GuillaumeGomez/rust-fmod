@@ -1,8 +1,15 @@
 [package]
 
-name = "rust-fmod"
+name = "fmod"
 version = "0.9.5"
 authors = ["Guillaume Gomez <guillaume1.gomez@gmail.com>"]
+
+description = "A rust binding for the FMOD library"
+repository = "https://github.com/GuillaumeGomez/rust-fmod"
+documentation = "http://rust-ci.org/GuillaumeGomez/rust-fmod/doc/rfmod/"
+readme = "README.md"
+keyworks = ["library", "sound", "3D", "fmod", "fmodex", "FMOD", "FMODEX"]
+license = "FMOD non-commercial use"
 
 [lib]
 
