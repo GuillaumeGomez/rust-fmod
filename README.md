@@ -94,7 +94,5 @@ For a more complete example : https://github.com/GuillaumeGomez/rust-music-playe
 
 ##License
 
-    Copyright (c) 2014 Guillaume Gomez
-    
-    The license of this project is the same of the FMOD non-commercial use. 
-    Please refer to it. Here is the website for FMOD : http://www.fmod.org/
+    Please refer to the LICENSE.txt file for more details.
+    If you want more information, here is the FMOD website : http://www.fmod.org/
