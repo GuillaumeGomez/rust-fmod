@@ -40,11 +40,20 @@ fn get_key() -> u8 {
     }
 }
 
-fn my_DSP_callback(dsp_state: &rfmod::DspState, inbuffer: &mut Vec<f32>, outbuffer: &mut Vec<f32>, length: u32, inchannels: i32,
-    outchannels: i32) -> rfmod::Result {
+fn my_DSP_callback(dsp_state: &rfmod::DspState, inbuffer: &mut [f32], outbuffer: &mut [f32], length: u32, in_channels: i32,
+    out_channels: i32) -> rfmod::Result {
     for it in range(0u, inbuffer.len() - 1u) {
         outbuffer[it] = inbuffer[it] * 0.2f32;
     }
+    for count in range(0, length) {
+        for count2 in range(0, out_channels) {
+            /* 
+                This DSP filter just halves the volume!
+                Input is modified, and sent to output.
+            */
+            outbuffer[((count as i32 * out_channels) + count2) as uint] = inbuffer[((count as i32 * in_channels) + count2) as uint] * 0.2f32;
+        }
+    } 
 
     rfmod::Result::Ok
 }
@@ -84,7 +93,7 @@ fn main() {
     println!("======== Custom DSP ========");
     println!("============================\n");
     println!("Enter 'f' to activate / deactivate user filter");
-    println!("Enter 'Esc' to quit");
+    println!("Press 'Esc' case then 'Enter' case to quit");
 
     let channel = match sound.play() {
         Ok(c) => c,

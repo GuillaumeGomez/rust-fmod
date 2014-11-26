@@ -39,7 +39,6 @@ use std::mem;
 use std::io::BufferedWriter;
 use std::slice;
 use std::default::Default;
-use std::string;
 
 struct RiffChunk {
     id: [c_char, ..4],
@@ -112,7 +111,7 @@ impl FmodTag {
             data_type: pointer.datatype,
             name: {
                 if pointer.name.is_not_null() {
-                    unsafe {string::raw::from_buf(pointer.name as *const u8).clone() }
+                    unsafe {String::from_raw_buf(pointer.name as *const u8).clone() }
                 } else {
                     String::new()
                 }
@@ -361,7 +360,7 @@ impl Sound {
 
         name.with_c_str(|c_name|{
             match unsafe { ffi::FMOD_Sound_GetName(self.sound, c_name as *mut c_char, name_len as i32) } {
-               ::Result::Ok => Ok(unsafe {string::raw::from_buf(c_name as *const u8).clone() }),
+               ::Result::Ok => Ok(unsafe {String::from_raw_buf(c_name as *const u8).clone() }),
                 e => Err(e)
             }
         })
@@ -601,21 +600,13 @@ impl Sound {
     pub fn lock(&self, offset: u32, length: u32) -> Result<(Vec<u8>, Vec<u8>), ::Result> {
         let mut len1 = 0u32;
         let mut len2 = 0u32;
-        let mut ptr1 =::std::ptr::null_mut();
-        let mut ptr2 =::std::ptr::null_mut();
+        let mut ptr1 = ::std::ptr::null_mut();
+        let mut ptr2 = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_Sound_Lock(self.sound, offset, length, &mut ptr1, &mut ptr2, &mut len1, &mut len2) } {
             ::Result::Ok => {
-                let mut v_ptr1 = Vec::new();
-                let mut v_ptr2 = Vec::new();
-
-                unsafe { slice::raw::buf_as_slice(ptr1 as *const u8, len1 as uint, |b| {
-                   v_ptr1 = b.clone().to_vec();
-                }); }
-                unsafe { slice::raw::buf_as_slice(ptr2 as *const u8, len2 as uint, |b| {
-                   v_ptr2 = b.clone().to_vec();
-                }); }
-                Ok((v_ptr1, v_ptr2))
+                unsafe { Ok((slice::from_raw_buf(&(ptr1 as *const u8), len1 as uint).clone().to_vec(),
+                    slice::from_raw_buf(&(ptr2 as *const u8), len2 as uint).clone().to_vec())) }
             }
             e => Err(e)
         }
@@ -755,9 +746,7 @@ impl Sound {
 
             ffi::FMOD_Sound_Lock(self.sound, 0, len_bytes, &mut ptr1, &mut ptr2, &mut len1, &mut len2);
 
-            slice::raw::buf_as_slice(ptr1 as *const u8, len_bytes as uint, |b| {
-               buf.write(b).unwrap();
-            });
+            buf.write(slice::from_raw_buf(&(ptr1 as *const u8), len_bytes as uint)).unwrap();
 
             ffi::FMOD_Sound_Unlock(self.sound, ptr1, ptr2, len1, len2);
         }

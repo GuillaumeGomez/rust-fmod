@@ -33,7 +33,7 @@ use channel;
 use libc::{c_char, c_void, c_uint, c_int, c_float};
 use std::c_str::CString;
 use std::default::Default;
-use std::string;
+use std::c_vec::CVec;
 
 extern "C" fn create_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> ::Result {
     unsafe {
@@ -112,27 +112,11 @@ extern "C" fn read_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, in_buffer: *mut
                 let callbacks : &mut UserData = transmute(tmp);
                 match callbacks.callbacks.read_callback {
                     Some(p) => {
-                        let mut v_in_buffer = Vec::new();
-                        let mut v_out_buffer = Vec::new();
+                        let mut v_in_buffer = CVec::new(in_buffer, (((length as i32 - 1i32) * in_channels) + out_channels) as uint);
+                        let mut v_out_buffer = CVec::new(out_buffer, (((length as i32 - 1i32) * out_channels) + out_channels) as uint);
 
-                        for count in range(0i32, length as i32) {
-                            for count2 in range(0i32, out_channels) {
-                                v_in_buffer.push(*in_buffer.offset((count * in_channels) as int + count2 as int));
-                                v_out_buffer.push(*out_buffer.offset((count * out_channels) as int + count2 as int));
-                            }
-                        }
-                        let ret = p(&from_state_ptr(*dsp_state), &mut v_in_buffer, &mut v_out_buffer, length as u32, in_channels as i32, out_channels as i32);
-
-                        let mut it = 0;
-                        
-                        for count in range(0i32, length as i32) {
-                            for count2 in range(0i32, out_channels) {
-                                *in_buffer.offset((count * in_channels) as int + count2 as int) = v_in_buffer[it];
-                                *out_buffer.offset((count * out_channels) as int + count2 as int) = v_out_buffer[it];
-                                it += 1;
-                            }
-                        }
-                        ret
+                        p(&from_state_ptr(*dsp_state), v_in_buffer.as_mut_slice(), v_out_buffer.as_mut_slice(),
+                            length as u32, in_channels as i32, out_channels as i32)
                     },
                     None => ::Result::Ok
                 }
@@ -204,7 +188,7 @@ extern "C" fn get_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index:
                         let ret = p(&from_state_ptr(*dsp_state),
                             index as i32,
                             &mut t_value,
-                            string::raw::from_buf(value_str as *const u8).as_slice());
+                            String::from_raw_buf(value_str as *const u8).as_slice());
                         *value = t_value;
                         ret
                     },
@@ -322,7 +306,7 @@ pub fn from_parameter_ptr(dsp_parameter: *mut ffi::FMOD_DSP_PARAMETERDESC) -> Ds
                     Some(s) => s.to_string(),
                     None => "".to_string()
                 },
-                description: string::raw::from_buf((*dsp_parameter).description.clone() as *const u8)
+                description: String::from_raw_buf((*dsp_parameter).description.clone() as *const u8)
             }
         }
     } else {
@@ -800,7 +784,7 @@ impl Dsp {
 
         tmp_v.with_c_str(|c_str|{
             match unsafe { ffi::FMOD_DSP_GetParameter(self.dsp, index, &mut value, c_str as *mut c_char, value_str_len as i32) } {
-               ::Result::Ok => Ok((value, unsafe {string::raw::from_buf(c_str as *const u8).clone() })),
+               ::Result::Ok => Ok((value, unsafe {String::from_raw_buf(c_str as *const u8).clone() })),
                 e => Err(e)
             }
         })
@@ -827,7 +811,7 @@ impl Dsp {
                 t_label.with_c_str(|c_label|{
                     match unsafe { ffi::FMOD_DSP_GetParameterInfo(self.dsp, index, c_name as *mut c_char, c_label as *mut c_char,
                         c_description as *mut c_char, description_len as i32, &mut min, &mut max) } {
-                       ::Result::Ok => Ok((unsafe {string::raw::from_buf(c_description as *const u8).clone() }, min, max)),
+                       ::Result::Ok => Ok((unsafe {String::from_raw_buf(c_description as *const u8).clone() }, min, max)),
                         e => Err(e)
                     }
                 })

@@ -66,7 +66,7 @@ pub type DspReleaseCallback = Option<fn(dsp_state: &dsp::DspState) -> ::Result>;
 /// notify the user that the DSP has been reset
 pub type DspResetCallback = Option<fn(dsp_state: &dsp::DspState) -> ::Result>;
 /// allow the user to modify data that will be read
-pub type DspReadCallback = Option<fn(dsp_state: &dsp::DspState, in_buffer: &mut Vec<f32>, out_buffer: &mut Vec<f32>, length: u32, inchannels: i32, outchannels: i32) -> ::Result>;
+pub type DspReadCallback = Option<fn(dsp_state: &dsp::DspState, in_buffer: &mut [f32], out_buffer: &mut [f32], length: u32, inchannels: i32, outchannels: i32) -> ::Result>;
 /// notify the user that DSP position has changed
 pub type DspSetPositionCallback = Option<fn(dsp_state: &dsp::DspState, pos: u32) -> ::Result>;
 /// DSP callback
