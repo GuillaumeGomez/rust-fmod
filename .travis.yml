@@ -25,5 +25,6 @@ script:
   - cargo build
   - cd ../user_created_sound
   - cargo build
+  - cd ../../
 after_script:
   - curl http://www.rust-ci.org/artifacts/put?t=$RUSTCI_TOKEN | sh
