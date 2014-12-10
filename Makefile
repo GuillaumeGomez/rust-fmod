@@ -28,13 +28,13 @@ rfmod:
 
 examples: rfmod
 	  mkdir -p bin
-	  rustc -o bin/simple_music_player -L ./lib examples/simple_music_player/main.rs
-	  rustc -o bin/recording -L ./lib examples/recording/main.rs
-	  rustc -o bin/dsp_custom -L ./lib examples/dsp_custom/main.rs
-	  rustc -o bin/user_created_sound -L ./lib examples/user_created_sound/main.rs
-	  rustc -o bin/3d -L ./lib examples/3d/main.rs
-	  rustc -o bin/effects -L ./lib examples/effects/main.rs
-	  rustc -o bin/file_callbacks -L ./lib examples/file_callbacks/main.rs
+	  rustc -o bin/simple_music_player -L ./lib examples/simple_music_player/src/simple_music_player.rs
+	  rustc -o bin/recording -L ./lib examples/recording/src/recording.rs
+	  rustc -o bin/dsp_custom -L ./lib examples/dsp_custom/src/dsp_custom.rs
+	  rustc -o bin/user_created_sound -L ./lib examples/user_created_sound/src/user_created_sound.rs
+	  rustc -o bin/3d -L ./lib examples/3d/src/3d.rs
+	  rustc -o bin/effects -L ./lib examples/effects/src/effects.rs
+	  rustc -o bin/file_callbacks -L ./lib examples/file_callbacks/src/file_callbacks.rs
 
 doc:
 	rustdoc -o doc src/rfmod.rs
