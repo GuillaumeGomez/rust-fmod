@@ -5,6 +5,7 @@ This is a rust binding for __FMOD__, the library developped by FIRELIGHT TECHNOL
 
 __FMOD__ website : www.fmod.org
 
+You can also find it on [crates.io](https://crates.io/crates/fmod) !
 
 ##Installation
 
@@ -44,8 +45,7 @@ Then open this file with an internet browser :
 file:///{rfmod_location}/doc/rfmod/index.html
 
 
-You can also access the latest build of the documentation via the internet :
-http://rust-ci.org/GuillaumeGomez/rust-fmod/doc/rfmod/
+You can also access the latest build of the documentation via the internet from [here](http://rust-ci.org/GuillaumeGomez/rust-fmod/doc/rfmod/).
 
 ##Short example
 
