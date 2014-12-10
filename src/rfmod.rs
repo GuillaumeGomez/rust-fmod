@@ -56,17 +56,13 @@ You can build them separatly too.
 Here is a short example on how to create a file and to play it :
 
 ```Rust
-#![feature(globs)]
-
 extern crate libc;
 extern crate rfmod;
 
-use rfmod::enums::*;
-use rfmod::*;
 use std::os;
 
 fn main() {
-    let fmod = match FmodSys::new() {
+    let fmod = match rfmod::FmodSys::new() {
         Ok(f) => f,
         Err(e) => {
             panic!("Error code : {}", e);
@@ -74,21 +70,26 @@ fn main() {
     };
 
     match fmod.init() {
-       enums::Result::Ok => {}
+        rfmod::Result::Ok => {}
         e => {
-            fmod.release();
             panic!("FmodSys.init failed : {}", e);
         }
     };
 
     let mut sound = match fmod.create_sound(StrBuf::from_str("music.mp3"), None, None) {
-                      enums::Result::Ok(s) => s,
-                      Err(err) => {panic!("Error code : {}", err);},
-                    };
+        Ok(s) => s,
+        Err(err) => {
+            panic!("Error code : {}", err);
+        }
+    };
 
     match sound.play_to_the_end() {
-       enums::Result::Ok => {println!("Ok !");}
-        err => {panic!("Error code : {}", err);}
+        rfmod::Result::Ok => {
+            println!("Ok !");
+        }
+        err => {
+            panic!("Error code : {}", err);
+        }
     };
 }
 ```
@@ -99,8 +100,8 @@ For a more complete example : https://github.com/GuillaumeGomez/rust-music-playe
 
     Copyright (c) 2014 Guillaume Gomez
 
-    The license of this project is the same of the FMOD non-commercial use.
-    Please refer to it. Here is the website for FMOD : http://www.fmod.org/
+    The license of this project is available in the LICENSE.TXT file. Please refer to it.
+    If you want more information, here is the website for FMOD : http://www.fmod.org/
 
 #Notes
 
@@ -112,7 +113,7 @@ Here is the list of all modules :
 !*/
 
 #![crate_name = "rfmod"]
-#![desc = "Rust binding for FMOD"]
+//#![desc = "Rust binding for FMOD"]
 #![crate_type = "rlib"]
 #![crate_type = "dylib"]
 
