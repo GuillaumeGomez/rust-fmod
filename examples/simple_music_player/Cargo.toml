@@ -1,0 +1,10 @@
+[package]
+name = "rfmod-examples"
+version = "0.9.5"
+authors = ["Guillaume Gomez <guillaume1.gomez@gmail.com>"]
+
+[dependencies.fmod]
+path = "../../"
+
+[[bin]]
+name = "simple_music_player"

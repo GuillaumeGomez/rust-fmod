@@ -1,5 +1,4 @@
 [package]
-
 name = "fmod"
 version = "0.9.5"
 authors = ["Guillaume Gomez <guillaume1.gomez@gmail.com>"]
@@ -12,41 +11,5 @@ keywords = ["library", "sound", "3D", "fmod", "fmodex"]
 license-file = "LICENSE.TXT"
 
 [lib]
-
 name = "rfmod"
 crate-type = ["dylib", "rlib"]
-
-[[bin]]
-
-name = "recording"
-path = "examples/recording/main.rs"
-
-[[bin]]
-
-name = "simple_music_player"
-path = "examples/simple_music_player/main.rs"
-
-[[bin]]
-
-name = "dsp_custom"
-path = "examples/dsp_custom/main.rs"
-
-[[bin]]
-
-name = "user_created_sound"
-path = "examples/user_created_sound/main.rs"
-
-[[bin]]
-
-name = "3d"
-path = "examples/3d/main.rs"
-
-[[bin]]
-
-name = "effects"
-path = "examples/effects/main.rs"
-
-[[bin]]
-
-name = "file_callbacks"
-path = "examples/file_callbacks/main.rs"

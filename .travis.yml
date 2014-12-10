@@ -11,5 +11,19 @@ script:
   - rustc --version
   - cargo build
   - rustdoc -o doc src/rfmod.rs
+  - cd examples/3d
+  - cargo build
+  - cd ../dsp_custom
+  - cargo build
+  - cd ../effects
+  - cargo build
+  - cd ../file_callbacks
+  - cargo build
+  - cd ../recording
+  - cargo build
+  - cd ../simple_music_player
+  - cargo build
+  - cd ../user_created_sound
+  - cargo build
 after_script:
   - curl http://www.rust-ci.org/artifacts/put?t=$RUSTCI_TOKEN | sh

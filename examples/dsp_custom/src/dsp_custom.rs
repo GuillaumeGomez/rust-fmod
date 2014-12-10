@@ -22,6 +22,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
+#![crate_type = "bin"]
+
 #![allow(non_snake_case)]
 #![allow(unused_variables)]
 

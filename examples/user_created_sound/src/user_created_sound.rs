@@ -22,6 +22,7 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
+#![crate_type = "bin"]
 
 extern crate libc;
 extern crate rfmod;
