@@ -36,7 +36,7 @@ use std::mem::transmute;
 use std::default::Default;
 
 /// Structure which contains data for [`Channel::set_speaker_mix`](struct.Channel.html#method.set_speaker_mix) and [`Channel::get_speaker_mix`](struct.Channel.html#method.get_speaker_mix)
-#[deriving(Show, PartialEq, PartialOrd, Clone)]
+#[deriving(Show, PartialEq, PartialOrd, Clone, Copy)]
 pub struct FmodSpeakerMixOptions {
     pub front_left : f32,
     pub front_right: f32,
@@ -480,7 +480,7 @@ impl Channel {
                     let mut ret_points = Vec::new();
 
                     for it in range(0i32, num_points) {
-                        ret_points.push(vector::from_ptr(*points.offset(it as int)));
+                        ret_points.push(vector::from_ptr(::std::ptr::read(points.offset(it as int) as *const ffi::FMOD_VECTOR)));
                     }
                     Ok(ret_points)
                 }

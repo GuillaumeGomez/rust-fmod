@@ -23,7 +23,7 @@
 */
 
 pub mod result {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     /// Error codes. Returned from every function.
     pub enum Result {
@@ -225,7 +225,7 @@ pub mod result {
 }
 
 pub mod speaker_map_type {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     /// When creating a multichannel sound, FMOD will pan them to their default speaker locations:
     /// * For example a 6 channel sound will default to one channel per 5.1 output speaker.
@@ -244,7 +244,7 @@ pub mod speaker_map_type {
 }
 
 pub mod sound_format {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     /// These definitions describe the native format of the hardware or software buffer that will be used.
     pub enum SoundFormat {
@@ -288,7 +288,7 @@ pub mod sound_format {
 }
 
 pub mod sound_type {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     /// These definitions describe the type of song being played.
     pub enum SoundType {
@@ -358,7 +358,7 @@ pub mod sound_type {
 }
 
 pub mod tag_type {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     /// List of tag types that could be stored within a sound. These include id3 tags, metadata from netstreams and vorbis/asf data.
     pub enum TagType {
@@ -382,7 +382,7 @@ pub mod tag_type {
 }
 
 pub mod tag_data_type {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     /// List of data types that can be returned by [`Sound::get_tag`](../../struct.Sound.html#method.get_tag)
     pub enum TagDataType {
@@ -402,7 +402,7 @@ pub mod tag_data_type {
 }
 
 pub mod channel_index {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     /// Special channel index values for FMOD functions.
     pub enum ChannelIndex {
@@ -414,7 +414,7 @@ pub mod channel_index {
 }
 
 pub mod dsp_fft_window {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     /// List of windowing methods used in spectrum analysis to reduce leakage / transient signals intefering with the analysis.
     /// This is a problem with analysis of continuous signals that only have a small portion of the signal sample (the fft window size).
@@ -440,7 +440,7 @@ pub mod dsp_fft_window {
 }
 
 pub mod delay_type {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     /// Types of delay that can be used with [`Channel::set_delay`](../../struct.Channel.html#method.set_delay) / [`Channel::get_delay`](../../struct.Channel.html#method.get_delay).
     pub enum DelayType {
@@ -460,7 +460,7 @@ pub mod delay_type {
 }
 
 pub mod output_type {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     /// These output types are used with [`FmodSys::set_output`](../../struct.FmodSys.html#method.set_output) / [`FmodSys::get_output`](../../struct.FmodSys.html#method.get_output), to choose which output method to use.
     pub enum OutputType {
@@ -528,7 +528,7 @@ pub mod output_type {
 }
 
 pub mod speaker {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     // FIXME
     /// These are speaker types defined for use with the [`Channel::set_speaker_level`](../../struct.Channel.html#method.set_speaker_level) command.
@@ -555,7 +555,7 @@ pub mod speaker {
 }
 
 pub mod speaker_mode {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     /// These are speaker types defined for use with the [`FmodSys::set_speaker_mode`](../../struct.FmodSys.html#method.set_speaker_mode) or [`FmodSys::get_speaker_mode`](../../struct.FmodSys.html#method.get_speaker_mode) command.
     pub enum SpeakerMode {
@@ -588,7 +588,7 @@ pub mod speaker_mode {
 }
 
 pub mod dsp_resampler {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     /// List of interpolation types that the FMOD Ex software mixer supports.
     pub enum DspResampler {
@@ -608,7 +608,7 @@ pub mod dsp_resampler {
 }
 
 pub mod plugin_type {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     /// These are plugin types defined for use with the [`FmodSys::get_num_plugins`](../../struct.FmodSys.html#method.get_num_plugins), [`FmodSys::get_plugin_info`](../../struct.FmodSys.html#method.get_plugin_info) and [`FmodSys::unload_plugin`](../../struct.FmodSys.html#method.unload_plugin) functions.
     pub enum PluginType {
@@ -626,7 +626,7 @@ pub mod plugin_type {
 }
 
 pub mod open_state {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     /// These values describe what state a sound is in after FMOD_NONBLOCKING has been used to open it.
     pub enum OpenState {
@@ -654,7 +654,7 @@ pub mod open_state {
 }
 
 pub mod system_callback_type {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     /// These callback types are used with [`Channel::set_callback`](../../struct.Channel.html#method.set_callback).
     pub enum SystemCallbackType {
@@ -680,7 +680,7 @@ pub mod system_callback_type {
 }
 
 pub mod sound_group_behavior {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     /// These flags are used with [`SoundGroup::set_max_audible_behavior`](../../struct.SoundGroup.html#method.set_max_audible_behavior) to determine what happens when more sounds are played than are specified with [`SoundGroup::set_max_audible`](../../struct.SoundGroup.html#method.set_max_audible).
     pub enum SoundGroupBehavior {
@@ -698,7 +698,7 @@ pub mod sound_group_behavior {
 }
 
 pub mod dsp_type {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     /// These definitions can be used for creating FMOD defined special effects or DSP units.
     /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
@@ -757,7 +757,7 @@ pub mod dsp_type {
 }
 
 pub mod dsp_oscillator {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     /// Parameter types for the FMOD_DSP_TYPE_OSCILLATOR filter.
     /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
@@ -770,7 +770,7 @@ pub mod dsp_oscillator {
 }
 
 pub mod dsp_low_pass {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     /// Parameter types for the FMOD_DSP_TYPE_LOWPASS filter.
     /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
@@ -783,7 +783,7 @@ pub mod dsp_low_pass {
 }
 
 pub mod dsp_it_low_pass {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     /// Parameter types for the FMOD_DSP_TYPE_ITLOWPASS filter.
     /// This is different to the default FMOD_DSP_TYPE_ITLOWPASS filter in that it uses a different quality algorithm and is 
@@ -798,7 +798,7 @@ pub mod dsp_it_low_pass {
     }
 }
 
-#[deriving(Clone, PartialEq, PartialOrd, Show)]
+#[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
 #[repr(C)]
 /// Parameter types for the FMOD_DSP_TYPE_HIGHPASS filter.
 /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
@@ -810,7 +810,7 @@ pub enum DspHighPass {
 }
 
 pub mod dsp_type_echo {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     /// Parameter types for the DspTypeEcho filter.
     /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
@@ -829,7 +829,7 @@ pub mod dsp_type_echo {
 }
 
 pub mod dsp_delay {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     /// Parameter types for the FMOD_DSP_TYPE_DELAY filter.
     /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
@@ -872,7 +872,7 @@ pub mod dsp_delay {
 }
 
 pub mod dsp_flange {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     /// Parameter types for the FMOD_DSP_TYPE_FLANGE filter.
     /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
@@ -889,7 +889,7 @@ pub mod dsp_flange {
 }
 
 pub mod dsp_tremolo {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     /// Parameter types for the FMOD_DSP_TYPE_TREMOLO filter.
     /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
@@ -914,7 +914,7 @@ pub mod dsp_tremolo {
 }
 
 pub mod dsp_distortion {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     /// Parameter types for the FMOD_DSP_TYPE_DISTORTION filter.
     /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
@@ -927,7 +927,7 @@ pub mod dsp_distortion {
 }
 
 pub mod dsp_normalize {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     /// Parameter types for the FMOD_DSP_TYPE_NORMALIZE filter.
     /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
@@ -942,7 +942,7 @@ pub mod dsp_normalize {
 }
 
 pub mod dsp_type_parameq {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     /// Parameter types for the DspTypeParameq filter.
     /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
@@ -957,7 +957,7 @@ pub mod dsp_type_parameq {
 }
 
 pub mod dsp_pitch_shift {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     /// Parameter types for the FMOD_DSP_TYPE_PITCHSHIFT filter.
     /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
@@ -974,7 +974,7 @@ pub mod dsp_pitch_shift {
 }
 
 pub mod dsp_chorus {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     /// Parameter types for the FMOD_DSP_TYPE_CHORUS filter.
     /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
@@ -997,7 +997,7 @@ pub mod dsp_chorus {
 }
 
 pub mod dsp_it_echo {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     /// Parameter types for the FMOD_DSP_TYPE_ITECHO filter.
     /// This is effectively a software based echo filter that emulates the DirectX DMO echo effect. Impulse tracker files can support this, and FMOD will produce the effect on ANY platform, not just those that support DirectX effects!
@@ -1017,7 +1017,7 @@ pub mod dsp_it_echo {
 }
 
 pub mod dsp_compressor {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     /// Parameter types for the FMOD_DSP_TYPE_COMPRESSOR unit.
     /// This is a simple linked multichannel software limiter that is uniform across the whole spectrum.
@@ -1035,7 +1035,7 @@ pub mod dsp_compressor {
 }
 
 pub mod dsp_sfx_reverb {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     /// Parameter types for the FMOD_DSP_TYPE_SFXREVERB unit.
     /// Used with [`Dsp::set_parameter`](../struct.Dsp.html#method.set_parameter) and [`Dsp::get_parameter`](../struct.Dsp.html#method.get_parameter)
@@ -1072,7 +1072,7 @@ pub mod dsp_sfx_reverb {
 }
 
 pub mod dsp_low_pass_simple {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     /// Parameter types for the FMOD_DSP_TYPE_LOWPASS_SIMPLE filter.
     /// This is a very simple low pass filter, based on two single-pole RC time-constant modules.
@@ -1087,7 +1087,7 @@ pub mod dsp_low_pass_simple {
 }
 
 pub mod dsp_high_pass_simple {
-    #[deriving(Clone, PartialEq, PartialOrd, Show)]
+    #[deriving(Clone, PartialEq, PartialOrd, Show, Copy)]
     #[repr(C)]
     /// Parameter types for the FMOD_DSP_TYPE_HIGHPASS_SIMPLE filter.
     /// This is a very simple single-order high pass filter.

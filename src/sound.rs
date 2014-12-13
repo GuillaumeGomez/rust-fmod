@@ -65,6 +65,7 @@ struct WavHeader {
 }
 
 /// Wrapper for SyncPoint object
+#[deriving(Copy)]
 pub struct FmodSyncPoint {
     sync_point: *mut ffi::FMOD_SYNCPOINT
 }

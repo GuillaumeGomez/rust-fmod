@@ -121,6 +121,7 @@ Here is the list of all modules :
 #![allow(non_snake_case)]
 #![allow(dead_code)]
 #![allow(improper_ctypes)]
+#![allow(raw_pointer_deriving)]
 
 #![feature(globs)]
 

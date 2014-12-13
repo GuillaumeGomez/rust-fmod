@@ -45,7 +45,7 @@ extern "C" fn create_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> ::Result {
                 let callbacks : &mut UserData = transmute(tmp);
 
                 match callbacks.callbacks.create_callback {
-                    Some(p) => p(&from_state_ptr(*dsp_state)),
+                    Some(p) => p(&from_state_ptr(::std::ptr::read(dsp_state as *const ffi::FMOD_DSP_STATE))),
                     None => ::Result::Ok
                 }
             } else {
@@ -67,7 +67,7 @@ extern "C" fn release_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> ::Result 
                 let callbacks : &mut UserData = transmute(tmp);
                 
                 match callbacks.callbacks.release_callback {
-                    Some(p) => p(&from_state_ptr(*dsp_state)),
+                    Some(p) => p(&from_state_ptr(::std::ptr::read(dsp_state as *const ffi::FMOD_DSP_STATE))),
                     None => ::Result::Ok
                 }
             } else {
@@ -89,7 +89,7 @@ extern "C" fn reset_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> ::Result {
                 let callbacks : &mut UserData = transmute(tmp);
                 
                 match callbacks.callbacks.reset_callback {
-                    Some(p) => p(&from_state_ptr(*dsp_state)),
+                    Some(p) => p(&from_state_ptr(::std::ptr::read(dsp_state as *const ffi::FMOD_DSP_STATE))),
                     None => ::Result::Ok
                 }
             } else {
@@ -115,7 +115,7 @@ extern "C" fn read_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, in_buffer: *mut
                         let mut v_in_buffer = CVec::new(in_buffer, (((length as i32 - 1i32) * in_channels) + out_channels) as uint);
                         let mut v_out_buffer = CVec::new(out_buffer, (((length as i32 - 1i32) * out_channels) + out_channels) as uint);
 
-                        p(&from_state_ptr(*dsp_state), v_in_buffer.as_mut_slice(), v_out_buffer.as_mut_slice(),
+                        p(&from_state_ptr(::std::ptr::read(dsp_state as *const ffi::FMOD_DSP_STATE)), v_in_buffer.as_mut_slice(), v_out_buffer.as_mut_slice(),
                             length as u32, in_channels as i32, out_channels as i32)
                     },
                     None => ::Result::Ok
@@ -139,7 +139,7 @@ extern "C" fn set_position_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, pos: c_
                 let callbacks : &mut UserData = transmute(tmp);
                 
                 match callbacks.callbacks.set_pos_callback {
-                    Some(p) => p(&from_state_ptr(*dsp_state), pos as u32),
+                    Some(p) => p(&from_state_ptr(::std::ptr::read(dsp_state as *const ffi::FMOD_DSP_STATE)), pos as u32),
                     None => ::Result::Ok
                 }
             } else {
@@ -161,7 +161,7 @@ extern "C" fn set_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index:
                 let callbacks : &mut UserData = transmute(tmp);
                 
                 match callbacks.callbacks.set_param_callback {
-                    Some(p) => p(&from_state_ptr(*dsp_state), index as i32, value),
+                    Some(p) => p(&from_state_ptr(::std::ptr::read(dsp_state as *const ffi::FMOD_DSP_STATE)), index as i32, value),
                     None => ::Result::Ok
                 }
             } else {
@@ -185,7 +185,7 @@ extern "C" fn get_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index:
                     Some(p) => {
                         let mut t_value = *value;
 
-                        let ret = p(&from_state_ptr(*dsp_state),
+                        let ret = p(&from_state_ptr(::std::ptr::read(dsp_state as *const ffi::FMOD_DSP_STATE)),
                             index as i32,
                             &mut t_value,
                             String::from_raw_buf(value_str as *const u8).as_slice());

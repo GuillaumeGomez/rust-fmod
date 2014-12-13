@@ -43,6 +43,7 @@ pub fn from_ffi(fd: *mut FILE) -> FmodFile {
 }
 
 /// A little struct to wrap C files. I'll try to improve this or to replace it by File
+#[deriving(Copy)]
 pub struct FmodFile {
     fd: *mut FILE
 }

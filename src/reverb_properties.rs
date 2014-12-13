@@ -76,6 +76,7 @@ pub fn get_ffi(reverb: ReverbProperties) -> ffi::FMOD_REVERB_PROPERTIES {
 }
 
 /// Structure defining a reverb environment.
+#[deriving(Copy)]
 pub struct ReverbProperties
 {
     /// [w]   Min: 0 - Max: 3 - Default: 0 - Environment Instance. (SUPPORTED:SFX(4 instances) and Wii (3 instances))

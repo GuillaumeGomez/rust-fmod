@@ -253,6 +253,7 @@ extern "C" fn pcm_set_pos_callback(sound: *mut ffi::FMOD_SOUND, sub_sound: c_int
 }
 
 /// Structure describing a globally unique identifier.
+#[deriving(Copy)]
 pub struct FmodGuid
 {
     /// Specifies the first 8 hexadecimal digits of the GUID
@@ -277,6 +278,7 @@ impl Default for FmodGuid {
 }
 
 /// Structure used to store user data for file callback
+#[deriving(Copy)]
 pub struct FmodUserData {
     user_data: *mut c_void
 }
@@ -304,6 +306,7 @@ impl Default for FmodUserData {
 }
 
 /// Wrapper for arguments of [`FmodSys::set_software_format`](struct.FmodSys.html#method.set_software_format) and [`FmodSys::get_software_format`](struct.FmodSys.html#method.get_software_format)
+#[deriving(Copy)]
 pub struct FmodSoftwareFormat
 {
     pub sample_rate        : i32,
@@ -643,11 +646,13 @@ impl Default for FmodCodecDescription {
 }
 
 /// Wrapper for OutputHandle
+#[deriving(Copy)]
 pub struct FmodOutputHandle {
     handle: *mut c_void
 }
 
 /// Structure to be filled with detailed memory usage information of a FMOD object
+#[deriving(Copy)]
 pub struct FmodMemoryUsageDetails
 {
     /// [out] Memory not accounted for by other types
