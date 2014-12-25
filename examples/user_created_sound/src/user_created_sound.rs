@@ -68,7 +68,7 @@ fn get_key() -> Result<int, std::io::IoError> {
             if line.as_slice() == "Quit" {
                 Ok(-1)
             } else {
-                Ok(from_str(line.as_slice()).unwrap())
+                Ok(line.parse().unwrap())
             }
         }
         Err(e) => Err(e)
@@ -116,7 +116,7 @@ fn main() {
     exinfo.num_channels = channels;
     exinfo.default_frequency  = 44100;
     exinfo.format = rfmod::SoundFormat::PCM16;
-    exinfo.pcm_read_callback = Some(pcmreadcallback);
+    exinfo.pcm_read_callback = Some(pcmreadcallback as fn(&_, &mut _) -> _);
 
     let sound = match match ret {
         1 => fmod.create_sound("",

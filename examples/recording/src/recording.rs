@@ -45,7 +45,7 @@ fn get_key() -> Result<int, std::io::IoError> {
             if line.as_slice() == "ESC" {
                 Ok(-1)
             } else {
-                Ok(from_str(line.as_slice()).unwrap())
+                Ok(line.parse().unwrap())
             }
         }
         Err(e) => Err(e)

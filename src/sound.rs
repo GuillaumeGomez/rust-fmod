@@ -357,7 +357,7 @@ impl Sound {
     }
 
     pub fn get_name(&self, name_len: u32) -> Result<String, ::Result> {
-        let name = String::with_capacity(name_len as uint).into_string();
+        let name = String::with_capacity(name_len as uint);
 
         name.with_c_str(|c_name|{
             match unsafe { ffi::FMOD_Sound_GetName(self.sound, c_name as *mut c_char, name_len as i32) } {
@@ -418,7 +418,7 @@ impl Sound {
             updated: 0
         };
 
-        match unsafe { ffi::FMOD_Sound_GetTag(self.sound, name.into_string().with_c_str(|c_name|{c_name}), index, &mut tag) } {
+        match unsafe { ffi::FMOD_Sound_GetTag(self.sound, name.with_c_str(|c_name|{c_name}), index, &mut tag) } {
             ::Result::Ok => Ok(FmodTag::from_ptr(tag)),
             e => Err(e)
         }
@@ -478,7 +478,7 @@ impl Sound {
     }
 
     pub fn get_sync_point_info(&self, sync_point: FmodSyncPoint, name_len: u32, FmodTimeUnit(offset_type): FmodTimeUnit) -> Result<(String, u32), ::Result> {
-        let name = String::with_capacity(name_len as uint).into_string();
+        let name = String::with_capacity(name_len as uint);
         let mut offset = 0u32;
 
         match unsafe { ffi::FMOD_Sound_GetSyncPointInfo(self.sound, sync_point.sync_point, name.with_c_str(|c_name|{c_name as *mut c_char}),
@@ -491,7 +491,7 @@ impl Sound {
     pub fn add_sync_point(&self, offset: u32, FmodTimeUnit(offset_type): FmodTimeUnit, name: String) -> Result<FmodSyncPoint, ::Result> {
         let mut sync_point = ::std::ptr::null_mut();
 
-        match unsafe { ffi::FMOD_Sound_AddSyncPoint(self.sound, offset, offset_type, name.into_string().with_c_str(|c_name|{c_name}), &mut sync_point) } {
+        match unsafe { ffi::FMOD_Sound_AddSyncPoint(self.sound, offset, offset_type, name.with_c_str(|c_name|{c_name}), &mut sync_point) } {
             ::Result::Ok => Ok(FmodSyncPoint::from_ptr(sync_point)),
             e => Err(e)
         }

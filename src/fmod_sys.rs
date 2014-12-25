@@ -554,15 +554,15 @@ impl FmodCreateSoundexInfo {
             inclusionlist: self.inclusion_list.as_mut_ptr(),
             inclusionlistnum: self.inclusion_list.len() as i32,
             pcmreadcallback: match self.pcm_read_callback {
-                Some(_) => Some(pcm_read_callback),
+                Some(_) => Some(pcm_read_callback as extern "C" fn(*mut _, *mut _, _) -> _),
                 None => None
             },
             pcmsetposcallback: match self.pcm_set_pos_callback {
-                Some(_) => Some(pcm_set_pos_callback),
+                Some(_) => Some(pcm_set_pos_callback as extern "C" fn(*mut _, _, _, _) -> _),
                 None => None
             },
             nonblockcallback: match self.non_block_callback {
-                Some(_) => Some(non_block_callback),
+                Some(_) => Some(non_block_callback as extern "C" fn(*mut _, _) -> _),
                 None => None
             },
             dlsname: self.dls_name.clone().with_c_str(|c_str|{c_str as *mut c_char}),
@@ -1864,19 +1864,19 @@ impl FmodSys {
         tmp.file_seek = user_seek;
         unsafe { ffi::FMOD_System_SetFileSystem(self.system,
             match user_open {
-                Some(_) => Some(file_open_callback),
+                Some(_) => Some(file_open_callback as extern "C" fn(*mut _, _, *mut _, *mut *mut _, *mut *mut _) -> _),
                 None => None
             },
             match user_close {
-                Some(_) => Some(file_close_callback),
+                Some(_) => Some(file_close_callback as extern "C" fn(*mut _, *mut _) -> _),
                 None => None
             },
             match user_read {
-                Some(_) => Some(file_read_callback),
+                Some(_) => Some(file_read_callback as extern "C" fn(*mut _, *mut _, _, *mut _, *mut _) -> _),
                 None => None
             },
             match user_seek {
-                Some(_) => Some(file_seek_callback),
+                Some(_) => Some(file_seek_callback as extern "C" fn(*mut _, _, *mut _) -> _),
                 None => None
             },
             None,

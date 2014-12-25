@@ -106,7 +106,7 @@ fn main() {
 
     let mut description : rfmod::DspDescription = Default::default();
 
-    description.read = Some(my_DSP_callback);
+    description.read = Some(my_DSP_callback as fn(&_, &mut _, &mut _, _, _, _) -> _);
     description.name = String::from_str("test");
 
     let dsp = match fmod.create_DSP_with_description(&mut description) {

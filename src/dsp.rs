@@ -431,37 +431,37 @@ pub fn get_description_ffi(dsp_description: &mut DspDescription) -> ffi::FMOD_DS
         version: dsp_description.version,
         channels: dsp_description.channels,
         create: match dsp_description.create {
-            Some(_) => Some(create_callback),
+            Some(_) => Some(create_callback as extern "C" fn(*mut _) -> _),
             None => None
         },
         release: match dsp_description.release {
-            Some(_) => Some(release_callback),
+            Some(_) => Some(release_callback as extern "C" fn(*mut _) -> _),
             None => None
         },
         reset: match dsp_description.reset {
-            Some(_) => Some(reset_callback),
+            Some(_) => Some(reset_callback as extern "C" fn(*mut _) -> _),
             None => None
         },
         read: match dsp_description.read {
-            Some(_) => Some(read_callback),
+            Some(_) => Some(read_callback as extern "C" fn(*mut _, *mut _, *mut _, _, _, _) -> _),
             None => None
         },
         set_position: match dsp_description.set_position {
-            Some(_) => Some(set_position_callback),
+            Some(_) => Some(set_position_callback as extern "C" fn(*mut _, _) -> _),
             None => None
         },
         num_parameters: dsp_description.num_parameters,
         param_desc: &mut get_parameter_ffi(&dsp_description.param_desc) as *mut ffi::FMOD_DSP_PARAMETERDESC,
         set_parameter: match dsp_description.set_parameter {
-            Some(_) => Some(set_parameter_callback),
+            Some(_) => Some(set_parameter_callback as extern "C" fn(*mut _, _, _) -> _),
             None => None
         },
         get_parameter: match dsp_description.get_parameter {
-            Some(_) => Some(get_parameter_callback),
+            Some(_) => Some(get_parameter_callback as extern "C" fn(*mut _, _, *mut _, *mut _) -> _),
             None => None
         },
         config: match dsp_description.config {
-            Some(_) => Some(config_callback),
+            Some(_) => Some(config_callback as extern "C" fn(*mut _, *mut _, _) -> _),
             None => None
         },
         config_height: dsp_description.config_height,

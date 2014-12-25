@@ -42,7 +42,7 @@ fn get_key() -> Result<int, std::io::IoError> {
             if line.as_slice() == "quit" {
                 Ok(-1)
             } else {
-                match from_str(line.as_slice()) {
+                match line.parse() {
                     Some(s) => Ok(s),
                     None => Ok(9)
                 }

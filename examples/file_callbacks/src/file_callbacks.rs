@@ -80,7 +80,11 @@ fn main() {
         }
     };
 
-    match fmod.set_file_system(Some(my_open), Some(my_close), Some(my_read), Some(my_seek), 2048i32) {
+    match fmod.set_file_system(Some(my_open as fn(&_, _) -> _),
+        Some(my_close as fn(&mut _, Option<&mut _>)),
+        Some(my_read as fn(&mut _, &mut _, _, Option<&mut _>) -> _),
+        Some(my_seek as fn(&mut _, _, Option<&mut _>)),
+        2048i32) {
         rfmod::Result::Ok => {}
         e => {
             panic!("FmodSys.set_file_system failed : {}", e);
