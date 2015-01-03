@@ -22,6 +22,7 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
+use std::c_str::ToCStr;
 use types::*;
 use ffi;
 use channel;
@@ -58,7 +59,7 @@ impl ffi::FFI<ffi::FMOD_CHANNELGROUP> for ChannelGroup {
 
 impl ChannelGroup {
     pub fn release(&mut self) -> ::Result {
-        if self.channel_group.is_not_null() {
+        if !self.channel_group.is_null() {
             match unsafe { ffi::FMOD_ChannelGroup_Release(self.channel_group) } {
                ::Result::Ok => {
                     self.channel_group = ::std::ptr::null_mut();
@@ -271,7 +272,7 @@ impl ChannelGroup {
     }
 
     pub fn get_spectrum(&self, spectrum_size: uint, channel_offset: Option<i32>, window_type: Option<::DspFftWindow>) -> Result<Vec<f32>, ::Result> {
-        let mut ptr = Vec::from_elem(spectrum_size, 0f32);
+        let mut ptr : Vec<f32> = ::std::iter::repeat(0f32).take(spectrum_size).collect();
         let c_window_type = match window_type {
             Some(wt) => wt,
             None => ::DspFftWindow::Rect
@@ -288,7 +289,7 @@ impl ChannelGroup {
     }
 
     pub fn get_wave_data(&self, wave_size: uint, channel_offset: i32) -> Result<Vec<f32>, ::Result> {
-        let mut ptr = Vec::from_elem(wave_size, 0f32);
+        let mut ptr : Vec<f32> = ::std::iter::repeat(0f32).take(wave_size).collect();
 
         match unsafe { ffi::FMOD_ChannelGroup_GetWaveData(self.channel_group, ptr.as_mut_ptr(), wave_size as c_int, channel_offset) } {
             ::Result::Ok => Ok(ptr),

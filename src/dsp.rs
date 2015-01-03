@@ -34,14 +34,15 @@ use libc::{c_char, c_void, c_uint, c_int, c_float};
 use std::c_str::CString;
 use std::default::Default;
 use std::c_vec::CVec;
+use std::c_str::ToCStr;
 
 extern "C" fn create_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> ::Result {
     unsafe {
-        if dsp_state.is_not_null() && (*dsp_state).instance.is_not_null() {
+        if !dsp_state.is_null() && !(*dsp_state).instance.is_null() {
             let mut tmp = ::std::ptr::null_mut();
 
             ffi::FMOD_DSP_GetUserData((*dsp_state).instance, &mut tmp);
-            if tmp.is_not_null() {
+            if !tmp.is_null() {
                 let callbacks : &mut UserData = transmute(tmp);
 
                 match callbacks.callbacks.create_callback {
@@ -59,11 +60,11 @@ extern "C" fn create_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> ::Result {
 
 extern "C" fn release_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> ::Result {
     unsafe {
-        if dsp_state.is_not_null() && (*dsp_state).instance.is_not_null() {
+        if !dsp_state.is_null() && !(*dsp_state).instance.is_null() {
             let mut tmp = ::std::ptr::null_mut();
 
             ffi::FMOD_DSP_GetUserData((*dsp_state).instance, &mut tmp);
-            if tmp.is_not_null() {
+            if !tmp.is_null() {
                 let callbacks : &mut UserData = transmute(tmp);
                 
                 match callbacks.callbacks.release_callback {
@@ -81,11 +82,11 @@ extern "C" fn release_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> ::Result 
 
 extern "C" fn reset_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> ::Result {
     unsafe {
-        if dsp_state.is_not_null() && (*dsp_state).instance.is_not_null() {
+        if !dsp_state.is_null() && !(*dsp_state).instance.is_null() {
             let mut tmp = ::std::ptr::null_mut();
 
             ffi::FMOD_DSP_GetUserData((*dsp_state).instance, &mut tmp);
-            if tmp.is_not_null() {
+            if !tmp.is_null() {
                 let callbacks : &mut UserData = transmute(tmp);
                 
                 match callbacks.callbacks.reset_callback {
@@ -104,11 +105,11 @@ extern "C" fn reset_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> ::Result {
 extern "C" fn read_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, in_buffer: *mut c_float, out_buffer: *mut c_float, length: c_uint,
     in_channels: c_int, out_channels: c_int) -> ::Result {
     unsafe {
-        if dsp_state.is_not_null() && (*dsp_state).instance.is_not_null() {
+        if !dsp_state.is_null() && !(*dsp_state).instance.is_null() {
             let mut tmp = ::std::ptr::null_mut();
 
             ffi::FMOD_DSP_GetUserData((*dsp_state).instance, &mut tmp);
-            if tmp.is_not_null() {
+            if !tmp.is_null() {
                 let callbacks : &mut UserData = transmute(tmp);
                 match callbacks.callbacks.read_callback {
                     Some(p) => {
@@ -131,11 +132,11 @@ extern "C" fn read_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, in_buffer: *mut
 
 extern "C" fn set_position_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, pos: c_uint) -> ::Result {
     unsafe {
-        if dsp_state.is_not_null() && (*dsp_state).instance.is_not_null() {
+        if !dsp_state.is_null() && !(*dsp_state).instance.is_null() {
             let mut tmp = ::std::ptr::null_mut();
 
             ffi::FMOD_DSP_GetUserData((*dsp_state).instance, &mut tmp);
-            if tmp.is_not_null() {
+            if !tmp.is_null() {
                 let callbacks : &mut UserData = transmute(tmp);
                 
                 match callbacks.callbacks.set_pos_callback {
@@ -153,11 +154,11 @@ extern "C" fn set_position_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, pos: c_
 
 extern "C" fn set_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index: c_int, value: c_float) -> ::Result {
     unsafe {
-        if dsp_state.is_not_null() && (*dsp_state).instance.is_not_null() {
+        if !dsp_state.is_null() && !(*dsp_state).instance.is_null() {
             let mut tmp = ::std::ptr::null_mut();
 
             ffi::FMOD_DSP_GetUserData((*dsp_state).instance, &mut tmp);
-            if tmp.is_not_null() {
+            if !tmp.is_null() {
                 let callbacks : &mut UserData = transmute(tmp);
                 
                 match callbacks.callbacks.set_param_callback {
@@ -175,11 +176,11 @@ extern "C" fn set_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index:
 
 extern "C" fn get_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index: c_int, value: *mut c_float, value_str: *mut c_char) -> ::Result {
     unsafe {
-        if dsp_state.is_not_null() && (*dsp_state).instance.is_not_null() {
+        if !dsp_state.is_null() && !(*dsp_state).instance.is_null() {
             let mut tmp = ::std::ptr::null_mut();
 
             ffi::FMOD_DSP_GetUserData((*dsp_state).instance, &mut tmp);
-            if tmp.is_not_null() {
+            if !tmp.is_null() {
                 let callbacks : &mut UserData = transmute(tmp);
                 match callbacks.callbacks.get_param_callback {
                     Some(p) => {
@@ -260,7 +261,7 @@ impl Clone for DspCallbacks {
     }
 }
 
-#[deriving(Show, PartialEq, Clone)]
+#[derive(Show, PartialEq, Clone)]
 /// Structure to define a parameter for a DSP unit.
 pub struct DspParameterDesc
 {
@@ -292,7 +293,7 @@ impl Default for DspParameterDesc {
 }
 
 pub fn from_parameter_ptr(dsp_parameter: *mut ffi::FMOD_DSP_PARAMETERDESC) -> DspParameterDesc {
-    if dsp_parameter.is_not_null() {
+    if !dsp_parameter.is_null() {
         unsafe {
             DspParameterDesc {
                 min: (*dsp_parameter).min,
@@ -328,7 +329,7 @@ pub fn get_parameter_ffi(dsp_parameter: &DspParameterDesc) -> ffi::FMOD_DSP_PARA
             max: dsp_parameter.max,
             default_val: dsp_parameter.default_val,
             name: {
-                let mut slice : [i8, ..16] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+                let mut slice : [i8; 16] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
                 let mut it = 0;
 
                 for tmp in tmp_name.iter() {
@@ -338,7 +339,7 @@ pub fn get_parameter_ffi(dsp_parameter: &DspParameterDesc) -> ffi::FMOD_DSP_PARA
                 slice
             },
             label: {
-                let mut slice : [i8, ..16] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+                let mut slice : [i8; 16] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
                 let mut it = 0;
 
                 for tmp in tmp_label.iter() {
@@ -419,7 +420,7 @@ pub fn get_description_ffi(dsp_description: &mut DspDescription) -> ffi::FMOD_DS
     tmp_s.reserve_exact(32);
     ffi::FMOD_DSP_DESCRIPTION {
         name: {
-            let mut slice : [i8, ..32] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            let mut slice : [i8; 32] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
             let mut it = 0;
 
             for tmp in tmp_s.iter() {
@@ -558,7 +559,7 @@ impl Dsp {
     }
 
     pub fn release(&mut self) -> ::Result {
-        if self.can_be_deleted && self.dsp.is_not_null() {
+        if self.can_be_deleted && !self.dsp.is_null() {
             match unsafe { ffi::FMOD_DSP_Release(self.dsp) } {
                ::Result::Ok => {
                     self.dsp =::std::ptr::null_mut();
@@ -902,7 +903,7 @@ impl Dsp {
 
             match ffi::FMOD_DSP_GetUserData(self.dsp, &mut user_data) {
                ::Result::Ok => {
-                    if user_data.is_not_null() {
+                    if !user_data.is_null() {
                         let tmp : &mut UserData = transmute::<*mut c_void, &mut UserData>(user_data);
                         let tmp2 : &mut T = transmute::<*mut c_void, &mut T>(tmp.user_data);
                         

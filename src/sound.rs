@@ -39,9 +39,10 @@ use std::mem;
 use std::io::BufferedWriter;
 use std::slice;
 use std::default::Default;
+use std::c_str::ToCStr;
 
 struct RiffChunk {
-    id: [c_char, ..4],
+    id: [c_char; 4],
     size: c_int
 }
 
@@ -61,11 +62,11 @@ struct DataChunk {
 
 struct WavHeader {
     chunk: RiffChunk,
-    riff_type: [c_char, ..4]
+    riff_type: [c_char; 4]
 }
 
 /// Wrapper for SyncPoint object
-#[deriving(Copy)]
+#[derive(Copy)]
 pub struct FmodSyncPoint {
     sync_point: *mut ffi::FMOD_SYNCPOINT
 }
@@ -111,7 +112,7 @@ impl FmodTag {
             _type: pointer._type,
             data_type: pointer.datatype,
             name: {
-                if pointer.name.is_not_null() {
+                if !pointer.name.is_null() {
                     unsafe {String::from_raw_buf(pointer.name as *const u8).clone() }
                 } else {
                     String::new()
@@ -193,7 +194,7 @@ impl Sound {
     }
 
     pub fn release(&mut self) -> ::Result {
-        if self.can_be_deleted && self.sound.is_not_null() {
+        if self.can_be_deleted && !self.sound.is_null() {
             match unsafe { ffi::FMOD_Sound_Release(self.sound) } {
                ::Result::Ok => {
                     self.sound = ::std::ptr::null_mut();
@@ -650,7 +651,7 @@ impl Sound {
 
             match ffi::FMOD_Sound_GetUserData(self.sound, &mut user_data) {
                ::Result::Ok => {
-                    if user_data.is_not_null() {
+                    if !user_data.is_null() {
                         let tmp : &mut ffi::SoundData = transmute::<*mut c_void, &mut ffi::SoundData>(user_data);
                         let tmp2 : &mut T = transmute::<*mut c_void, &mut T>(tmp.user_data);
                         

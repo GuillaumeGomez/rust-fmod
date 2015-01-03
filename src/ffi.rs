@@ -605,7 +605,7 @@ pub struct FMOD_GUID
     pub Data1: c_uint,              /* Specifies the first 8 hexadecimal digits of the GUID */
     pub Data2: c_ushort,            /* Specifies the first group of 4 hexadecimal digits.  */
     pub Data3: c_ushort,            /* Specifies the second group of 4 hexadecimal digits. */
-    pub Data4: [c_uchar, ..8]       /* Array of 8 bytes. The first 2 bytes contain the third group of 4 hexadecimal digits. The remaining 6 bytes contain the final 12 hexadecimal digits. */
+    pub Data4: [c_uchar; 8]         /* Array of 8 bytes. The first 2 bytes contain the third group of 4 hexadecimal digits. The remaining 6 bytes contain the final 12 hexadecimal digits. */
 }
 
 pub struct FMOD_ADVANCEDSETTINGS
@@ -657,8 +657,8 @@ pub struct FMOD_CODEC_DESCRIPTION
 
 pub struct FMOD_CODEC_WAVEFORMAT
 {
-    pub name       : [c_char, ..256],  /* [in] Name of sound.*/
-    pub format     : ::SoundFormat,/* [in] Format for (decompressed) codec output, ie ::SoundFormat_PCM8, ::SoundFormat_PCM16.*/
+    pub name       : [c_char; 256],    /* [in] Name of sound.*/
+    pub format     : ::SoundFormat,    /* [in] Format for (decompressed) codec output, ie ::SoundFormat_PCM8, ::SoundFormat_PCM16.*/
     pub channels   : c_int,            /* [in] Number of channels used by codec, ie mono = 1, stereo = 2. */
     pub frequency  : c_int,            /* [in] Default frequency in hz of the codec, ie 44100. */
     pub lengthbytes: c_uint,           /* [in] Length in bytes of the source data. */
@@ -778,17 +778,17 @@ pub struct FMOD_MEMORY_USAGE_DETAILS
 
 pub struct FMOD_DSP_PARAMETERDESC
 {
-    pub min         : c_float,        /* [w] Minimum value of the parameter (ie 100.0). */
-    pub max         : c_float,        /* [w] Maximum value of the parameter (ie 22050.0). */
-    pub default_val : c_float,        /* [w] Default value of parameter. */
-    pub name        : [c_char, ..16], /* [w] Name of the parameter to be displayed (ie "Cutoff frequency"). */
-    pub label       : [c_char, ..16], /* [w] Short string to be put next to value to denote the unit type (ie "hz"). */
-    pub description : *const c_char   /* [w] Description of the parameter to be displayed as a help item / tooltip for this parameter. */
+    pub min         : c_float,      /* [w] Minimum value of the parameter (ie 100.0). */
+    pub max         : c_float,      /* [w] Maximum value of the parameter (ie 22050.0). */
+    pub default_val : c_float,      /* [w] Default value of parameter. */
+    pub name        : [c_char; 16], /* [w] Name of the parameter to be displayed (ie "Cutoff frequency"). */
+    pub label       : [c_char; 16], /* [w] Short string to be put next to value to denote the unit type (ie "hz"). */
+    pub description : *const c_char /* [w] Description of the parameter to be displayed as a help item / tooltip for this parameter. */
 }
 
 pub struct FMOD_DSP_DESCRIPTION
 {
-    pub name                    : [c_char, ..32],               /* [w] Name of the unit to be displayed in the network. */
+    pub name                    : [c_char; 32],                 /* [w] Name of the unit to be displayed in the network. */
     pub version                 : c_uint,                       /* [w] Plugin writer's version number. */
     pub channels                : c_int,                        /* [w] Number of channels. Use 0 to process whatever number of channels is currently in the network. >0 would be mostly used if the unit is a unit that only generates sound. */
     pub create                  : FMOD_DSP_CREATECALLBACK,      /* [w] Create callback. This is called when DSP unit is created. Can be null. */

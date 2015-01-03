@@ -33,7 +33,7 @@ pub fn get_ffi(vec: &FmodVector) -> ffi::FMOD_VECTOR {
     ffi::FMOD_VECTOR {x: vec.x, y: vec.y, z: vec.z}
 }
 
-#[deriving(Show, Copy)]
+#[derive(Show, Copy)]
 /// Structure describing a point in 3D space.
 pub struct FmodVector
 {

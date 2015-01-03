@@ -23,6 +23,7 @@
 */
 
 use libc::{c_void, c_uint, c_int, c_char, c_short};
+use std::c_str::ToCStr;
 use ffi;
 use types::*;
 use sound;
@@ -182,11 +183,11 @@ extern "C" fn file_seek_callback(handle: *mut c_void, pos: c_uint, user_data: *m
 
 extern "C" fn pcm_read_callback(sound: *mut ffi::FMOD_SOUND, data: *mut c_void, data_len: c_uint) -> ::Result {
     unsafe {
-        if sound.is_not_null() {
+        if !sound.is_null() {
             let mut tmp = ::std::ptr::null_mut();
 
             ffi::FMOD_Sound_GetUserData(sound, &mut tmp);
-            if tmp.is_not_null() {
+            if !tmp.is_null() {
                 let callbacks : &mut ffi::SoundData = std::mem::transmute(tmp);
 
                 match callbacks.pcm_read {
@@ -210,11 +211,11 @@ extern "C" fn pcm_read_callback(sound: *mut ffi::FMOD_SOUND, data: *mut c_void, 
 
 extern "C" fn non_block_callback(sound: *mut ffi::FMOD_SOUND, result: ::Result) -> ::Result {
     unsafe {
-        if sound.is_not_null() {
+        if !sound.is_null() {
             let mut tmp = ::std::ptr::null_mut();
 
             ffi::FMOD_Sound_GetUserData(sound, &mut tmp);
-            if tmp.is_not_null() {
+            if !tmp.is_null() {
                 let callbacks : &mut ffi::SoundData = ::std::mem::transmute(tmp);
 
                 match callbacks.non_block {
@@ -232,11 +233,11 @@ extern "C" fn non_block_callback(sound: *mut ffi::FMOD_SOUND, result: ::Result) 
 
 extern "C" fn pcm_set_pos_callback(sound: *mut ffi::FMOD_SOUND, sub_sound: c_int, position: c_uint, postype: ffi::FMOD_TIMEUNIT) -> ::Result {
     unsafe {
-        if sound.is_not_null() {
+        if !sound.is_null() {
             let mut tmp = ::std::ptr::null_mut();
 
             ffi::FMOD_Sound_GetUserData(sound, &mut tmp);
-            if tmp.is_not_null() {
+            if !tmp.is_null() {
                 let callbacks : &mut ffi::SoundData = ::std::mem::transmute(tmp);
 
                 match callbacks.pcm_set_pos {
@@ -253,7 +254,7 @@ extern "C" fn pcm_set_pos_callback(sound: *mut ffi::FMOD_SOUND, sub_sound: c_int
 }
 
 /// Structure describing a globally unique identifier.
-#[deriving(Copy)]
+#[derive(Copy)]
 pub struct FmodGuid
 {
     /// Specifies the first 8 hexadecimal digits of the GUID
@@ -263,7 +264,7 @@ pub struct FmodGuid
     /// Specifies the second group of 4 hexadecimal digits.
     pub data3: u16,
     /// Array of 8 bytes. The first 2 bytes contain the third group of 4 hexadecimal digits. The remaining 6 bytes contain the final 12 hexadecimal digits.
-    pub data4: [u8, ..8]
+    pub data4: [u8; 8]
 }
 
 impl Default for FmodGuid {
@@ -272,13 +273,13 @@ impl Default for FmodGuid {
             data1: 0u32,
             data2: 0u16,
             data3: 0u16,
-            data4: [0u8, ..8]
+            data4: [0u8; 8]
         }
     }
 }
 
 /// Structure used to store user data for file callback
-#[deriving(Copy)]
+#[derive(Copy)]
 pub struct FmodUserData {
     user_data: *mut c_void
 }
@@ -306,7 +307,7 @@ impl Default for FmodUserData {
 }
 
 /// Wrapper for arguments of [`FmodSys::set_software_format`](struct.FmodSys.html#method.set_software_format) and [`FmodSys::get_software_format`](struct.FmodSys.html#method.get_software_format)
-#[deriving(Copy)]
+#[derive(Copy)]
 pub struct FmodSoftwareFormat
 {
     pub sample_rate        : i32,
@@ -646,13 +647,13 @@ impl Default for FmodCodecDescription {
 }
 
 /// Wrapper for OutputHandle
-#[deriving(Copy)]
+#[derive(Copy)]
 pub struct FmodOutputHandle {
     handle: *mut c_void
 }
 
 /// Structure to be filled with detailed memory usage information of a FMOD object
-#[deriving(Copy)]
+#[derive(Copy)]
 pub struct FmodMemoryUsageDetails
 {
     /// [out] Memory not accounted for by other types
@@ -960,7 +961,7 @@ impl FmodSys {
     }
 
     pub fn release(&mut self) -> ::Result {
-        if self.is_first && self.system.is_not_null() {
+        if self.is_first && !self.system.is_null() {
             unsafe {
                 match match ffi::FMOD_System_Close(self.system) {
                     ::Result::Ok => ffi::FMOD_System_Release(self.system),
@@ -1230,9 +1231,9 @@ impl FmodSys {
     }
 
     pub fn set_advanced_settings(&self, settings: &mut FmodAdvancedSettings) -> ::Result {
-        let mut converted_c_char = Vec::from_fn(settings.ASIO_channel_list.len(), |pos| {
+        let mut converted_c_char : Vec<*const c_char> = ::std::iter::range(0, settings.ASIO_channel_list.len()).map(|pos| {
             settings.ASIO_channel_list[pos].clone().with_c_str(|c_str| c_str)
-        });
+        }).collect();
         let deb_log_filename = settings.debug_log_filename.clone();
         let mut advanced_settings = ffi::FMOD_ADVANCEDSETTINGS{
             cbsize: mem::size_of::<ffi::FMOD_ADVANCEDSETTINGS>() as i32,
@@ -1304,7 +1305,7 @@ impl FmodSys {
                 let mut converted_ASIO_speaker_vec = Vec::new();
 
                 unsafe {
-                    if advanced_settings.ASIOChannelList.is_not_null() {
+                    if !advanced_settings.ASIOChannelList.is_null() {
                         let mut it = 0;
                         loop {
                             let tmp = advanced_settings.ASIOChannelList.offset(it);
@@ -1316,7 +1317,7 @@ impl FmodSys {
                             it += 1;
                         }
                     }
-                    if advanced_settings.ASIOSpeakerList.is_not_null() {
+                    if !advanced_settings.ASIOSpeakerList.is_null() {
                         let mut it = 0;
                         loop {
                             let tmp = advanced_settings.ASIOSpeakerList.offset(it);
@@ -1348,7 +1349,7 @@ impl FmodSys {
                     event_queue_size: advanced_settings.eventqueuesize,
                     default_decode_buffer_size: advanced_settings.defaultDecodeBufferSize,
                     debug_log_filename: {
-                        if advanced_settings.debugLogFilename.is_not_null() {
+                        if !advanced_settings.debugLogFilename.is_null() {
                             unsafe {String::from_raw_buf(advanced_settings.debugLogFilename as *const u8).clone() }
                         } else {
                             String::new()
@@ -1625,7 +1626,7 @@ impl FmodSys {
     }
 
     pub fn get_spectrum(&self, spectrum_size: uint, channel_offset: Option<i32>, window_type: Option<::DspFftWindow>) -> Result<Vec<f32>, ::Result> {
-        let mut ptr = Vec::from_elem(spectrum_size, 0f32);
+        let mut ptr : Vec<f32> = ::std::iter::repeat(0f32).take(spectrum_size).collect();
         let c_window_type = match window_type {
             Some(wt) => wt,
             None => ::DspFftWindow::Rect
@@ -1642,7 +1643,7 @@ impl FmodSys {
     }
 
     pub fn get_wave_data(&self, wave_size: uint, channel_offset: i32) -> Result<Vec<f32>, ::Result> {
-        let mut ptr = Vec::from_elem(wave_size, 0f32);
+        let mut ptr : Vec<f32> = ::std::iter::repeat(0f32).take(wave_size).collect();
 
         match unsafe { ffi::FMOD_System_GetWaveData(self.system, ptr.as_mut_ptr(), wave_size as c_int, channel_offset) } {
             ::Result::Ok => Ok(ptr),

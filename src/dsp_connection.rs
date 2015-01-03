@@ -93,7 +93,7 @@ impl DspConnection {
     }
 
     pub fn get_levels(&self, speaker: ::Speaker, num_levels: uint) -> Result<Vec<f32>, ::Result> {
-        let mut levels = Vec::from_elem(num_levels, 0f32);
+        let mut levels : Vec<f32> = ::std::iter::repeat(0f32).take(num_levels).collect();
 
         match unsafe { ffi::FMOD_DSPConnection_GetLevels(self.dsp_connection, speaker, levels.as_mut_ptr(), levels.len() as c_int) } {
             ::Result::Ok => Ok(levels),

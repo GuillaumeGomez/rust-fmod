@@ -36,7 +36,7 @@ use std::mem::transmute;
 use std::default::Default;
 
 /// Structure which contains data for [`Channel::set_speaker_mix`](struct.Channel.html#method.set_speaker_mix) and [`Channel::get_speaker_mix`](struct.Channel.html#method.get_speaker_mix)
-#[deriving(Show, PartialEq, PartialOrd, Clone, Copy)]
+#[derive(Show, PartialEq, PartialOrd, Clone, Copy)]
 pub struct FmodSpeakerMixOptions {
     pub front_left : f32,
     pub front_right: f32,
@@ -120,7 +120,7 @@ impl Channel {
 
     /// channel_offset:  0/1 -> left channel/right channel
     pub fn get_spectrum(&self, spectrum_size: uint, channel_offset: Option<i32>, window_type: Option<::DspFftWindow>) -> Result<Vec<f32>, ::Result> {
-        let mut ptr = Vec::from_elem(spectrum_size, 0f32);
+        let mut ptr : Vec<f32> = ::std::iter::repeat(0f32).take(spectrum_size).collect();
         let c_window_type = match window_type {
             Some(wt) => wt,
             None => ::DspFftWindow::Rect
@@ -137,7 +137,7 @@ impl Channel {
     }
 
     pub fn get_wave_data(&self, wave_size: uint, channel_offset: i32) -> Result<Vec<f32>, ::Result> {
-        let mut ptr = Vec::from_elem(wave_size, 0f32);
+        let mut ptr : Vec<f32> = ::std::iter::repeat(0f32).take(wave_size).collect();
 
         match unsafe { ffi::FMOD_Channel_GetWaveData(self.channel, ptr.as_mut_ptr(), wave_size as c_int, channel_offset) } {
             ::Result::Ok => Ok(ptr),
@@ -146,7 +146,7 @@ impl Channel {
     }
 
     pub fn is_init(&self) -> bool {
-        self.channel.is_not_null()
+        !self.channel.is_null()
     }
 
     pub fn is_playing(&self) -> Result<bool, ::Result> {
@@ -308,7 +308,7 @@ impl Channel {
     }
 
     pub fn get_speaker_level(&self, speaker: ::Speaker, num_levels: uint) -> Result<Vec<f32>, ::Result> {
-        let mut ptr = Vec::from_elem(num_levels, 0f32);
+        let mut ptr : Vec<f32> = ::std::iter::repeat(0f32).take(num_levels).collect();
 
         match unsafe { ffi::FMOD_Channel_GetSpeakerLevels(self.channel, speaker, ptr.as_mut_ptr(), num_levels as i32) } {
             ::Result::Ok => Ok(ptr),
@@ -321,7 +321,7 @@ impl Channel {
     }
 
     pub fn get_input_channel_mix(&self, num_levels: uint) -> Result<Vec<f32>, ::Result> {
-        let mut ptr = Vec::from_elem(num_levels, 0f32);
+        let mut ptr : Vec<f32> = ::std::iter::repeat(0f32).take(num_levels).collect();
 
         match unsafe { ffi::FMOD_Channel_GetInputChannelMix(self.channel, ptr.as_mut_ptr(), num_levels as i32) } {
             ::Result::Ok => Ok(ptr),

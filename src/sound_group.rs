@@ -22,6 +22,7 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
+use std::c_str::ToCStr;
 use types::*;
 use ffi;
 use sound;
@@ -55,7 +56,7 @@ impl Drop for SoundGroup {
 
 impl SoundGroup {
     pub fn release(&mut self) -> ::Result {
-        if self.sound_group.is_not_null() {
+        if !self.sound_group.is_null() {
             match unsafe { ffi::FMOD_SoundGroup_Release(self.sound_group) } {
                ::Result::Ok => {
                     self.sound_group =::std::ptr::null_mut();

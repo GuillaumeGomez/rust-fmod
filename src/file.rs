@@ -31,6 +31,7 @@ use std::mem::zeroed;
 use libc::funcs::posix88::stat_::fstat;
 use libc::funcs::posix88::stdio::fileno;
 use libc::c_void;
+use std::c_str::ToCStr;
 
 pub fn get_ffi(file: &FmodFile) -> *mut FILE {
     file.fd
@@ -43,7 +44,7 @@ pub fn from_ffi(fd: *mut FILE) -> FmodFile {
 }
 
 /// A little struct to wrap C files. I'll try to improve this or to replace it by File
-#[deriving(Copy)]
+#[derive(Copy)]
 pub struct FmodFile {
     fd: *mut FILE
 }
@@ -115,7 +116,7 @@ impl FmodFile {
 
     pub fn close(&mut self) {
         unsafe {
-            if self.fd.is_not_null() {
+            if !self.fd.is_null() {
                 fclose(self.fd);
                 self.fd = ::std::ptr::null_mut();
             }
