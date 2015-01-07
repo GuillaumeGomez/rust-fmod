@@ -31,7 +31,7 @@ use std::mem::zeroed;
 use libc::funcs::posix88::stat_::fstat;
 use libc::funcs::posix88::stdio::fileno;
 use libc::c_void;
-use std::c_str::ToCStr;
+use c_str::ToCStr;
 
 pub fn get_ffi(file: &FmodFile) -> *mut FILE {
     file.fd

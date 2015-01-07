@@ -34,7 +34,7 @@ use std::time::duration::Duration;
 
 #[allow(unused_variables)]
 fn my_open(music_name: &str, unicode: i32) -> Option<(rfmod::FmodFile, Option<rfmod::FmodUserData>)> {
-    println!("Let's start !");
+    println!("Let's start by opening {} !", music_name);
     let file = match rfmod::FmodFile::open(music_name) {
         Some(f) => f,
         None => panic!("Couldn't open: {}", music_name)

@@ -31,10 +31,8 @@ use fmod_sys::{FmodMemoryUsageDetails, FmodSys};
 use std::mem::transmute;
 use channel;
 use libc::{c_char, c_void, c_uint, c_int, c_float};
-use std::c_str::CString;
 use std::default::Default;
-use std::c_vec::CVec;
-use std::c_str::ToCStr;
+use c_str::{ToCStr, FromCStr};
 
 extern "C" fn create_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> ::Result {
     unsafe {
@@ -113,8 +111,8 @@ extern "C" fn read_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, in_buffer: *mut
                 let callbacks : &mut UserData = transmute(tmp);
                 match callbacks.callbacks.read_callback {
                     Some(p) => {
-                        let mut v_in_buffer = CVec::new(in_buffer, (((length as i32 - 1i32) * in_channels) + out_channels) as uint);
-                        let mut v_out_buffer = CVec::new(out_buffer, (((length as i32 - 1i32) * out_channels) + out_channels) as uint);
+                        let mut v_in_buffer = Vec::from_raw_buf(in_buffer, (((length as i32 - 1i32) * in_channels) + out_channels) as uint);
+                        let mut v_out_buffer = Vec::from_raw_buf(out_buffer, (((length as i32 - 1i32) * out_channels) + out_channels) as uint);
 
                         p(&from_state_ptr(::std::ptr::read(dsp_state as *const ffi::FMOD_DSP_STATE)), v_in_buffer.as_mut_slice(), v_out_buffer.as_mut_slice(),
                             length as u32, in_channels as i32, out_channels as i32)
@@ -185,11 +183,12 @@ extern "C" fn get_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index:
                 match callbacks.callbacks.get_param_callback {
                     Some(p) => {
                         let mut t_value = *value;
+                        let tmp : String = FromCStr::from_c_str(value_str);
 
                         let ret = p(&from_state_ptr(::std::ptr::read(dsp_state as *const ffi::FMOD_DSP_STATE)),
                             index as i32,
                             &mut t_value,
-                            String::from_raw_buf(value_str as *const u8).as_slice());
+                            tmp.as_slice());
                         *value = t_value;
                         ret
                     },
@@ -299,15 +298,9 @@ pub fn from_parameter_ptr(dsp_parameter: *mut ffi::FMOD_DSP_PARAMETERDESC) -> Ds
                 min: (*dsp_parameter).min,
                 max: (*dsp_parameter).max,
                 default_val: (*dsp_parameter).default_val,
-                name: match CString::new((*dsp_parameter).name.as_ptr(), true).as_str() {
-                    Some(s) => s.to_string(),
-                    None => "".to_string()
-                },
-                label: match CString::new((*dsp_parameter).label.as_ptr(), true).as_str() {
-                    Some(s) => s.to_string(),
-                    None => "".to_string()
-                },
-                description: String::from_raw_buf((*dsp_parameter).description.clone() as *const u8)
+                name: FromCStr::from_c_str((*dsp_parameter).name.as_ptr()),
+                label: FromCStr::from_c_str((*dsp_parameter).label.as_ptr()),
+                description: FromCStr::from_c_str((*dsp_parameter).description.clone() as *const c_char)
             }
         }
     } else {
@@ -785,7 +778,7 @@ impl Dsp {
 
         tmp_v.with_c_str(|c_str|{
             match unsafe { ffi::FMOD_DSP_GetParameter(self.dsp, index, &mut value, c_str as *mut c_char, value_str_len as i32) } {
-               ::Result::Ok => Ok((value, unsafe {String::from_raw_buf(c_str as *const u8).clone() })),
+               ::Result::Ok => Ok((value, unsafe {FromCStr::from_c_str(c_str as *const c_char) })),
                 e => Err(e)
             }
         })
@@ -812,7 +805,7 @@ impl Dsp {
                 t_label.with_c_str(|c_label|{
                     match unsafe { ffi::FMOD_DSP_GetParameterInfo(self.dsp, index, c_name as *mut c_char, c_label as *mut c_char,
                         c_description as *mut c_char, description_len as i32, &mut min, &mut max) } {
-                       ::Result::Ok => Ok((unsafe {String::from_raw_buf(c_description as *const u8).clone() }, min, max)),
+                       ::Result::Ok => Ok((unsafe {FromCStr::from_c_str(c_description as *const c_char) }, min, max)),
                         e => Err(e)
                     }
                 })

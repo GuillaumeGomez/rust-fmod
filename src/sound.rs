@@ -39,7 +39,7 @@ use std::mem;
 use std::io::BufferedWriter;
 use std::slice;
 use std::default::Default;
-use std::c_str::ToCStr;
+use c_str::{ToCStr, FromCStr};
 
 struct RiffChunk {
     id: [c_char; 4],
@@ -113,7 +113,7 @@ impl FmodTag {
             data_type: pointer.datatype,
             name: {
                 if !pointer.name.is_null() {
-                    unsafe {String::from_raw_buf(pointer.name as *const u8).clone() }
+                    unsafe { FromCStr::from_c_str(pointer.name) }
                 } else {
                     String::new()
                 }
@@ -362,7 +362,7 @@ impl Sound {
 
         name.with_c_str(|c_name|{
             match unsafe { ffi::FMOD_Sound_GetName(self.sound, c_name as *mut c_char, name_len as i32) } {
-               ::Result::Ok => Ok(unsafe {String::from_raw_buf(c_name as *const u8).clone() }),
+               ::Result::Ok => Ok(unsafe { FromCStr::from_c_str(c_name) }),
                 e => Err(e)
             }
         })

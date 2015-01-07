@@ -121,11 +121,10 @@ Here is the list of all modules :
 #![allow(non_snake_case)]
 #![allow(dead_code)]
 #![allow(improper_ctypes)]
-#![allow(raw_pointer_deriving)]
-
-#![feature(globs)]
+#![allow(raw_pointer_derive)]
 
 extern crate libc;
+extern crate c_str;
 
 pub use channel::{Channel, FmodSpeakerMixOptions, FmodReverbChannelProperties};
 pub use fmod_sys::{FmodSys, FmodGuid, FmodSoftwareFormat, FmodAdvancedSettings, FmodOutputHandle, FmodCreateSoundexInfo, FmodMemoryUsageDetails, FmodUserData};

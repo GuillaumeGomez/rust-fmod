@@ -22,7 +22,7 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-use std::c_str::ToCStr;
+use c_str::{ToCStr, FromCStr};
 use types::*;
 use ffi;
 use sound;
@@ -130,7 +130,7 @@ impl SoundGroup {
 
         name.with_c_str(|c_name|{
             match unsafe { ffi::FMOD_SoundGroup_GetName(self.sound_group, c_name as *mut c_char, name_len as i32) } {
-               ::Result::Ok => Ok(unsafe {String::from_raw_buf(c_name as *const u8).clone() }),
+               ::Result::Ok => Ok(unsafe { FromCStr::from_c_str(c_name) }),
                 e => Err(e)
             }
         })
