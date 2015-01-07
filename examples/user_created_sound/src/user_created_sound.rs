@@ -30,7 +30,7 @@ extern crate rfmod;
 use std::default::Default;
 use std::io::timer::sleep;
 use std::time::duration::Duration;
-use std::num::FloatMath;
+use std::num::Float;
 
 #[allow(unused_variables)]
 fn pcmreadcallback(sound: &rfmod::Sound, data: &mut [i16]) -> rfmod::Result {

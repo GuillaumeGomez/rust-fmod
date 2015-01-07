@@ -10,6 +10,9 @@ readme = "README.md"
 keywords = ["library", "sound", "3D", "fmod", "fmodex"]
 license-file = "LICENSE.TXT"
 
+[dependencies.c_str]
+git = "https://github.com/GuillaumeGomez/c_str-rs.git"
+
 [lib]
 name = "rfmod"
 crate-type = ["dylib", "rlib"]
