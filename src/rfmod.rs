@@ -125,6 +125,7 @@ Here is the list of all modules :
 
 extern crate libc;
 extern crate c_str;
+extern crate c_vec;
 
 pub use channel::{Channel, FmodSpeakerMixOptions, FmodReverbChannelProperties};
 pub use fmod_sys::{FmodSys, FmodGuid, FmodSoftwareFormat, FmodAdvancedSettings, FmodOutputHandle, FmodCreateSoundexInfo, FmodMemoryUsageDetails, FmodUserData};

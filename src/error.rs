@@ -66,7 +66,7 @@ pub fn error_string(errcode: ::Result) -> &'static str {
         ::Result::HTTPTimeout => "The HTTP request timed out.",
         ::Result::Initialization => "FMOD was not initialized correctly to support this function.",
         ::Result::Initialized => "Cannot call this command after System::init.",
-        ::Result::Internal => "An error occured that wasn't supposed to.  Contact support.",
+        ::Result::Internal => "An error occured that wasn't supposed to. Contact support.",
         ::Result::InvalidAddress => "On Xbox 360, this memory address passed to FMOD must be physical, (ie allocated with XPhysicalAlloc.)",
         ::Result::InvalidFloat => "Value passed in was a NaN, Inf or denormalized float.",
         ::Result::InvalidHandle => "An invalid object handle was used.",
