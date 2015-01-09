@@ -112,8 +112,8 @@ extern "C" fn read_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, in_buffer: *mut
                 let callbacks : &mut UserData = transmute(tmp);
                 match callbacks.callbacks.read_callback {
                     Some(p) => {
-                        let mut v_in_buffer = CVec::new(in_buffer, (((length as i32 - 1i32) * in_channels) + out_channels) as uint);
-                        let mut v_out_buffer = CVec::new(out_buffer, (((length as i32 - 1i32) * out_channels) + out_channels) as uint);
+                        let mut v_in_buffer = CVec::new(in_buffer, (((length as i32 - 1i32) * in_channels) + out_channels) as usize);
+                        let mut v_out_buffer = CVec::new(out_buffer, (((length as i32 - 1i32) * out_channels) + out_channels) as usize);
 
                         p(&from_state_ptr(::std::ptr::read(dsp_state as *const ffi::FMOD_DSP_STATE)), v_in_buffer.as_mut_slice(), v_out_buffer.as_mut_slice(),
                             length as u32, in_channels as i32, out_channels as i32)
@@ -402,7 +402,7 @@ impl Default for DspDescription {
             config: None,
             config_width: 0i32,
             config_height: 0i32,
-            user_data: box UserData::new()
+            user_data: Box::new(UserData::new())
         }
     }
 }
@@ -774,7 +774,7 @@ impl Dsp {
     /// * [`DspLowPassSimple`](enums/fmod/type.DspLowPassSimple.html)
     /// * [`DspHighPassSimple`](enums/fmod/type.DspHighPassSimple.html)
     pub fn get_parameter(&self, index: i32, value_str_len: u32) -> Result<(f32, String), ::Result> {
-        let tmp_v = String::with_capacity(value_str_len as uint);
+        let tmp_v = String::with_capacity(value_str_len as usize);
         let mut value = 0f32;
 
         tmp_v.with_c_str(|c_str|{
@@ -797,7 +797,7 @@ impl Dsp {
     pub fn get_parameter_info(&self, index: i32, name: &String, label: &String, description_len: u32) -> Result<(String, f32, f32), ::Result> {
         let mut min = 0f32;
         let mut max = 0f32;
-        let tmp_d = String::with_capacity(description_len as uint);
+        let tmp_d = String::with_capacity(description_len as usize);
         let t_name = name.clone();
         let t_label = label.clone();
 

@@ -122,6 +122,7 @@ Here is the list of all modules :
 #![allow(dead_code)]
 #![allow(improper_ctypes)]
 #![allow(raw_pointer_derive)]
+#![allow(unstable)]
 
 extern crate libc;
 extern crate c_str;

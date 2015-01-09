@@ -119,7 +119,7 @@ impl Channel {
     }
 
     /// channel_offset:  0/1 -> left channel/right channel
-    pub fn get_spectrum(&self, spectrum_size: uint, channel_offset: Option<i32>, window_type: Option<::DspFftWindow>) -> Result<Vec<f32>, ::Result> {
+    pub fn get_spectrum(&self, spectrum_size: usize, channel_offset: Option<i32>, window_type: Option<::DspFftWindow>) -> Result<Vec<f32>, ::Result> {
         let mut ptr : Vec<f32> = ::std::iter::repeat(0f32).take(spectrum_size).collect();
         let c_window_type = match window_type {
             Some(wt) => wt,
@@ -136,7 +136,7 @@ impl Channel {
         }
     }
 
-    pub fn get_wave_data(&self, wave_size: uint, channel_offset: i32) -> Result<Vec<f32>, ::Result> {
+    pub fn get_wave_data(&self, wave_size: usize, channel_offset: i32) -> Result<Vec<f32>, ::Result> {
         let mut ptr : Vec<f32> = ::std::iter::repeat(0f32).take(wave_size).collect();
 
         match unsafe { ffi::FMOD_Channel_GetWaveData(self.channel, ptr.as_mut_ptr(), wave_size as c_int, channel_offset) } {
@@ -273,16 +273,16 @@ impl Channel {
         }
     }
 
-    pub fn set_delay(&self, delay_type: ::DelayType, delay_hi: uint, delay_lo: uint) -> ::Result {
+    pub fn set_delay(&self, delay_type: ::DelayType, delay_hi: usize, delay_lo: usize) -> ::Result {
         unsafe { ffi::FMOD_Channel_SetDelay(self.channel, delay_type, delay_hi as u32, delay_lo as u32) }
     }
 
-    pub fn get_delay(&self, delay_type: ::DelayType) -> Result<(::DelayType, uint, uint), ::Result> {
+    pub fn get_delay(&self, delay_type: ::DelayType) -> Result<(::DelayType, usize, usize), ::Result> {
         let mut delaylo = 0u32;
         let mut delayhi = 0u32;
 
         match unsafe { ffi::FMOD_Channel_GetDelay(self.channel, delay_type, &mut delayhi, &mut delaylo) } {
-            ::Result::Ok => Ok((delay_type, delayhi as uint, delaylo as uint)),
+            ::Result::Ok => Ok((delay_type, delayhi as usize, delaylo as usize)),
             e => Err(e),
         }
     }
@@ -307,7 +307,7 @@ impl Channel {
         unsafe { ffi::FMOD_Channel_SetSpeakerLevels(self.channel, speaker, levels.as_mut_ptr(), levels.len() as i32) }
     }
 
-    pub fn get_speaker_level(&self, speaker: ::Speaker, num_levels: uint) -> Result<Vec<f32>, ::Result> {
+    pub fn get_speaker_level(&self, speaker: ::Speaker, num_levels: usize) -> Result<Vec<f32>, ::Result> {
         let mut ptr : Vec<f32> = ::std::iter::repeat(0f32).take(num_levels).collect();
 
         match unsafe { ffi::FMOD_Channel_GetSpeakerLevels(self.channel, speaker, ptr.as_mut_ptr(), num_levels as i32) } {
@@ -320,7 +320,7 @@ impl Channel {
         unsafe { ffi::FMOD_Channel_SetInputChannelMix(self.channel, levels.as_mut_ptr(), levels.len() as i32) }
     }
 
-    pub fn get_input_channel_mix(&self, num_levels: uint) -> Result<Vec<f32>, ::Result> {
+    pub fn get_input_channel_mix(&self, num_levels: usize) -> Result<Vec<f32>, ::Result> {
         let mut ptr : Vec<f32> = ::std::iter::repeat(0f32).take(num_levels).collect();
 
         match unsafe { ffi::FMOD_Channel_GetInputChannelMix(self.channel, ptr.as_mut_ptr(), num_levels as i32) } {
@@ -342,15 +342,15 @@ impl Channel {
         }
     }
 
-    pub fn set_position(&self, position: uint, FmodTimeUnit(postype): FmodTimeUnit) -> ::Result {
+    pub fn set_position(&self, position: usize, FmodTimeUnit(postype): FmodTimeUnit) -> ::Result {
         unsafe { ffi::FMOD_Channel_SetPosition(self.channel, position as u32, postype) }
     }
 
-    pub fn get_position(&self, FmodTimeUnit(postype): FmodTimeUnit) -> Result<uint, ::Result> {
+    pub fn get_position(&self, FmodTimeUnit(postype): FmodTimeUnit) -> Result<usize, ::Result> {
         let mut t = 0u32;
 
         match unsafe { ffi::FMOD_Channel_GetPosition(self.channel, &mut t, postype) } {
-            ::Result::Ok => Ok(t as uint),
+            ::Result::Ok => Ok(t as usize),
             e => Err(e),
         }
     }
@@ -480,7 +480,7 @@ impl Channel {
                     let mut ret_points = Vec::new();
 
                     for it in range(0i32, num_points) {
-                        ret_points.push(vector::from_ptr(::std::ptr::read(points.offset(it as int) as *const ffi::FMOD_VECTOR)));
+                        ret_points.push(vector::from_ptr(::std::ptr::read(points.offset(it as isize) as *const ffi::FMOD_VECTOR)));
                     }
                     Ok(ret_points)
                 }

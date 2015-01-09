@@ -144,7 +144,7 @@ extern "C" fn file_read_callback(handle: *mut c_void, buffer: *mut c_void, size_
     match tmp.file_read {
         Some(s) => {
             unsafe {
-                let mut data_vec : CVec<u8> = CVec::new(buffer as *mut u8, size_bytes as uint);
+                let mut data_vec : CVec<u8> = CVec::new(buffer as *mut u8, size_bytes as usize);
 
                 let read_bytes = s(&mut file::from_ffi(handle as *mut FILE), data_vec.as_mut_slice(), size_bytes, if user_data.is_null() {
                     None
@@ -152,7 +152,7 @@ extern "C" fn file_read_callback(handle: *mut c_void, buffer: *mut c_void, size_
                     Some(std::mem::transmute(user_data))
                 });
                 *bytes_read = read_bytes as u32;
-                if read_bytes < size_bytes as uint {
+                if read_bytes < size_bytes as usize {
                     ::Result::FileEOF
                 } else {
                    ::Result::Ok
@@ -192,8 +192,8 @@ extern "C" fn pcm_read_callback(sound: *mut ffi::FMOD_SOUND, data: *mut c_void, 
 
                 match callbacks.pcm_read {
                     Some(p) => {
-                        let max = data_len as int >> 2;
-                        let mut data_vec = CVec::new(data as *mut c_short, max as uint * 2);
+                        let max = data_len as isize >> 2;
+                        let mut data_vec = CVec::new(data as *mut c_short, max as usize * 2);
 
                         let ret = p(&ffi::FFI::wrap(sound), data_vec.as_mut_slice());
                         ret
@@ -263,7 +263,8 @@ pub struct FmodGuid
     pub data2: u16,
     /// Specifies the second group of 4 hexadecimal digits.
     pub data3: u16,
-    /// Array of 8 bytes. The first 2 bytes contain the third group of 4 hexadecimal digits. The remaining 6 bytes contain the final 12 hexadecimal digits.
+    /// Array of 8 bytes. The first 2 bytes contain the third group of 4 hexadecimal digits. The remaining 6 bytes contain the final
+    /// 12 hexadecimal digits.
     pub data4: [u8; 8]
 }
 
@@ -306,7 +307,8 @@ impl Default for FmodUserData {
     }
 }
 
-/// Wrapper for arguments of [`FmodSys::set_software_format`](struct.FmodSys.html#method.set_software_format) and [`FmodSys::get_software_format`](struct.FmodSys.html#method.get_software_format)
+/// Wrapper for arguments of [`FmodSys::set_software_format`](struct.FmodSys.html#method.set_software_format) and
+/// [`FmodSys::get_software_format`](struct.FmodSys.html#method.get_software_format)
 #[derive(Copy)]
 pub struct FmodSoftwareFormat
 {
@@ -334,57 +336,85 @@ impl Default for FmodSoftwareFormat {
 /// Settings for advanced features like configuring memory and cpu usage for the FMOD_CREATECOMPRESSEDSAMPLE feature.
 pub struct FmodAdvancedSettings
 {
-    /// [r/w] Optional. Specify 0 to ignore. For use with FMOD_CREATECOMPRESSEDSAMPLE only. Mpeg codecs consume 21,684 bytes per instance and this number will determine how many mpeg channels can be played simultaneously. Default = 32.
+    /// [r/w] Optional. Specify 0 to ignore. For use with FMOD_CREATECOMPRESSEDSAMPLE only. Mpeg codecs consume 21,684 bytes per
+    /// instance and this number will determine how many mpeg channels can be played simultaneously. Default = 32.
     pub max_MPEG_codecs               : i32,
-    /// [r/w] Optional. Specify 0 to ignore. For use with FMOD_CREATECOMPRESSEDSAMPLE only. ADPCM codecs consume 2,136 bytes per instance and this number will determine how many ADPCM channels can be played simultaneously. Default = 32.
+    /// [r/w] Optional. Specify 0 to ignore. For use with FMOD_CREATECOMPRESSEDSAMPLE only. ADPCM codecs consume 2,136 bytes per
+    /// instance and this number will determine how many ADPCM channels can be played simultaneously. Default = 32.
     pub max_ADPCM_codecs              : i32,
-    /// [r/w] Optional. Specify 0 to ignore. For use with FMOD_CREATECOMPRESSEDSAMPLE only. XMA codecs consume 14,836 bytes per instance and this number will determine how many XMA channels can be played simultaneously. Default = 32.
+    /// [r/w] Optional. Specify 0 to ignore. For use with FMOD_CREATECOMPRESSEDSAMPLE only. XMA codecs consume 14,836 bytes per instance
+    /// and this number will determine how many XMA channels can be played simultaneously. Default = 32.
     pub max_XMA_codecs                : i32,
-    /// [r/w] Optional. Specify 0 to ignore. For use with FMOD_CREATECOMPRESSEDSAMPLE only. CELT codecs consume 11,500 bytes per instance and this number will determine how many CELT channels can be played simultaneously. Default = 32.
+    /// [r/w] Optional. Specify 0 to ignore. For use with FMOD_CREATECOMPRESSEDSAMPLE only. CELT codecs consume 11,500 bytes per
+    /// instance and this number will determine how many CELT channels can be played simultaneously. Default = 32.
     pub max_CELT_codecs               : i32,
-    /// [r/w] Optional. Specify 0 to ignore. For use with FMOD_CREATECOMPRESSEDSAMPLE only. Vorbis codecs consume 12,000 bytes per instance and this number will determine how many Vorbis channels can be played simultaneously. Default = 32.
+    /// [r/w] Optional. Specify 0 to ignore. For use with FMOD_CREATECOMPRESSEDSAMPLE only. Vorbis codecs consume 12,000 bytes per
+    /// instance and this number will determine how many Vorbis channels can be played simultaneously. Default = 32.
     pub max_VORBIS_codecs             : i32,
-    /// [r/w] Optional. Specify 0 to ignore. For use with FMOD_CREATECOMPRESSEDSAMPLE only. AT9 codecs consume 8,720 bytes per instance and this number will determine how many AT9 channels can be played simultaneously. Default = 32.
+    /// [r/w] Optional. Specify 0 to ignore. For use with FMOD_CREATECOMPRESSEDSAMPLE only. AT9 codecs consume 8,720 bytes per instance
+    /// and this number will determine how many AT9 channels can be played simultaneously. Default = 32.
     pub max_AT9_codecs                : i32,
-    /// [r/w] Optional. Specify 0 to ignore. For use with PS3 only. PCM codecs consume 12,672 bytes per instance and this number will determine how many streams and PCM voices can be played simultaneously. Default = 16.
+    /// [r/w] Optional. Specify 0 to ignore. For use with PS3 only. PCM codecs consume 12,672 bytes per instance and this number will
+    /// determine how many streams and PCM voices can be played simultaneously. Default = 16.
     pub max_PCM_codecs                : i32,
     /// [r/w] Optional. Specify 0 to ignore. Number of channels available on the ASIO device.
     pub ASIO_num_channels             : i32,
-    /// [r/w] Optional. Specify 0 to ignore. Pointer to an array of strings (number of entries defined by ASIONumChannels) with ASIO channel names.
+    /// [r/w] Optional. Specify 0 to ignore. Pointer to an array of strings (number of entries defined by ASIONumChannels) with ASIO
+    /// channel names.
     pub ASIO_channel_list             : Vec<String>,
-    /// [r/w] Optional. Specify 0 to ignore. Pointer to a list of speakers that the ASIO channels map to. This can be called after [`FmodSys::init`](doc/rfmod/struct.FmodSys.html#method.init) to remap ASIO output.
+    /// [r/w] Optional. Specify 0 to ignore. Pointer to a list of speakers that the ASIO channels map to. This can be called after
+    /// [`FmodSys::init`](doc/rfmod/struct.FmodSys.html#method.init) to remap ASIO output.
     pub ASIO_speaker_list             : Vec<::Speaker>,
     /// [r/w] Optional. Specify 0 to ignore. The max number of 3d reverb DSP's in the system. (NOTE: CURRENTLY DISABLED / UNUSED)
     pub max_3D_reverb_DSPs            : i32,
-    /// [r/w] Optional. For use with FMOD_INIT_HRTF_LOWPASS. The angle range (0-360) of a 3D sound in relation to the listener, at which the HRTF function begins to have an effect. 0 = in front of the listener. 180 = from 90 degrees to the left of the listener to 90 degrees to the right. 360 = behind the listener. Default = 180.0.
+    /// [r/w] Optional. For use with FMOD_INIT_HRTF_LOWPASS. The angle range (0-360) of a 3D sound in relation to the listener, at
+    /// which the HRTF function begins to have an effect. 0 = in front of the listener. 180 = from 90 degrees to the left of the
+    /// listener to 90 degrees to the right. 360 = behind the listener. Default = 180.0.
     pub HRTF_min_angle                : f32,
-    /// [r/w] Optional. For use with FMOD_INIT_HRTF_LOWPASS. The angle range (0-360) of a 3D sound in relation to the listener, at which the HRTF function has maximum effect. 0 = front of the listener. 180 = from 90 degrees to the left of the listener to 90 degrees to the right. 360 = behind the listener. Default = 360.0.
+    /// [r/w] Optional. For use with FMOD_INIT_HRTF_LOWPASS. The angle range (0-360) of a 3D sound in relation to the listener, at
+    /// which the HRTF function has maximum effect. 0 = front of the listener. 180 = from 90 degrees to the left of the listener to
+    /// 90 degrees to the right. 360 = behind the listener. Default = 360.0.
     pub HRTF_max_angle                : f32,
-    /// [r/w] Optional. Specify 0 to ignore. For use with FMOD_INIT_HRTF_LOWPASS. The cutoff frequency of the HRTF's lowpass filter function when at maximum effect. (i.e. at HRTFMaxAngle). Default = 4000.0.
+    /// [r/w] Optional. Specify 0 to ignore. For use with FMOD_INIT_HRTF_LOWPASS. The cutoff frequency of the HRTF's lowpass filter
+    /// function when at maximum effect. (i.e. at HRTFMaxAngle). Default = 4000.0.
     pub HRTF_freq                     : f32,
-    /// [r/w] Optional. Specify 0 to ignore. For use with FMOD_INIT_VOL0_BECOMES_VIRTUAL. If this flag is used, and the volume is 0.0, then the sound will become virtual. Use this value to raise the threshold to a different point where a sound goes virtual.
+    /// [r/w] Optional. Specify 0 to ignore. For use with FMOD_INIT_VOL0_BECOMES_VIRTUAL. If this flag is used, and the volume is 0.0,
+    /// then the sound will become virtual. Use this value to raise the threshold to a different point where a sound goes virtual.
     pub vol0_virtual_vol              : f32,
-    /// [r/w] Optional. Specify 0 to ignore. For use with FMOD Event system only. Specifies the number of slots available for simultaneous non blocking loads, across all threads. Default = 32.
+    /// [r/w] Optional. Specify 0 to ignore. For use with FMOD Event system only. Specifies the number of slots available for
+    /// simultaneous non blocking loads, across all threads. Default = 32.
     pub event_queue_size              : i32,
-    /// [r/w] Optional. Specify 0 to ignore. For streams. This determines the default size of the double buffer (in milliseconds) that a stream uses. Default = 400ms
+    /// [r/w] Optional. Specify 0 to ignore. For streams. This determines the default size of the double buffer (in milliseconds) that
+    /// a stream uses. Default = 400ms
     pub default_decode_buffer_size    : u32,
-    /// [r/w] Optional. Specify 0 to ignore. Gives fmod's logging system a path/filename. Normally the log is placed in the same directory as the executable and called fmod.log. When using [`FmodSys::get_advanced_settings`](doc/rfmod/struct.FmodSys.html#method.get_advanced_settings), provide at least 256 bytes of memory to copy into.
+    /// [r/w] Optional. Specify 0 to ignore. Gives fmod's logging system a path/filename. Normally the log is placed in the same
+    /// directory as the executable and called fmod.log. When using
+    /// [`FmodSys::get_advanced_settings`](doc/rfmod/struct.FmodSys.html#method.get_advanced_settings), provide at least 256 bytes of
+    /// memory to copy into.
     pub debug_log_filename            : String,
-    /// [r/w] Optional. Specify 0 to ignore. For use with FMOD_INIT_ENABLE_PROFILE. Specify the port to listen on for connections by the profiler application.
+    /// [r/w] Optional. Specify 0 to ignore. For use with FMOD_INIT_ENABLE_PROFILE. Specify the port to listen on for connections by the
+    /// profiler application.
     pub profile_port                  : u16,
-    /// [r/w] Optional. Specify 0 to ignore. The maximum time in miliseconds it takes for a channel to fade to the new level when its occlusion changes.
+    /// [r/w] Optional. Specify 0 to ignore. The maximum time in miliseconds it takes for a channel to fade to the new level when its
+    /// occlusion changes.
     pub geometry_max_fade_time        : u32,
-    /// [r/w] Optional. Specify 0 to ignore. Tells [`FmodSys::init`](doc/rfmod/struct.FmodSys.html#method.init) to allocate a pool of wavedata/spectrum buffers to prevent memory fragmentation, any additional buffers will be allocated normally.
+    /// [r/w] Optional. Specify 0 to ignore. Tells [`FmodSys::init`](doc/rfmod/struct.FmodSys.html#method.init) to allocate a pool of
+    /// wavedata/spectrum buffers to prevent memory fragmentation, any additional buffers will be allocated normally.
     pub max_spectrum_wave_data_buffers: u32,
-    /// [r/w] Optional. Specify 0 to ignore. The delay the music system should allow for loading a sample from disk (in milliseconds). Default = 400 ms.
+    /// [r/w] Optional. Specify 0 to ignore. The delay the music system should allow for loading a sample from disk (in
+    /// milliseconds). Default = 400 ms.
     pub music_system_cache_delay      : u32,
-    /// [r/w] Optional. Specify 0 to ignore. For use with FMOD_INIT_DISTANCE_FILTERING. The default center frequency in Hz for the distance filtering effect. Default = 1500.0.
+    /// [r/w] Optional. Specify 0 to ignore. For use with FMOD_INIT_DISTANCE_FILTERING. The default center frequency in Hz for the
+    /// distance filtering effect. Default = 1500.0.
     pub distance_filter_center_freq   : f32,
-    /// [r/w] Optional. Specify 0 to ignore. Specify the stack size for the FMOD Stream thread in bytes. Useful for custom codecs that use excess stack. Default 49,152 (48kb)
+    /// [r/w] Optional. Specify 0 to ignore. Specify the stack size for the FMOD Stream thread in bytes. Useful for custom codecs that
+    /// use excess stack. Default 49,152 (48kb)
     pub stack_size_stream             : u32,
-    /// [r/w] Optional. Specify 0 to ignore. Specify the stack size for the FMOD_NONBLOCKING loading thread. Useful for custom codecs that use excess stack. Default 65,536 (64kb)
+    /// [r/w] Optional. Specify 0 to ignore. Specify the stack size for the FMOD_NONBLOCKING loading thread. Useful for custom codecs
+    /// that use excess stack. Default 65,536 (64kb)
     pub stack_size_non_blocking       : u32,
-    /// [r/w] Optional. Specify 0 to ignore. Specify the stack size for the FMOD mixer thread. Useful for custom dsps that use excess stack. Default 49,152 (48kb)
+    /// [r/w] Optional. Specify 0 to ignore. Specify the stack size for the FMOD mixer thread. Useful for custom dsps that use excess
+    /// stack. Default 49,152 (48kb)
     pub stack_size_mixer              : u32
 }
 
@@ -428,46 +458,71 @@ impl Default for FmodAdvancedSettings {
 /// * Loading a file from within another larger (possibly wad/pak) file, by giving the loader an offset and length.
 /// * To create a user created / non file based sound.
 /// * To specify a starting subsound to seek to within a multi-sample sounds (ie FSB/DLS/SF2) when created as a stream.
-/// * To specify which subsounds to load for multi-sample sounds (ie FSB/DLS/SF2) so that memory is saved and only a subset is actually loaded/read from disk.
-/// * To specify 'piggyback' read and seek callbacks for capture of sound data as fmod reads and decodes it. Useful for ripping decoded PCM data from sounds as they are loaded / played.
+/// * To specify which subsounds to load for multi-sample sounds (ie FSB/DLS/SF2) so that memory is saved and only a subset is actually
+/// loaded/read from disk.
+/// * To specify 'piggyback' read and seek callbacks for capture of sound data as fmod reads and decodes it. Useful for ripping decoded
+/// PCM data from sounds as they are loaded / played.
 /// * To specify a MIDI DLS/SF2 sample set file to load when opening a MIDI file.
 ///
 /// See below on what members to fill for each of the above types of sound you want to create.
 pub struct FmodCreateSoundexInfo
 {
-    /// [w] Optional. Specify 0 to ignore. Size in bytes of file to load, or sound to create (in this case only if FMOD_OPENUSER is used). Required if loading from memory. If 0 is specified, then it will use the size of the file (unless loading from memory then an error will be returned).
+    /// [w] Optional. Specify 0 to ignore. Size in bytes of file to load, or sound to create (in this case only if FMOD_OPENUSER is
+    /// used). Required if loading from memory. If 0 is specified, then it will use the size of the file (unless loading from memory
+    /// then an error will be returned).
     pub length                 : u32,
-    /// [w] Optional. Specify 0 to ignore. Offset from start of the file to start loading from. This is useful for loading files from inside big data files.
+    /// [w] Optional. Specify 0 to ignore. Offset from start of the file to start loading from. This is useful for loading files from
+    /// inside big data files.
     pub file_offset            : u32,
     /// [w] Optional. Specify 0 to ignore. Number of channels in a sound mandatory if FMOD_OPENUSER or FMOD_OPENRAW is used.
     pub num_channels           : i32,
-    /// [w] Optional. Specify 0 to ignore. Default frequency of sound in a sound mandatory if FMOD_OPENUSER or FMOD_OPENRAW is used. Other formats use the frequency determined by the file format.
+    /// [w] Optional. Specify 0 to ignore. Default frequency of sound in a sound mandatory if FMOD_OPENUSER or FMOD_OPENRAW is used.
+    /// Other formats use the frequency determined by the file format.
     pub default_frequency      : i32,
-    /// [w] Optional. Specify 0 or ::SoundFormatNone to ignore. Format of the sound mandatory if FMOD_OPENUSER or FMOD_OPENRAW is used. Other formats use the format determined by the file format.
+    /// [w] Optional. Specify 0 or ::SoundFormatNone to ignore. Format of the sound mandatory if FMOD_OPENUSER or FMOD_OPENRAW is used.
+    /// Other formats use the format determined by the file format.
     pub format                 : ::SoundFormat,
-    /// [w] Optional. Specify 0 to ignore. For streams. This determines the size of the double buffer (in PCM samples) that a stream uses. Use this for user created streams if you want to determine the size of the callback buffer passed to you. Specify 0 to use FMOD's default size which is currently equivalent to 400ms of the sound format created/loaded.
+    /// [w] Optional. Specify 0 to ignore. For streams. This determines the size of the double buffer (in PCM samples) that a stream
+    /// uses. Use this for user created streams if you want to determine the size of the callback buffer passed to you. Specify 0
+    /// to use FMOD's default size which is currently equivalent to 400ms of the sound format created/loaded.
     pub decode_buffer_size     : u32,
-    /// [w] Optional. Specify 0 to ignore. In a multi-sample file format such as .FSB/.DLS/.SF2, specify the initial subsound to seek to, only if FMOD_CREATESTREAM is used.
+    /// [w] Optional. Specify 0 to ignore. In a multi-sample file format such as .FSB/.DLS/.SF2, specify the initial subsound to seek
+    /// to, only if FMOD_CREATESTREAM is used.
     pub initial_subsound       : i32,
-    /// [w] Optional. Specify 0 to ignore or have no subsounds. In a sound created with FMOD_OPENUSER, specify the number of subsounds that are accessable with [`Sound::get_sub_sound`](doc/rfmod/struct.Sound.html#method.get_sub_sound). If not created with FMOD_OPENUSER, this will limit the number of subsounds loaded within a multi-subsound file. If using FSB, then if FMOD_CREATESOUNDEXINFO::inclusionlist is used, this will shuffle subsounds down so that there are not any gaps. It will mean that the indices of the sounds will be different.
+    /// [w] Optional. Specify 0 to ignore or have no subsounds. In a sound created with FMOD_OPENUSER, specify the number of subsounds
+    /// that are accessable with [`Sound::get_sub_sound`](doc/rfmod/struct.Sound.html#method.get_sub_sound). If not created with
+    /// FMOD_OPENUSER, this will limit the number of subsounds loaded within a multi-subsound file. If using FSB, then if
+    /// FMOD_CREATESOUNDEXINFO::inclusionlist is used, this will shuffle subsounds down so that there are not any gaps. It will mean
+    /// that the indices of the sounds will be different.
     pub num_subsounds          : i32,
-    /// [w] Optional. Specify 0 to ignore. In a multi-sample format such as .FSB/.DLS/.SF2 it may be desirable to specify only a subset of sounds to be loaded out of the whole file. This is an array of subsound indices to load into memory when created.
+    /// [w] Optional. Specify 0 to ignore. In a multi-sample format such as .FSB/.DLS/.SF2 it may be desirable to specify only a subset
+    /// of sounds to be loaded out of the whole file. This is an array of subsound indices to load into memory when created.
     pub inclusion_list         : Vec<i32>,
-    /// [w] Optional. Specify 0 to ignore. Callback to 'piggyback' on FMOD's read functions and accept or even write PCM data while FMOD is opening the sound. Used for user sounds created with FMOD_OPENUSER or for capturing decoded data as FMOD reads it.
+    /// [w] Optional. Specify 0 to ignore. Callback to 'piggyback' on FMOD's read functions and accept or even write PCM data while
+    /// FMOD is opening the sound. Used for user sounds created with FMOD_OPENUSER or for capturing decoded data as FMOD reads it.
     pub pcm_read_callback      : SoundPcmReadCallback,
-    /// [w] Optional. Specify 0 to ignore. Callback for when the user calls a seeking function such as [`Channel::set_time`](doc/rfmod/struct.Channel.html#method.set_time) or [`Channel::set_position`](doc/rfmod/struct.Channel.html#method.set_position) within a multi-sample sound, and for when it is opened.
+    /// [w] Optional. Specify 0 to ignore. Callback for when the user calls a seeking function such as [`Channel::set_time`](doc/rfmod/struct.Channel.html#method.set_time)
+    /// or [`Channel::set_position`](doc/rfmod/struct.Channel.html#method.set_position) within a multi-sample sound, and for when it is opened.
     pub pcm_set_pos_callback   : SoundPcmSetPosCallback,
-    /// [w] Optional. Specify 0 to ignore. Callback for successful completion, or error while loading a sound that used the FMOD_NONBLOCKING flag. Also called duing seeking, when setPosition is called or a stream is restarted.
+    /// [w] Optional. Specify 0 to ignore. Callback for successful completion, or error while loading a sound that used the
+    /// FMOD_NONBLOCKING flag. Also called duing seeking, when setPosition is called or a stream is restarted.
     pub non_block_callback     : SoundNonBlockCallback,
-    /// [w] Optional. Specify 0 to ignore. Filename for a DLS or SF2 sample set when loading a MIDI file. If not specified, on Windows it will attempt to open /windows/system32/drivers/gm.dls or /windows/system32/drivers/etc/gm.dls, on Mac it will attempt to load /System/Library/Components/CoreAudio.component/Contents/Resources/gs_instruments.dls, otherwise the MIDI will fail to open. Current DLS support is for level 1 of the specification.
+    /// [w] Optional. Specify 0 to ignore. Filename for a DLS or SF2 sample set when loading a MIDI file. If not specified, on Windows
+    /// it will attempt to open /windows/system32/drivers/gm.dls or /windows/system32/drivers/etc/gm.dls, on Mac it will attempt to
+    /// load /System/Library/Components/CoreAudio.component/Contents/Resources/gs_instruments.dls, otherwise the MIDI will fail to
+    /// open. Current DLS support is for level 1 of the specification.
     pub dls_name               : String,
     /// [w] Optional. Specify 0 to ignore. Key for encrypted FSB file. Without this key an encrypted FSB file will not load.
     pub encryption_key         : String,
-    /// [w] Optional. Specify 0 to ignore. For sequenced formats with dynamic channel allocation such as .MID and .IT, this specifies the maximum voice count allowed while playing. .IT defaults to 64. .MID defaults to 32.
+    /// [w] Optional. Specify 0 to ignore. For sequenced formats with dynamic channel allocation such as .MID and .IT, this specifies
+    /// the maximum voice count allowed while playing. .IT defaults to 64. .MID defaults to 32.
     pub max_polyphony          : i32,
-    /// [w] Optional. Specify 0 to ignore. This is user data to be attached to the sound during creation. Access via [`Sound::get_user_data`](doc/rfmod/struct.Sound.html#method.get_user_data). Note: This is not passed to FMOD_FILE_OPENCALLBACK, that is a different userdata that is file specific.
+    /// [w] Optional. Specify 0 to ignore. This is user data to be attached to the sound during creation. Access via
+    /// [`Sound::get_user_data`](doc/rfmod/struct.Sound.html#method.get_user_data). Note: This is not passed to FMOD_FILE_OPENCALLBACK,
+    /// that is a different userdata that is file specific.
     user_data                  : Box<ffi::SoundData>,
-    /// [w] Optional. Specify 0 or SoundTypeUnknown to ignore. Instead of scanning all codec types, use this to speed up loading by making it jump straight to this codec.
+    /// [w] Optional. Specify 0 or SoundTypeUnknown to ignore. Instead of scanning all codec types, use this to speed up loading by
+    /// making it jump straight to this codec.
     pub suggested_sound_type   : ::SoundType,
     /// [w] Optional. Specify 0 to ignore. Callback for opening this file.
     user_open                  : ffi::FMOD_FILE_OPENCALLBACK,
@@ -481,7 +536,8 @@ pub struct FmodCreateSoundexInfo
     user_async_read            : ffi::FMOD_FILE_ASYNCREADCALLBACK,
     /// [w] Optional. Specify 0 to ignore. Callback for seeking within this file.
     user_async_cancel          : ffi::FMOD_FILE_ASYNCCANCELCALLBACK,
-    /// [w] Optional. Specify 0 to ignore. Use this to differ the way fmod maps multichannel sounds to speakers. See SpeakerMapType for more.
+    /// [w] Optional. Specify 0 to ignore. Use this to differ the way fmod maps multichannel sounds to speakers. See SpeakerMapType
+    /// for more.
     pub speaker_map            : ::SpeakerMapType,
     /// [w] Optional. Specify 0 to ignore. Specify a sound group if required, to put sound in as it is created.
     pub initial_sound_group    : sound_group::SoundGroup,
@@ -489,15 +545,21 @@ pub struct FmodCreateSoundexInfo
     pub initial_seek_position  : u32,
     /// [w] Optional. Specify 0 to ignore. For streams. Specify the time unit for the position set in initialseekposition.
     pub initial_seek_pos_type  : FmodTimeUnit,
-    /// [w] Optional. Specify true to ignore. Set to false to use fmod's built in file system. Ignores setFileSystem callbacks and also FMOD_CREATESOUNEXINFO file callbacks. Useful for specific cases where you don't want to use your own file system but want to use fmod's file system (ie net streaming).
+    /// [w] Optional. Specify true to ignore. Set to false to use fmod's built in file system. Ignores setFileSystem callbacks and also
+    /// FMOD_CREATESOUNEXINFO file callbacks. Useful for specific cases where you don't want to use your own file system but want to
+    /// use fmod's file system (ie net streaming).
     pub ignore_set_file_system : bool,
-    /// [w] Optional. Specify 0 to ignore. For CDDA sounds only - if non-zero use ASPI instead of NTSCSI to access the specified CD/DVD device.
+    /// [w] Optional. Specify 0 to ignore. For CDDA sounds only - if non-zero use ASPI instead of NTSCSI to access the specified CD/DVD
+    /// device.
     pub cdda_force_aspi        : i32,
-    /// [w] Optional. Specify 0 or FMOD_AUDIOQUEUE_CODECPOLICY_DEFAULT to ignore. Policy used to determine whether hardware or software is used for decoding, see FMOD_AUDIOQUEUE_CODECPOLICY for options (iOS >= 3.0 required, otherwise only hardware is available)
+    /// [w] Optional. Specify 0 or FMOD_AUDIOQUEUE_CODECPOLICY_DEFAULT to ignore. Policy used to determine whether hardware or software
+    /// is used for decoding, see FMOD_AUDIOQUEUE_CODECPOLICY for options (iOS >= 3.0 required, otherwise only hardware is available)
     pub audio_queue_policy     : u32,
-    /// [w] Optional. Specify 0 to ignore. Allows you to set a minimum desired MIDI mixer granularity. Values smaller than 512 give greater than default accuracy at the cost of more CPU and vice versa. Specify 0 for default (512 samples).
+    /// [w] Optional. Specify 0 to ignore. Allows you to set a minimum desired MIDI mixer granularity. Values smaller than 512 give
+    /// greater than default accuracy at the cost of more CPU and vice versa. Specify 0 for default (512 samples).
     pub min_midi_granularity   : u32,
-    /// [w] Optional. Specify 0 to ignore. Specifies a thread index to execute non blocking load on. Allows for up to 5 threads to be used for loading at once. This is to avoid one load blocking another. Maximum value = 4.
+    /// [w] Optional. Specify 0 to ignore. Specifies a thread index to execute non blocking load on. Allows for up to 5 threads to be
+    /// used for loading at once. This is to avoid one load blocking another. Maximum value = 4.
     pub non_block_thread_id    : i32
 }
 
@@ -519,7 +581,7 @@ impl Default for FmodCreateSoundexInfo {
             dls_name: String::new(),
             encryption_key: String::new(),
             max_polyphony: 0i32,
-            user_data: box ffi::SoundData::new(),
+            user_data: Box::new(ffi::SoundData::new()),
             suggested_sound_type: ::SoundType::Unknown,
             user_open: None,
             user_close: None,
@@ -604,26 +666,38 @@ pub struct FmodCodecDescription {
     pub name             : String,
     /// [in] Plugin writer's version number.
     pub version          : u32,
-    /// [in] Tells FMOD to open the file as a stream when calling [`FmodSys::create_sound`](doc/rfmod/struct.FmodSys.html#method.create_sound), and not a static sample. Should normally be 0 (FALSE), because generally the user wants to decode the file into memory when using [`FmodSys::create_sound`](doc/rfmod/struct.FmodSys.html#method.create_sound). Mainly used for formats that decode for a very long time, or could use large amounts of memory when decoded.
-    /// Usually sequenced formats such as mod/s3m/xm/it/midi fall into this category. It is mainly to stop users that don't know what they're doing from getting FMOD_ERR_MEMORY returned from createSound when they should have in fact called System::createStream or used FMOD_CREATESTREAM in [`FmodSys::create_sound`](doc/rfmod/struct.FmodSys.html#method.create_sound).
+    /// [in] Tells FMOD to open the file as a stream when calling [`FmodSys::create_sound`](doc/rfmod/struct.FmodSys.html#method.create_sound),
+    /// and not a static sample. Should normally be 0 (FALSE), because generally the user wants to decode the file into memory when using
+    /// [`FmodSys::create_sound`](doc/rfmod/struct.FmodSys.html#method.create_sound). Mainly used for formats that decode for a very long time,
+    /// or could use large amounts of memory when decoded.
+    /// Usually sequenced formats such as mod/s3m/xm/it/midi fall into this category. It is mainly to stop users that don't know what they're
+    /// doing from getting FMOD_ERR_MEMORY returned from createSound when they should have in fact called System::createStream or used
+    /// FMOD_CREATESTREAM in [`FmodSys::create_sound`](doc/rfmod/struct.FmodSys.html#method.create_sound).
     pub default_as_stream: i32,
-    /// [in] When setposition codec is called, only these time formats will be passed to the codec. Use bitwise OR to accumulate different types.
+    /// [in] When setposition codec is called, only these time formats will be passed to the codec. Use bitwise OR to accumulate different
+    /// types.
     pub time_units       : FmodTimeUnit,
     /// [in] Open callback for the codec for when FMOD tries to open a sound using this codec.
     open                 : ffi::FMOD_CODEC_OPENCALLBACK,
     /// [in] Close callback for the codec for when FMOD tries to close a sound using this codec.
     close                : ffi::FMOD_CODEC_CLOSECALLBACK,
-    /// [in] Read callback for the codec for when FMOD tries to read some data from the file to the destination format (specified in the open callback).
+    /// [in] Read callback for the codec for when FMOD tries to read some data from the file to the destination format (specified in
+    /// the open callback).
     read                 : ffi::FMOD_CODEC_READCALLBACK,
-    /// [in] Callback to return the length of the song in whatever format required when [`Sound::get_length`](doc/rfmod/struct.Sound.html#method.get_length) is called.
+    /// [in] Callback to return the length of the song in whatever format required when [`Sound::get_length`](doc/rfmod/struct.Sound.html#method.get_length)
+    /// is called.
     get_length           : ffi::FMOD_CODEC_GETLENGTHCALLBACK,
-    /// [in] Seek callback for the codec for when FMOD tries to seek within the file with [`Channel::set_position`](doc/rfmod/struct.Channel.html#method.set_position).
+    /// [in] Seek callback for the codec for when FMOD tries to seek within the file with
+    /// [`Channel::set_position`](doc/rfmod/struct.Channel.html#method.set_position).
     set_position         : ffi::FMOD_CODEC_SETPOSITIONCALLBACK,
-    /// [in] Tell callback for the codec for when FMOD tries to get the current position within the with [`Channel::get_position`](doc/rfmod/struct.Channel.html#method.get_position).
+    /// [in] Tell callback for the codec for when FMOD tries to get the current position within the with
+    /// [`Channel::get_position`](doc/rfmod/struct.Channel.html#method.get_position).
     get_position         : ffi::FMOD_CODEC_GETPOSITIONCALLBACK,
-    /// [in] Sound creation callback for the codec when FMOD finishes creating the sound. (So the codec can set more parameters for the related created sound, ie loop points/mode or 3D attributes etc).
+    /// [in] Sound creation callback for the codec when FMOD finishes creating the sound. (So the codec can set more parameters for the
+    /// related created sound, ie loop points/mode or 3D attributes etc).
     sound_create         : ffi::FMOD_CODEC_SOUNDCREATECALLBACK,
-    /// [in] Callback to tell FMOD about the waveformat of a particular subsound. This is to save memory, rather than saving 1000 FMOD_CODEC_WAVEFORMAT structures in the codec, the codec might have a more optimal way of storing this information.
+    /// [in] Callback to tell FMOD about the waveformat of a particular subsound. This is to save memory, rather than saving 1000
+    /// FMOD_CODEC_WAVEFORMAT structures in the codec, the codec might have a more optimal way of storing this information.
     get_wave_format      : ffi::FMOD_CODEC_GETWAVEFORMAT
 }
 
@@ -1130,7 +1204,7 @@ impl FmodSys {
         }
     }
 
-    pub fn get_driver_info(&self, id: i32, name_len: uint) -> Result<(FmodGuid, String), ::Result> {
+    pub fn get_driver_info(&self, id: i32, name_len: usize) -> Result<(FmodGuid, String), ::Result> {
         let tmp_v = String::with_capacity(name_len);
         let mut guid = ffi::FMOD_GUID{Data1: 0, Data2: 0, Data3: 0, Data4: [0, 0, 0, 0, 0, 0, 0, 0]};
 
@@ -1425,7 +1499,7 @@ impl FmodSys {
     }
 
     pub fn get_plugin_info(&self, FmodPluginHandle(handle): FmodPluginHandle, name_len: u32) -> Result<(String, ::PluginType, u32), ::Result> {
-        let name = String::with_capacity(name_len as uint);
+        let name = String::with_capacity(name_len as usize);
         let mut plugin_type = ::PluginType::Output;
         let mut version = 0u32;
 
@@ -1606,14 +1680,15 @@ impl FmodSys {
     }
 
     pub fn get_CDROM_drive_name(&self, drive: i32, drive_name_len: u32, scsi_name_len: u32, device_name_len: u32) -> Result<(String, String, String), ::Result> {
-        let drive_name = String::with_capacity(drive_name_len as uint);
-        let scsi_name = String::with_capacity(scsi_name_len as uint);
-        let device_name = String::with_capacity(device_name_len as uint);
+        let drive_name = String::with_capacity(drive_name_len as usize);
+        let scsi_name = String::with_capacity(scsi_name_len as usize);
+        let device_name = String::with_capacity(device_name_len as usize);
 
         drive_name.with_c_str(|c_drive_name|{
             scsi_name.with_c_str(|c_scsi_name|{
                 device_name.with_c_str(|c_device_name|{
-                    match unsafe { ffi::FMOD_System_GetCDROMDriveName(self.system, drive, c_drive_name as *mut c_char, drive_name_len as i32, c_scsi_name as *mut c_char,
+                    match unsafe { ffi::FMOD_System_GetCDROMDriveName(self.system, drive, c_drive_name as *mut c_char,
+                        drive_name_len as i32, c_scsi_name as *mut c_char,
                         scsi_name_len as i32, c_device_name as *mut c_char, device_name_len as i32) } {
                         ::Result::Ok => Ok((unsafe { FromCStr::from_c_str(c_drive_name) },
                                         unsafe { FromCStr::from_c_str(c_scsi_name) },
@@ -1625,7 +1700,7 @@ impl FmodSys {
         })
     }
 
-    pub fn get_spectrum(&self, spectrum_size: uint, channel_offset: Option<i32>, window_type: Option<::DspFftWindow>) -> Result<Vec<f32>, ::Result> {
+    pub fn get_spectrum(&self, spectrum_size: usize, channel_offset: Option<i32>, window_type: Option<::DspFftWindow>) -> Result<Vec<f32>, ::Result> {
         let mut ptr : Vec<f32> = ::std::iter::repeat(0f32).take(spectrum_size).collect();
         let c_window_type = match window_type {
             Some(wt) => wt,
@@ -1642,7 +1717,7 @@ impl FmodSys {
         }
     }
 
-    pub fn get_wave_data(&self, wave_size: uint, channel_offset: i32) -> Result<Vec<f32>, ::Result> {
+    pub fn get_wave_data(&self, wave_size: usize, channel_offset: i32) -> Result<Vec<f32>, ::Result> {
         let mut ptr : Vec<f32> = ::std::iter::repeat(0f32).take(wave_size).collect();
 
         match unsafe { ffi::FMOD_System_GetWaveData(self.system, ptr.as_mut_ptr(), wave_size as c_int, channel_offset) } {
@@ -1753,7 +1828,7 @@ impl FmodSys {
         }
     }
 
-    pub fn get_record_driver_info(&self, id: i32, name_len: uint) -> Result<(FmodGuid, String), ::Result> {
+    pub fn get_record_driver_info(&self, id: i32, name_len: usize) -> Result<(FmodGuid, String), ::Result> {
         let tmp_v = String::with_capacity(name_len);
         let mut guid = ffi::FMOD_GUID{Data1: 0, Data2: 0, Data3: 0, Data4: [0, 0, 0, 0, 0, 0, 0, 0]};
 

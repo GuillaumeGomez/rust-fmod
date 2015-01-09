@@ -243,7 +243,7 @@ impl ChannelGroup {
     }
 
     pub fn get_name(&self, name_len: u32) -> Result<String, ::Result> {
-        let name = String::with_capacity(name_len as uint);
+        let name = String::with_capacity(name_len as usize);
 
         name.with_c_str(|c_name|{
             match unsafe { ffi::FMOD_ChannelGroup_GetName(self.channel_group, c_name as *mut c_char, name_len as i32) } {
@@ -271,7 +271,7 @@ impl ChannelGroup {
         }
     }
 
-    pub fn get_spectrum(&self, spectrum_size: uint, channel_offset: Option<i32>, window_type: Option<::DspFftWindow>) -> Result<Vec<f32>, ::Result> {
+    pub fn get_spectrum(&self, spectrum_size: usize, channel_offset: Option<i32>, window_type: Option<::DspFftWindow>) -> Result<Vec<f32>, ::Result> {
         let mut ptr : Vec<f32> = ::std::iter::repeat(0f32).take(spectrum_size).collect();
         let c_window_type = match window_type {
             Some(wt) => wt,
@@ -288,7 +288,7 @@ impl ChannelGroup {
         }
     }
 
-    pub fn get_wave_data(&self, wave_size: uint, channel_offset: i32) -> Result<Vec<f32>, ::Result> {
+    pub fn get_wave_data(&self, wave_size: usize, channel_offset: i32) -> Result<Vec<f32>, ::Result> {
         let mut ptr : Vec<f32> = ::std::iter::repeat(0f32).take(wave_size).collect();
 
         match unsafe { ffi::FMOD_ChannelGroup_GetWaveData(self.channel_group, ptr.as_mut_ptr(), wave_size as c_int, channel_offset) } {

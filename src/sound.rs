@@ -328,7 +328,7 @@ impl Sound {
 
     //to test
     pub fn get_3D_custom_rolloff(&self, num_points: u32) -> Result<Vec<vector::FmodVector>, ::Result> {
-        let mut points_vec = Vec::with_capacity(num_points as uint);
+        let mut points_vec = Vec::with_capacity(num_points as usize);
         let mut pointer = points_vec.as_mut_ptr();
 
         match unsafe { ffi::FMOD_Sound_Get3DCustomRolloff(self.sound, &mut pointer, num_points as i32) } {
@@ -358,7 +358,7 @@ impl Sound {
     }
 
     pub fn get_name(&self, name_len: u32) -> Result<String, ::Result> {
-        let name = String::with_capacity(name_len as uint);
+        let name = String::with_capacity(name_len as usize);
 
         name.with_c_str(|c_name|{
             match unsafe { ffi::FMOD_Sound_GetName(self.sound, c_name as *mut c_char, name_len as i32) } {
@@ -479,7 +479,7 @@ impl Sound {
     }
 
     pub fn get_sync_point_info(&self, sync_point: FmodSyncPoint, name_len: u32, FmodTimeUnit(offset_type): FmodTimeUnit) -> Result<(String, u32), ::Result> {
-        let name = String::with_capacity(name_len as uint);
+        let name = String::with_capacity(name_len as usize);
         let mut offset = 0u32;
 
         match unsafe { ffi::FMOD_Sound_GetSyncPointInfo(self.sound, sync_point.sync_point, name.with_c_str(|c_name|{c_name as *mut c_char}),
@@ -607,8 +607,8 @@ impl Sound {
 
         match unsafe { ffi::FMOD_Sound_Lock(self.sound, offset, length, &mut ptr1, &mut ptr2, &mut len1, &mut len2) } {
             ::Result::Ok => {
-                unsafe { Ok((slice::from_raw_buf(&(ptr1 as *const u8), len1 as uint).clone().to_vec(),
-                    slice::from_raw_buf(&(ptr2 as *const u8), len2 as uint).clone().to_vec())) }
+                unsafe { Ok((slice::from_raw_buf(&(ptr1 as *const u8), len1 as usize).clone().to_vec(),
+                    slice::from_raw_buf(&(ptr2 as *const u8), len2 as usize).clone().to_vec())) }
             }
             e => Err(e)
         }
@@ -673,7 +673,7 @@ impl Sound {
             let mut rate = 0f32;
             let len_bytes = match self.get_length(::FMOD_TIMEUNIT_PCMBYTES) {
                 Ok(l) => l,
-                Err(e) => return Err(format!("{}", e))
+                Err(e) => return Err(format!("{:?}", e))
             };
             let mut len1 = 0u32;
             let mut len2 = 0u32;
@@ -683,9 +683,9 @@ impl Sound {
             match ffi::FMOD_Sound_GetFormat(self.sound, ::std::ptr::null_mut(), ::std::ptr::null_mut(), &mut channels, &mut bits) {
                ::Result::Ok => match ffi::FMOD_Sound_GetDefaults(self.sound, &mut rate, ::std::ptr::null_mut(), ::std::ptr::null_mut(), ::std::ptr::null_mut()) {
                    ::Result::Ok => {}
-                    e => return Err(format!("{}", e))
+                    e => return Err(format!("{:?}", e))
                 },
-                e => return Err(format!("{}", e))
+                e => return Err(format!("{:?}", e))
             };
             let fmt_chunk = FmtChunk {
                 chunk: RiffChunk {
@@ -720,16 +720,16 @@ impl Sound {
             let mut buf: BufferedWriter<File> = BufferedWriter::new(file);
 
             /* wav header */
-            for it in range(0u, 4u) {
+            for it in range(0us, 4us) {
                 buf.write_i8(wav_header.chunk.id[it]).unwrap();
             }
             buf.write_le_i32(wav_header.chunk.size).unwrap();
-            for it in range(0u, 4u) {
+            for it in range(0us, 4us) {
                 buf.write_i8(wav_header.riff_type[it]).unwrap();
             }
 
             /* wav chunk */
-            for it in range(0u, 4u) {
+            for it in range(0us, 4us) {
                 buf.write_i8(fmt_chunk.chunk.id[it]).unwrap();
             }
             buf.write_le_i32(fmt_chunk.chunk.size).unwrap();
@@ -741,14 +741,14 @@ impl Sound {
             buf.write_le_u16(fmt_chunk.w_bits_per_sample).unwrap();
 
             /* wav data chunk */
-            for it in range(0u, 4u) {
+            for it in range(0us, 4us) {
                 buf.write_i8(data_chunk.chunk.id[it]).unwrap();
             }
             buf.write_le_i32(data_chunk.chunk.size).unwrap();
 
             ffi::FMOD_Sound_Lock(self.sound, 0, len_bytes, &mut ptr1, &mut ptr2, &mut len1, &mut len2);
 
-            buf.write(slice::from_raw_buf(&(ptr1 as *const u8), len_bytes as uint)).unwrap();
+            buf.write(slice::from_raw_buf(&(ptr1 as *const u8), len_bytes as usize)).unwrap();
 
             ffi::FMOD_Sound_Unlock(self.sound, ptr1, ptr2, len1, len2);
         }

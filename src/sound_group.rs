@@ -126,7 +126,7 @@ impl SoundGroup {
     }
 
     pub fn get_name(&self, name_len: u32) -> Result<String, ::Result> {
-        let name = String::with_capacity(name_len as uint);
+        let name = String::with_capacity(name_len as usize);
 
         name.with_c_str(|c_name|{
             match unsafe { ffi::FMOD_SoundGroup_GetName(self.sound_group, c_name as *mut c_char, name_len as i32) } {

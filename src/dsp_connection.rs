@@ -92,7 +92,7 @@ impl DspConnection {
         unsafe { ffi::FMOD_DSPConnection_SetLevels(self.dsp_connection, speaker, levels.as_mut_ptr(), levels.len() as c_int) }
     }
 
-    pub fn get_levels(&self, speaker: ::Speaker, num_levels: uint) -> Result<Vec<f32>, ::Result> {
+    pub fn get_levels(&self, speaker: ::Speaker, num_levels: usize) -> Result<Vec<f32>, ::Result> {
         let mut levels : Vec<f32> = ::std::iter::repeat(0f32).take(num_levels).collect();
 
         match unsafe { ffi::FMOD_DSPConnection_GetLevels(self.dsp_connection, speaker, levels.as_mut_ptr(), levels.len() as c_int) } {
