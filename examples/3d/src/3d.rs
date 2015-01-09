@@ -23,6 +23,7 @@
 */
 
 #![crate_type = "bin"]
+#![allow(unstable)]
 
 extern crate libc;
 extern crate rfmod;
@@ -43,14 +44,14 @@ fn main() {
     let fmod = match rfmod::FmodSys::new() {
         Ok(f) => f,
         Err(e) => {
-            panic!("FmodSys.new : {}", e);
+            panic!("FmodSys.new : {:?}", e);
         }
     };
 
     match fmod.init_with_parameters(10i32, rfmod::FmodInitFlag(rfmod::FMOD_INIT_NORMAL)) {
         rfmod::Result::Ok => {}
         e => {
-            panic!("FmodSys.init failed : {}", e);
+            panic!("FmodSys.init failed : {:?}", e);
         }
     };
 
@@ -61,14 +62,14 @@ fn main() {
     let arg1 = tmp.get(0).unwrap();
     let sound = match fmod.create_sound((*arg1).as_slice(), Some(rfmod::FmodMode(rfmod::FMOD_3D | rfmod::FMOD_SOFTWARE)), None) {
         Ok(s) => s,
-        Err(e) => panic!("create sound error: {}", e)
+        Err(e) => panic!("create sound error: {:?}", e)
     };
     sound.set_3D_min_max_distance(4f32, 10000f32);
     sound.set_mode(rfmod::FmodMode(rfmod::FMOD_LOOP_NORMAL));
 
     let chan = match sound.play() {
         Ok(c) => c,
-        Err(e) => panic!("sound.play error: {}", e)
+        Err(e) => panic!("sound.play error: {:?}", e)
     };
     chan.set_3D_attributes(&rfmod::FmodVector{x: -10f32, y: 0f32, z: 0f32}, &Default::default());
 
@@ -93,7 +94,7 @@ fn main() {
         fmod.set_3D_listener_attributes(0, &listener_pos, &vel, &forward, &up);
 
         let mut tmp = String::from_str("|.......................<1>......................<2>....................|\r");
-        unsafe { tmp.as_mut_vec().as_mut_slice()[listener_pos.x as uint + 35u] = 'L' as u8; }
+        unsafe { tmp.as_mut_vec().as_mut_slice()[listener_pos.x as usize + 35us] = 'L' as u8; }
         print!("{}", tmp);
         fmod.update();
         sleep(Duration::milliseconds(interface_update_time as i64 - 1i64));

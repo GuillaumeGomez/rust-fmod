@@ -23,6 +23,7 @@
 */
 
 #![crate_type = "bin"]
+#![allow(unstable)]
 
 extern crate libc;
 extern crate rfmod;
@@ -38,7 +39,7 @@ fn pcmreadcallback(sound: &rfmod::Sound, data: &mut [i16]) -> rfmod::Result {
     static mut t2 : f32 = 0f32; // time
     static mut v1 : f32 = 0f32; // velocity
     static mut v2 : f32 = 0f32; // velocity
-    let mut count = 0u;
+    let mut count = 0us;
 
     while count < data.len() {
         unsafe {
@@ -57,7 +58,7 @@ fn pcmreadcallback(sound: &rfmod::Sound, data: &mut [i16]) -> rfmod::Result {
     rfmod::Result::Ok
 }
 
-fn get_key() -> Result<int, std::io::IoError> {
+fn get_key() -> Result<isize, std::io::IoError> {
     let mut reader = std::io::stdio::stdin();
     print!("> ");
 
@@ -80,14 +81,14 @@ fn main() {
     let fmod = match rfmod::FmodSys::new() {
         Ok(f) => f,
         Err(e) => {
-            panic!("FmodSys.new : {}", e);
+            panic!("FmodSys.new : {:?}", e);
         }
     };
 
     match fmod.init_with_parameters(32i32, rfmod::FmodInitFlag(rfmod::FMOD_INIT_NORMAL)) {
         rfmod::Result::Ok => {}
         e => {
-            panic!("FmodSys.init failed : {}", e);
+            panic!("FmodSys.init failed : {:?}", e);
         }
     };
 
@@ -128,12 +129,12 @@ fn main() {
         _ => return
     } {
         Ok(s) => s,
-        Err(e) => panic!("create sound error: {}", e)
+        Err(e) => panic!("create sound error: {:?}", e)
     };
 
     let chan = match sound.play() {
         Ok(c) => c,
-        Err(e) => panic!("sound.play error: {}", e)
+        Err(e) => panic!("sound.play error: {:?}", e)
     };
 
     let length = sound.get_length(rfmod::FMOD_TIMEUNIT_MS).unwrap();

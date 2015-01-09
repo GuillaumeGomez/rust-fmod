@@ -23,6 +23,7 @@
 */
 
 #![crate_type = "bin"]
+#![allow(unstable)]
 
 extern crate libc;
 extern crate rfmod;
@@ -50,7 +51,7 @@ fn my_close(music_file: &mut rfmod::FmodFile, user_data: Option<&mut rfmod::Fmod
 }
 
 #[allow(unused_variables)]
-fn my_read(handle: &mut rfmod::FmodFile, buffer: &mut [u8], size_to_read: u32, user_data: Option<&mut rfmod::FmodUserData>) -> uint {
+fn my_read(handle: &mut rfmod::FmodFile, buffer: &mut [u8], size_to_read: u32, user_data: Option<&mut rfmod::FmodUserData>) -> usize {
     handle.read(buffer)
 }
 
@@ -69,14 +70,14 @@ fn main() {
     let fmod = match rfmod::FmodSys::new() {
         Ok(f) => f,
         Err(e) => {
-            panic!("FmodSys.new : {}", e);
+            panic!("FmodSys.new : {:?}", e);
         }
     };
 
     match fmod.init_with_parameters(1i32, rfmod::FmodInitFlag(rfmod::FMOD_INIT_NORMAL)) {
         rfmod::Result::Ok => {}
         e => {
-            panic!("FmodSys.init failed : {}", e);
+            panic!("FmodSys.init failed : {:?}", e);
         }
     };
 
@@ -87,7 +88,7 @@ fn main() {
         2048i32) {
         rfmod::Result::Ok => {}
         e => {
-            panic!("FmodSys.set_file_system failed : {}", e);
+            panic!("FmodSys.set_file_system failed : {:?}", e);
         }
     };
 
@@ -100,12 +101,12 @@ fn main() {
         Some(rfmod::FmodMode(rfmod::FMOD_2D | rfmod::FMOD_HARDWARE | rfmod::FMOD_LOOP_OFF)), None)
     {
         Ok(s) => s,
-        Err(e) => panic!("create sound error: {}", e)
+        Err(e) => panic!("create sound error: {:?}", e)
     };
 
     let chan = match sound.play() {
         Ok(c) => c,
-        Err(e) => panic!("sound.play error: {}", e)
+        Err(e) => panic!("sound.play error: {:?}", e)
     };
 
     let length = sound.get_length(rfmod::FMOD_TIMEUNIT_MS).unwrap();

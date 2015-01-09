@@ -26,6 +26,7 @@
 
 #![allow(non_snake_case)]
 #![allow(unused_variables)]
+#![allow(unstable)]
 
 extern crate rfmod;
 
@@ -44,7 +45,7 @@ fn get_key() -> u8 {
 
 fn my_DSP_callback(dsp_state: &rfmod::DspState, inbuffer: &mut [f32], outbuffer: &mut [f32], length: u32, in_channels: i32,
     out_channels: i32) -> rfmod::Result {
-    for it in range(0u, inbuffer.len() - 1u) {
+    for it in range(0us, inbuffer.len() - 1us) {
         outbuffer[it] = inbuffer[it] * 0.2f32;
     }
     for count in range(0, length) {
@@ -53,7 +54,7 @@ fn my_DSP_callback(dsp_state: &rfmod::DspState, inbuffer: &mut [f32], outbuffer:
                 This DSP filter just halves the volume!
                 Input is modified, and sent to output.
             */
-            outbuffer[((count as i32 * out_channels) + count2) as uint] = inbuffer[((count as i32 * in_channels) + count2) as uint] * 0.2f32;
+            outbuffer[((count as i32 * out_channels) + count2) as usize] = inbuffer[((count as i32 * in_channels) + count2) as usize] * 0.2f32;
         }
     } 
 
@@ -70,14 +71,14 @@ fn main() {
     let fmod = match rfmod::FmodSys::new() {
         Ok(f) => f,
         Err(e) => {
-            panic!("FmodSys.new : {}", e);
+            panic!("FmodSys.new : {:?}", e);
         }
     };
 
     match fmod.init() {
         rfmod::Result::Ok => {}
         e => {
-            panic!("FmodSys.init failed : {}", e);
+            panic!("FmodSys.init failed : {:?}", e);
         }
     };
 
@@ -87,7 +88,7 @@ fn main() {
         Some(rfmod::FmodMode(rfmod::FMOD_SOFTWARE | rfmod::FMOD_LOOP_NORMAL)), None) {
         Ok(s) => s,
         Err(err) => {
-            panic!("FmodSys.create_sound failed : {}", err);
+            panic!("FmodSys.create_sound failed : {:?}", err);
         }
     };
 
@@ -100,7 +101,7 @@ fn main() {
     let channel = match sound.play() {
         Ok(c) => c,
         Err(e) => {
-            panic!("Sound.play failed : {}", e);
+            panic!("Sound.play failed : {:?}", e);
         }
     };
 
@@ -112,7 +113,7 @@ fn main() {
     let dsp = match fmod.create_DSP_with_description(&mut description) {
         Ok(dsp) => dsp,
         Err(e) => {
-            panic!("FmodSys.create_DSP_with_description failed : {}", e);
+            panic!("FmodSys.create_DSP_with_description failed : {:?}", e);
         }
     };
 
@@ -120,7 +121,7 @@ fn main() {
     let connection = match fmod.add_DSP(&dsp) {
         Ok(c) => c,
         Err(e) => {
-            panic!("FmodSys.add_DSP failed : {}", e);
+            panic!("FmodSys.add_DSP failed : {:?}", e);
         }
     };
 

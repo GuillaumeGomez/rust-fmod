@@ -23,6 +23,7 @@
 */
 
 #![crate_type = "bin"]
+#![allow(unstable)]
 
 extern crate libc;
 extern crate rfmod;
@@ -32,7 +33,7 @@ use std::mem;
 use std::default::Default;
 use std::time::duration::Duration;
 
-fn get_key() -> Result<int, std::io::IoError> {
+fn get_key() -> Result<isize, std::io::IoError> {
     let mut reader = std::io::stdio::stdin();
     
     println!("\nEnter a corresponding number or \"ESC\" to quit:");
@@ -56,7 +57,7 @@ fn main() {
     let fmod = match rfmod::FmodSys::new() {
         Ok(f) => f,
         Err(e) => {
-            panic!("FmodSys.new : {}", e);
+            panic!("FmodSys.new : {:?}", e);
         }
     };
 
@@ -94,7 +95,7 @@ fn main() {
         }
     }
 
-    let num_drivers = match fmod.get_num_drivers().unwrap() as uint {
+    let num_drivers = match fmod.get_num_drivers().unwrap() as usize {
         0 => panic!("No driver available for this output type"),
         val => val
     };
@@ -105,9 +106,9 @@ fn main() {
     println!("--------------------------------");
     while it < num_drivers as i32 {
         //check this function
-        let t = match fmod.get_driver_info(it, 256u) {
+        let t = match fmod.get_driver_info(it, 256us) {
             Ok((_, name)) => name,
-            Err(e) => panic!("get_driver_info error: {}", e)
+            Err(e) => panic!("get_driver_info error: {:?}", e)
         };
         println!("{} : {}", it, t);
         it = it + 1;
@@ -118,7 +119,7 @@ fn main() {
             Ok(nb) => {
                 match nb {
                     -1 => return,
-                    nb if nb < num_drivers as int => {
+                    nb if nb < num_drivers as isize => {
                         fmod.set_driver(nb as i32);
                         break;
                     }
@@ -128,7 +129,7 @@ fn main() {
                 }
             }
             Err(e) => {
-                panic!("Input type error: {}", e);
+                panic!("Input type error: {:?}", e);
             }
         }
     }
@@ -136,7 +137,7 @@ fn main() {
     match fmod.init() {
         rfmod::Result::Ok => {}
         e => {
-            panic!("FmodSys.init failed : {}", e);
+            panic!("FmodSys.init failed : {:?}", e);
         }
     };
 
@@ -151,7 +152,7 @@ fn main() {
     let sound = match fmod.create_sound("", Some(rfmod::FmodMode(rfmod::FMOD_2D | rfmod::FMOD_SOFTWARE | rfmod::FMOD_OPENUSER)),
         Some(&mut exinfo)) {
         Ok(s) => s,
-        Err(e) => panic!("create sound error: {}", e)
+        Err(e) => panic!("create sound error: {:?}", e)
     };
 
     println!("\n=========================");
@@ -224,7 +225,7 @@ fn main() {
                 } {
                     Some(r) if r == rfmod::Result::Ok => {}
                     Some(e) => {
-                        println!("Error : {}", e);
+                        println!("Error : {:?}", e);
                         break;
                     }
                     None => {}

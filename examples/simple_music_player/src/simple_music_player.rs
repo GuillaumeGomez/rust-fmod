@@ -23,6 +23,7 @@
 */
 
 #![crate_type = "bin"]
+#![allow(unstable)]
 
 extern crate rfmod;
 
@@ -30,16 +31,16 @@ use std::os;
 use std::io::timer::sleep;
 use std::time::duration::Duration;
 
-fn play_to_the_end(sound: rfmod::Sound, len: uint) -> rfmod::Result {
+fn play_to_the_end(sound: rfmod::Sound, len: usize) -> rfmod::Result {
     let length = match sound.get_length(rfmod::FMOD_TIMEUNIT_MS) {
         Ok(l) => l,
-        Err(e) => panic!("sound.get_length error: {}", e)
+        Err(e) => panic!("sound.get_length error: {:?}", e)
     };
     let name = match sound.get_name(len as u32) {
         Ok(n) => n,
-        Err(e) => panic!("sound.get_name error: {}", e)
+        Err(e) => panic!("sound.get_name error: {:?}", e)
     };
-    let mut old_position = 100u;
+    let mut old_position = 100us;
 
     match sound.play() {
         Ok(chan) => {
@@ -78,14 +79,14 @@ fn main() {
     let fmod = match rfmod::FmodSys::new() {
         Ok(f) => f,
         Err(e) => {
-            panic!("FmodSys.new : {}", e);
+            panic!("FmodSys.new : {:?}", e);
         }
     };
 
     match fmod.init() {
         rfmod::Result::Ok => {}
         e => {
-            panic!("FmodSys.init failed : {}", e);
+            panic!("FmodSys.init failed : {:?}", e);
         }
     };
 
@@ -94,7 +95,7 @@ fn main() {
     let sound = match fmod.create_sound((*arg1).as_slice(), None, None) {
         Ok(s) => s,
         Err(err) => {
-            panic!("FmodSys.create_sound failed : {}", err);
+            panic!("FmodSys.create_sound failed : {:?}", err);
         },
     };
 
@@ -103,7 +104,7 @@ fn main() {
             println!("Ok !");
         },
         err => {
-            panic!("FmodSys.play_to_the_end : {}", err);
+            panic!("FmodSys.play_to_the_end : {:?}", err);
         }
     };
 }
