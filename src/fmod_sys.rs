@@ -1198,7 +1198,7 @@ impl FmodSys {
     pub fn get_num_drivers(&self) -> Result<i32, ::Result> {
         let mut num_drivers = 0i32;
 
-        match unsafe { ffi::FMOD_System_GetNumDrivers(self.system, &mut num_drivers) } {
+        match unsafe { ffi::FMOD_System_GetNumDrivers(self.system, &mut num_drivers as *mut c_int) } {
             ::Result::Ok => Ok(num_drivers),
             e => Err(e)
         }
@@ -1209,7 +1209,7 @@ impl FmodSys {
         let mut guid = ffi::FMOD_GUID{Data1: 0, Data2: 0, Data3: 0, Data4: [0, 0, 0, 0, 0, 0, 0, 0]};
 
         tmp_v.with_c_str(|c_str|{
-            match unsafe { ffi::FMOD_System_GetDriverInfo(self.system, id, c_str as *mut c_char, name_len as i32, &mut guid) } {
+            match unsafe { ffi::FMOD_System_GetDriverInfo(self.system, id as c_int, c_str as *mut c_char, name_len as c_int, &mut guid) } {
                 ::Result::Ok => Ok((FmodGuid{data1: guid.Data1, data2: guid.Data2, data3: guid.Data3, data4: guid.Data4},
                     unsafe { FromCStr::from_c_str(c_str) })),
                 e => Err(e)
@@ -1222,46 +1222,46 @@ impl FmodSys {
         let mut speaker_mode = ::SpeakerMode::Raw;
         let mut control_panel_output_rate = 0i32;
 
-        match unsafe { ffi::FMOD_System_GetDriverCaps(self.system, id, &mut fmod_caps, &mut control_panel_output_rate, &mut speaker_mode) } {
+        match unsafe { ffi::FMOD_System_GetDriverCaps(self.system, id as c_int, &mut fmod_caps, &mut control_panel_output_rate as *mut c_int, &mut speaker_mode) } {
             ::Result::Ok => Ok((FmodCaps(fmod_caps), control_panel_output_rate, speaker_mode)),
             e => Err(e)
         }
     }
 
     pub fn set_driver(&self, driver: i32) -> ::Result {
-        unsafe { ffi::FMOD_System_SetDriver(self.system, driver) }
+        unsafe { ffi::FMOD_System_SetDriver(self.system, driver as c_int) }
     }
 
     pub fn get_driver(&self) -> Result<i32, ::Result> {
         let mut driver = 0i32;
 
-        match unsafe { ffi::FMOD_System_GetDriver(self.system, &mut driver) } {
+        match unsafe { ffi::FMOD_System_GetDriver(self.system, &mut driver as *mut c_int) } {
             ::Result::Ok => Ok(driver),
             e => Err(e)
         }
     }
 
     pub fn set_hardware_channels(&self, num_hardware_channels: i32) -> ::Result {
-        unsafe { ffi::FMOD_System_SetHardwareChannels(self.system, num_hardware_channels) }
+        unsafe { ffi::FMOD_System_SetHardwareChannels(self.system, num_hardware_channels as c_int) }
     }
 
     pub fn get_hardware_channels(&self) -> Result<i32, ::Result> {
         let mut num_hardware_channels = 0i32;
 
-        match unsafe { ffi::FMOD_System_GetHardwareChannels(self.system, &mut num_hardware_channels) } {
+        match unsafe { ffi::FMOD_System_GetHardwareChannels(self.system, &mut num_hardware_channels as *mut c_int) } {
             ::Result::Ok => Ok(num_hardware_channels),
             e => Err(e)
         }
     }
 
     pub fn set_software_channels(&self, num_software_channels: i32) -> ::Result {
-        unsafe { ffi::FMOD_System_SetSoftwareChannels(self.system, num_software_channels) }
+        unsafe { ffi::FMOD_System_SetSoftwareChannels(self.system, num_software_channels as c_int) }
     }
 
     pub fn get_software_channels(&self) -> Result<i32, ::Result> {
         let mut num_software_channels = 0i32;
 
-        match unsafe { ffi::FMOD_System_GetSoftwareChannels(self.system, &mut num_software_channels) } {
+        match unsafe { ffi::FMOD_System_GetSoftwareChannels(self.system, &mut num_software_channels as *mut c_int) } {
             ::Result::Ok => Ok(num_software_channels),
             e => Err(e)
         }
@@ -1269,8 +1269,8 @@ impl FmodSys {
 
     pub fn set_software_format(&self, sample_rate: i32, format: ::SoundFormat, num_output_channels: i32,
         max_input_channels: i32, resample_method: ::DspResampler) -> ::Result {
-        unsafe { ffi::FMOD_System_SetSoftwareFormat(self.system, sample_rate, format, num_output_channels,
-            max_input_channels, resample_method) }
+        unsafe { ffi::FMOD_System_SetSoftwareFormat(self.system, sample_rate as c_int, format, num_output_channels as c_int,
+            max_input_channels as c_int, resample_method) }
     }
 
     pub fn get_software_format(&self) -> Result<FmodSoftwareFormat, ::Result> {
@@ -1283,22 +1283,22 @@ impl FmodSys {
             bits: 0
         };
 
-        match unsafe { ffi::FMOD_System_GetSoftwareFormat(self.system, &mut t.sample_rate, &mut t.format,
-            &mut t.num_output_channels, &mut t.max_input_channels, &mut t.resample_method, &mut t.bits) } {
+        match unsafe { ffi::FMOD_System_GetSoftwareFormat(self.system, &mut t.sample_rate as *mut c_int, &mut t.format,
+            &mut t.num_output_channels as *mut c_int, &mut t.max_input_channels as *mut c_int, &mut t.resample_method, &mut t.bits as *mut c_int) } {
             ::Result::Ok => Ok(t),
             e => Err(e)
         }
     }
 
     pub fn set_DSP_buffer_size(&self, buffer_length: u32, num_buffers: i32) -> ::Result {
-        unsafe { ffi::FMOD_System_SetDSPBufferSize(self.system, buffer_length, num_buffers) }
+        unsafe { ffi::FMOD_System_SetDSPBufferSize(self.system, buffer_length as c_uint, num_buffers as c_int) }
     }
 
     pub fn get_DSP_buffer_size(&self) -> Result<(u32, i32), ::Result> {
         let mut buffer_length = 0u32;
         let mut num_buffers = 0i32;
 
-        match unsafe { ffi::FMOD_System_GetDSPBufferSize(self.system, &mut buffer_length, &mut num_buffers) } {
+        match unsafe { ffi::FMOD_System_GetDSPBufferSize(self.system, &mut buffer_length as *mut c_uint, &mut num_buffers as *mut c_int) } {
             ::Result::Ok => Ok((buffer_length, num_buffers)),
             e => Err(e)
         }
@@ -1404,7 +1404,7 @@ impl FmodSys {
                         }
                     }
                 }
-                Ok(FmodAdvancedSettings{
+                Ok(FmodAdvancedSettings {
                     max_MPEG_codecs: advanced_settings.maxMPEGcodecs,
                     max_ADPCM_codecs: advanced_settings.maxADPCMcodecs,
                     max_XMA_codecs: advanced_settings.maxXMAcodecs,
@@ -1456,20 +1456,17 @@ impl FmodSys {
         }
     }
 
-    pub fn set_plugin_path(&self, path: String) -> ::Result {
-        let tmp_v = path.clone();
-
-        tmp_v.with_c_str(|c_str|{
+    pub fn set_plugin_path(&self, path: &str) -> ::Result {
+        path.with_c_str(|c_str|{
             unsafe { ffi::FMOD_System_SetPluginPath(self.system, c_str) }
         })
     }
 
-    pub fn load_plugin(&self, filename: String, priority: u32) -> Result<FmodPluginHandle, ::Result> {
-        let tmp_v = filename.clone();
+    pub fn load_plugin(&self, filename: &str, priority: u32) -> Result<FmodPluginHandle, ::Result> {
         let mut handle = 0u32;
 
-        tmp_v.with_c_str(|c_str|{
-            match unsafe { ffi::FMOD_System_LoadPlugin(self.system, c_str, &mut handle, priority) } {
+        filename.with_c_str(|c_str| {
+            match unsafe { ffi::FMOD_System_LoadPlugin(self.system, c_str, &mut handle as *mut c_uint, priority as c_uint) } {
                 ::Result::Ok => Ok(FmodPluginHandle(handle)),
                 e => Err(e)
             }
@@ -1492,7 +1489,7 @@ impl FmodSys {
     pub fn get_plugin_handle(&self, plugin_type: ::PluginType, index: i32) -> Result<FmodPluginHandle, ::Result> {
         let mut handle = 0u32;
 
-        match unsafe { ffi::FMOD_System_GetPluginHandle(self.system, plugin_type, index, &mut handle) } {
+        match unsafe { ffi::FMOD_System_GetPluginHandle(self.system, plugin_type, index as c_int, &mut handle as *mut c_uint) } {
             ::Result::Ok => Ok(FmodPluginHandle(handle)),
             e => Err(e)
         }
@@ -1504,7 +1501,7 @@ impl FmodSys {
         let mut version = 0u32;
 
         name.with_c_str(|c_str|{
-            match unsafe { ffi::FMOD_System_GetPluginInfo(self.system, handle, &mut plugin_type, c_str as *mut c_char, name_len as i32, &mut version) } {
+            match unsafe { ffi::FMOD_System_GetPluginInfo(self.system, handle, &mut plugin_type, c_str as *mut c_char, name_len as c_int, &mut version as *mut c_uint) } {
                 ::Result::Ok => Ok((unsafe { FromCStr::from_c_str(c_str) }, plugin_type, version)),
                 e => Err(e)
             }
@@ -1534,13 +1531,13 @@ impl FmodSys {
     }
 
     pub fn set_3D_num_listeners(&self, num_listeners: i32) -> ::Result {
-        unsafe { ffi::FMOD_System_Set3DNumListeners(self.system, num_listeners) }
+        unsafe { ffi::FMOD_System_Set3DNumListeners(self.system, num_listeners as c_int) }
     }
 
     pub fn get_3D_num_listeners(&self) -> Result<i32, ::Result> {
         let mut num_listeners = 0i32;
 
-        match unsafe { ffi::FMOD_System_Get3DNumListeners(self.system, &mut num_listeners) } {
+        match unsafe { ffi::FMOD_System_Get3DNumListeners(self.system, &mut num_listeners as *mut c_int) } {
             ::Result::Ok => Ok(num_listeners),
             e => Err(e)
         }
@@ -1553,7 +1550,7 @@ impl FmodSys {
         let c_f = vector::get_ffi(forward);
         let c_u = vector::get_ffi(up);
 
-        unsafe { ffi::FMOD_System_Set3DListenerAttributes(self.system, listener, &c_p, &c_v, &c_f, &c_u) }
+        unsafe { ffi::FMOD_System_Set3DListenerAttributes(self.system, listener as c_int, &c_p, &c_v, &c_f, &c_u) }
     }
 
     pub fn get_3D_listener_attributes(&self, listener: i32) -> Result<(vector::FmodVector, vector::FmodVector, vector::FmodVector, vector::FmodVector), ::Result> {
@@ -1562,16 +1559,16 @@ impl FmodSys {
         let mut forward = vector::get_ffi(&vector::FmodVector::new());
         let mut up = vector::get_ffi(&vector::FmodVector::new());
 
-        match unsafe { ffi::FMOD_System_Get3DListenerAttributes(self.system, listener, &mut pos, &mut vel, &mut forward, &mut up) } {
+        match unsafe { ffi::FMOD_System_Get3DListenerAttributes(self.system, listener as c_int, &mut pos, &mut vel, &mut forward, &mut up) } {
             ::Result::Ok => Ok((vector::from_ptr(pos), vector::from_ptr(vel), vector::from_ptr(forward), vector::from_ptr(up))),
             e => Err(e)
         }
     }
 
     pub fn set_3D_speaker_position(&self, speaker: ::Speaker, x: f32, y: f32, active: bool) -> ::Result {
-        let t_active = match active {
-            true => 1i32,
-            false => 0i32
+        let t_active : c_int = match active {
+            true => 1,
+            false => 0
         };
         unsafe { ffi::FMOD_System_Set3DSpeakerPosition(self.system, speaker, x, y, t_active) }
     }
@@ -1579,12 +1576,12 @@ impl FmodSys {
     pub fn get_3D_speaker_position(&self, speaker: ::Speaker) -> Result<(f32, f32, bool), ::Result> {
         let mut x = 0f32;
         let mut y = 0f32;
-        let mut active = 0i32;
+        let mut active : c_int = 0;
 
         match unsafe { ffi::FMOD_System_Get3DSpeakerPosition(self.system, speaker, &mut x, &mut y, &mut active) } {
             ::Result::Ok => Ok((x, y, match active {
-                1 => true,
-                _ => false
+                0 => false,
+                _ => true
             })),
             e => Err(e)
         }
@@ -1606,7 +1603,7 @@ impl FmodSys {
     }
 
     pub fn set_stream_buffer_size(&self, file_buffer_size: u32, FmodTimeUnit(file_buffer_size_type): FmodTimeUnit) -> ::Result {
-        unsafe { ffi::FMOD_System_SetStreamBufferSize(self.system, file_buffer_size, file_buffer_size_type) }
+        unsafe { ffi::FMOD_System_SetStreamBufferSize(self.system, file_buffer_size as c_uint, file_buffer_size_type) }
     }
 
     pub fn get_stream_buffer_size(&self) -> Result<(u32, FmodTimeUnit), ::Result> {
@@ -1620,10 +1617,10 @@ impl FmodSys {
     }
 
     pub fn get_version(&self) -> Result<u32, ::Result> {
-        let mut version = 0u32;
+        let mut version : c_uint = 0;
 
         match unsafe { ffi::FMOD_System_GetVersion(self.system, &mut version) } {
-            ::Result::Ok => Ok(version),
+            ::Result::Ok => Ok(version as u32),
             e => Err(e)
         }
     }
@@ -1638,10 +1635,10 @@ impl FmodSys {
     }
 
     pub fn get_channels_playing(&self) -> Result<i32, ::Result> {
-        let mut playing_chans = 0i32;
+        let mut playing_chans : c_int = 0;
 
         match unsafe { ffi::FMOD_System_GetChannelsPlaying(self.system, &mut playing_chans) } {
-            ::Result::Ok => Ok(playing_chans),
+            ::Result::Ok => Ok(playing_chans as i32),
             e => Err(e)
         }
     }
@@ -1660,21 +1657,21 @@ impl FmodSys {
     }
 
     pub fn get_sound_RAM(&self) -> Result<(i32, i32, i32), ::Result> {
-        let mut current_alloced = 0i32;
-        let mut max_alloced = 0i32;
-        let mut total = 0i32;
+        let mut current_alloced : c_int = 0;
+        let mut max_alloced : c_int = 0;
+        let mut total : c_int = 0;
 
         match unsafe { ffi::FMOD_System_GetSoundRAM(self.system, &mut current_alloced, &mut max_alloced, &mut total) } {
-            ::Result::Ok => Ok((current_alloced, max_alloced, total)),
+            ::Result::Ok => Ok((current_alloced as i32, max_alloced as i32, total as i32)),
             e => Err(e)
         }
     }
 
     pub fn get_num_CDROM_drives(&self) -> Result<i32, ::Result> {
-        let mut num_drives = 0i32;
+        let mut num_drives : c_int= 0;
 
         match unsafe { ffi::FMOD_System_GetNumCDROMDrives(self.system, &mut num_drives) } {
-            ::Result::Ok => Ok(num_drives),
+            ::Result::Ok => Ok(num_drives as i32),
             e => Err(e)
         }
     }
@@ -1687,9 +1684,9 @@ impl FmodSys {
         drive_name.with_c_str(|c_drive_name|{
             scsi_name.with_c_str(|c_scsi_name|{
                 device_name.with_c_str(|c_device_name|{
-                    match unsafe { ffi::FMOD_System_GetCDROMDriveName(self.system, drive, c_drive_name as *mut c_char,
-                        drive_name_len as i32, c_scsi_name as *mut c_char,
-                        scsi_name_len as i32, c_device_name as *mut c_char, device_name_len as i32) } {
+                    match unsafe { ffi::FMOD_System_GetCDROMDriveName(self.system, drive as c_int, c_drive_name as *mut c_char,
+                        drive_name_len as c_int, c_scsi_name as *mut c_char,
+                        scsi_name_len as c_int, c_device_name as *mut c_char, device_name_len as c_int) } {
                         ::Result::Ok => Ok((unsafe { FromCStr::from_c_str(c_drive_name) },
                                         unsafe { FromCStr::from_c_str(c_scsi_name) },
                                         unsafe { FromCStr::from_c_str(c_device_name) })),
@@ -1706,9 +1703,9 @@ impl FmodSys {
             Some(wt) => wt,
             None => ::DspFftWindow::Rect
         };
-        let c_channel_offset = match channel_offset {
-            Some(co) => co,
-            None => 0i32
+        let c_channel_offset : c_int = match channel_offset {
+            Some(co) => co as c_int,
+            None => 0
         };
 
         match unsafe { ffi::FMOD_System_GetSpectrum(self.system, ptr.as_mut_ptr(), spectrum_size as c_int, c_channel_offset, c_window_type) } {
@@ -1720,7 +1717,7 @@ impl FmodSys {
     pub fn get_wave_data(&self, wave_size: usize, channel_offset: i32) -> Result<Vec<f32>, ::Result> {
         let mut ptr : Vec<f32> = ::std::iter::repeat(0f32).take(wave_size).collect();
 
-        match unsafe { ffi::FMOD_System_GetWaveData(self.system, ptr.as_mut_ptr(), wave_size as c_int, channel_offset) } {
+        match unsafe { ffi::FMOD_System_GetWaveData(self.system, ptr.as_mut_ptr(), wave_size as c_int, channel_offset as c_int) } {
             ::Result::Ok => Ok(ptr),
             e => Err(e)
         }
@@ -1729,7 +1726,7 @@ impl FmodSys {
     pub fn get_channel(&self, channel_id: i32) -> Result<channel::Channel, ::Result> {
         let mut channel = ::std::ptr::null_mut();
 
-        match unsafe { ffi::FMOD_System_GetChannel(self.system, channel_id, &mut channel) } {
+        match unsafe { ffi::FMOD_System_GetChannel(self.system, channel_id as c_int, &mut channel) } {
             ::Result::Ok => Ok(ffi::FFI::wrap(channel)),
             e => Err(e)
         }
@@ -1810,20 +1807,20 @@ impl FmodSys {
     }
 
     pub fn get_DSP_clock(&self) -> Result<(u32, u32), ::Result> {
-        let mut hi = 0u32;
-        let mut lo = 0u32;
+        let mut hi : c_uint = 0;
+        let mut lo : c_uint = 0;
 
         match unsafe { ffi::FMOD_System_GetDSPClock(self.system, &mut hi, &mut lo) } {
-            ::Result::Ok => Ok((hi, lo)),
+            ::Result::Ok => Ok((hi as u32, lo as u32)),
             e => Err(e)
         }
     }
 
     pub fn get_record_num_drivers(&self) -> Result<i32, ::Result> {
-        let mut num_drivers = 0i32;
+        let mut num_drivers : c_int = 0;
 
         match unsafe { ffi::FMOD_System_GetRecordNumDrivers(self.system, &mut num_drivers) } {
-            ::Result::Ok => Ok(num_drivers),
+            ::Result::Ok => Ok(num_drivers as i32),
             e => Err(e)
         }
     }
@@ -1833,7 +1830,7 @@ impl FmodSys {
         let mut guid = ffi::FMOD_GUID{Data1: 0, Data2: 0, Data3: 0, Data4: [0, 0, 0, 0, 0, 0, 0, 0]};
 
         tmp_v.with_c_str(|c_str|{
-            match unsafe { ffi::FMOD_System_GetRecordDriverInfo(self.system, id, c_str as *mut c_char, name_len as i32, &mut guid) } {
+            match unsafe { ffi::FMOD_System_GetRecordDriverInfo(self.system, id as c_int, c_str as *mut c_char, name_len as c_int, &mut guid) } {
                 ::Result::Ok => Ok((FmodGuid{data1: guid.Data1, data2: guid.Data2, data3: guid.Data3, data4: guid.Data4},
                     unsafe { FromCStr::from_c_str(c_str) })),
                 e => Err(e)
@@ -1842,21 +1839,21 @@ impl FmodSys {
     }
 
     pub fn get_record_driver_caps(&self, id: i32) -> Result<(FmodCaps, i32, i32), ::Result> {
-        let mut fmod_caps = 0u32;
-        let mut min_frequency = 0i32;
-        let mut max_frequency = 0i32;
+        let mut fmod_caps : c_uint = 0;
+        let mut min_frequency : c_int = 0;
+        let mut max_frequency : c_int = 0;
 
-        match unsafe { ffi::FMOD_System_GetRecordDriverCaps(self.system, id, &mut fmod_caps, &mut min_frequency, &mut max_frequency) } {
-            ::Result::Ok => Ok((FmodCaps(fmod_caps), min_frequency, max_frequency)),
+        match unsafe { ffi::FMOD_System_GetRecordDriverCaps(self.system, id as c_int, &mut fmod_caps, &mut min_frequency, &mut max_frequency) } {
+            ::Result::Ok => Ok((FmodCaps(fmod_caps), min_frequency as i32, max_frequency as i32)),
             e => Err(e)
         }
     }
 
     pub fn get_record_position(&self, id: i32) -> Result<u32, ::Result> {
-        let mut position = 0u32;
+        let mut position : c_uint = 0;
 
-        match unsafe { ffi::FMOD_System_GetRecordPosition(self.system, id, &mut position) } {
-            ::Result::Ok => Ok(position),
+        match unsafe { ffi::FMOD_System_GetRecordPosition(self.system, id as c_int, &mut position) } {
+            ::Result::Ok => Ok(position as u32),
             e => Err(e)
         }
     }
@@ -1867,17 +1864,17 @@ impl FmodSys {
             _ => 0
         };
 
-        unsafe { ffi::FMOD_System_RecordStart(self.system, id, ffi::FFI::unwrap(sound), t_loop) }
+        unsafe { ffi::FMOD_System_RecordStart(self.system, id as c_int, ffi::FFI::unwrap(sound), t_loop) }
     }
 
     pub fn stop_record(&self, id: i32) -> ::Result {
-        unsafe { ffi::FMOD_System_RecordStop(self.system, id) }
+        unsafe { ffi::FMOD_System_RecordStop(self.system, id as c_int) }
     }
 
     pub fn is_recording(&self, id: i32) -> Result<bool, ::Result> {
-        let mut is_recording = 0i32;
+        let mut is_recording : c_int = 0;
         
-        match unsafe { ffi::FMOD_System_IsRecording(self.system, id, &mut is_recording) } {
+        match unsafe { ffi::FMOD_System_IsRecording(self.system, id as c_int, &mut is_recording) } {
             ::Result::Ok => Ok(is_recording == 1),
             e => Err(e)
         }
@@ -1886,7 +1883,7 @@ impl FmodSys {
     pub fn create_geometry(&self, max_polygons: i32, max_vertices: i32) -> Result<geometry::Geometry, ::Result> {
         let mut geometry = ::std::ptr::null_mut();
 
-        match unsafe { ffi::FMOD_System_CreateGeometry(self.system, max_polygons, max_vertices, &mut geometry) } {
+        match unsafe { ffi::FMOD_System_CreateGeometry(self.system, max_polygons as c_int, max_vertices as c_int, &mut geometry) } {
             ::Result::Ok => Ok(ffi::FFI::wrap(geometry)),
             e => Err(e)
         }
@@ -1920,10 +1917,10 @@ impl FmodSys {
     pub fn get_memory_info(&self, FmodMemoryBits(memory_bits): FmodMemoryBits,
         FmodEventMemoryBits(event_memory_bits): FmodEventMemoryBits) -> Result<(u32, FmodMemoryUsageDetails), ::Result> {
         let mut details = get_memory_usage_details_ffi(Default::default());
-        let mut memory_used = 0u32;
+        let mut memory_used : c_uint = 0;
 
         match unsafe { ffi::FMOD_System_GetMemoryInfo(self.system, memory_bits, event_memory_bits, &mut memory_used, &mut details) } {
-            ::Result::Ok => Ok((memory_used, from_memory_usage_details_ptr(details))),
+            ::Result::Ok => Ok((memory_used as u32, from_memory_usage_details_ptr(details))),
             e => Err(e)
         }
     }
