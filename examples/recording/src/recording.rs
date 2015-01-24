@@ -95,7 +95,10 @@ fn main() {
         }
     }
 
-    let num_drivers = match fmod.get_num_drivers().unwrap() as usize {
+    let num_drivers = match match fmod.get_num_drivers() {
+        Ok(n) => n as usize,
+        Err(e) => panic!("rfmod.get_num_drivers failed: {:?}", e)
+    } {
         0 => panic!("No driver available for this output type"),
         val => val
     };
@@ -171,8 +174,20 @@ fn main() {
                     0 => {
                         match fmod.start_record(record_driver, &sound, false) {
                             rfmod::Result::Ok => {
-                                while fmod.is_recording(record_driver).unwrap() == true {
-                                    print!("\rRecording : {}", fmod.get_record_position(record_driver).unwrap());
+                                while match fmod.is_recording(record_driver) {
+                                    Ok(r) => r,
+                                    Err(e) => {
+                                        println!("Error on rfmod.is_recording: {:?}", e);
+                                        false
+                                    }
+                                } {
+                                    print!("\rRecording : {}", match fmod.get_record_position(record_driver) {
+                                        Ok(p) => p,
+                                        Err(e) => {
+                                            println!("rfmod.get_record_position failed: {:?}", e);
+                                            return;
+                                        }
+                                    });
                                     fmod.update();
                                     sleep(Duration::milliseconds(15));
                                 }
@@ -185,9 +200,26 @@ fn main() {
                         match sound.play() {
                             Ok(chan) => {
                                 fmod.update();
-                                while chan.is_playing().unwrap() == true {
-                                    print!("\rPlaying : {} / {}", chan.get_position(rfmod::FMOD_TIMEUNIT_MS).unwrap(),
-                                        sound.get_length(rfmod::FMOD_TIMEUNIT_MS).unwrap());
+                                while match chan.is_playing() {
+                                    Ok(p) => p,
+                                    Err(e) => {
+                                        println!("channel.is_playing failed: {:?}", e);
+                                        false
+                                    }
+                                } {
+                                    print!("\rPlaying : {} / {}", match chan.get_position(rfmod::FMOD_TIMEUNIT_MS) {
+                                        Ok(l) => l,
+                                        Err(e) => {
+                                            println!("channel.get_position failed: {:?}", e);
+                                            return;
+                                        }
+                                    }, match sound.get_length(rfmod::FMOD_TIMEUNIT_MS) {
+                                        Ok(l) => l,
+                                        Err(e) => {
+                                            println!("sound.get_length failed: {:?}", e);
+                                            return;
+                                        }
+                                    });
                                     fmod.update();
                                     sleep(Duration::milliseconds(15));
                                 }

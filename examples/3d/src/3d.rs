@@ -79,7 +79,13 @@ fn main() {
     let interface_update_time = 50f32;
     let compensate_time = 1000f32 / interface_update_time;
 
-    while chan.is_playing().unwrap() {
+    while match chan.is_playing() {
+        Ok(f) => f,
+        Err(e) => {
+            println!("channel.is_playing failed: {:?}", e);
+            false
+        }
+    } {
         let forward = rfmod::FmodVector{x: 0f32, y: 0f32, z: 1f32};
         let up = rfmod::FmodVector{x: 0f32, y: 1f32, z: 0f32};
         let mut vel = rfmod::FmodVector::new();

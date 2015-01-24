@@ -48,7 +48,12 @@ fn play_to_the_end(sound: rfmod::Sound, len: usize) -> rfmod::Result {
                 match chan.is_playing() {
                     Ok(b) => {
                         if b == true {
-                            let position = chan.get_position(rfmod::FMOD_TIMEUNIT_MS).unwrap();
+                            let position = match chan.get_position(rfmod::FMOD_TIMEUNIT_MS) {
+                                Ok(p) => p,
+                                Err(e) => {
+                                    panic!("channel.get_position failed: {:?}", e)
+                                }
+                            };
 
                             if position != old_position {
                                 old_position = position;

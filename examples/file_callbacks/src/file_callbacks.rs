@@ -109,9 +109,24 @@ fn main() {
         Err(e) => panic!("sound.play error: {:?}", e)
     };
 
-    let length = sound.get_length(rfmod::FMOD_TIMEUNIT_MS).unwrap();
-    while chan.is_playing().unwrap() {
-        let position = chan.get_position(rfmod::FMOD_TIMEUNIT_MS).unwrap();
+    let length = match sound.get_length(rfmod::FMOD_TIMEUNIT_MS) {
+        Ok(l) => l,
+        Err(e) => panic!("sound.get_length error: {:?}", e)
+    };
+    while match chan.is_playing() {
+        Ok(p) => p,
+        Err(e) => {
+            println!("channel.is_playing failed: {:?}", e);
+            false
+        }
+    } {
+        let position = match chan.get_position(rfmod::FMOD_TIMEUNIT_MS) {
+            Ok(p) => p,
+            Err(e) => {
+                println!("channel.get_position failed: {:?}", e);
+                return;
+            }
+        };
 
         print!("{:02}:{:02} / {:02}:{:02}\r", position / 1000 / 60, position / 1000 % 60, length / 1000 / 60, length / 1000 % 60);
         sleep(Duration::milliseconds(30))

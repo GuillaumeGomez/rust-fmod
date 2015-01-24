@@ -32,6 +32,7 @@ use std::os;
 use std::io::timer::sleep;
 use std::time::duration::Duration;
 
+
 fn get_key() -> Result<isize, std::io::IoError> {
     let mut reader = std::io::stdio::stdin();
 
@@ -60,7 +61,7 @@ fn switch_dsp_state(dsp: &rfmod::Dsp, fmod: &rfmod::FmodSys, dsp_type: isize) {
     } {
         dsp.remove();
     } else {
-        fmod.add_DSP(dsp).unwrap();
+        match fmod.add_DSP(dsp) { _ => {}};
         match dsp_type {
             3 => {
                 dsp.set_parameter(rfmod::DspTypeEcho::Delay as i32, 50f32);
@@ -153,13 +154,13 @@ fn main() {
     println!("Enter 'quit' to quit.");
     loop {
         println!("low pass[{}] high pass[{}] echo[{}] flange[{}] dist[{}] chorus[{}] parameq[{}]",
-            match dsps[0].get_active().unwrap(){true => {'x'},_ => {' '}},
-            match dsps[1].get_active().unwrap(){true => {'x'},_ => {' '}},
-            match dsps[2].get_active().unwrap(){true => {'x'},_ => {' '}},
-            match dsps[3].get_active().unwrap(){true => {'x'},_ => {' '}},
-            match dsps[4].get_active().unwrap(){true => {'x'},_ => {' '}},
-            match dsps[5].get_active().unwrap(){true => {'x'},_ => {' '}},
-            match dsps[6].get_active().unwrap(){true => {'x'},_ => {' '}});
+            match dsps[0].get_active() { Ok(true) => {'x'}, _ => {' '}},
+            match dsps[1].get_active() { Ok(true) => {'x'}, _ => {' '}},
+            match dsps[2].get_active() { Ok(true) => {'x'}, _ => {' '}},
+            match dsps[3].get_active() { Ok(true) => {'x'}, _ => {' '}},
+            match dsps[4].get_active() { Ok(true) => {'x'}, _ => {' '}},
+            match dsps[5].get_active() { Ok(true) => {'x'}, _ => {' '}},
+            match dsps[6].get_active() { Ok(true) => {'x'}, _ => {' '}});
         match get_key() {
             Ok(v) => match v {
                 -1 => break,
