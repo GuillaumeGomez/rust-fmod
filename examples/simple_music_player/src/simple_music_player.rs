@@ -23,12 +23,13 @@
 */
 
 #![crate_type = "bin"]
-#![allow(unstable)]
+
+#![feature(io, std_misc, os, collections, core)]
 
 extern crate rfmod;
 
 use std::os;
-use std::io::timer::sleep;
+use std::old_io::timer::sleep;
 use std::time::duration::Duration;
 
 fn play_to_the_end(sound: rfmod::Sound, len: usize) -> rfmod::Result {

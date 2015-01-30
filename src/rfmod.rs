@@ -113,7 +113,6 @@ Here is the list of all modules :
 !*/
 
 #![crate_name = "rfmod"]
-//#![desc = "Rust binding for FMOD"]
 #![crate_type = "rlib"]
 #![crate_type = "dylib"]
 
@@ -122,7 +121,8 @@ Here is the list of all modules :
 #![allow(dead_code)]
 #![allow(improper_ctypes)]
 #![allow(raw_pointer_derive)]
-#![allow(unstable)]
+
+#![feature(core, io, libc, std_misc, path)]
 
 extern crate libc;
 extern crate c_str;

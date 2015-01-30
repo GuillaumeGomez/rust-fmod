@@ -26,7 +26,8 @@
 
 #![allow(non_snake_case)]
 #![allow(unused_variables)]
-#![allow(unstable)]
+
+#![feature(io, os, core, collections)]
 
 extern crate rfmod;
 
@@ -34,7 +35,7 @@ use std::os;
 use std::default::Default;
 
 fn get_key() -> u8 {
-    let mut reader = std::io::stdio::stdin();
+    let mut reader = std::old_io::stdio::stdin();
     print!("> ");
 
     match reader.read_byte() {

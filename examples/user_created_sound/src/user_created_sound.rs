@@ -23,13 +23,14 @@
 */
 
 #![crate_type = "bin"]
-#![allow(unstable)]
+
+#![feature(io, libc, core, collections, std_misc)]
 
 extern crate libc;
 extern crate rfmod;
 
 use std::default::Default;
-use std::io::timer::sleep;
+use std::old_io::timer::sleep;
 use std::time::duration::Duration;
 use std::num::Float;
 
@@ -58,8 +59,8 @@ fn pcmreadcallback(sound: &rfmod::Sound, data: &mut [i16]) -> rfmod::Result {
     rfmod::Result::Ok
 }
 
-fn get_key() -> Result<isize, std::io::IoError> {
-    let mut reader = std::io::stdio::stdin();
+fn get_key() -> Result<isize, std::old_io::IoError> {
+    let mut reader = std::old_io::stdio::stdin();
     print!("> ");
 
     match reader.read_line() {

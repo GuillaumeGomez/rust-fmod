@@ -24,7 +24,7 @@
 
 use libc::funcs::c95::stdio::{fopen, fread, fclose, fseek, ftell};
 use libc::consts::os::c95::{SEEK_SET, SEEK_CUR, SEEK_END};
-use std::io::{SeekStyle, SeekSet, SeekEnd, SeekCur};
+use std::old_io::{SeekStyle, SeekSet, SeekEnd, SeekCur};
 use libc::types::common::c95::FILE;
 use libc::types::os::arch::posix01::stat;
 use std::mem::zeroed;

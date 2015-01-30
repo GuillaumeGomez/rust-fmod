@@ -28,15 +28,15 @@ use ffi;
 use channel;
 use channel::Channel;
 use sound_group;
-use std::io::timer::sleep;
+use std::old_io::timer::sleep;
 use std::time::duration::Duration;
 use vector;
 use fmod_sys;
 use fmod_sys::{FmodMemoryUsageDetails, FmodSys};
 use std::mem::transmute;
-use std::io::File;
+use std::old_io::File;
 use std::mem;
-use std::io::BufferedWriter;
+use std::old_io::BufferedWriter;
 use std::slice;
 use std::default::Default;
 use c_str::{ToCStr, FromCStr};
@@ -748,7 +748,7 @@ impl Sound {
 
             ffi::FMOD_Sound_Lock(self.sound, 0, len_bytes, &mut ptr1, &mut ptr2, &mut len1, &mut len2);
 
-            buf.write(slice::from_raw_buf(&(ptr1 as *const u8), len_bytes as usize)).unwrap();
+            buf.write_all(slice::from_raw_buf(&(ptr1 as *const u8), len_bytes as usize)).unwrap();
 
             ffi::FMOD_Sound_Unlock(self.sound, ptr1, ptr2, len1, len2);
         }

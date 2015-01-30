@@ -23,14 +23,15 @@
 */
 
 #![crate_type = "bin"]
-#![allow(unstable)]
+
+#![feature(io, libc, os, core, collections, std_misc)]
 
 extern crate libc;
 extern crate rfmod;
 
-use std::io::timer::sleep;
+use std::old_io::timer::sleep;
 use std::os;
-use std::io::SeekSet;
+use std::old_io::SeekSet;
 use std::time::duration::Duration;
 
 #[allow(unused_variables)]
