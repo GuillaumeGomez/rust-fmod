@@ -45,8 +45,8 @@ fn get_key() -> Result<isize, std::old_io::IoError> {
                 Ok(-1)
             } else {
                 match line.parse() {
-                    Some(s) => Ok(s),
-                    None => Ok(9)
+                    Ok(s) => Ok(s),
+                    Err(_) => Ok(9)
                 }
             }
         }

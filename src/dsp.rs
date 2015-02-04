@@ -261,7 +261,7 @@ impl Clone for DspCallbacks {
     }
 }
 
-#[derive(Show, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 /// Structure to define a parameter for a DSP unit.
 pub struct DspParameterDesc
 {

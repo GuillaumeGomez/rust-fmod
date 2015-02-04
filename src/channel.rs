@@ -36,7 +36,7 @@ use std::mem::transmute;
 use std::default::Default;
 
 /// Structure which contains data for [`Channel::set_speaker_mix`](struct.Channel.html#method.set_speaker_mix) and [`Channel::get_speaker_mix`](struct.Channel.html#method.get_speaker_mix)
-#[derive(Show, PartialEq, PartialOrd, Clone, Copy)]
+#[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
 pub struct FmodSpeakerMixOptions {
     pub front_left : f32,
     pub front_right: f32,

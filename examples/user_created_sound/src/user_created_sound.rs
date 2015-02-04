@@ -24,7 +24,7 @@
 
 #![crate_type = "bin"]
 
-#![feature(io, libc, core, collections, std_misc)]
+#![feature(io, libc, core, std_misc)]
 
 extern crate libc;
 extern crate rfmod;
