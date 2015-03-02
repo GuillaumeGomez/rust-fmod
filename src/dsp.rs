@@ -34,6 +34,7 @@ use libc::{c_char, c_void, c_uint, c_int, c_float};
 use std::default::Default;
 use c_str::{ToCStr, FromCStr};
 use c_vec::CVec;
+use std::ptr::Unique;
 
 extern "C" fn create_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> ::Result {
     unsafe {
@@ -112,8 +113,8 @@ extern "C" fn read_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, in_buffer: *mut
                 let callbacks : &mut UserData = transmute(tmp);
                 match callbacks.callbacks.read_callback {
                     Some(p) => {
-                        let mut v_in_buffer = CVec::new(in_buffer, (((length as i32 - 1i32) * in_channels) + out_channels) as usize);
-                        let mut v_out_buffer = CVec::new(out_buffer, (((length as i32 - 1i32) * out_channels) + out_channels) as usize);
+                        let mut v_in_buffer = CVec::new(Unique::new(in_buffer), (((length as i32 - 1i32) * in_channels) + out_channels) as usize);
+                        let mut v_out_buffer = CVec::new(Unique::new(out_buffer), (((length as i32 - 1i32) * out_channels) + out_channels) as usize);
 
                         p(&from_state_ptr(::std::ptr::read(dsp_state as *const ffi::FMOD_DSP_STATE)), v_in_buffer.as_mut_slice(), v_out_buffer.as_mut_slice(),
                             length as u32, in_channels as i32, out_channels as i32)

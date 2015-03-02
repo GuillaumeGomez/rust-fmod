@@ -42,6 +42,7 @@ use dsp_connection;
 use std::default::Default;
 use callbacks::*;
 use std;
+use std::ptr::Unique;
 use file;
 use libc::types::common::c95::FILE;
 use c_vec::CVec;
@@ -144,7 +145,7 @@ extern "C" fn file_read_callback(handle: *mut c_void, buffer: *mut c_void, size_
     match tmp.file_read {
         Some(s) => {
             unsafe {
-                let mut data_vec : CVec<u8> = CVec::new(buffer as *mut u8, size_bytes as usize);
+                let mut data_vec : CVec<u8> = CVec::new(Unique::new(buffer as *mut u8), size_bytes as usize);
 
                 let read_bytes = s(&mut file::from_ffi(handle as *mut FILE), data_vec.as_mut_slice(), size_bytes, if user_data.is_null() {
                     None
@@ -193,7 +194,7 @@ extern "C" fn pcm_read_callback(sound: *mut ffi::FMOD_SOUND, data: *mut c_void, 
                 match callbacks.pcm_read {
                     Some(p) => {
                         let max = data_len as isize >> 2;
-                        let mut data_vec = CVec::new(data as *mut c_short, max as usize * 2);
+                        let mut data_vec = CVec::new(Unique::new(data as *mut c_short), max as usize * 2);
 
                         let ret = p(&ffi::FFI::wrap(sound), data_vec.as_mut_slice());
                         ret
