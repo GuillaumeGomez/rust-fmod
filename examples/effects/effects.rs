@@ -24,12 +24,11 @@
 
 #![crate_type = "bin"]
 
-#![feature(io, libc, core, collections, std_misc, os)]
+#![feature(old_io, libc, core, collections, std_misc)]
 
 extern crate libc;
 extern crate rfmod;
 
-use std::os;
 use std::old_io::timer::sleep;
 use std::time::duration::Duration;
 
@@ -79,7 +78,12 @@ fn switch_dsp_state(dsp: &rfmod::Dsp, fmod: &rfmod::FmodSys, dsp_type: isize) {
 }
 
 fn main() {
-    let args = os::args();
+    let t_args = std::env::args();
+    let mut args = Vec::new();
+
+    for tmp in t_args {
+        args.push(tmp);
+    }
     let tmp = args.tail();
 
     if tmp.len() < 1 {

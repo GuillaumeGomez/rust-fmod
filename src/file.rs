@@ -68,7 +68,7 @@ impl FmodFile {
     pub fn read(&self, buffer: &mut [u8]) -> usize {
         unsafe {
             if self.fd.is_null() {
-                0us
+                0usize
             } else {
                 fread(buffer.as_mut_ptr() as *mut c_void, buffer.len() as u64, 1u64, self.fd) as usize
             }
@@ -78,7 +78,7 @@ impl FmodFile {
     pub fn seek(&self, pos: i64, style: SeekStyle) -> usize {
         unsafe {
             if self.fd.is_null() {
-                0us
+                0usize
             } else {
                 fseek(self.fd, pos, match style {
                     SeekSet => SEEK_SET,

@@ -24,13 +24,12 @@
 
 #![crate_type = "bin"]
 
-#![feature(io, libc, os, core, collections, std_misc)]
+#![feature(old_io, libc, core, collections, std_misc)]
 
 extern crate libc;
 extern crate rfmod;
 
 use std::old_io::timer::sleep;
-use std::os;
 use std::old_io::SeekSet;
 use std::time::duration::Duration;
 
@@ -62,7 +61,12 @@ fn my_seek(handle: &mut rfmod::FmodFile, pos: u32, user_data: Option<&mut rfmod:
 }
 
 fn main() {
-    let args = os::args();
+    let t_args = std::env::args();
+    let mut args = Vec::new();
+
+    for tmp in t_args {
+        args.push(tmp);
+    }
     let tmp = args.tail();
 
     if tmp.len() < 1 {

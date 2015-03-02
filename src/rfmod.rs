@@ -122,7 +122,7 @@ Here is the list of all modules :
 #![allow(improper_ctypes)]
 #![allow(raw_pointer_derive)]
 
-#![feature(core, io, libc, std_misc, path)]
+#![feature(core, libc, std_misc, unique, old_io, old_path)]
 
 extern crate libc;
 extern crate c_str;

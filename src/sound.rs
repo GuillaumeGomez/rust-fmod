@@ -607,8 +607,8 @@ impl Sound {
 
         match unsafe { ffi::FMOD_Sound_Lock(self.sound, offset, length, &mut ptr1, &mut ptr2, &mut len1, &mut len2) } {
             ::Result::Ok => {
-                unsafe { Ok((slice::from_raw_buf(&(ptr1 as *const u8), len1 as usize).clone().to_vec(),
-                    slice::from_raw_buf(&(ptr2 as *const u8), len2 as usize).clone().to_vec())) }
+                unsafe { Ok((slice::from_raw_parts(ptr1 as *const u8, len1 as usize).clone().to_vec(),
+                    slice::from_raw_parts(ptr2 as *const u8, len2 as usize).clone().to_vec())) }
             }
             e => Err(e)
         }
@@ -720,16 +720,16 @@ impl Sound {
             let mut buf: BufferedWriter<File> = BufferedWriter::new(file);
 
             /* wav header */
-            for it in range(0us, 4us) {
+            for it in range(0usize, 4usize) {
                 buf.write_i8(wav_header.chunk.id[it]).unwrap();
             }
             buf.write_le_i32(wav_header.chunk.size).unwrap();
-            for it in range(0us, 4us) {
+            for it in range(0usize, 4usize) {
                 buf.write_i8(wav_header.riff_type[it]).unwrap();
             }
 
             /* wav chunk */
-            for it in range(0us, 4us) {
+            for it in range(0usize, 4usize) {
                 buf.write_i8(fmt_chunk.chunk.id[it]).unwrap();
             }
             buf.write_le_i32(fmt_chunk.chunk.size).unwrap();
@@ -741,14 +741,14 @@ impl Sound {
             buf.write_le_u16(fmt_chunk.w_bits_per_sample).unwrap();
 
             /* wav data chunk */
-            for it in range(0us, 4us) {
+            for it in range(0usize, 4usize) {
                 buf.write_i8(data_chunk.chunk.id[it]).unwrap();
             }
             buf.write_le_i32(data_chunk.chunk.size).unwrap();
 
             ffi::FMOD_Sound_Lock(self.sound, 0, len_bytes, &mut ptr1, &mut ptr2, &mut len1, &mut len2);
 
-            buf.write_all(slice::from_raw_buf(&(ptr1 as *const u8), len_bytes as usize)).unwrap();
+            buf.write_all(slice::from_raw_parts(ptr1 as *const u8, len_bytes as usize)).unwrap();
 
             ffi::FMOD_Sound_Unlock(self.sound, ptr1, ptr2, len1, len2);
         }

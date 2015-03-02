@@ -24,7 +24,7 @@
 
 #![crate_type = "bin"]
 
-#![feature(io, libc, core, std_misc)]
+#![feature(old_io, libc, core, std_misc)]
 
 extern crate libc;
 extern crate rfmod;
@@ -40,7 +40,7 @@ fn pcmreadcallback(sound: &rfmod::Sound, data: &mut [i16]) -> rfmod::Result {
     static mut t2 : f32 = 0f32; // time
     static mut v1 : f32 = 0f32; // velocity
     static mut v2 : f32 = 0f32; // velocity
-    let mut count = 0us;
+    let mut count = 0usize;
 
     while count < data.len() {
         unsafe {

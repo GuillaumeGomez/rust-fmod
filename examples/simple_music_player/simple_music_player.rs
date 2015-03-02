@@ -24,11 +24,10 @@
 
 #![crate_type = "bin"]
 
-#![feature(io, std_misc, os, collections, core)]
+#![feature(old_io, std_misc, collections, core)]
 
 extern crate rfmod;
 
-use std::os;
 use std::old_io::timer::sleep;
 use std::time::duration::Duration;
 
@@ -41,7 +40,7 @@ fn play_to_the_end(sound: rfmod::Sound, len: usize) -> rfmod::Result {
         Ok(n) => n,
         Err(e) => panic!("sound.get_name error: {:?}", e)
     };
-    let mut old_position = 100us;
+    let mut old_position = 100usize;
 
     match sound.play() {
         Ok(chan) => {
@@ -76,7 +75,12 @@ fn play_to_the_end(sound: rfmod::Sound, len: usize) -> rfmod::Result {
 }
 
 fn main() {
-    let args = os::args();
+    let t_args = std::env::args();
+    let mut args = Vec::new();
+
+    for tmp in t_args {
+        args.push(tmp);
+    }
     let tmp = args.tail();
 
     if tmp.len() < 1 {

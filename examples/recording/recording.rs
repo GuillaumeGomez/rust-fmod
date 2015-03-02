@@ -24,7 +24,7 @@
 
 #![crate_type = "bin"]
 
-#![feature(io, libc, core, std_misc)]
+#![feature(old_io, libc, core, std_misc)]
 
 extern crate libc;
 extern crate rfmod;
@@ -110,7 +110,7 @@ fn main() {
     println!("--------------------------------");
     while it < num_drivers as i32 {
         //check this function
-        let t = match fmod.get_driver_info(it, 256us) {
+        let t = match fmod.get_driver_info(it, 256usize) {
             Ok((_, name)) => name,
             Err(e) => panic!("get_driver_info error: {:?}", e)
         };

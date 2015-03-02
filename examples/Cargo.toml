@@ -8,28 +8,28 @@ path = "../"
 
 [[bin]]
 name = "3d"
-path = "./3d/src/3d.rs"
+path = "./3d/3d.rs"
 
 [[bin]]
 name = "dsp_custom"
-path = "./dsp_custom/src/dsp_custom.rs"
+path = "./dsp_custom/dsp_custom.rs"
 
 [[bin]]
 name = "effects"
-path = "./effects/src/effects.rs"
+path = "./effects/effects.rs"
 
 [[bin]]
 name = "file_callbacks"
-path = "./file_callbacks/src/file_callbacks.rs"
+path = "./file_callbacks/file_callbacks.rs"
 
 [[bin]]
 name = "recording"
-path = "./recording/src/recording.rs"
+path = "./recording/recording.rs"
 
 [[bin]]
 name = "simple_music_player"
-path = "./simple_music_player/src/simple_music_player.rs"
+path = "./simple_music_player/simple_music_player.rs"
 
 [[bin]]
 name = "user_created_sound"
-path = "./user_created_sound/src/user_created_sound.rs"
+path = "./user_created_sound/user_created_sound.rs"

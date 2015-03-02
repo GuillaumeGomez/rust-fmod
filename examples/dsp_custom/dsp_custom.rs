@@ -27,11 +27,10 @@
 #![allow(non_snake_case)]
 #![allow(unused_variables)]
 
-#![feature(io, os, core, collections)]
+#![feature(old_io, core, collections)]
 
 extern crate rfmod;
 
-use std::os;
 use std::default::Default;
 
 fn get_key() -> u8 {
@@ -46,7 +45,7 @@ fn get_key() -> u8 {
 
 fn my_DSP_callback(dsp_state: &rfmod::DspState, inbuffer: &mut [f32], outbuffer: &mut [f32], length: u32, in_channels: i32,
     out_channels: i32) -> rfmod::Result {
-    for it in range(0us, inbuffer.len() - 1us) {
+    for it in range(0usize, inbuffer.len() - 1usize) {
         outbuffer[it] = inbuffer[it] * 0.2f32;
     }
     for count in range(0, length) {
@@ -63,7 +62,12 @@ fn my_DSP_callback(dsp_state: &rfmod::DspState, inbuffer: &mut [f32], outbuffer:
 }
 
 fn main() {
-    let args = os::args();
+    let t_args = std::env::args();
+    let mut args = Vec::new();
+
+    for tmp in t_args {
+        args.push(tmp);
+    }
     let tmp = args.tail();
 
     if tmp.len() < 1 {
