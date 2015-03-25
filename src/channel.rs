@@ -479,7 +479,7 @@ impl Channel {
                ::Result::Ok => {
                     let mut ret_points = Vec::new();
 
-                    for it in range(0i32, num_points) {
+                    for it in 0i32..num_points {
                         ret_points.push(vector::from_ptr(::std::ptr::read(points.offset(it as isize) as *const ffi::FMOD_VECTOR)));
                     }
                     Ok(ret_points)

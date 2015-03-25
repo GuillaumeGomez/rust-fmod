@@ -34,12 +34,14 @@ use vector;
 use fmod_sys;
 use fmod_sys::{FmodMemoryUsageDetails, FmodSys};
 use std::mem::transmute;
-use std::old_io::File;
+use std::fs::File;
 use std::mem;
 use std::old_io::BufferedWriter;
 use std::slice;
 use std::default::Default;
 use c_str::{ToCStr, FromCStr};
+use std::path::Path;
+use byteorder::{WriterBytesExt, BigEndian, LittleEndian};
 
 struct RiffChunk {
     id: [c_char; 4],
@@ -713,42 +715,42 @@ impl Sound {
                 riff_type: ['W' as i8, 'A' as i8, 'V' as i8, 'E' as i8]
             };
 
-            let file = match File::create(&Path::new(file_name.as_slice())) {
+            let file = match File::create(file_name) {
                 Ok(f) => f,
                 Err(e) => return Err(format!("{}", e))
             };
-            let mut buf: BufferedWriter<File> = BufferedWriter::new(file);
+            let mut wtr = vec![];
 
             /* wav header */
-            for it in range(0usize, 4usize) {
-                buf.write_i8(wav_header.chunk.id[it]).unwrap();
+            for it in 0usize..4usize {
+                wtr.write_i8::<BigEndian>(wav_header.chunk.id[it]).unwrap();
             }
-            buf.write_le_i32(wav_header.chunk.size).unwrap();
-            for it in range(0usize, 4usize) {
-                buf.write_i8(wav_header.riff_type[it]).unwrap();
+            wtr.write_i32::<LittleEndian>(wav_header.chunk.size).unwrap();
+            for it in 0usize..4usize {
+                wtr.write_i8::<BigEndian>(wav_header.riff_type[it]).unwrap();
             }
 
             /* wav chunk */
-            for it in range(0usize, 4usize) {
-                buf.write_i8(fmt_chunk.chunk.id[it]).unwrap();
+            for it in 0usize..4usize {
+                wtr.write_i8::<BigEndian>(fmt_chunk.chunk.id[it]).unwrap();
             }
-            buf.write_le_i32(fmt_chunk.chunk.size).unwrap();
-            buf.write_le_u16(fmt_chunk.w_format_tag).unwrap();
-            buf.write_le_u16(fmt_chunk.n_channels).unwrap();
-            buf.write_le_u32(fmt_chunk.n_samples_per_sec).unwrap();
-            buf.write_le_u32(fmt_chunk.n_avg_bytes_per_sec).unwrap();
-            buf.write_le_u16(fmt_chunk.n_block_align).unwrap();
-            buf.write_le_u16(fmt_chunk.w_bits_per_sample).unwrap();
+            wtr.write_i32::<LittleEndian>(fmt_chunk.chunk.size).unwrap();
+            wtr.write_u16::<LittleEndian>(fmt_chunk.w_format_tag).unwrap();
+            wtr.write_u16::<LittleEndian>(fmt_chunk.n_channels).unwrap();
+            wtr.write_u32::<LittleEndian>(fmt_chunk.n_samples_per_sec).unwrap();
+            wtr.write_u32::<LittleEndian>(fmt_chunk.n_avg_bytes_per_sec).unwrap();
+            wtr.write_u16::<LittleEndian>(fmt_chunk.n_block_align).unwrap();
+            wtr.write_u16::<LittleEndian>(fmt_chunk.w_bits_per_sample).unwrap();
 
             /* wav data chunk */
-            for it in range(0usize, 4usize) {
-                buf.write_i8(data_chunk.chunk.id[it]).unwrap();
+            for it in 0usize..4usize {
+                wtr.write_i8::<BigEndian>(data_chunk.chunk.id[it]).unwrap();
             }
-            buf.write_le_i32(data_chunk.chunk.size).unwrap();
+            wtr.write_i32::<LittleEndian>(data_chunk.chunk.size).unwrap();
 
             ffi::FMOD_Sound_Lock(self.sound, 0, len_bytes, &mut ptr1, &mut ptr2, &mut len1, &mut len2);
 
-            buf.write_all(slice::from_raw_parts(ptr1 as *const u8, len_bytes as usize)).unwrap();
+            file.write_all(wtr).unwrap();
 
             ffi::FMOD_Sound_Unlock(self.sound, ptr1, ptr2, len1, len2);
         }
