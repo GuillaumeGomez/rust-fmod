@@ -27,11 +27,12 @@
 #![allow(non_snake_case)]
 #![allow(unused_variables)]
 
-#![feature(old_io, core, collections)]
+#![feature(old_io, core, collections, convert)]
 
 extern crate rfmod;
 
 use std::default::Default;
+use std::old_io::Reader;
 
 fn get_key() -> u8 {
     let mut reader = std::old_io::stdio::stdin();
@@ -45,11 +46,11 @@ fn get_key() -> u8 {
 
 fn my_DSP_callback(dsp_state: &rfmod::DspState, inbuffer: &mut [f32], outbuffer: &mut [f32], length: u32, in_channels: i32,
     out_channels: i32) -> rfmod::Result {
-    for it in range(0usize, inbuffer.len() - 1usize) {
+    for it in 0usize..(inbuffer.len() - 1usize) {
         outbuffer[it] = inbuffer[it] * 0.2f32;
     }
-    for count in range(0, length) {
-        for count2 in range(0, out_channels) {
+    for count in 0..length {
+        for count2 in 0..out_channels {
             /* 
                 This DSP filter just halves the volume!
                 Input is modified, and sent to output.
@@ -89,7 +90,7 @@ fn main() {
 
     let arg1 = tmp.get(0).unwrap();
 
-    let sound = match fmod.create_sound((*arg1).as_slice(),
+    let sound = match fmod.create_sound((*arg1).as_ref(),
         Some(rfmod::FmodMode(rfmod::FMOD_SOFTWARE | rfmod::FMOD_LOOP_NORMAL)), None) {
         Ok(s) => s,
         Err(err) => {

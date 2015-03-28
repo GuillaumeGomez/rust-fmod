@@ -41,7 +41,8 @@ use std::slice;
 use std::default::Default;
 use c_str::{ToCStr, FromCStr};
 use std::path::Path;
-use byteorder::{WriterBytesExt, BigEndian, LittleEndian};
+use byteorder::{WriteBytesExt, BigEndian, LittleEndian};
+use std::io::Write;
 
 struct RiffChunk {
     id: [c_char; 4],
@@ -715,7 +716,7 @@ impl Sound {
                 riff_type: ['W' as i8, 'A' as i8, 'V' as i8, 'E' as i8]
             };
 
-            let file = match File::create(file_name) {
+            let mut file = match File::create(file_name) {
                 Ok(f) => f,
                 Err(e) => return Err(format!("{}", e))
             };
@@ -723,16 +724,16 @@ impl Sound {
 
             /* wav header */
             for it in 0usize..4usize {
-                wtr.write_i8::<BigEndian>(wav_header.chunk.id[it]).unwrap();
+                wtr.write_i8(wav_header.chunk.id[it]).unwrap();
             }
             wtr.write_i32::<LittleEndian>(wav_header.chunk.size).unwrap();
             for it in 0usize..4usize {
-                wtr.write_i8::<BigEndian>(wav_header.riff_type[it]).unwrap();
+                wtr.write_i8(wav_header.riff_type[it]).unwrap();
             }
 
             /* wav chunk */
             for it in 0usize..4usize {
-                wtr.write_i8::<BigEndian>(fmt_chunk.chunk.id[it]).unwrap();
+                wtr.write_i8(fmt_chunk.chunk.id[it]).unwrap();
             }
             wtr.write_i32::<LittleEndian>(fmt_chunk.chunk.size).unwrap();
             wtr.write_u16::<LittleEndian>(fmt_chunk.w_format_tag).unwrap();
@@ -744,13 +745,13 @@ impl Sound {
 
             /* wav data chunk */
             for it in 0usize..4usize {
-                wtr.write_i8::<BigEndian>(data_chunk.chunk.id[it]).unwrap();
+                wtr.write_i8(data_chunk.chunk.id[it]).unwrap();
             }
             wtr.write_i32::<LittleEndian>(data_chunk.chunk.size).unwrap();
 
             ffi::FMOD_Sound_Lock(self.sound, 0, len_bytes, &mut ptr1, &mut ptr2, &mut len1, &mut len2);
 
-            file.write_all(wtr).unwrap();
+            file.write_all(&wtr).unwrap();
 
             ffi::FMOD_Sound_Unlock(self.sound, ptr1, ptr2, len1, len2);
         }
