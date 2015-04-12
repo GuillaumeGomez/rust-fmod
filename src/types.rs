@@ -22,17 +22,17 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 pub struct FmodMode(pub u32);
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 pub struct FmodTimeUnit(pub u32);
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 pub struct FmodCaps(pub u32);
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 pub struct FmodPluginHandle(pub u32);
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 pub struct FmodInitFlag(pub u32);
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 pub struct FmodMemoryBits(pub u32);
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 pub struct FmodEventMemoryBits(pub u32);

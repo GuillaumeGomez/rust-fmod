@@ -87,7 +87,7 @@ extern "C" fn file_open_callback(name: *mut c_char, unicode: c_int, file_size: *
             } else {
                 unsafe { FromCStr::from_c_str(name) }
             };
-            match s(t_name.as_slice(), unicode) {
+            match s(t_name.as_ref(), unicode) {
                 Some((f, s)) => {
                     unsafe {
                         *file_size = f.get_file_size() as u32;
@@ -255,7 +255,6 @@ extern "C" fn pcm_set_pos_callback(sound: *mut ffi::FMOD_SOUND, sub_sound: c_int
 }
 
 /// Structure describing a globally unique identifier.
-#[derive(Copy)]
 pub struct FmodGuid
 {
     /// Specifies the first 8 hexadecimal digits of the GUID
@@ -281,7 +280,6 @@ impl Default for FmodGuid {
 }
 
 /// Structure used to store user data for file callback
-#[derive(Copy)]
 pub struct FmodUserData {
     user_data: *mut c_void
 }
@@ -310,7 +308,6 @@ impl Default for FmodUserData {
 
 /// Wrapper for arguments of [`FmodSys::set_software_format`](struct.FmodSys.html#method.set_software_format) and
 /// [`FmodSys::get_software_format`](struct.FmodSys.html#method.get_software_format)
-#[derive(Copy)]
 pub struct FmodSoftwareFormat
 {
     pub sample_rate        : i32,
@@ -722,13 +719,12 @@ impl Default for FmodCodecDescription {
 }
 
 /// Wrapper for OutputHandle
-#[derive(Copy)]
 pub struct FmodOutputHandle {
     handle: *mut c_void
 }
 
 /// Structure to be filled with detailed memory usage information of a FMOD object
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 pub struct FmodMemoryUsageDetails
 {
     /// [out] Memory not accounted for by other types
@@ -1306,7 +1302,7 @@ impl FmodSys {
     }
 
     pub fn set_advanced_settings(&self, settings: &mut FmodAdvancedSettings) -> ::Result {
-        let mut converted_c_char : Vec<*const c_char> = ::std::iter::range(0, settings.ASIO_channel_list.len()).map(|pos| {
+        let mut converted_c_char : Vec<*const c_char> = (0..settings.ASIO_channel_list.len()).map(|pos| {
             settings.ASIO_channel_list[pos].clone().with_c_str(|c_str| c_str)
         }).collect();
         let deb_log_filename = settings.debug_log_filename.clone();

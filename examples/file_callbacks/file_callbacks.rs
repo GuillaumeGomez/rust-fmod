@@ -24,14 +24,12 @@
 
 #![crate_type = "bin"]
 
-#![feature(old_io, libc, core, collections, std_misc)]
+#![feature(libc, collections)]
 
 extern crate libc;
 extern crate rfmod;
 
-use std::old_io::timer::sleep;
-use std::old_io::SeekSet;
-use std::time::duration::Duration;
+use rfmod::SeekStyle;
 
 #[allow(unused_variables)]
 fn my_open(music_name: &str, unicode: i32) -> Option<(rfmod::FmodFile, Option<rfmod::FmodUserData>)> {
@@ -57,7 +55,7 @@ fn my_read(handle: &mut rfmod::FmodFile, buffer: &mut [u8], size_to_read: u32, u
 
 #[allow(unused_variables)]
 fn my_seek(handle: &mut rfmod::FmodFile, pos: u32, user_data: Option<&mut rfmod::FmodUserData>) {
-    handle.seek(pos as i64, SeekSet);
+    handle.seek(pos as i64, SeekStyle::SeekSet);
 }
 
 fn main() {
@@ -102,7 +100,7 @@ fn main() {
     println!("============================================================================");
 
     let arg1 = tmp.get(0).unwrap();
-    let sound = match fmod.create_stream((*arg1).as_slice(),
+    let sound = match fmod.create_stream((*arg1).as_ref(),
         Some(rfmod::FmodMode(rfmod::FMOD_2D | rfmod::FMOD_HARDWARE | rfmod::FMOD_LOOP_OFF)), None)
     {
         Ok(s) => s,
@@ -134,6 +132,6 @@ fn main() {
         };
 
         print!("{:02}:{:02} / {:02}:{:02}\r", position / 1000 / 60, position / 1000 % 60, length / 1000 / 60, length / 1000 % 60);
-        sleep(Duration::milliseconds(30))
+        ::std::thread::sleep_ms(30);
     }
 }

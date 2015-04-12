@@ -28,20 +28,16 @@ use ffi;
 use channel;
 use channel::Channel;
 use sound_group;
-use std::old_io::timer::sleep;
-use std::time::duration::Duration;
 use vector;
 use fmod_sys;
 use fmod_sys::{FmodMemoryUsageDetails, FmodSys};
 use std::mem::transmute;
 use std::fs::File;
 use std::mem;
-use std::old_io::BufferedWriter;
 use std::slice;
 use std::default::Default;
 use c_str::{ToCStr, FromCStr};
-use std::path::Path;
-use byteorder::{WriteBytesExt, BigEndian, LittleEndian};
+use byteorder::{WriteBytesExt, LittleEndian};
 use std::io::Write;
 
 struct RiffChunk {
@@ -69,7 +65,6 @@ struct WavHeader {
 }
 
 /// Wrapper for SyncPoint object
-#[derive(Copy)]
 pub struct FmodSyncPoint {
     sync_point: *mut ffi::FMOD_SYNCPOINT
 }
@@ -245,7 +240,7 @@ impl Sound {
                     match chan.is_playing() {
                         Ok(b) => {
                             if b == true {
-                                sleep(Duration::milliseconds(30))
+                                ::std::thread::sleep_ms(30)
                             } else {
                                 break;
                             }

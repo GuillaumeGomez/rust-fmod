@@ -24,14 +24,12 @@
 
 #![crate_type = "bin"]
 
-#![feature(old_io, libc, collections, std_misc, core)]
+#![feature(libc, collections, core)]
 
 extern crate libc;
 extern crate rfmod;
 
 use std::default::Default;
-use std::old_io::timer::sleep;
-use std::time::duration::Duration;
 use std::num::Float;
 
 fn main() {
@@ -105,9 +103,9 @@ fn main() {
         fmod.set_3D_listener_attributes(0, &listener_pos, &vel, &forward, &up);
 
         let mut tmp = String::from_str("|.......................<1>......................<2>....................|\r");
-        unsafe { tmp.as_mut_vec().as_mut_slice()[listener_pos.x as usize + 35usize] = 'L' as u8; }
+        unsafe { tmp.as_mut_vec().as_mut()[listener_pos.x as usize + 35usize] = 'L' as u8; }
         print!("{}", tmp);
         fmod.update();
-        sleep(Duration::milliseconds(interface_update_time as i64 - 1i64));
+        ::std::thread::sleep_ms(interface_update_time as u32 - 1u32);
     }
 }

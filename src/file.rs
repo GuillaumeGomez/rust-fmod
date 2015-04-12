@@ -24,7 +24,6 @@
 
 use libc::funcs::c95::stdio::{fopen, fread, fclose, fseek, ftell};
 use libc::consts::os::c95::{SEEK_SET, SEEK_CUR, SEEK_END};
-use std::old_io::{SeekStyle, SeekSet, SeekEnd, SeekCur};
 use libc::types::common::c95::FILE;
 use libc::types::os::arch::posix01::stat;
 use std::mem::zeroed;
@@ -43,8 +42,17 @@ pub fn from_ffi(fd: *mut FILE) -> FmodFile {
     }
 }
 
+#[derive(Debug, PartialOrd, PartialEq)]
+pub enum SeekStyle {
+    /// Seek from the beginning of the stream
+    SeekSet,
+    /// Seek from the end of the stream
+    SeekEnd,
+    /// Seek from the current position
+    SeekCur
+}
+
 /// A little struct to wrap C files. I'll try to improve this or to replace it by File
-#[derive(Copy)]
 pub struct FmodFile {
     fd: *mut FILE
 }
@@ -75,15 +83,15 @@ impl FmodFile {
         }
     }
 
-    pub fn seek(&self, pos: i64, style: SeekStyle) -> usize {
+    pub fn seek(&self, pos: i64, style: self::SeekStyle) -> usize {
         unsafe {
             if self.fd.is_null() {
                 0usize
             } else {
                 fseek(self.fd, pos, match style {
-                    SeekSet => SEEK_SET,
-                    SeekEnd => SEEK_END,
-                    SeekCur => SEEK_CUR
+                    self::SeekStyle::SeekSet => SEEK_SET,
+                    self::SeekStyle::SeekEnd => SEEK_END,
+                    self::SeekStyle::SeekCur => SEEK_CUR
                 }) as usize
             }
         }

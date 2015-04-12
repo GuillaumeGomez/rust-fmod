@@ -122,7 +122,7 @@ Here is the list of all modules :
 #![allow(improper_ctypes)]
 #![allow(raw_pointer_derive)]
 
-#![feature(core, libc, std_misc, unique, old_io, old_path, convert)]
+#![feature(libc, unique, convert)]
 
 extern crate libc;
 extern crate c_str;
@@ -140,7 +140,7 @@ pub use reverb::Reverb;
 pub use reverb_properties::ReverbProperties;
 pub use vector::FmodVector;
 pub use geometry::Geometry;
-pub use file::FmodFile;
+pub use file::{FmodFile, SeekStyle};
 
 pub use self::enums::result::Result;
 pub use self::enums::speaker_map_type::SpeakerMapType;

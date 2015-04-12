@@ -190,7 +190,7 @@ extern "C" fn get_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index:
                         let ret = p(&from_state_ptr(::std::ptr::read(dsp_state as *const ffi::FMOD_DSP_STATE)),
                             index as i32,
                             &mut t_value,
-                            tmp.as_slice());
+                            tmp.as_ref());
                         *value = t_value;
                         ret
                     },
@@ -318,7 +318,7 @@ pub fn get_parameter_ffi(dsp_parameter: &DspParameterDesc) -> ffi::FMOD_DSP_PARA
     tmp_label.truncate(16);
     tmp_name.reserve_exact(16);
     tmp_label.reserve_exact(16);
-    dsp_parameter.description.as_slice().with_c_str(|c_description| {
+    dsp_parameter.description.as_str().with_c_str(|c_description| {
         ffi::FMOD_DSP_PARAMETERDESC {
             min: dsp_parameter.min,
             max: dsp_parameter.max,
