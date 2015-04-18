@@ -29,8 +29,7 @@ use libc::types::os::arch::posix01::stat;
 use std::mem::zeroed;
 use libc::funcs::posix88::stat_::fstat;
 use libc::funcs::posix88::stdio::fileno;
-use libc::c_void;
-use c_str::ToCStr;
+use libc::{c_void, c_char};
 
 pub fn get_ffi(file: &FmodFile) -> *mut FILE {
     file.fd
@@ -60,11 +59,8 @@ pub struct FmodFile {
 impl FmodFile {
     pub fn open(file_name: &str) -> Option<FmodFile> {
         unsafe {
-            let tmp = file_name.with_c_str(|c_str| {
-                "rb".with_c_str(|c_str2| {
-                    fopen(c_str, c_str2)
-                })
-            });
+            let tmp = fopen(file_name.as_ptr() as *const c_char, "rb".as_ptr() as *const c_char);
+
             if tmp.is_null() {
                 None
             } else {

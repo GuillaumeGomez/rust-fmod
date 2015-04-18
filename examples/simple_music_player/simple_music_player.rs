@@ -35,7 +35,7 @@ fn play_to_the_end(sound: rfmod::Sound, len: usize) -> rfmod::Result {
         Ok(l) => l,
         Err(e) => panic!("sound.get_length error: {:?}", e)
     };
-    let name = match sound.get_name(len as u32) {
+    let name = match sound.get_name(len) {
         Ok(n) => n,
         Err(e) => panic!("sound.get_name error: {:?}", e)
     };

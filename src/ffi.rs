@@ -32,6 +32,20 @@ pub trait FFI<T> {
     fn unwrap(&Self) -> *mut T;
 }
 
+pub fn strlen(mut c: *const c_char) -> usize {
+    let mut len = 0;
+
+    unsafe {
+        if !c.is_null() {
+            while *c != 0 {
+                len += 1;
+                c = c.offset(1);
+            }
+        }
+    }
+    len
+}
+
 pub type FMOD_BOOL = c_int;
 pub type FMOD_CAPS = c_uint;
 pub type FMOD_INITFLAGS = c_uint;

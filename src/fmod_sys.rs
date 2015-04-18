@@ -23,7 +23,6 @@
 */
 
 use libc::{c_void, c_uint, c_int, c_char, c_short};
-use c_str::{ToCStr, FromCStr};
 use ffi;
 use types::*;
 use sound;
@@ -85,7 +84,9 @@ extern "C" fn file_open_callback(name: *mut c_char, unicode: c_int, file_size: *
             let t_name = if name.is_null() {
                 String::new()
             } else {
-                unsafe { FromCStr::from_c_str(name) }
+                let l = ffi::strlen(name);
+
+                unsafe { String::from_raw_parts(name as *mut u8, l, l) }
             };
             match s(t_name.as_ref(), unicode) {
                 Some((f, s)) => {
@@ -626,8 +627,8 @@ impl FmodCreateSoundexInfo {
                 Some(_) => Some(non_block_callback as extern "C" fn(*mut _, _) -> _),
                 None => None
             },
-            dlsname: self.dls_name.clone().with_c_str(|c_str|{c_str as *mut c_char}),
-            encryptionkey: self.encryption_key.clone().with_c_str(|c_str|{c_str as *mut c_char}),
+            dlsname: self.dls_name.as_ptr() as *mut c_char,
+            encryptionkey: self.encryption_key.as_ptr() as *mut c_char,
             maxpolyphony: self.max_polyphony,
             userdata: {
                 self.user_data.non_block = self.non_block_callback;
@@ -1073,9 +1074,7 @@ impl FmodSys {
         };
 
         match if music.len() > 0 {
-            music.with_c_str(|c_str|{
-               unsafe { ffi::FMOD_System_CreateSound(self.system, c_str, op, ex, sound::get_fffi(&mut sound)) }
-            })
+            unsafe { ffi::FMOD_System_CreateSound(self.system, music.as_ptr() as *const c_char, op, ex, sound::get_fffi(&mut sound)) }
         } else {
             unsafe { ffi::FMOD_System_CreateSound(self.system, ::std::ptr::null(), op, ex, sound::get_fffi(&mut sound)) }
         } {
@@ -1107,9 +1106,7 @@ impl FmodSys {
         };
 
         match if music.len() > 0 {
-            music.with_c_str(|c_str|{
-                unsafe { ffi::FMOD_System_CreateStream(self.system, c_str, op, ex, sound::get_fffi(&mut sound)) }
-            })
+            unsafe { ffi::FMOD_System_CreateStream(self.system, music.as_ptr() as *const c_char, op, ex, sound::get_fffi(&mut sound)) }
         } else {
             unsafe { ffi::FMOD_System_CreateStream(self.system, ::std::ptr::null(), op, ex, sound::get_fffi(&mut sound)) }
         } {
@@ -1118,28 +1115,22 @@ impl FmodSys {
         }
     }
 
-    pub fn create_channel_group(&self, group_name: String) -> Result<channel_group::ChannelGroup, ::Result> {
-        let t_group_name = group_name.clone();
+    pub fn create_channel_group(&self, group_name: &str) -> Result<channel_group::ChannelGroup, ::Result> {
         let mut channel_group = ::std::ptr::null_mut();
 
-        t_group_name.with_c_str(|c_str|{
-            match unsafe { ffi::FMOD_System_CreateChannelGroup(self.system, c_str, &mut channel_group) } {
-                ::Result::Ok => Ok(ffi::FFI::wrap(channel_group)),
-                e => Err(e)
-            }
-        })
+        match unsafe { ffi::FMOD_System_CreateChannelGroup(self.system, group_name.as_ptr() as *const c_char, &mut channel_group) } {
+            ::Result::Ok => Ok(ffi::FFI::wrap(channel_group)),
+            e => Err(e)
+        }
     }
 
-    pub fn create_sound_group(&self, group_name: String) -> Result<sound_group::SoundGroup, ::Result> {
-        let t_group_name = group_name.clone();
+    pub fn create_sound_group(&self, group_name: &str) -> Result<sound_group::SoundGroup, ::Result> {
         let mut sound_group = ::std::ptr::null_mut();
 
-        t_group_name.with_c_str(|c_str|{
-            match unsafe { ffi::FMOD_System_CreateSoundGroup(self.system, c_str, &mut sound_group) } {
-                ::Result::Ok => Ok(ffi::FFI::wrap(sound_group)),
-                e => Err(e)
-            }
-        })
+        match unsafe { ffi::FMOD_System_CreateSoundGroup(self.system, group_name.as_ptr() as *const c_char, &mut sound_group) } {
+            ::Result::Ok => Ok(ffi::FFI::wrap(sound_group)),
+            e => Err(e)
+        }
     }
 
     pub fn create_reverb(&self) -> Result<reverb::Reverb, ::Result>{
@@ -1202,16 +1193,18 @@ impl FmodSys {
     }
 
     pub fn get_driver_info(&self, id: i32, name_len: usize) -> Result<(FmodGuid, String), ::Result> {
-        let tmp_v = String::with_capacity(name_len);
+        let mut c = Vec::with_capacity(name_len + 1);
         let mut guid = ffi::FMOD_GUID{Data1: 0, Data2: 0, Data3: 0, Data4: [0, 0, 0, 0, 0, 0, 0, 0]};
 
-        tmp_v.with_c_str(|c_str|{
-            match unsafe { ffi::FMOD_System_GetDriverInfo(self.system, id as c_int, c_str as *mut c_char, name_len as c_int, &mut guid) } {
-                ::Result::Ok => Ok((FmodGuid{data1: guid.Data1, data2: guid.Data2, data3: guid.Data3, data4: guid.Data4},
-                    unsafe { FromCStr::from_c_str(c_str) })),
-                e => Err(e)
-            }
-        })
+        for _ in 0..(name_len + 1) {
+            c.push(0);
+        }
+
+        match unsafe { ffi::FMOD_System_GetDriverInfo(self.system, id as c_int, c.as_mut_ptr() as *mut c_char, name_len as c_int, &mut guid) } {
+            ::Result::Ok => Ok((FmodGuid{data1: guid.Data1, data2: guid.Data2, data3: guid.Data3, data4: guid.Data4},
+                String::from_utf8(c).unwrap())),
+            e => Err(e)
+        }
     }
 
     pub fn get_driver_caps(&self, id: i32) -> Result<(FmodCaps, i32, ::SpeakerMode), ::Result> {
@@ -1303,7 +1296,7 @@ impl FmodSys {
 
     pub fn set_advanced_settings(&self, settings: &mut FmodAdvancedSettings) -> ::Result {
         let mut converted_c_char : Vec<*const c_char> = (0..settings.ASIO_channel_list.len()).map(|pos| {
-            settings.ASIO_channel_list[pos].clone().with_c_str(|c_str| c_str)
+            settings.ASIO_channel_list[pos].as_ptr() as *const c_char
         }).collect();
         let deb_log_filename = settings.debug_log_filename.clone();
         let mut advanced_settings = ffi::FMOD_ADVANCEDSETTINGS{
@@ -1325,7 +1318,7 @@ impl FmodSys {
             vol0virtualvol: settings.vol0_virtual_vol,
             eventqueuesize: settings.event_queue_size,
             defaultDecodeBufferSize: settings.default_decode_buffer_size,
-            debugLogFilename: deb_log_filename.with_c_str(|c_str| c_str as *mut c_char),
+            debugLogFilename: deb_log_filename.as_ptr() as *mut c_char,
             profileport: settings.profile_port,
             geometryMaxFadeTime: settings.geometry_max_fade_time,
             maxSpectrumWaveDataBuffers: settings.max_spectrum_wave_data_buffers,
@@ -1384,7 +1377,10 @@ impl FmodSys {
                             if (*tmp).is_null() {
                                 break;
                             }
-                            converted_ASIO_channel_vec.push(FromCStr::from_c_str(*tmp));
+
+                            let l = ffi::strlen(*tmp);
+                            
+                            converted_ASIO_channel_vec.push(String::from_raw_parts(*tmp as *mut u8, l, l));
                             it += 1;
                         }
                     }
@@ -1421,7 +1417,9 @@ impl FmodSys {
                     default_decode_buffer_size: advanced_settings.defaultDecodeBufferSize,
                     debug_log_filename: {
                         if !advanced_settings.debugLogFilename.is_null() {
-                            unsafe { FromCStr::from_c_str(advanced_settings.debugLogFilename) }
+                            let l = ffi::strlen(advanced_settings.debugLogFilename);
+
+                            unsafe { String::from_raw_parts(advanced_settings.debugLogFilename as *mut u8, l, l) }
                         } else {
                             String::new()
                         }
@@ -1454,20 +1452,16 @@ impl FmodSys {
     }
 
     pub fn set_plugin_path(&self, path: &str) -> ::Result {
-        path.with_c_str(|c_str|{
-            unsafe { ffi::FMOD_System_SetPluginPath(self.system, c_str) }
-        })
+        unsafe { ffi::FMOD_System_SetPluginPath(self.system, path.as_ptr() as *const c_char) }
     }
 
     pub fn load_plugin(&self, filename: &str, priority: u32) -> Result<FmodPluginHandle, ::Result> {
         let mut handle = 0u32;
 
-        filename.with_c_str(|c_str| {
-            match unsafe { ffi::FMOD_System_LoadPlugin(self.system, c_str, &mut handle as *mut c_uint, priority as c_uint) } {
-                ::Result::Ok => Ok(FmodPluginHandle(handle)),
-                e => Err(e)
-            }
-        })
+        match unsafe { ffi::FMOD_System_LoadPlugin(self.system, filename.as_ptr() as *const c_char, &mut handle as *mut c_uint, priority as c_uint) } {
+            ::Result::Ok => Ok(FmodPluginHandle(handle)),
+            e => Err(e)
+        }
     }
 
     pub fn unload_plugin(&self, FmodPluginHandle(handle): FmodPluginHandle) -> ::Result {
@@ -1492,17 +1486,20 @@ impl FmodSys {
         }
     }
 
-    pub fn get_plugin_info(&self, FmodPluginHandle(handle): FmodPluginHandle, name_len: u32) -> Result<(String, ::PluginType, u32), ::Result> {
-        let name = String::with_capacity(name_len as usize);
+    pub fn get_plugin_info(&self, FmodPluginHandle(handle): FmodPluginHandle, name_len: usize) -> Result<(String, ::PluginType, u32), ::Result> {
         let mut plugin_type = ::PluginType::Output;
         let mut version = 0u32;
+        let mut c = Vec::with_capacity(name_len + 1);
 
-        name.with_c_str(|c_str|{
-            match unsafe { ffi::FMOD_System_GetPluginInfo(self.system, handle, &mut plugin_type, c_str as *mut c_char, name_len as c_int, &mut version as *mut c_uint) } {
-                ::Result::Ok => Ok((unsafe { FromCStr::from_c_str(c_str) }, plugin_type, version)),
-                e => Err(e)
-            }
-        })
+        for _ in 0..(name_len + 1) {
+            c.push(0);
+        }
+
+        match unsafe { ffi::FMOD_System_GetPluginInfo(self.system, handle, &mut plugin_type, c.as_mut_ptr() as *mut c_char, name_len as c_int,
+            &mut version as *mut c_uint) } {
+            ::Result::Ok => Ok((String::from_utf8(c).unwrap(), plugin_type, version)),
+            e => Err(e)
+        }
     }
 
     pub fn set_output_by_plugin(&self, FmodPluginHandle(handle): FmodPluginHandle) -> ::Result {
@@ -1673,25 +1670,30 @@ impl FmodSys {
         }
     }
 
-    pub fn get_CDROM_drive_name(&self, drive: i32, drive_name_len: u32, scsi_name_len: u32, device_name_len: u32) -> Result<(String, String, String), ::Result> {
-        let drive_name = String::with_capacity(drive_name_len as usize);
-        let scsi_name = String::with_capacity(scsi_name_len as usize);
-        let device_name = String::with_capacity(device_name_len as usize);
+    pub fn get_CDROM_drive_name(&self, drive: i32, drive_name_len: usize, scsi_name_len: usize,
+        device_name_len: usize) -> Result<(String, String, String), ::Result> {
+        let mut drive_name = Vec::with_capacity(drive_name_len + 1);
+        let mut scsi_name = Vec::with_capacity(scsi_name_len + 1);
+        let mut device_name = Vec::with_capacity(device_name_len + 1);
 
-        drive_name.with_c_str(|c_drive_name|{
-            scsi_name.with_c_str(|c_scsi_name|{
-                device_name.with_c_str(|c_device_name|{
-                    match unsafe { ffi::FMOD_System_GetCDROMDriveName(self.system, drive as c_int, c_drive_name as *mut c_char,
-                        drive_name_len as c_int, c_scsi_name as *mut c_char,
-                        scsi_name_len as c_int, c_device_name as *mut c_char, device_name_len as c_int) } {
-                        ::Result::Ok => Ok((unsafe { FromCStr::from_c_str(c_drive_name) },
-                                        unsafe { FromCStr::from_c_str(c_scsi_name) },
-                                        unsafe { FromCStr::from_c_str(c_device_name) })),
-                        e => Err(e)
-                    }
-                })
-            })
-        })
+        for _ in 0..(drive_name_len + 1) {
+            drive_name.push(0);
+        }
+        for _ in 0..(scsi_name_len + 1) {
+            scsi_name.push(0);
+        }
+        for _ in 0..(device_name_len + 1) {
+            device_name.push(0);
+        }
+
+        match unsafe { ffi::FMOD_System_GetCDROMDriveName(self.system, drive as c_int, drive_name.as_mut_ptr() as *mut c_char,
+            drive_name_len as c_int, scsi_name.as_mut_ptr() as *mut c_char,
+            scsi_name_len as c_int, device_name.as_mut_ptr() as *mut c_char, device_name_len as c_int) } {
+            ::Result::Ok => Ok((String::from_utf8(drive_name).unwrap(),
+                                String::from_utf8(scsi_name).unwrap(),
+                                String::from_utf8(device_name).unwrap())),
+            e => Err(e)
+        }
     }
 
     pub fn get_spectrum(&self, spectrum_size: usize, channel_offset: Option<i32>, window_type: Option<::DspFftWindow>) -> Result<Vec<f32>, ::Result> {
@@ -1823,16 +1825,18 @@ impl FmodSys {
     }
 
     pub fn get_record_driver_info(&self, id: i32, name_len: usize) -> Result<(FmodGuid, String), ::Result> {
-        let tmp_v = String::with_capacity(name_len);
         let mut guid = ffi::FMOD_GUID{Data1: 0, Data2: 0, Data3: 0, Data4: [0, 0, 0, 0, 0, 0, 0, 0]};
+        let mut c = Vec::with_capacity(name_len + 1);
 
-        tmp_v.with_c_str(|c_str|{
-            match unsafe { ffi::FMOD_System_GetRecordDriverInfo(self.system, id as c_int, c_str as *mut c_char, name_len as c_int, &mut guid) } {
-                ::Result::Ok => Ok((FmodGuid{data1: guid.Data1, data2: guid.Data2, data3: guid.Data3, data4: guid.Data4},
-                    unsafe { FromCStr::from_c_str(c_str) })),
-                e => Err(e)
-            }
-        })
+        for _ in 0..(name_len + 1) {
+            c.push(0);
+        }
+
+        match unsafe { ffi::FMOD_System_GetRecordDriverInfo(self.system, id as c_int, c.as_mut_ptr() as *mut c_char, name_len as c_int, &mut guid) } {
+            ::Result::Ok => Ok((FmodGuid{data1: guid.Data1, data2: guid.Data2, data3: guid.Data3, data4: guid.Data4},
+                String::from_utf8(c).unwrap())),
+            e => Err(e)
+        }
     }
 
     pub fn get_record_driver_caps(&self, id: i32) -> Result<(FmodCaps, i32, i32), ::Result> {

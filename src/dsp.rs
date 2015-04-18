@@ -32,7 +32,6 @@ use std::mem::transmute;
 use channel;
 use libc::{c_char, c_void, c_uint, c_int, c_float};
 use std::default::Default;
-use c_str::{ToCStr, FromCStr};
 use c_vec::CVec;
 use std::ptr::Unique;
 
@@ -185,12 +184,13 @@ extern "C" fn get_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index:
                 match callbacks.callbacks.get_param_callback {
                     Some(p) => {
                         let mut t_value = *value;
-                        let tmp : String = FromCStr::from_c_str(value_str);
+                        let l = ffi::strlen(value_str);
+                        let tmp = String::from_raw_parts(value_str as *mut u8, l, l);
 
                         let ret = p(&from_state_ptr(::std::ptr::read(dsp_state as *const ffi::FMOD_DSP_STATE)),
                             index as i32,
                             &mut t_value,
-                            tmp.as_ref());
+                            &tmp);
                         *value = t_value;
                         ret
                     },
@@ -296,13 +296,24 @@ impl Default for DspParameterDesc {
 pub fn from_parameter_ptr(dsp_parameter: *mut ffi::FMOD_DSP_PARAMETERDESC) -> DspParameterDesc {
     if !dsp_parameter.is_null() {
         unsafe {
+            let l = ffi::strlen((*dsp_parameter).description);
+            let description = String::from_raw_parts((*dsp_parameter).description as *mut u8, l, l);
+            let mut v1 : Vec<u8> = Vec::with_capacity((*dsp_parameter).name.len());
+            let mut v2 : Vec<u8> = Vec::with_capacity((*dsp_parameter).label.len());
+
+            for i in (*dsp_parameter).name.iter() {
+                v1.push(*i as u8);
+            }
+            for i in (*dsp_parameter).label.iter() {
+                v2.push(*i as u8);
+            }
             DspParameterDesc {
                 min: (*dsp_parameter).min,
                 max: (*dsp_parameter).max,
                 default_val: (*dsp_parameter).default_val,
-                name: FromCStr::from_c_str((*dsp_parameter).name.as_ptr()),
-                label: FromCStr::from_c_str((*dsp_parameter).label.as_ptr()),
-                description: FromCStr::from_c_str((*dsp_parameter).description.clone() as *const c_char)
+                name: String::from_utf8(v1).unwrap(),
+                label: String::from_utf8(v2).unwrap(),
+                description: description
             }
         }
     } else {
@@ -318,34 +329,32 @@ pub fn get_parameter_ffi(dsp_parameter: &DspParameterDesc) -> ffi::FMOD_DSP_PARA
     tmp_label.truncate(16);
     tmp_name.reserve_exact(16);
     tmp_label.reserve_exact(16);
-    dsp_parameter.description.as_str().with_c_str(|c_description| {
-        ffi::FMOD_DSP_PARAMETERDESC {
-            min: dsp_parameter.min,
-            max: dsp_parameter.max,
-            default_val: dsp_parameter.default_val,
-            name: {
-                let mut slice : [i8; 16] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-                let mut it = 0;
+    ffi::FMOD_DSP_PARAMETERDESC {
+        min: dsp_parameter.min,
+        max: dsp_parameter.max,
+        default_val: dsp_parameter.default_val,
+        name: {
+            let mut slice : [i8; 16] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            let mut it = 0;
 
-                for tmp in tmp_name.iter() {
-                    slice[it] = *tmp as i8;
-                    it += 1;
-                }
-                slice
-            },
-            label: {
-                let mut slice : [i8; 16] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-                let mut it = 0;
+            for tmp in tmp_name.iter() {
+                slice[it] = *tmp as i8;
+                it += 1;
+            }
+            slice
+        },
+        label: {
+            let mut slice : [i8; 16] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            let mut it = 0;
 
-                for tmp in tmp_label.iter() {
-                    slice[it] = *tmp as i8;
-                    it += 1;
-                }
-                slice
-            },
-            description: c_description
-        }
-    })
+            for tmp in tmp_label.iter() {
+                slice[it] = *tmp as i8;
+                it += 1;
+            }
+            slice
+        },
+        description: dsp_parameter.description.as_ptr() as *const c_char
+    }
 }
 
 /// When creating a DSP unit, declare one of these and provide the relevant callbacks and name for FMOD to use when it creates and uses a DSP unit of this type.
@@ -774,16 +783,18 @@ impl Dsp {
     /// * [`DspSfxReverb`](enums/fmod/type.DspSfxReverb.html)
     /// * [`DspLowPassSimple`](enums/fmod/type.DspLowPassSimple.html)
     /// * [`DspHighPassSimple`](enums/fmod/type.DspHighPassSimple.html)
-    pub fn get_parameter(&self, index: i32, value_str_len: u32) -> Result<(f32, String), ::Result> {
-        let tmp_v = String::with_capacity(value_str_len as usize);
+    pub fn get_parameter(&self, index: i32, value_str_len: usize) -> Result<(f32, String), ::Result> {
         let mut value = 0f32;
+        let mut c = Vec::with_capacity(value_str_len + 1);
 
-        tmp_v.with_c_str(|c_str|{
-            match unsafe { ffi::FMOD_DSP_GetParameter(self.dsp, index, &mut value, c_str as *mut c_char, value_str_len as i32) } {
-               ::Result::Ok => Ok((value, unsafe {FromCStr::from_c_str(c_str as *const c_char) })),
-                e => Err(e)
-            }
-        })
+        for _ in 0..(value_str_len + 1) {
+            c.push(0);
+        }
+
+        match unsafe { ffi::FMOD_DSP_GetParameter(self.dsp, index, &mut value, c.as_mut_ptr() as *mut c_char, value_str_len as i32) } {
+           ::Result::Ok => Ok((value, String::from_utf8(c).unwrap())),
+            e => Err(e)
+        }
     }
 
     pub fn get_num_parameters(&self) -> Result<i32, ::Result> {
@@ -795,24 +806,22 @@ impl Dsp {
         }
     }
 
-    pub fn get_parameter_info(&self, index: i32, name: &String, label: &String, description_len: u32) -> Result<(String, f32, f32), ::Result> {
+    pub fn get_parameter_info(&self, index: i32, name: &String, label: &String, description_len: usize) -> Result<(String, f32, f32), ::Result> {
         let mut min = 0f32;
         let mut max = 0f32;
-        let tmp_d = String::with_capacity(description_len as usize);
         let t_name = name.clone();
         let t_label = label.clone();
+        let mut description = Vec::with_capacity(description_len + 1);
 
-        tmp_d.with_c_str(|c_description| {
-            t_name.with_c_str(|c_name| {
-                t_label.with_c_str(|c_label|{
-                    match unsafe { ffi::FMOD_DSP_GetParameterInfo(self.dsp, index, c_name as *mut c_char, c_label as *mut c_char,
-                        c_description as *mut c_char, description_len as i32, &mut min, &mut max) } {
-                       ::Result::Ok => Ok((unsafe {FromCStr::from_c_str(c_description as *const c_char) }, min, max)),
-                        e => Err(e)
-                    }
-                })
-            })
-        })
+        for _ in 0..(description_len + 1) {
+            description.push(0);
+        }
+
+        match unsafe { ffi::FMOD_DSP_GetParameterInfo(self.dsp, index, t_name.as_ptr() as *mut c_char, t_label.as_ptr() as *mut c_char,
+            description.as_mut_ptr() as *mut c_char, description_len as i32, &mut min, &mut max) } {
+            ::Result::Ok => Ok((String::from_utf8(description).unwrap(), min, max)),
+            e => Err(e)
+        }
     }
 
     pub fn get_info(&self, name: &String) -> Result<(u32, i32, i32, i32), ::Result> {
@@ -822,12 +831,11 @@ impl Dsp {
         let mut config_height = 0i32;
         let tmp_n = name.clone();
 
-        tmp_n.with_c_str(|c_name| {
-            match unsafe { ffi::FMOD_DSP_GetInfo(self.dsp, c_name as *mut c_char, &mut version, &mut channels, &mut config_width, &mut config_height) } {
-               ::Result::Ok => Ok((version, channels, config_width, config_height)),
-                e => Err(e)
-            }
-        })
+        match unsafe { ffi::FMOD_DSP_GetInfo(self.dsp, tmp_n.as_ptr() as *mut c_char, &mut version, &mut channels, &mut config_width,
+            &mut config_height) } {
+            ::Result::Ok => Ok((version, channels, config_width, config_height)),
+            e => Err(e)
+        }
     }
 
     pub fn set_defaults(&self, frequency: f32, volume: f32, pan: f32, priority: i32) -> ::Result {

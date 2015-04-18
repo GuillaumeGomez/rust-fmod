@@ -22,7 +22,6 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-use c_str::{ToCStr, FromCStr};
 use types::*;
 use ffi;
 use channel;
@@ -242,15 +241,17 @@ impl ChannelGroup {
         }
     }
 
-    pub fn get_name(&self, name_len: u32) -> Result<String, ::Result> {
-        let name = String::with_capacity(name_len as usize);
+    pub fn get_name(&self, name_len: usize) -> Result<String, ::Result> {
+        let mut c = Vec::with_capacity(name_len + 1);
 
-        name.with_c_str(|c_name|{
-            match unsafe { ffi::FMOD_ChannelGroup_GetName(self.channel_group, c_name as *mut c_char, name_len as i32) } {
-               ::Result::Ok => Ok(unsafe { FromCStr::from_c_str(c_name) }),
-                e => Err(e)
-            }
-        })
+        for _ in 0..(name_len + 1) {
+            c.push(0);
+        }
+
+        match unsafe { ffi::FMOD_ChannelGroup_GetName(self.channel_group, c.as_mut_ptr() as *mut c_char, name_len as i32) } {
+            ::Result::Ok => Ok(String::from_utf8(c).unwrap()),
+            e => Err(e)
+        }
     }
 
     pub fn get_num_channels(&self) -> Result<u32, ::Result> {
