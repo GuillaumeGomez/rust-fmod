@@ -24,27 +24,28 @@
 
 #![crate_type = "bin"]
 
-#![feature(old_io, libc, core, std_misc)]
+#![feature(libc)]
 
 extern crate libc;
 extern crate rfmod;
 
-use std::old_io::timer::sleep;
+use std::thread::sleep_ms;
 use std::mem;
 use std::default::Default;
-use std::time::duration::Duration;
+use std::io::{self, Error, BufRead};
 
-fn get_key() -> Result<isize, std::old_io::IoError> {
-    let mut reader = std::old_io::stdio::stdin();
-    
+fn get_key() -> Result<isize, Error> {
+    let r = io::stdin();
+    let mut reader = r.lock();
+    let mut line = String::new();
+
     println!("\nEnter a corresponding number or \"ESC\" to quit:");
     print!("> ");
-
-    match reader.read_line() {
-        Ok(mut line) => {
+    match reader.read_line(&mut line) {
+        Ok(_) => {
             let length = line.len() - 1;
             line.truncate(length);
-            if line.as_slice() == "ESC" {
+            if &line == "ESC" {
                 Ok(-1)
             } else {
                 Ok(line.parse().unwrap())
@@ -190,7 +191,7 @@ fn main() {
                                         }
                                     });
                                     fmod.update();
-                                    sleep(Duration::milliseconds(15));
+                                    sleep_ms(15);
                                 }
                                 Some(rfmod::Result::Ok)
                             }
@@ -222,7 +223,7 @@ fn main() {
                                         }
                                     });
                                     fmod.update();
-                                    sleep(Duration::milliseconds(15));
+                                    sleep_ms(15);
                                 }
                                 Some(rfmod::Result::Ok)
                             }
@@ -231,10 +232,12 @@ fn main() {
                     },
                     2 => {
                         print!("Please enter the output file name : ");
-                        let mut reader = std::old_io::stdio::stdin();
+                        let r = io::stdin();
+                        let mut reader = r.lock();
+                        let mut name = String::new();
 
-                        match reader.read_line() {
-                            Ok(mut name) => {
+                        match reader.read_line(&mut name) {
+                            Ok(_) => {
                                 name.pop().unwrap();
                                 match sound.save_to_wav(&name) {
                                     Ok(b) => if b {

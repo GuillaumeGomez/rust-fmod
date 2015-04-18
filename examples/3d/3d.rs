@@ -24,13 +24,12 @@
 
 #![crate_type = "bin"]
 
-#![feature(libc, collections, core)]
+#![feature(libc, collections)]
 
 extern crate libc;
 extern crate rfmod;
 
 use std::default::Default;
-use std::num::Float;
 
 fn main() {
     let t_args = std::env::args();
@@ -63,7 +62,7 @@ fn main() {
     println!("=========================================");
 
     let arg1 = tmp.get(0).unwrap();
-    let sound = match fmod.create_sound((*arg1).as_slice(), Some(rfmod::FmodMode(rfmod::FMOD_3D | rfmod::FMOD_SOFTWARE)), None) {
+    let sound = match fmod.create_sound((*arg1).as_ref(), Some(rfmod::FmodMode(rfmod::FMOD_3D | rfmod::FMOD_SOFTWARE)), None) {
         Ok(s) => s,
         Err(e) => panic!("create sound error: {:?}", e)
     };

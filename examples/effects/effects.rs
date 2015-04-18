@@ -24,23 +24,25 @@
 
 #![crate_type = "bin"]
 
-#![feature(old_io, libc, core, collections, std_misc)]
+#![feature(libc, collections)]
 
 extern crate libc;
 extern crate rfmod;
 
-use std::old_io::timer::sleep;
-use std::time::duration::Duration;
+use std::thread::sleep_ms;
+use std::io::{self, Error, BufRead};
 
-fn get_key() -> Result<isize, std::old_io::IoError> {
-    let mut reader = std::old_io::stdio::stdin();
+fn get_key() -> Result<isize, Error> {
+    let r = io::stdin();
+    let mut reader = r.lock();
+    let mut line = String::new();
 
     print!("> ");
-    match reader.read_line() {
-        Ok(mut line) => {
+    match reader.read_line(&mut line) {
+        Ok(_) => {
             let length = line.len() - 1;
             line.truncate(length);
-            if line.as_slice() == "quit" {
+            if &line == "quit" {
                 Ok(-1)
             } else {
                 match line.parse() {
@@ -108,7 +110,7 @@ fn main() {
     println!("==============================================");
 
     let arg1 = tmp.get(0).unwrap();
-    let sound = match fmod.create_sound((*arg1).as_slice(), Some(rfmod::FmodMode(rfmod::FMOD_SOFTWARE)), None) {
+    let sound = match fmod.create_sound(&(*arg1), Some(rfmod::FmodMode(rfmod::FMOD_SOFTWARE)), None) {
         Ok(s) => s,
         Err(e) => panic!("create sound error: {:?}", e)
     };
@@ -176,6 +178,6 @@ fn main() {
             Err(e) => panic!("Entry error: {:?}", e)
         }
         fmod.update();
-        sleep(Duration::milliseconds(30)); // let time to the system for update
+        sleep_ms(30); // let time to the system for update
     }
 }

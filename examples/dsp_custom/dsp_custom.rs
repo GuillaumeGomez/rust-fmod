@@ -27,19 +27,21 @@
 #![allow(non_snake_case)]
 #![allow(unused_variables)]
 
-#![feature(old_io, core, collections, convert)]
+#![feature(collections)]
 
 extern crate rfmod;
 
 use std::default::Default;
-use std::old_io::Reader;
+use std::io::{self, Read};
 
 fn get_key() -> u8 {
-    let mut reader = std::old_io::stdio::stdin();
+    let r = io::stdin();
+    let mut reader = r.lock();
+    let mut tmp : &mut [u8] = &mut  [0];
     print!("> ");
 
-    match reader.read_byte() {
-        Ok(nb) => nb,
+    match reader.read(&mut tmp) {
+        Ok(_) => tmp[0],
         Err(_) => 0u8
     }
 }

@@ -24,12 +24,11 @@
 
 #![crate_type = "bin"]
 
-#![feature(old_io, std_misc, collections, core)]
+#![feature(collections)]
 
 extern crate rfmod;
 
-use std::old_io::timer::sleep;
-use std::time::duration::Duration;
+use std::thread::sleep_ms;
 
 fn play_to_the_end(sound: rfmod::Sound, len: usize) -> rfmod::Result {
     let length = match sound.get_length(rfmod::FMOD_TIMEUNIT_MS) {
@@ -60,7 +59,7 @@ fn play_to_the_end(sound: rfmod::Sound, len: usize) -> rfmod::Result {
                                 print!("\r{} : {:02}:{:02} / {:02}:{:02}", name, position / 1000 / 60, position / 1000 % 60,
                                     length / 1000 / 60, length / 1000 % 60);
                             }
-                            sleep(Duration::milliseconds(30))
+                            sleep_ms(30)
                         } else {
                             break;
                         }
@@ -102,7 +101,7 @@ fn main() {
 
     let arg1 = tmp.get(0).unwrap();
 
-    let sound = match fmod.create_sound((*arg1).as_slice(), None, None) {
+    let sound = match fmod.create_sound(&(*arg1), None, None) {
         Ok(s) => s,
         Err(err) => {
             panic!("FmodSys.create_sound failed : {:?}", err);

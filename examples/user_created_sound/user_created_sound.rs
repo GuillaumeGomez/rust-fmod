@@ -24,15 +24,14 @@
 
 #![crate_type = "bin"]
 
-#![feature(old_io, libc, core, std_misc)]
+#![feature(libc)]
 
 extern crate libc;
 extern crate rfmod;
 
 use std::default::Default;
-use std::old_io::timer::sleep;
-use std::time::duration::Duration;
-use std::num::Float;
+use std::thread::sleep_ms;
+use std::io::{self, BufRead, Error};
 
 #[allow(unused_variables)]
 fn pcmreadcallback(sound: &rfmod::Sound, data: &mut [i16]) -> rfmod::Result {
@@ -59,15 +58,18 @@ fn pcmreadcallback(sound: &rfmod::Sound, data: &mut [i16]) -> rfmod::Result {
     rfmod::Result::Ok
 }
 
-fn get_key() -> Result<isize, std::old_io::IoError> {
-    let mut reader = std::old_io::stdio::stdin();
-    print!("> ");
+fn get_key() -> Result<isize, Error> {
+    let r = io::stdin();
+    let mut reader = r.lock();
+    let mut line = String::new();
 
-    match reader.read_line() {
-        Ok(mut line) => {
+    print!("> ");
+    match reader.read_line(&mut line) {
+        Ok(_) => {
             let length = line.len() - 1;
+
             line.truncate(length);
-            if line.as_slice() == "Quit" {
+            if &line == "Quit" {
                 Ok(-1)
             } else {
                 Ok(line.parse().unwrap())
@@ -158,6 +160,6 @@ fn main() {
         };
 
         print!("{:02}:{:02} / {:02}:{:02}\r", position / 1000 / 60, position / 1000 % 60, length / 1000 / 60, length / 1000 % 60);
-        sleep(Duration::milliseconds(30))
+        sleep_ms(30)
     }
 }
