@@ -5,9 +5,9 @@ env:
     - secure: Id4Ztg0rzqPo7Qx8F3L2Y7TZyzqKcqs1/qL/nlVFv1QK4ISpEKprkIcEnxL97NJdIJCBqaqESkqzmMOII+l6a6zfLjHlze/aY3myhRY2DjcWwI5EC8IOq6zuGxkB7sclIX2DZvQOag4gW23d7grpI43tHeJLj4S9yHajxBcY41Q=
     - LD_LIBRARY_PATH=/usr/local/lib
 install:
-  - wget http://www.fmod.org/download/fmodex/api/Linux/fmodapi44439linux.tar.gz
-  - tar xvf fmodapi44439linux.tar.gz
-  - sudo cp -r fmodapi44439linux/api/lib/* /usr/local/lib/.
+  - wget http://www.fmod.org/download/fmodstudio/api/Linux/fmodstudioapi10601linux.tar.gz
+  - tar xvf fmodstudioapi10601linux.tar.gz
+  - sudo cp -r fmodstudioapi10601linux/api/lib/* /usr/local/lib/.
 script:
   - rustc --version
   - cargo build
