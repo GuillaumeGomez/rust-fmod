@@ -671,7 +671,7 @@ impl Sound {
         }
     }
 
-    pub fn save_to_wav(&self, file_name: &String) -> Result<bool, String> {
+    pub fn save_to_wav(&self, file_name: &str) -> Result<bool, String> {
         unsafe {
             let mut channels = 0i32;
             let mut bits = 0i32;
