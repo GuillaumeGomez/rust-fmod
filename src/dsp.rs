@@ -806,7 +806,7 @@ impl Dsp {
         }
     }
 
-    pub fn get_parameter_info(&self, index: i32, name: &String, label: &String, description_len: usize) -> Result<(String, f32, f32), ::Result> {
+    pub fn get_parameter_info(&self, index: i32, name: &str, label: &str, description_len: usize) -> Result<(String, f32, f32), ::Result> {
         let mut min = 0f32;
         let mut max = 0f32;
         let t_name = name.clone();
@@ -824,7 +824,7 @@ impl Dsp {
         }
     }
 
-    pub fn get_info(&self, name: &String) -> Result<(u32, i32, i32, i32), ::Result> {
+    pub fn get_info(&self, name: &str) -> Result<(u32, i32, i32, i32), ::Result> {
         let mut version = 0u32;
         let mut channels = 0i32;
         let mut config_width = 0i32;
