@@ -11,7 +11,7 @@ keywords = ["library", "sound", "3D", "fmod", "fmodex"]
 license-file = "LICENSE.TXT"
 
 [dependencies]
-c_vec = "^1.0.0"
+c_vec = "~1.0"
 byteorder = "*"
 
 [lib]
