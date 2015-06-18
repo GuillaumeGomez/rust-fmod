@@ -1,6 +1,6 @@
 [package]
 name = "fmod"
-version = "0.9.19"
+version = "0.9.20"
 authors = ["Guillaume Gomez <guillaume1.gomez@gmail.com>"]
 
 description = "A rust binding for the FMOD library"
@@ -13,6 +13,7 @@ license-file = "LICENSE.TXT"
 [dependencies]
 c_vec = "~1.0"
 byteorder = "*"
+libc = "*"
 
 [lib]
 name = "rfmod"

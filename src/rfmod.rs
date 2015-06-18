@@ -122,8 +122,6 @@ Here is the list of all modules :
 #![allow(improper_ctypes)]
 #![allow(raw_pointer_derive)]
 
-#![feature(libc)]
-
 extern crate libc;
 extern crate c_vec;
 extern crate byteorder;

@@ -32,17 +32,28 @@
 extern crate rfmod;
 
 use std::default::Default;
-use std::io::{self, Read};
+use std::io::{Read, BufRead, Write};
 
-fn get_key() -> u8 {
-    let r = io::stdin();
+#[allow(unused_must_use)]
+fn get_key() -> char {
+    let stdout = ::std::io::stdout();
+    let mut io = stdout.lock();
+    let r = ::std::io::stdin();
     let mut reader = r.lock();
-    let mut tmp : &mut [u8] = &mut  [0];
-    print!("> ");
+    let mut tmp = String::new();
 
-    match reader.read(&mut tmp) {
-        Ok(_) => tmp[0],
-        Err(_) => 0u8
+    write!(io, "> ");
+    io.flush();
+    match reader.read_line(&mut tmp) {
+        Ok(_) => {
+            if tmp.len() < 2 {
+                '\0'
+            } else {
+                let l = tmp.len() - 2;
+                tmp.remove(l)
+            }
+        },
+        Err(_) => '\0'
     }
 }
 
