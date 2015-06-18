@@ -76,10 +76,10 @@ fn main() {
     if tmp.len() < 1 {
         panic!("USAGE: ./dsp_custom [music_file]");
     }
-    let fmod = match rfmod::FmodSys::new() {
+    let fmod = match rfmod::Sys::new() {
         Ok(f) => f,
         Err(e) => {
-            panic!("FmodSys.new : {:?}", e);
+            panic!("Sys::new() : {:?}", e);
         }
     };
 
@@ -93,7 +93,7 @@ fn main() {
     let arg1 = tmp.get(0).unwrap();
 
     let sound = match fmod.create_sound((*arg1).as_ref(),
-        Some(rfmod::FmodMode(rfmod::FMOD_SOFTWARE | rfmod::FMOD_LOOP_NORMAL)), None) {
+        Some(rfmod::Mode(rfmod::SOFTWARE | rfmod::LOOP_NORMAL)), None) {
         Ok(s) => s,
         Err(err) => {
             panic!("FmodSys.create_sound failed : {:?}", err);

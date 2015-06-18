@@ -41,7 +41,6 @@ use dsp_connection;
 use std::default::Default;
 use callbacks::*;
 use std;
-use std::ptr::Unique;
 use file;
 use libc::types::common::c95::FILE;
 use c_vec::CVec;
@@ -146,7 +145,7 @@ extern "C" fn file_read_callback(handle: *mut c_void, buffer: *mut c_void, size_
     match tmp.file_read {
         Some(s) => {
             unsafe {
-                let mut data_vec : CVec<u8> = CVec::new(Unique::new(buffer as *mut u8), size_bytes as usize);
+                let mut data_vec : CVec<u8> = CVec::new(buffer as *mut u8, size_bytes as usize);
 
                 let read_bytes = s(&mut file::from_ffi(handle as *mut FILE), data_vec.as_mut(), size_bytes, if user_data.is_null() {
                     None
@@ -195,7 +194,7 @@ extern "C" fn pcm_read_callback(sound: *mut ffi::FMOD_SOUND, data: *mut c_void, 
                 match callbacks.pcm_read {
                     Some(p) => {
                         let max = data_len as isize >> 2;
-                        let mut data_vec = CVec::new(Unique::new(data as *mut c_short), max as usize * 2);
+                        let mut data_vec = CVec::new(data as *mut c_short, max as usize * 2);
 
                         let ret = p(&ffi::FFI::wrap(sound), data_vec.as_mut());
                         ret
@@ -243,7 +242,7 @@ extern "C" fn pcm_set_pos_callback(sound: *mut ffi::FMOD_SOUND, sub_sound: c_int
                 let callbacks : &mut ffi::SoundData = ::std::mem::transmute(tmp);
 
                 match callbacks.pcm_set_pos {
-                    Some(p) => p(&ffi::FFI::wrap(sound), sub_sound, position, FmodTimeUnit(postype)),
+                    Some(p) => p(&ffi::FFI::wrap(sound), sub_sound, position, TimeUnit(postype)),
                     None => ::Result::Ok
                 }
             } else {
@@ -256,7 +255,7 @@ extern "C" fn pcm_set_pos_callback(sound: *mut ffi::FMOD_SOUND, sub_sound: c_int
 }
 
 /// Structure describing a globally unique identifier.
-pub struct FmodGuid
+pub struct Guid
 {
     /// Specifies the first 8 hexadecimal digits of the GUID
     pub data1: u32,
@@ -269,9 +268,9 @@ pub struct FmodGuid
     pub data4: [u8; 8]
 }
 
-impl Default for FmodGuid {
-    fn default() -> FmodGuid {
-        FmodGuid {
+impl Default for Guid {
+    fn default() -> Guid {
+        Guid {
             data1: 0u32,
             data2: 0u16,
             data3: 0u16,
@@ -281,11 +280,11 @@ impl Default for FmodGuid {
 }
 
 /// Structure used to store user data for file callback
-pub struct FmodUserData {
+pub struct UserData {
     user_data: *mut c_void
 }
 
-impl FmodUserData {
+impl UserData {
     pub fn set_user_data<T>(&mut self, user_data: &mut T) {
         unsafe { self.user_data = std::mem::transmute(user_data) }
     }
@@ -299,17 +298,17 @@ impl FmodUserData {
     }
 }
 
-impl Default for FmodUserData {
-    fn default() -> FmodUserData {
-        FmodUserData {
+impl Default for UserData {
+    fn default() -> UserData {
+        UserData {
             user_data: ::std::ptr::null_mut()
         }
     }
 }
 
-/// Wrapper for arguments of [`FmodSys::set_software_format`](struct.FmodSys.html#method.set_software_format) and
-/// [`FmodSys::get_software_format`](struct.FmodSys.html#method.get_software_format)
-pub struct FmodSoftwareFormat
+/// Wrapper for arguments of [`Sys::set_software_format`](struct.Sys.html#method.set_software_format) and
+/// [`Sys::get_software_format`](struct.Sys.html#method.get_software_format)
+pub struct SoftwareFormat
 {
     pub sample_rate        : i32,
     pub format             : ::SoundFormat,
@@ -319,9 +318,9 @@ pub struct FmodSoftwareFormat
     pub bits               : i32
 }
 
-impl Default for FmodSoftwareFormat {
-    fn default() -> FmodSoftwareFormat {
-        FmodSoftwareFormat {
+impl Default for SoftwareFormat {
+    fn default() -> SoftwareFormat {
+        SoftwareFormat {
             sample_rate: 0i32,
             format: ::SoundFormat::None,
             num_output_channels: 0i32,
@@ -333,7 +332,7 @@ impl Default for FmodSoftwareFormat {
 }
 
 /// Settings for advanced features like configuring memory and cpu usage for the FMOD_CREATECOMPRESSEDSAMPLE feature.
-pub struct FmodAdvancedSettings
+pub struct AdvancedSettings
 {
     /// [r/w] Optional. Specify 0 to ignore. For use with FMOD_CREATECOMPRESSEDSAMPLE only. Mpeg codecs consume 21,684 bytes per
     /// instance and this number will determine how many mpeg channels can be played simultaneously. Default = 32.
@@ -362,7 +361,7 @@ pub struct FmodAdvancedSettings
     /// channel names.
     pub ASIO_channel_list             : Vec<String>,
     /// [r/w] Optional. Specify 0 to ignore. Pointer to a list of speakers that the ASIO channels map to. This can be called after
-    /// [`FmodSys::init`](doc/rfmod/struct.FmodSys.html#method.init) to remap ASIO output.
+    /// [`Sys::init`](doc/rfmod/struct.Sys.html#method.init) to remap ASIO output.
     pub ASIO_speaker_list             : Vec<::Speaker>,
     /// [r/w] Optional. Specify 0 to ignore. The max number of 3d reverb DSP's in the system. (NOTE: CURRENTLY DISABLED / UNUSED)
     pub max_3D_reverb_DSPs            : i32,
@@ -388,7 +387,7 @@ pub struct FmodAdvancedSettings
     pub default_decode_buffer_size    : u32,
     /// [r/w] Optional. Specify 0 to ignore. Gives fmod's logging system a path/filename. Normally the log is placed in the same
     /// directory as the executable and called fmod.log. When using
-    /// [`FmodSys::get_advanced_settings`](doc/rfmod/struct.FmodSys.html#method.get_advanced_settings), provide at least 256 bytes of
+    /// [`Sys::get_advanced_settings`](doc/rfmod/struct.Sys.html#method.get_advanced_settings), provide at least 256 bytes of
     /// memory to copy into.
     pub debug_log_filename            : String,
     /// [r/w] Optional. Specify 0 to ignore. For use with FMOD_INIT_ENABLE_PROFILE. Specify the port to listen on for connections by the
@@ -397,7 +396,7 @@ pub struct FmodAdvancedSettings
     /// [r/w] Optional. Specify 0 to ignore. The maximum time in miliseconds it takes for a channel to fade to the new level when its
     /// occlusion changes.
     pub geometry_max_fade_time        : u32,
-    /// [r/w] Optional. Specify 0 to ignore. Tells [`FmodSys::init`](doc/rfmod/struct.FmodSys.html#method.init) to allocate a pool of
+    /// [r/w] Optional. Specify 0 to ignore. Tells [`Sys::init`](doc/rfmod/struct.Sys.html#method.init) to allocate a pool of
     /// wavedata/spectrum buffers to prevent memory fragmentation, any additional buffers will be allocated normally.
     pub max_spectrum_wave_data_buffers: u32,
     /// [r/w] Optional. Specify 0 to ignore. The delay the music system should allow for loading a sample from disk (in
@@ -417,9 +416,9 @@ pub struct FmodAdvancedSettings
     pub stack_size_mixer              : u32
 }
 
-impl Default for FmodAdvancedSettings {
-    fn default() -> FmodAdvancedSettings {
-        FmodAdvancedSettings {
+impl Default for AdvancedSettings {
+    fn default() -> AdvancedSettings {
+        AdvancedSettings {
             max_MPEG_codecs: 32i32,
             max_ADPCM_codecs: 32i32,
             max_XMA_codecs: 32i32,
@@ -450,8 +449,8 @@ impl Default for FmodAdvancedSettings {
     }
 }
 
-/// Use this structure with [`FmodSys::create_sound`](struct.FmodSys.html#method.create_sound) when more control is needed over loading.
-/// The possible reasons to use this with [`FmodSys::create_sound`](struct.FmodSys.html#method.create_sound) are:
+/// Use this structure with [`Sys::create_sound`](struct.Sys.html#method.create_sound) when more control is needed over loading.
+/// The possible reasons to use this with [`Sys::create_sound`](struct.Sys.html#method.create_sound) are:
 ///
 /// * Loading a file from memory.
 /// * Loading a file from within another larger (possibly wad/pak) file, by giving the loader an offset and length.
@@ -464,7 +463,7 @@ impl Default for FmodAdvancedSettings {
 /// * To specify a MIDI DLS/SF2 sample set file to load when opening a MIDI file.
 ///
 /// See below on what members to fill for each of the above types of sound you want to create.
-pub struct FmodCreateSoundexInfo
+pub struct CreateSoundexInfo
 {
     /// [w] Optional. Specify 0 to ignore. Size in bytes of file to load, or sound to create (in this case only if FMOD_OPENUSER is
     /// used). Required if loading from memory. If 0 is specified, then it will use the size of the file (unless loading from memory
@@ -543,7 +542,7 @@ pub struct FmodCreateSoundexInfo
     /// [w] Optional. Specify 0 to ignore. For streams. Specify an initial position to seek the stream to.
     pub initial_seek_position  : u32,
     /// [w] Optional. Specify 0 to ignore. For streams. Specify the time unit for the position set in initialseekposition.
-    pub initial_seek_pos_type  : FmodTimeUnit,
+    pub initial_seek_pos_type  : TimeUnit,
     /// [w] Optional. Specify true to ignore. Set to false to use fmod's built in file system. Ignores setFileSystem callbacks and also
     /// FMOD_CREATESOUNEXINFO file callbacks. Useful for specific cases where you don't want to use your own file system but want to
     /// use fmod's file system (ie net streaming).
@@ -562,9 +561,9 @@ pub struct FmodCreateSoundexInfo
     pub non_block_thread_id    : i32
 }
 
-impl Default for FmodCreateSoundexInfo {
-    fn default() -> FmodCreateSoundexInfo {
-        FmodCreateSoundexInfo {
+impl Default for CreateSoundexInfo {
+    fn default() -> CreateSoundexInfo {
+        CreateSoundexInfo {
             length: 0u32,
             file_offset: 0u32,
             num_channels: 0i32,
@@ -591,7 +590,7 @@ impl Default for FmodCreateSoundexInfo {
             speaker_map: ::SpeakerMapType::Default,
             initial_sound_group: ffi::FFI::wrap(::std::ptr::null_mut()),
             initial_seek_position: 0u32,
-            initial_seek_pos_type: FmodTimeUnit(0u32),
+            initial_seek_pos_type: TimeUnit(0u32),
             ignore_set_file_system: true,
             cdda_force_aspi: 0i32,
             audio_queue_policy: 0u32,
@@ -601,7 +600,7 @@ impl Default for FmodCreateSoundexInfo {
     }
 }
 
-impl FmodCreateSoundexInfo {
+impl CreateSoundexInfo {
     fn convert_to_c(&mut self) -> ffi::FMOD_CREATESOUNDEXINFO {
         ffi::FMOD_CREATESOUNDEXINFO{
             cbsize: mem::size_of::<ffi::FMOD_CREATESOUNDEXINFO>() as i32,
@@ -646,7 +645,7 @@ impl FmodCreateSoundexInfo {
             speakermap: self.speaker_map,
             initialsoundgroup: ffi::FFI::unwrap(&self.initial_sound_group),
             initialseekposition: self.initial_seek_position,
-            initialseekpostype: match self.initial_seek_pos_type {FmodTimeUnit(v) => v},
+            initialseekpostype: match self.initial_seek_pos_type {TimeUnit(v) => v},
             ignoresetfilesystem: match self.ignore_set_file_system {
                 true => 0i32,
                 false => 1i32
@@ -665,17 +664,17 @@ pub struct FmodCodecDescription {
     pub name             : String,
     /// [in] Plugin writer's version number.
     pub version          : u32,
-    /// [in] Tells FMOD to open the file as a stream when calling [`FmodSys::create_sound`](doc/rfmod/struct.FmodSys.html#method.create_sound),
+    /// [in] Tells FMOD to open the file as a stream when calling [`Sys::create_sound`](doc/rfmod/struct.Sys.html#method.create_sound),
     /// and not a static sample. Should normally be 0 (FALSE), because generally the user wants to decode the file into memory when using
-    /// [`FmodSys::create_sound`](doc/rfmod/struct.FmodSys.html#method.create_sound). Mainly used for formats that decode for a very long time,
+    /// [`Sys::create_sound`](doc/rfmod/struct.Sys.html#method.create_sound). Mainly used for formats that decode for a very long time,
     /// or could use large amounts of memory when decoded.
     /// Usually sequenced formats such as mod/s3m/xm/it/midi fall into this category. It is mainly to stop users that don't know what they're
     /// doing from getting FMOD_ERR_MEMORY returned from createSound when they should have in fact called System::createStream or used
-    /// FMOD_CREATESTREAM in [`FmodSys::create_sound`](doc/rfmod/struct.FmodSys.html#method.create_sound).
+    /// FMOD_CREATESTREAM in [`Sys::create_sound`](doc/rfmod/struct.Sys.html#method.create_sound).
     pub default_as_stream: i32,
     /// [in] When setposition codec is called, only these time formats will be passed to the codec. Use bitwise OR to accumulate different
     /// types.
-    pub time_units       : FmodTimeUnit,
+    pub time_units       : TimeUnit,
     /// [in] Open callback for the codec for when FMOD tries to open a sound using this codec.
     open                 : ffi::FMOD_CODEC_OPENCALLBACK,
     /// [in] Close callback for the codec for when FMOD tries to close a sound using this codec.
@@ -706,7 +705,7 @@ impl Default for FmodCodecDescription {
             name: String::new(),
             version: 0u32,
             default_as_stream: 0i32,
-            time_units: FmodTimeUnit(0u32),
+            time_units: TimeUnit(0u32),
             open: None,
             close: None,
             read: None,
@@ -720,13 +719,13 @@ impl Default for FmodCodecDescription {
 }
 
 /// Wrapper for OutputHandle
-pub struct FmodOutputHandle {
+pub struct OutputHandle {
     handle: *mut c_void
 }
 
 /// Structure to be filled with detailed memory usage information of a FMOD object
 #[derive(Clone, Copy)]
-pub struct FmodMemoryUsageDetails
+pub struct MemoryUsageDetails
 {
     /// [out] Memory not accounted for by other types
     pub other                  : u32,
@@ -826,9 +825,9 @@ pub struct FmodMemoryUsageDetails
     pub event_instance_pool    : u32
 }
 
-impl Default for FmodMemoryUsageDetails {
-    fn default() -> FmodMemoryUsageDetails {
-        FmodMemoryUsageDetails {
+impl Default for MemoryUsageDetails {
+    fn default() -> MemoryUsageDetails {
+        MemoryUsageDetails {
             other: 0u32,
             string: 0u32,
             system: 0u32,
@@ -881,7 +880,7 @@ impl Default for FmodMemoryUsageDetails {
     }
 }
 
-pub fn get_memory_usage_details_ffi(details: FmodMemoryUsageDetails) -> ffi::FMOD_MEMORY_USAGE_DETAILS {
+pub fn get_memory_usage_details_ffi(details: MemoryUsageDetails) -> ffi::FMOD_MEMORY_USAGE_DETAILS {
     ffi::FMOD_MEMORY_USAGE_DETAILS {
         other: details.other,
         string: details.string,
@@ -934,8 +933,8 @@ pub fn get_memory_usage_details_ffi(details: FmodMemoryUsageDetails) -> ffi::FMO
     }
 }
 
-pub fn from_memory_usage_details_ptr(details: ffi::FMOD_MEMORY_USAGE_DETAILS) -> FmodMemoryUsageDetails {
-    FmodMemoryUsageDetails {
+pub fn from_memory_usage_details_ptr(details: ffi::FMOD_MEMORY_USAGE_DETAILS) -> MemoryUsageDetails {
+    MemoryUsageDetails {
         other: details.other,
         string: details.string,
         system: details.system,
@@ -988,43 +987,43 @@ pub fn from_memory_usage_details_ptr(details: ffi::FMOD_MEMORY_USAGE_DETAILS) ->
 }
 
 /// FMOD System Object
-pub struct FmodSys {
+pub struct Sys {
     system: *mut ffi::FMOD_SYSTEM,
     is_first: bool
 }
 
-impl ffi::FFI<ffi::FMOD_SYSTEM> for FmodSys {
-    fn wrap(system: *mut ffi::FMOD_SYSTEM) -> FmodSys {
-        FmodSys {system: system, is_first: false}
+impl ffi::FFI<ffi::FMOD_SYSTEM> for Sys {
+    fn wrap(system: *mut ffi::FMOD_SYSTEM) -> Sys {
+        Sys {system: system, is_first: false}
     }
 
-    fn unwrap(s: &FmodSys) -> *mut ffi::FMOD_SYSTEM {
+    fn unwrap(s: &Sys) -> *mut ffi::FMOD_SYSTEM {
         s.system
     }
 }
 
-impl Drop for FmodSys {
+impl Drop for Sys {
     fn drop(&mut self) {
         self.release();
     }
 }
 
-impl FmodSys {
+impl Sys {
     /* the first one created has to be the last one released */
-    pub fn new() -> Result<FmodSys, ::Result> {
+    pub fn new() -> Result<Sys, ::Result> {
         let mut tmp = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_System_Create(&mut tmp) } {
-            ::Result::Ok => Ok(FmodSys{system: tmp, is_first: true}),
+            ::Result::Ok => Ok(Sys{system: tmp, is_first: true}),
             err => Err(err)
         }
     }
 
     pub fn init(&self) -> ::Result {
-        unsafe { ffi::FMOD_System_Init(self.system, 1, ::FMOD_INIT_NORMAL, ::std::ptr::null_mut()) }
+        unsafe { ffi::FMOD_System_Init(self.system, 1, ::INIT_NORMAL, ::std::ptr::null_mut()) }
     }
 
-    pub fn init_with_parameters(&self, max_channels: i32, FmodInitFlag(flag): FmodInitFlag) -> ::Result {
+    pub fn init_with_parameters(&self, max_channels: i32, InitFlag(flag): InitFlag) -> ::Result {
         unsafe { ffi::FMOD_System_Init(self.system, max_channels, flag, ::std::ptr::null_mut()) }
     }
 
@@ -1053,11 +1052,11 @@ impl FmodSys {
     }
 
     /// If music is empty, null is sent
-    pub fn create_sound(&self, music: &str, options: Option<FmodMode>, exinfo: Option<&mut FmodCreateSoundexInfo>) -> Result<Sound, ::Result> {
+    pub fn create_sound(&self, music: &str, options: Option<Mode>, exinfo: Option<&mut CreateSoundexInfo>) -> Result<Sound, ::Result> {
         let mut sound = sound::from_ptr_first(::std::ptr::null_mut());
         let op = match options {
-            Some(FmodMode(t)) => t,
-            None => ::FMOD_SOFTWARE | ::FMOD_LOOP_OFF | ::FMOD_2D | ::FMOD_CREATESTREAM
+            Some(Mode(t)) => t,
+            None => ::SOFTWARE | ::LOOP_OFF | ::_2D | ::CREATESTREAM
         };
         let ex = match exinfo {
             Some(e) => {
@@ -1085,11 +1084,11 @@ impl FmodSys {
         }
     }
 
-    pub fn create_stream(&self, music: &str, options: Option<FmodMode>, exinfo: Option<&mut FmodCreateSoundexInfo>) -> Result<Sound, ::Result> {
+    pub fn create_stream(&self, music: &str, options: Option<Mode>, exinfo: Option<&mut CreateSoundexInfo>) -> Result<Sound, ::Result> {
         let mut sound = sound::from_ptr_first(::std::ptr::null_mut());
         let op = match options {
-            Some(FmodMode(t)) => t,
-            None => ::FMOD_SOFTWARE | ::FMOD_LOOP_OFF | ::FMOD_2D | ::FMOD_CREATESTREAM
+            Some(Mode(t)) => t,
+            None => ::SOFTWARE | ::LOOP_OFF | ::_2D | ::CREATESTREAM
         };
         let ex = match exinfo {
             Some(e) => {
@@ -1192,7 +1191,7 @@ impl FmodSys {
         }
     }
 
-    pub fn get_driver_info(&self, id: i32, name_len: usize) -> Result<(FmodGuid, String), ::Result> {
+    pub fn get_driver_info(&self, id: i32, name_len: usize) -> Result<(Guid, String), ::Result> {
         let mut c = Vec::with_capacity(name_len + 1);
         let mut guid = ffi::FMOD_GUID{Data1: 0, Data2: 0, Data3: 0, Data4: [0, 0, 0, 0, 0, 0, 0, 0]};
 
@@ -1201,7 +1200,7 @@ impl FmodSys {
         }
 
         match unsafe { ffi::FMOD_System_GetDriverInfo(self.system, id as c_int, c.as_mut_ptr() as *mut c_char, name_len as c_int, &mut guid) } {
-            ::Result::Ok => Ok((FmodGuid{data1: guid.Data1, data2: guid.Data2, data3: guid.Data3, data4: guid.Data4},
+            ::Result::Ok => Ok((Guid{data1: guid.Data1, data2: guid.Data2, data3: guid.Data3, data4: guid.Data4},
                 String::from_utf8(c).unwrap())),
             e => Err(e)
         }
@@ -1263,8 +1262,8 @@ impl FmodSys {
             max_input_channels as c_int, resample_method) }
     }
 
-    pub fn get_software_format(&self) -> Result<FmodSoftwareFormat, ::Result> {
-        let mut t = FmodSoftwareFormat {
+    pub fn get_software_format(&self) -> Result<SoftwareFormat, ::Result> {
+        let mut t = SoftwareFormat {
             sample_rate: 0,
             format: ::SoundFormat::None,
             num_output_channels: 0,
@@ -1294,7 +1293,7 @@ impl FmodSys {
         }
     }
 
-    pub fn set_advanced_settings(&self, settings: &mut FmodAdvancedSettings) -> ::Result {
+    pub fn set_advanced_settings(&self, settings: &mut AdvancedSettings) -> ::Result {
         let mut converted_c_char : Vec<*const c_char> = (0..settings.ASIO_channel_list.len()).map(|pos| {
             settings.ASIO_channel_list[pos].as_ptr() as *const c_char
         }).collect();
@@ -1332,7 +1331,7 @@ impl FmodSys {
         unsafe { ffi::FMOD_System_SetAdvancedSettings(self.system, &mut advanced_settings) }
     }
 
-    pub fn get_advanced_settings(&self) -> Result<FmodAdvancedSettings, ::Result> {
+    pub fn get_advanced_settings(&self) -> Result<AdvancedSettings, ::Result> {
         let mut advanced_settings = ffi::FMOD_ADVANCEDSETTINGS{
             cbsize: mem::size_of::<ffi::FMOD_ADVANCEDSETTINGS>() as i32,
             maxMPEGcodecs: 0,
@@ -1397,7 +1396,7 @@ impl FmodSys {
                         }
                     }
                 }
-                Ok(FmodAdvancedSettings {
+                Ok(AdvancedSettings {
                     max_MPEG_codecs: advanced_settings.maxMPEGcodecs,
                     max_ADPCM_codecs: advanced_settings.maxADPCMcodecs,
                     max_XMA_codecs: advanced_settings.maxXMAcodecs,
@@ -1455,16 +1454,16 @@ impl FmodSys {
         unsafe { ffi::FMOD_System_SetPluginPath(self.system, path.as_ptr() as *const c_char) }
     }
 
-    pub fn load_plugin(&self, filename: &str, priority: u32) -> Result<FmodPluginHandle, ::Result> {
+    pub fn load_plugin(&self, filename: &str, priority: u32) -> Result<PluginHandle, ::Result> {
         let mut handle = 0u32;
 
         match unsafe { ffi::FMOD_System_LoadPlugin(self.system, filename.as_ptr() as *const c_char, &mut handle as *mut c_uint, priority as c_uint) } {
-            ::Result::Ok => Ok(FmodPluginHandle(handle)),
+            ::Result::Ok => Ok(PluginHandle(handle)),
             e => Err(e)
         }
     }
 
-    pub fn unload_plugin(&self, FmodPluginHandle(handle): FmodPluginHandle) -> ::Result {
+    pub fn unload_plugin(&self, PluginHandle(handle): PluginHandle) -> ::Result {
         unsafe { ffi::FMOD_System_UnloadPlugin(self.system, handle) }
     }
 
@@ -1477,16 +1476,16 @@ impl FmodSys {
         }
     }
 
-    pub fn get_plugin_handle(&self, plugin_type: ::PluginType, index: i32) -> Result<FmodPluginHandle, ::Result> {
+    pub fn get_plugin_handle(&self, plugin_type: ::PluginType, index: i32) -> Result<PluginHandle, ::Result> {
         let mut handle = 0u32;
 
         match unsafe { ffi::FMOD_System_GetPluginHandle(self.system, plugin_type, index as c_int, &mut handle as *mut c_uint) } {
-            ::Result::Ok => Ok(FmodPluginHandle(handle)),
+            ::Result::Ok => Ok(PluginHandle(handle)),
             e => Err(e)
         }
     }
 
-    pub fn get_plugin_info(&self, FmodPluginHandle(handle): FmodPluginHandle, name_len: usize) -> Result<(String, ::PluginType, u32), ::Result> {
+    pub fn get_plugin_info(&self, PluginHandle(handle): PluginHandle, name_len: usize) -> Result<(String, ::PluginType, u32), ::Result> {
         let mut plugin_type = ::PluginType::Output;
         let mut version = 0u32;
         let mut c = Vec::with_capacity(name_len + 1);
@@ -1502,20 +1501,20 @@ impl FmodSys {
         }
     }
 
-    pub fn set_output_by_plugin(&self, FmodPluginHandle(handle): FmodPluginHandle) -> ::Result {
+    pub fn set_output_by_plugin(&self, PluginHandle(handle): PluginHandle) -> ::Result {
         unsafe { ffi::FMOD_System_SetOutputByPlugin(self.system, handle) }
     }
 
-    pub fn get_output_by_plugin(&self) -> Result<FmodPluginHandle, ::Result> {
+    pub fn get_output_by_plugin(&self) -> Result<PluginHandle, ::Result> {
         let mut handle = 0u32;
 
         match unsafe { ffi::FMOD_System_GetOutputByPlugin(self.system, &mut handle) } {
-            ::Result::Ok => Ok(FmodPluginHandle(handle)),
+            ::Result::Ok => Ok(PluginHandle(handle)),
             e => Err(e)
         }
     }
 
-    pub fn create_DSP_by_plugin(&self, FmodPluginHandle(handle): FmodPluginHandle) -> Result<Dsp, ::Result> {
+    pub fn create_DSP_by_plugin(&self, PluginHandle(handle): PluginHandle) -> Result<Dsp, ::Result> {
         let mut dsp = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_System_CreateDSPByPlugin(self.system, handle, &mut dsp) } {
@@ -1537,8 +1536,8 @@ impl FmodSys {
         }
     }
 
-    pub fn set_3D_listener_attributes(&self, listener: i32, pos: &vector::FmodVector, vel: &vector::FmodVector, forward: &vector::FmodVector,
-        up: &vector::FmodVector) -> ::Result {
+    pub fn set_3D_listener_attributes(&self, listener: i32, pos: &vector::Vector, vel: &vector::Vector, forward: &vector::Vector,
+        up: &vector::Vector) -> ::Result {
         let c_p = vector::get_ffi(pos);
         let c_v = vector::get_ffi(vel);
         let c_f = vector::get_ffi(forward);
@@ -1547,11 +1546,11 @@ impl FmodSys {
         unsafe { ffi::FMOD_System_Set3DListenerAttributes(self.system, listener as c_int, &c_p, &c_v, &c_f, &c_u) }
     }
 
-    pub fn get_3D_listener_attributes(&self, listener: i32) -> Result<(vector::FmodVector, vector::FmodVector, vector::FmodVector, vector::FmodVector), ::Result> {
-        let mut pos = vector::get_ffi(&vector::FmodVector::new());
-        let mut vel = vector::get_ffi(&vector::FmodVector::new());
-        let mut forward = vector::get_ffi(&vector::FmodVector::new());
-        let mut up = vector::get_ffi(&vector::FmodVector::new());
+    pub fn get_3D_listener_attributes(&self, listener: i32) -> Result<(vector::Vector, vector::Vector, vector::Vector, vector::Vector), ::Result> {
+        let mut pos = vector::get_ffi(&vector::Vector::new());
+        let mut vel = vector::get_ffi(&vector::Vector::new());
+        let mut forward = vector::get_ffi(&vector::Vector::new());
+        let mut up = vector::get_ffi(&vector::Vector::new());
 
         match unsafe { ffi::FMOD_System_Get3DListenerAttributes(self.system, listener as c_int, &mut pos, &mut vel, &mut forward, &mut up) } {
             ::Result::Ok => Ok((vector::from_ptr(pos), vector::from_ptr(vel), vector::from_ptr(forward), vector::from_ptr(up))),
@@ -1596,16 +1595,16 @@ impl FmodSys {
         }
     }
 
-    pub fn set_stream_buffer_size(&self, file_buffer_size: u32, FmodTimeUnit(file_buffer_size_type): FmodTimeUnit) -> ::Result {
+    pub fn set_stream_buffer_size(&self, file_buffer_size: u32, TimeUnit(file_buffer_size_type): TimeUnit) -> ::Result {
         unsafe { ffi::FMOD_System_SetStreamBufferSize(self.system, file_buffer_size as c_uint, file_buffer_size_type) }
     }
 
-    pub fn get_stream_buffer_size(&self) -> Result<(u32, FmodTimeUnit), ::Result> {
+    pub fn get_stream_buffer_size(&self) -> Result<(u32, TimeUnit), ::Result> {
         let mut file_buffer_size = 0u32;
         let mut file_buffer_size_type = 0u32;
 
         match unsafe { ffi::FMOD_System_GetStreamBufferSize(self.system, &mut file_buffer_size, &mut file_buffer_size_type) } {
-            ::Result::Ok => Ok((file_buffer_size, FmodTimeUnit(file_buffer_size_type))),
+            ::Result::Ok => Ok((file_buffer_size, TimeUnit(file_buffer_size_type))),
             e => Err(e)
         }
     }
@@ -1619,11 +1618,11 @@ impl FmodSys {
         }
     }
 
-    pub fn get_output_handle(&self) -> Result<FmodOutputHandle, ::Result> {
+    pub fn get_output_handle(&self) -> Result<OutputHandle, ::Result> {
         let mut output_h = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_System_GetOutputHandle(self.system, &mut output_h) } {
-            ::Result::Ok => Ok(FmodOutputHandle{handle: output_h}),
+            ::Result::Ok => Ok(OutputHandle{handle: output_h}),
             e => Err(e)
         }
     }
@@ -1824,7 +1823,7 @@ impl FmodSys {
         }
     }
 
-    pub fn get_record_driver_info(&self, id: i32, name_len: usize) -> Result<(FmodGuid, String), ::Result> {
+    pub fn get_record_driver_info(&self, id: i32, name_len: usize) -> Result<(Guid, String), ::Result> {
         let mut guid = ffi::FMOD_GUID{Data1: 0, Data2: 0, Data3: 0, Data4: [0, 0, 0, 0, 0, 0, 0, 0]};
         let mut c = Vec::with_capacity(name_len + 1);
 
@@ -1833,7 +1832,7 @@ impl FmodSys {
         }
 
         match unsafe { ffi::FMOD_System_GetRecordDriverInfo(self.system, id as c_int, c.as_mut_ptr() as *mut c_char, name_len as c_int, &mut guid) } {
-            ::Result::Ok => Ok((FmodGuid{data1: guid.Data1, data2: guid.Data2, data3: guid.Data3, data4: guid.Data4},
+            ::Result::Ok => Ok((Guid{data1: guid.Data1, data2: guid.Data2, data3: guid.Data3, data4: guid.Data4},
                 String::from_utf8(c).unwrap())),
             e => Err(e)
         }
@@ -1903,9 +1902,9 @@ impl FmodSys {
         }
     }
 
-    pub fn get_geometry_occlusion(&self) -> Result<(vector::FmodVector, vector::FmodVector, f32, f32), ::Result> {
-        let listener = vector::get_ffi(&vector::FmodVector::new());
-        let source = vector::get_ffi(&vector::FmodVector::new());
+    pub fn get_geometry_occlusion(&self) -> Result<(vector::Vector, vector::Vector, f32, f32), ::Result> {
+        let listener = vector::get_ffi(&vector::Vector::new());
+        let source = vector::get_ffi(&vector::Vector::new());
         let mut direct = 0f32;
         let mut reverb = 0f32;
 
@@ -1915,8 +1914,8 @@ impl FmodSys {
         }
     }
 
-    pub fn get_memory_info(&self, FmodMemoryBits(memory_bits): FmodMemoryBits,
-        FmodEventMemoryBits(event_memory_bits): FmodEventMemoryBits) -> Result<(u32, FmodMemoryUsageDetails), ::Result> {
+    pub fn get_memory_info(&self, MemoryBits(memory_bits): MemoryBits,
+        EventMemoryBits(event_memory_bits): EventMemoryBits) -> Result<(u32, MemoryUsageDetails), ::Result> {
         let mut details = get_memory_usage_details_ffi(Default::default());
         let mut memory_used : c_uint = 0;
 

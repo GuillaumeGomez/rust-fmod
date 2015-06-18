@@ -31,7 +31,7 @@ extern crate rfmod;
 use std::thread::sleep_ms;
 
 fn play_to_the_end(sound: rfmod::Sound, len: usize) -> rfmod::Result {
-    let length = match sound.get_length(rfmod::FMOD_TIMEUNIT_MS) {
+    let length = match sound.get_length(rfmod::TIMEUNIT_MS) {
         Ok(l) => l,
         Err(e) => panic!("sound.get_length error: {:?}", e)
     };
@@ -47,7 +47,7 @@ fn play_to_the_end(sound: rfmod::Sound, len: usize) -> rfmod::Result {
                 match chan.is_playing() {
                     Ok(b) => {
                         if b == true {
-                            let position = match chan.get_position(rfmod::FMOD_TIMEUNIT_MS) {
+                            let position = match chan.get_position(rfmod::TIMEUNIT_MS) {
                                 Ok(p) => p,
                                 Err(e) => {
                                     panic!("channel.get_position failed: {:?}", e)
@@ -85,17 +85,17 @@ fn main() {
     if tmp.len() < 1 {
         panic!("USAGE: ./simple_music_player [music_file]");
     }
-    let fmod = match rfmod::FmodSys::new() {
+    let fmod = match rfmod::Sys::new() {
         Ok(f) => f,
         Err(e) => {
-            panic!("FmodSys.new : {:?}", e);
+            panic!("Sys::new() : {:?}", e);
         }
     };
 
     match fmod.init() {
         rfmod::Result::Ok => {}
         e => {
-            panic!("FmodSys.init failed : {:?}", e);
+            panic!("Sys::init() failed : {:?}", e);
         }
     };
 
@@ -104,7 +104,7 @@ fn main() {
     let sound = match fmod.create_sound(&(*arg1), None, None) {
         Ok(s) => s,
         Err(err) => {
-            panic!("FmodSys.create_sound failed : {:?}", err);
+            panic!("Sys::create_sound() failed : {:?}", err);
         },
     };
 
@@ -113,7 +113,7 @@ fn main() {
             println!("Ok !");
         },
         err => {
-            panic!("FmodSys.play_to_the_end : {:?}", err);
+            panic!("Sys::play_to_the_end() : {:?}", err);
         }
     };
 }

@@ -24,18 +24,18 @@
 
 use dsp;
 use sound;
-use types::FmodTimeUnit;
+use types::TimeUnit;
 use fmod_sys;
 use file;
 
-/*pub type SystemCallback = Option<fn(fmod: &FmodSys, _type:SystemCallbackType, command_data1: *mut c_void,
+/*pub type SystemCallback = Option<fn(fmod: &Sys, _type:SystemCallbackType, command_data1: *mut c_void,
     command_data2: *mut c_void) -> ::Result>;*/
 
 /* file callbacks */
-pub type FileOpenCallback = Option<fn(name: &str, unicode: i32) -> Option<(file::FmodFile, Option<fmod_sys::FmodUserData>)>>;
-pub type FileCloseCallback = Option<fn(handle: &mut file::FmodFile, user_data: Option<&mut fmod_sys::FmodUserData>)>;
-pub type FileReadCallback = Option<fn(handle: &mut file::FmodFile, buffer: &mut [u8], size_to_read: u32, user_data: Option<&mut fmod_sys::FmodUserData>) -> usize>;
-pub type FileSeekCallback = Option<fn(handle: &mut file::FmodFile, pos: u32, user_data: Option<&mut fmod_sys::FmodUserData>)>;
+pub type FileOpenCallback = Option<fn(name: &str, unicode: i32) -> Option<(file::FmodFile, Option<fmod_sys::UserData>)>>;
+pub type FileCloseCallback = Option<fn(handle: &mut file::FmodFile, user_data: Option<&mut fmod_sys::UserData>)>;
+pub type FileReadCallback = Option<fn(handle: &mut file::FmodFile, buffer: &mut [u8], size_to_read: u32, user_data: Option<&mut fmod_sys::UserData>) -> usize>;
+pub type FileSeekCallback = Option<fn(handle: &mut file::FmodFile, pos: u32, user_data: Option<&mut fmod_sys::UserData>)>;
 /*pub type FMOD_FILE_ASYNCREADCALLBACK = Option<extern "C" fn(arg1: *mut FMOD_ASYNCREADINFO, arg2: *mut c_void) -> ::Result>;
 pub type FMOD_FILE_ASYNCCANCELCALLBACK = Option<extern "C" fn(arg1: *mut c_void, arg2: *mut c_void, arg3: c_uint) -> ::Result>;*/
 
@@ -44,7 +44,7 @@ pub type SoundNonBlockCallback = Option<fn(sound: &sound::Sound, result: ::Resul
 /// callback which allow to set/change data that will be played
 pub type SoundPcmReadCallback = Option<fn(sound: &sound::Sound, data: &mut [i16]) -> ::Result>;
 /// notify the user that music position has changed
-pub type SoundPcmSetPosCallback = Option<fn(sound: &sound::Sound, sub_sound: i32, position: u32, postype: FmodTimeUnit) -> ::Result>;
+pub type SoundPcmSetPosCallback = Option<fn(sound: &sound::Sound, sub_sound: i32, position: u32, postype: TimeUnit) -> ::Result>;
 
 /*  codec callbacks */
 /*pub type FMOD_CODEC_OPENCALLBACK = Option<extern "C" fn(codec_state: *mut FMOD_CODEC_STATE, user_mode: FMOD_MODE, userexinfo: *mut FMOD_CREATESOUNDEXINFO) -> ::Result>;

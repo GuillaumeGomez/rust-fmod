@@ -81,17 +81,17 @@ fn get_key() -> Result<isize, Error> {
 
 fn main() {
     let channels = 2i32;
-    let fmod = match rfmod::FmodSys::new() {
+    let fmod = match rfmod::Sys::new() {
         Ok(f) => f,
         Err(e) => {
-            panic!("FmodSys.new : {:?}", e);
+            panic!("Sys::new() : {:?}", e);
         }
     };
 
-    match fmod.init_with_parameters(32i32, rfmod::FmodInitFlag(rfmod::FMOD_INIT_NORMAL)) {
+    match fmod.init_with_parameters(32i32, rfmod::InitFlag(rfmod::INIT_NORMAL)) {
         rfmod::Result::Ok => {}
         e => {
-            panic!("FmodSys.init failed : {:?}", e);
+            panic!("Sys::init() failed : {:?}", e);
         }
     };
 
@@ -113,7 +113,7 @@ fn main() {
         println!("Invalid entry");
         ret = get_key().unwrap();
     }
-    let mut exinfo : rfmod::FmodCreateSoundexInfo = Default::default();
+    let mut exinfo : rfmod::CreateSoundexInfo = Default::default();
 
     exinfo.decode_buffer_size = 44100;
     exinfo.length = 44100u32 * channels as u32 * std::mem::size_of::<i16>() as u32 * 5u32;
@@ -124,10 +124,10 @@ fn main() {
 
     let sound = match match ret {
         1 => fmod.create_sound("",
-            Some(rfmod::FmodMode(rfmod::FMOD_2D | rfmod::FMOD_OPENUSER | rfmod::FMOD_HARDWARE | rfmod::FMOD_LOOP_NORMAL
-            | rfmod::FMOD_CREATESTREAM)), Some(&mut exinfo)),
+            Some(rfmod::Mode(rfmod::_2D | rfmod::OPENUSER | rfmod::HARDWARE | rfmod::LOOP_NORMAL
+            | rfmod::CREATESTREAM)), Some(&mut exinfo)),
         2 => fmod.create_sound("",
-            Some(rfmod::FmodMode(rfmod::FMOD_2D | rfmod::FMOD_OPENUSER | rfmod::FMOD_HARDWARE | rfmod::FMOD_LOOP_NORMAL)),
+            Some(rfmod::Mode(rfmod::_2D | rfmod::OPENUSER | rfmod::HARDWARE | rfmod::LOOP_NORMAL)),
             Some(&mut exinfo)),
         _ => return
     } {
@@ -140,7 +140,7 @@ fn main() {
         Err(e) => panic!("sound.play error: {:?}", e)
     };
 
-    let length = match sound.get_length(rfmod::FMOD_TIMEUNIT_MS) {
+    let length = match sound.get_length(rfmod::TIMEUNIT_MS) {
         Ok(l) => l,
         Err(e) => panic!("sound.get_length failed: {:?}", e)
     };
@@ -151,7 +151,7 @@ fn main() {
             false
         }
     } {
-        let position = match chan.get_position(rfmod::FMOD_TIMEUNIT_MS) {
+        let position = match chan.get_position(rfmod::TIMEUNIT_MS) {
             Ok(p) => p,
             Err(e) => {
                 println!("channel.get_position failed: {:?}", e);

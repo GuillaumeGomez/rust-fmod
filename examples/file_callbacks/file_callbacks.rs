@@ -32,7 +32,7 @@ extern crate rfmod;
 use rfmod::SeekStyle;
 
 #[allow(unused_variables)]
-fn my_open(music_name: &str, unicode: i32) -> Option<(rfmod::FmodFile, Option<rfmod::FmodUserData>)> {
+fn my_open(music_name: &str, unicode: i32) -> Option<(rfmod::FmodFile, Option<rfmod::UserData>)> {
     println!("Let's start by opening {} !", music_name);
     let file = match rfmod::FmodFile::open(music_name) {
         Some(f) => f,
@@ -43,18 +43,18 @@ fn my_open(music_name: &str, unicode: i32) -> Option<(rfmod::FmodFile, Option<rf
 }
 
 #[allow(unused_variables)]
-fn my_close(music_file: &mut rfmod::FmodFile, user_data: Option<&mut rfmod::FmodUserData>) {
+fn my_close(music_file: &mut rfmod::FmodFile, user_data: Option<&mut rfmod::UserData>) {
     println!("This is the end !");
     music_file.close();
 }
 
 #[allow(unused_variables)]
-fn my_read(handle: &mut rfmod::FmodFile, buffer: &mut [u8], size_to_read: u32, user_data: Option<&mut rfmod::FmodUserData>) -> usize {
+fn my_read(handle: &mut rfmod::FmodFile, buffer: &mut [u8], size_to_read: u32, user_data: Option<&mut rfmod::UserData>) -> usize {
     handle.read(buffer)
 }
 
 #[allow(unused_variables)]
-fn my_seek(handle: &mut rfmod::FmodFile, pos: u32, user_data: Option<&mut rfmod::FmodUserData>) {
+fn my_seek(handle: &mut rfmod::FmodFile, pos: u32, user_data: Option<&mut rfmod::UserData>) {
     handle.seek(pos as i64, SeekStyle::SeekSet);
 }
 
@@ -70,17 +70,17 @@ fn main() {
     if tmp.len() < 1 {
         panic!("USAGE: ./file_callback [music_file]");
     }
-    let fmod = match rfmod::FmodSys::new() {
+    let fmod = match rfmod::Sys::new() {
         Ok(f) => f,
         Err(e) => {
-            panic!("FmodSys.new : {:?}", e);
+            panic!("Sys::new() : {:?}", e);
         }
     };
 
-    match fmod.init_with_parameters(1i32, rfmod::FmodInitFlag(rfmod::FMOD_INIT_NORMAL)) {
+    match fmod.init_with_parameters(1i32, rfmod::InitFlag(rfmod::INIT_NORMAL)) {
         rfmod::Result::Ok => {}
         e => {
-            panic!("FmodSys.init failed : {:?}", e);
+            panic!("Sys::init() failed : {:?}", e);
         }
     };
 
@@ -101,7 +101,7 @@ fn main() {
 
     let arg1 = tmp.get(0).unwrap();
     let sound = match fmod.create_stream((*arg1).as_ref(),
-        Some(rfmod::FmodMode(rfmod::FMOD_2D | rfmod::FMOD_HARDWARE | rfmod::FMOD_LOOP_OFF)), None)
+        Some(rfmod::Mode(rfmod::_2D | rfmod::HARDWARE | rfmod::LOOP_OFF)), None)
     {
         Ok(s) => s,
         Err(e) => panic!("create sound error: {:?}", e)
@@ -112,7 +112,7 @@ fn main() {
         Err(e) => panic!("sound.play error: {:?}", e)
     };
 
-    let length = match sound.get_length(rfmod::FMOD_TIMEUNIT_MS) {
+    let length = match sound.get_length(rfmod::TIMEUNIT_MS) {
         Ok(l) => l,
         Err(e) => panic!("sound.get_length error: {:?}", e)
     };
@@ -123,7 +123,7 @@ fn main() {
             false
         }
     } {
-        let position = match chan.get_position(rfmod::FMOD_TIMEUNIT_MS) {
+        let position = match chan.get_position(rfmod::TIMEUNIT_MS) {
             Ok(p) => p,
             Err(e) => {
                 println!("channel.get_position failed: {:?}", e);

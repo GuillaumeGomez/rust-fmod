@@ -27,13 +27,12 @@ use types::*;
 use callbacks::*;
 use dsp_connection;
 use fmod_sys;
-use fmod_sys::{FmodMemoryUsageDetails, FmodSys};
+use fmod_sys::{MemoryUsageDetails, Sys};
 use std::mem::transmute;
 use channel;
 use libc::{c_char, c_void, c_uint, c_int, c_float};
 use std::default::Default;
 use c_vec::CVec;
-use std::ptr::Unique;
 
 extern "C" fn create_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> ::Result {
     unsafe {
@@ -112,8 +111,8 @@ extern "C" fn read_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, in_buffer: *mut
                 let callbacks : &mut UserData = transmute(tmp);
                 match callbacks.callbacks.read_callback {
                     Some(p) => {
-                        let mut v_in_buffer = CVec::new(Unique::new(in_buffer), (((length as i32 - 1i32) * in_channels) + out_channels) as usize);
-                        let mut v_out_buffer = CVec::new(Unique::new(out_buffer), (((length as i32 - 1i32) * out_channels) + out_channels) as usize);
+                        let mut v_in_buffer = CVec::new(in_buffer, (((length as i32 - 1i32) * in_channels) + out_channels) as usize);
+                        let mut v_out_buffer = CVec::new(out_buffer, (((length as i32 - 1i32) * out_channels) + out_channels) as usize);
 
                         p(&from_state_ptr(::std::ptr::read(dsp_state as *const ffi::FMOD_DSP_STATE)), v_in_buffer.as_mut(), v_out_buffer.as_mut(),
                             length as u32, in_channels as i32, out_channels as i32)
@@ -553,7 +552,7 @@ impl Drop for Dsp {
 }
 
 impl Dsp {
-    pub fn get_system_object(&self) -> Result<FmodSys, ::Result> {
+    pub fn get_system_object(&self) -> Result<Sys, ::Result> {
         let mut system = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_DSP_GetSystemObject(self.dsp, &mut system) } {
@@ -863,8 +862,8 @@ impl Dsp {
         }
     }
 
-    pub fn get_memory_info(&self, FmodMemoryBits(memory_bits): FmodMemoryBits,
-        FmodEventMemoryBits(event_memory_bits): FmodEventMemoryBits) -> Result<(u32, FmodMemoryUsageDetails), ::Result> {
+    pub fn get_memory_info(&self, MemoryBits(memory_bits): MemoryBits,
+        EventMemoryBits(event_memory_bits): EventMemoryBits) -> Result<(u32, MemoryUsageDetails), ::Result> {
         let mut details = fmod_sys::get_memory_usage_details_ffi(Default::default());
         let mut memory_used = 0u32;
 

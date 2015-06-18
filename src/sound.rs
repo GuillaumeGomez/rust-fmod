@@ -30,7 +30,7 @@ use channel::Channel;
 use sound_group;
 use vector;
 use fmod_sys;
-use fmod_sys::{FmodMemoryUsageDetails, FmodSys};
+use fmod_sys::{MemoryUsageDetails, Sys};
 use std::mem::transmute;
 use std::fs::File;
 use std::mem;
@@ -183,7 +183,7 @@ impl Drop for Sound {
 }
 
 impl Sound {
-    pub fn get_system_object(&self) -> Result<FmodSys, ::Result> {
+    pub fn get_system_object(&self) -> Result<Sys, ::Result> {
         let mut system = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_Sound_GetSystemObject(self.sound, &mut system) } {
@@ -316,7 +316,7 @@ impl Sound {
         }
     }
 
-    pub fn set_3D_custom_rolloff(&self, points: Vec<vector::FmodVector>) -> ::Result {
+    pub fn set_3D_custom_rolloff(&self, points: Vec<vector::Vector>) -> ::Result {
         let mut points_vec = Vec::with_capacity(points.len());
 
         for tmp in points.into_iter() {
@@ -326,7 +326,7 @@ impl Sound {
     }
 
     //to test
-    pub fn get_3D_custom_rolloff(&self, num_points: u32) -> Result<Vec<vector::FmodVector>, ::Result> {
+    pub fn get_3D_custom_rolloff(&self, num_points: u32) -> Result<Vec<vector::Vector>, ::Result> {
         let mut points_vec = Vec::with_capacity(num_points as usize);
         let mut pointer = points_vec.as_mut_ptr();
 
@@ -369,7 +369,7 @@ impl Sound {
         }
     }
 
-    pub fn get_length(&self, FmodTimeUnit(length_type): FmodTimeUnit) -> Result<u32, ::Result> {
+    pub fn get_length(&self, TimeUnit(length_type): TimeUnit) -> Result<u32, ::Result> {
         let mut length = 0u32;
 
         match unsafe { ffi::FMOD_Sound_GetLength(self.sound, &mut length, length_type) } {
@@ -479,7 +479,7 @@ impl Sound {
         }
     }
 
-    pub fn get_sync_point_info(&self, sync_point: FmodSyncPoint, name_len: usize, FmodTimeUnit(offset_type): FmodTimeUnit) -> Result<(String, u32), ::Result> {
+    pub fn get_sync_point_info(&self, sync_point: FmodSyncPoint, name_len: usize, TimeUnit(offset_type): TimeUnit) -> Result<(String, u32), ::Result> {
         let mut offset = 0u32;
         let mut c = Vec::with_capacity(name_len + 1);
 
@@ -494,7 +494,7 @@ impl Sound {
         }
     }
 
-    pub fn add_sync_point(&self, offset: u32, FmodTimeUnit(offset_type): FmodTimeUnit, name: String) -> Result<FmodSyncPoint, ::Result> {
+    pub fn add_sync_point(&self, offset: u32, TimeUnit(offset_type): TimeUnit, name: String) -> Result<FmodSyncPoint, ::Result> {
         let mut sync_point = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_Sound_AddSyncPoint(self.sound, offset, offset_type, name.as_ptr() as *const c_char, &mut sync_point) } {
@@ -507,15 +507,15 @@ impl Sound {
         unsafe { ffi::FMOD_Sound_DeleteSyncPoint(self.sound, sync_point.sync_point) }
     }
 
-    pub fn set_mode(&self, FmodMode(mode): FmodMode) -> ::Result {
+    pub fn set_mode(&self, Mode(mode): Mode) -> ::Result {
         unsafe { ffi::FMOD_Sound_SetMode(self.sound, mode) }
     }
 
-    pub fn get_mode(&self) -> Result<FmodMode, ::Result> {
+    pub fn get_mode(&self) -> Result<Mode, ::Result> {
         let mut mode = 0u32;
 
         match unsafe { ffi::FMOD_Sound_GetMode(self.sound, &mut mode) } {
-            ::Result::Ok => Ok(FmodMode(mode)),
+            ::Result::Ok => Ok(Mode(mode)),
             e => Err(e)
         }
     }
@@ -533,12 +533,12 @@ impl Sound {
         }
     }
 
-    pub fn set_loop_points(&self, loop_start: u32, FmodTimeUnit(loop_start_type): FmodTimeUnit, loop_end: u32,
-        FmodTimeUnit(loop_end_type): FmodTimeUnit) -> ::Result {
+    pub fn set_loop_points(&self, loop_start: u32, TimeUnit(loop_start_type): TimeUnit, loop_end: u32,
+        TimeUnit(loop_end_type): TimeUnit) -> ::Result {
         unsafe { ffi::FMOD_Sound_SetLoopPoints(self.sound, loop_start, loop_start_type, loop_end, loop_end_type) }
     }
 
-    pub fn get_loop_points(&self, FmodTimeUnit(loop_start_type): FmodTimeUnit, FmodTimeUnit(loop_end_type): FmodTimeUnit) -> Result<(u32, u32), ::Result> {
+    pub fn get_loop_points(&self, TimeUnit(loop_start_type): TimeUnit, TimeUnit(loop_end_type): TimeUnit) -> Result<(u32, u32), ::Result> {
         let mut loop_start = 0u32;
         let mut loop_end = 0u32;
 
@@ -593,8 +593,8 @@ impl Sound {
         unsafe { ffi::FMOD_Sound_SeekData(self.sound, pcm) }
     }
 
-    pub fn get_memory_info(&self, FmodMemoryBits(memory_bits): FmodMemoryBits,
-        FmodEventMemoryBits(event_memory_bits): FmodEventMemoryBits) -> Result<(u32, FmodMemoryUsageDetails), ::Result> {
+    pub fn get_memory_info(&self, MemoryBits(memory_bits): MemoryBits,
+        EventMemoryBits(event_memory_bits): EventMemoryBits) -> Result<(u32, MemoryUsageDetails), ::Result> {
         let mut details = fmod_sys::get_memory_usage_details_ffi(Default::default());
         let mut memory_used = 0u32;
 
@@ -676,7 +676,7 @@ impl Sound {
             let mut channels = 0i32;
             let mut bits = 0i32;
             let mut rate = 0f32;
-            let len_bytes = match self.get_length(::FMOD_TIMEUNIT_PCMBYTES) {
+            let len_bytes = match self.get_length(::TIMEUNIT_PCMBYTES) {
                 Ok(l) => l,
                 Err(e) => return Err(format!("{:?}", e))
             };

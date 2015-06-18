@@ -27,7 +27,7 @@ use ffi;
 use sound;
 use libc::c_void;
 use fmod_sys;
-use fmod_sys::FmodMemoryUsageDetails;
+use fmod_sys::MemoryUsageDetails;
 use std::mem::transmute;
 use libc::{c_char};
 use std::default::Default;
@@ -164,8 +164,8 @@ impl SoundGroup {
         }
     }
 
-    pub fn get_memory_info(&self, FmodMemoryBits(memory_bits): FmodMemoryBits,
-        FmodEventMemoryBits(event_memory_bits): FmodEventMemoryBits) -> Result<(u32, FmodMemoryUsageDetails), ::Result> {
+    pub fn get_memory_info(&self, MemoryBits(memory_bits): MemoryBits,
+        EventMemoryBits(event_memory_bits): EventMemoryBits) -> Result<(u32, MemoryUsageDetails), ::Result> {
         let mut details = fmod_sys::get_memory_usage_details_ffi(Default::default());
         let mut memory_used = 0u32;
 

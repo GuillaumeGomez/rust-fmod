@@ -56,10 +56,10 @@ fn get_key() -> Result<isize, Error> {
 }
 
 fn main() {
-    let fmod = match rfmod::FmodSys::new() {
+    let fmod = match rfmod::Sys::new() {
         Ok(f) => f,
         Err(e) => {
-            panic!("FmodSys.new : {:?}", e);
+            panic!("Sys::new() : {:?}", e);
         }
     };
 
@@ -146,7 +146,7 @@ fn main() {
         }
     };
 
-    let mut exinfo : rfmod::FmodCreateSoundexInfo = Default::default();
+    let mut exinfo : rfmod::CreateSoundexInfo = Default::default();
     let secs = 5i32;
 
     exinfo.num_channels      = 2;
@@ -154,7 +154,7 @@ fn main() {
     exinfo.default_frequency = 44100;
     exinfo.length            = (exinfo.default_frequency * mem::size_of::<i16>() as i32 * exinfo.num_channels * secs) as u32;
 
-    let sound = match fmod.create_sound("", Some(rfmod::FmodMode(rfmod::FMOD_2D | rfmod::FMOD_SOFTWARE | rfmod::FMOD_OPENUSER)),
+    let sound = match fmod.create_sound("", Some(rfmod::Mode(rfmod::_2D | rfmod::SOFTWARE | rfmod::OPENUSER)),
         Some(&mut exinfo)) {
         Ok(s) => s,
         Err(e) => panic!("create sound error: {:?}", e)
@@ -209,13 +209,13 @@ fn main() {
                                         false
                                     }
                                 } {
-                                    print!("\rPlaying : {} / {}", match chan.get_position(rfmod::FMOD_TIMEUNIT_MS) {
+                                    print!("\rPlaying : {} / {}", match chan.get_position(rfmod::TIMEUNIT_MS) {
                                         Ok(l) => l,
                                         Err(e) => {
                                             println!("channel.get_position failed: {:?}", e);
                                             return;
                                         }
-                                    }, match sound.get_length(rfmod::FMOD_TIMEUNIT_MS) {
+                                    }, match sound.get_length(rfmod::TIMEUNIT_MS) {
                                         Ok(l) => l,
                                         Err(e) => {
                                             println!("sound.get_length failed: {:?}", e);

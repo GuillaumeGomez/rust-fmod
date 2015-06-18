@@ -27,7 +27,7 @@ use types::*;
 use vector;
 use reverb_properties;
 use fmod_sys;
-use fmod_sys::FmodMemoryUsageDetails;
+use fmod_sys::MemoryUsageDetails;
 use std::mem::transmute;
 use libc::{c_void};
 use std::default::Default;
@@ -68,14 +68,14 @@ impl Reverb {
         }
     }
 
-    pub fn set_3D_attributes(&self, position: vector::FmodVector, min_distance: f32, max_distance: f32) -> ::Result {
+    pub fn set_3D_attributes(&self, position: vector::Vector, min_distance: f32, max_distance: f32) -> ::Result {
         let t_position = vector::get_ffi(&position);
 
         unsafe { ffi::FMOD_Reverb_Set3DAttributes(self.reverb, &t_position, min_distance, max_distance) }
     }
 
-    pub fn get_3D_attributes(&self) -> Result<(vector::FmodVector, f32, f32), ::Result> {
-        let mut position = vector::get_ffi(&vector::FmodVector::new());
+    pub fn get_3D_attributes(&self) -> Result<(vector::Vector, f32, f32), ::Result> {
+        let mut position = vector::get_ffi(&vector::Vector::new());
         let mut min_distance = 0f32;
         let mut max_distance = 0f32;
 
@@ -119,8 +119,8 @@ impl Reverb {
         }
     }
 
-    pub fn get_memory_info(&self, FmodMemoryBits(memory_bits): FmodMemoryBits,
-        FmodEventMemoryBits(event_memory_bits): FmodEventMemoryBits) -> Result<(u32, FmodMemoryUsageDetails), ::Result> {
+    pub fn get_memory_info(&self, MemoryBits(memory_bits): MemoryBits,
+        EventMemoryBits(event_memory_bits): EventMemoryBits) -> Result<(u32, MemoryUsageDetails), ::Result> {
         let mut details = fmod_sys::get_memory_usage_details_ffi(Default::default());
         let mut memory_used = 0u32;
 

@@ -25,17 +25,17 @@
 use ffi;
 use std::default::Default;
 
-pub fn from_ptr(vec: ffi::FMOD_VECTOR) -> FmodVector {
-    FmodVector {x: vec.x, y: vec.y, z: vec.z}
+pub fn from_ptr(vec: ffi::FMOD_VECTOR) -> Vector {
+    Vector {x: vec.x, y: vec.y, z: vec.z}
 }
 
-pub fn get_ffi(vec: &FmodVector) -> ffi::FMOD_VECTOR {
+pub fn get_ffi(vec: &Vector) -> ffi::FMOD_VECTOR {
     ffi::FMOD_VECTOR {x: vec.x, y: vec.y, z: vec.z}
 }
 
 #[derive(Debug, Clone, Copy)]
 /// Structure describing a point in 3D space.
-pub struct FmodVector
+pub struct Vector
 {
     /// X co-ordinate in 3D space.
     pub x: f32,
@@ -45,24 +45,24 @@ pub struct FmodVector
     pub z: f32
 }
 
-impl Default for FmodVector {
-    fn default() -> FmodVector {
-        FmodVector::new()
+impl Default for Vector {
+    fn default() -> Vector {
+        Vector::new()
     }
 }
 
-impl FmodVector {
-    pub fn new() -> FmodVector {
-        FmodVector{x: 0f32, y: 0f32, z: 0f32}
+impl Vector {
+    pub fn new() -> Vector {
+        Vector{x: 0f32, y: 0f32, z: 0f32}
     }
 }
 
-impl PartialEq for FmodVector {
-    fn eq(&self, other: &FmodVector) -> bool {
+impl PartialEq for Vector {
+    fn eq(&self, other: &Vector) -> bool {
         self.x == other.x && self.y == other.y && self.z == other.z
     }
 
-    fn ne(&self, other: &FmodVector) -> bool {
+    fn ne(&self, other: &Vector) -> bool {
         !self.eq(other)
     }
 }

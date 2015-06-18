@@ -55,7 +55,7 @@ fn get_key() -> Result<isize, Error> {
     }
 }
 
-fn switch_dsp_state(dsp: &rfmod::Dsp, fmod: &rfmod::FmodSys, dsp_type: isize) {
+fn switch_dsp_state(dsp: &rfmod::Dsp, fmod: &rfmod::Sys, dsp_type: isize) {
     if match dsp.get_active() {
         Ok(c) => c,
         Err(_) => return
@@ -91,17 +91,17 @@ fn main() {
     if tmp.len() < 1 {
         panic!("USAGE: ./effects [music_file]");
     }
-    let fmod = match rfmod::FmodSys::new() {
+    let fmod = match rfmod::Sys::new() {
         Ok(f) => f,
         Err(e) => {
-            panic!("FmodSys.new : {:?}", e);
+            panic!("Sys::new() : {:?}", e);
         }
     };
 
-    match fmod.init_with_parameters(32i32, rfmod::FmodInitFlag(rfmod::FMOD_INIT_NORMAL)) {
+    match fmod.init_with_parameters(32i32, rfmod::InitFlag(rfmod::INIT_NORMAL)) {
         rfmod::Result::Ok => {}
         e => {
-            panic!("FmodSys.init failed : {:?}", e);
+            panic!("Sys::init() failed : {:?}", e);
         }
     };
 
@@ -110,11 +110,11 @@ fn main() {
     println!("==============================================");
 
     let arg1 = tmp.get(0).unwrap();
-    let sound = match fmod.create_sound(&(*arg1), Some(rfmod::FmodMode(rfmod::FMOD_SOFTWARE)), None) {
+    let sound = match fmod.create_sound(&(*arg1), Some(rfmod::Mode(rfmod::SOFTWARE)), None) {
         Ok(s) => s,
         Err(e) => panic!("create sound error: {:?}", e)
     };
-    sound.set_mode(rfmod::FmodMode(rfmod::FMOD_LOOP_NORMAL));
+    sound.set_mode(rfmod::Mode(rfmod::LOOP_NORMAL));
 
     match sound.play() {
         Ok(_) => {},

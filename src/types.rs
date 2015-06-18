@@ -23,16 +23,16 @@
 */
 
 #[derive(Clone, Copy)]
-pub struct FmodMode(pub u32);
+pub struct Mode(pub u32);
 #[derive(Clone, Copy)]
-pub struct FmodTimeUnit(pub u32);
+pub struct TimeUnit(pub u32);
 #[derive(Clone, Copy)]
 pub struct FmodCaps(pub u32);
 #[derive(Clone, Copy)]
-pub struct FmodPluginHandle(pub u32);
+pub struct PluginHandle(pub u32);
 #[derive(Clone, Copy)]
-pub struct FmodInitFlag(pub u32);
+pub struct InitFlag(pub u32);
 #[derive(Clone, Copy)]
-pub struct FmodMemoryBits(pub u32);
+pub struct MemoryBits(pub u32);
 #[derive(Clone, Copy)]
-pub struct FmodEventMemoryBits(pub u32);
+pub struct EventMemoryBits(pub u32);
