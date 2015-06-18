@@ -24,9 +24,6 @@
 
 #![crate_type = "bin"]
 
-#![feature(libc, collections)]
-
-extern crate libc;
 extern crate rfmod;
 
 use std::default::Default;
@@ -38,7 +35,7 @@ fn main() {
     for tmp in t_args {
         args.push(tmp);
     }
-    let tmp = args.tail();
+    let tmp = args[1..].to_owned();
 
     if tmp.len() < 1 {
         panic!("USAGE: ./3d [music_file]");
@@ -101,7 +98,7 @@ fn main() {
         last_pos = listener_pos;
         fmod.set_3D_listener_attributes(0, &listener_pos, &vel, &forward, &up);
 
-        let mut tmp = String::from_str("|.......................<1>......................<2>....................|\r");
+        let mut tmp = "|.......................<1>......................<2>....................|\r".to_owned();
         unsafe { tmp.as_mut_vec().as_mut()[(listener_pos.x as isize + 35isize) as usize] = 'L' as u8; }
         print!("{}", tmp);
         fmod.update();

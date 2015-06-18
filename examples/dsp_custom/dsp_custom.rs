@@ -27,8 +27,6 @@
 #![allow(non_snake_case)]
 #![allow(unused_variables)]
 
-#![feature(collections)]
-
 extern crate rfmod;
 
 use std::default::Default;
@@ -82,7 +80,7 @@ fn main() {
     for tmp in t_args {
         args.push(tmp);
     }
-    let tmp = args.tail();
+    let tmp = args[1..].to_owned();
 
     if tmp.len() < 1 {
         panic!("USAGE: ./dsp_custom [music_file]");
@@ -127,7 +125,7 @@ fn main() {
     let mut description : rfmod::DspDescription = Default::default();
 
     description.read = Some(my_DSP_callback as fn(&_, &mut _, &mut _, _, _, _) -> _);
-    description.name = String::from_str("test");
+    description.name = "test".to_owned();
 
     let dsp = match fmod.create_DSP_with_description(&mut description) {
         Ok(dsp) => dsp,

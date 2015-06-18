@@ -24,9 +24,6 @@
 
 #![crate_type = "bin"]
 
-#![feature(libc, collections)]
-
-extern crate libc;
 extern crate rfmod;
 
 use std::thread::sleep_ms;
@@ -86,7 +83,7 @@ fn main() {
     for tmp in t_args {
         args.push(tmp);
     }
-    let tmp = args.tail();
+    let tmp = args[1..].to_owned();
 
     if tmp.len() < 1 {
         panic!("USAGE: ./effects [music_file]");

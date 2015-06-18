@@ -24,9 +24,6 @@
 
 #![crate_type = "bin"]
 
-#![feature(libc)]
-
-extern crate libc;
 extern crate rfmod;
 
 use std::thread::sleep_ms;
