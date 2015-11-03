@@ -52,30 +52,27 @@ You can also access the latest build of the documentation via the internet from 
 Here is a short example on how to create a file and to play it :
 
 ```Rust
-extern crate libc;
 extern crate rfmod;
 
-use std::os;
-
 fn main() {
-    let fmod = match rfmod::FmodSys::new() {
+    let fmod = match rfmod::Sys::new() {
         Ok(f) => f,
         Err(e) => {
-            panic!("Error code : {}", e);
+            panic!("Error code : {:?}", e);
         }
     };
 
     match fmod.init() {
         rfmod::Result::Ok => {}
         e => {
-            panic!("FmodSys.init failed : {}", e);
+            panic!("FmodSys.init failed : {:?}", e);
         }
     };
 
-    let mut sound = match fmod.create_sound(StrBuf::from_str("music.mp3"), None, None) {
+    let sound = match fmod.create_sound("music.mp3", None, None) {
         Ok(s) => s,
         Err(err) => {
-            panic!("Error code : {}", err);
+            panic!("Error code : {:?}", err);
         }
     };
 
@@ -84,7 +81,7 @@ fn main() {
             println!("Ok !");
         }
         err => {
-            panic!("Error code : {}", err);
+            panic!("Error code : {:?}", err);
         }
     };
 }
