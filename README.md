@@ -52,7 +52,6 @@ You can also access the latest build of the documentation via the internet from 
 Here is a short example on how to create a file and to play it :
 
 ```Rust
-extern crate libc;
 extern crate rfmod;
 
 fn main() {
