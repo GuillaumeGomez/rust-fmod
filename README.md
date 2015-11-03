@@ -69,7 +69,7 @@ fn main() {
         }
     };
 
-    let sound = match fmod.create_sound(&String::from("music.mp3"), None, None) {
+    let sound = match fmod.create_sound("music.mp3", None, None) {
         Ok(s) => s,
         Err(err) => {
             panic!("Error code : {:?}", err);
