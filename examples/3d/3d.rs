@@ -99,7 +99,7 @@ fn main() {
         fmod.set_3D_listener_attributes(0, &listener_pos, &vel, &forward, &up);
 
         let mut tmp = "|.......................<1>......................<2>....................|\r".to_owned();
-        unsafe { tmp.as_mut_vec().as_mut()[(listener_pos.x as isize + 35isize) as usize] = 'L' as u8; }
+        unsafe { (tmp.as_mut_vec().as_mut() as &mut [u8])[(listener_pos.x as isize + 35isize) as usize] = 'L' as u8; }
         print!("{}", tmp);
         fmod.update();
         ::std::thread::sleep_ms(interface_update_time as u32 - 1u32);

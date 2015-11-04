@@ -22,13 +22,13 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-use libc::funcs::c95::stdio::{fopen, fread, fclose, fseek, ftell};
-use libc::consts::os::c95::{SEEK_SET, SEEK_CUR, SEEK_END};
-use libc::types::common::c95::FILE;
-use libc::types::os::arch::posix01::stat;
+use libc::{fopen, fread, fclose, fseek, ftell};
+use libc::{SEEK_SET, SEEK_CUR, SEEK_END};
+use libc::FILE;
+use libc::stat;
 use std::mem::zeroed;
-use libc::funcs::posix88::stat_::fstat;
-use libc::funcs::posix88::stdio::fileno;
+use libc::fstat;
+use libc::fileno;
 use libc::{c_void, c_char};
 
 pub fn get_ffi(file: &FmodFile) -> *mut FILE {
@@ -74,7 +74,7 @@ impl FmodFile {
             if self.fd.is_null() {
                 0usize
             } else {
-                fread(buffer.as_mut_ptr() as *mut c_void, buffer.len() as u64, 1u64, self.fd) as usize
+                fread(buffer.as_mut_ptr() as *mut c_void, buffer.len() as usize, 1usize, self.fd) as usize
             }
         }
     }
