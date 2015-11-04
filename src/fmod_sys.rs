@@ -42,7 +42,7 @@ use std::default::Default;
 use callbacks::*;
 use std;
 use file;
-use libc::types::common::c95::FILE;
+use libc::FILE;
 use c_vec::CVec;
 use std::ffi::CString;
 
