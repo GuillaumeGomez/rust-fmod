@@ -44,6 +44,7 @@ use std;
 use file;
 use libc::types::common::c95::FILE;
 use c_vec::CVec;
+use std::ffi::CString;
 
 fn get_saved_sys_callback<'r>() -> &'r mut SysCallback {
     static mut callback : SysCallback = SysCallback {
@@ -1073,7 +1074,8 @@ impl Sys {
         };
 
         match if music.len() > 0 {
-            unsafe { ffi::FMOD_System_CreateSound(self.system, music.as_ptr() as *const c_char, op, ex, sound::get_fffi(&mut sound)) }
+            let music_cstring = CString::new(music).unwrap();
+            unsafe { ffi::FMOD_System_CreateSound(self.system, music_cstring.as_ptr() as *const c_char, op, ex, sound::get_fffi(&mut sound)) }
         } else {
             unsafe { ffi::FMOD_System_CreateSound(self.system, ::std::ptr::null(), op, ex, sound::get_fffi(&mut sound)) }
         } {
