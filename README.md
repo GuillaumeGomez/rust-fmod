@@ -11,23 +11,7 @@ You can also find it on [crates.io](https://crates.io/crates/fmod) !
 
 You must install on your computer the __FMOD__ library which is used for the binding.
 
-To build it, please use :
-
-```Shell
-> make
-```
-
-This command build __rfmod__, the examples and the documentation.
-
-You can build them separatly too.
-
-```Shell
-> make rfmod
-> make examples
-> make doc
-```
-
-Since this project supports cargo, you can also build it like this :
+Since this project supports cargo, you can build it this way:
 
 ```Shell
 > cargo build
@@ -38,7 +22,7 @@ Since this project supports cargo, you can also build it like this :
 You can access the __rfmod__ documentation locally, just build it :
 
 ```Shell
-> make doc
+> cargo doc
 ```
 
 Then open this file with an internet browser :
