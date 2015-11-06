@@ -33,6 +33,7 @@ use channel;
 use libc::{c_char, c_void, c_uint, c_int, c_float};
 use std::default::Default;
 use c_vec::CVec;
+use std::ffi::CString;
 
 extern "C" fn create_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> ::Result {
     unsafe {
@@ -323,6 +324,7 @@ pub fn from_parameter_ptr(dsp_parameter: *mut ffi::FMOD_DSP_PARAMETERDESC) -> Ds
 pub fn get_parameter_ffi(dsp_parameter: &DspParameterDesc) -> ffi::FMOD_DSP_PARAMETERDESC {
     let mut tmp_name = dsp_parameter.name.as_bytes().to_vec();
     let mut tmp_label = dsp_parameter.label.as_bytes().to_vec();
+    let tmp_description = CString::new(dsp_parameter.description.clone()).unwrap();
 
     tmp_name.truncate(16);
     tmp_label.truncate(16);
@@ -352,7 +354,7 @@ pub fn get_parameter_ffi(dsp_parameter: &DspParameterDesc) -> ffi::FMOD_DSP_PARA
             }
             slice
         },
-        description: dsp_parameter.description.as_ptr() as *const c_char
+        description: tmp_description.as_ptr() as *const c_char
     }
 }
 

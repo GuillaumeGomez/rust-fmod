@@ -30,6 +30,7 @@ use std::mem::zeroed;
 use libc::fstat;
 use libc::fileno;
 use libc::{c_void, c_char};
+use std::ffi::CString;
 
 pub fn get_ffi(file: &FmodFile) -> *mut FILE {
     file.fd
@@ -58,8 +59,9 @@ pub struct FmodFile {
 
 impl FmodFile {
     pub fn open(file_name: &str) -> Option<FmodFile> {
+        let tmp_file_name = CString::new(file_name).unwrap();
         unsafe {
-            let tmp = fopen(file_name.as_ptr() as *const c_char, "rb".as_ptr() as *const c_char);
+            let tmp = fopen(tmp_file_name.as_ptr() as *const c_char, "rb".as_ptr() as *const c_char);
 
             if tmp.is_null() {
                 None

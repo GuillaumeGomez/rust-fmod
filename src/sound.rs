@@ -38,6 +38,7 @@ use std::slice;
 use std::default::Default;
 use byteorder::{WriteBytesExt, LittleEndian};
 use std::io::Write;
+use std::ffi::CString;
 
 struct RiffChunk {
     id: [c_char; 4],
@@ -128,9 +129,9 @@ impl FmodTag {
     }
 
     fn convert_to_c(&self) -> ffi::FMOD_TAG {
-        let tmp = self.name.clone();
+        let tmp = CString::new(self.name.clone()).unwrap();
 
-        ffi::FMOD_TAG{
+        ffi::FMOD_TAG {
             _type: self._type,
             datatype: self.data_type,
             name: tmp.as_ptr() as *mut c_char,

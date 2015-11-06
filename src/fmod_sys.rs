@@ -603,6 +603,9 @@ impl Default for CreateSoundexInfo {
 
 impl CreateSoundexInfo {
     fn convert_to_c(&mut self) -> ffi::FMOD_CREATESOUNDEXINFO {
+        let tmp_dls_name = CString::new(self.dls_name.clone()).unwrap();
+        let tmp_encryption_key = CString::new(self.encryption_key.clone()).unwrap();
+
         ffi::FMOD_CREATESOUNDEXINFO{
             cbsize: mem::size_of::<ffi::FMOD_CREATESOUNDEXINFO>() as i32,
             length: self.length,
@@ -627,8 +630,8 @@ impl CreateSoundexInfo {
                 Some(_) => Some(non_block_callback as extern "C" fn(*mut _, _) -> _),
                 None => None
             },
-            dlsname: self.dls_name.as_ptr() as *mut c_char,
-            encryptionkey: self.encryption_key.as_ptr() as *mut c_char,
+            dlsname: tmp_dls_name.as_ptr() as *mut c_char,
+            encryptionkey: tmp_encryption_key.as_ptr() as *mut c_char,
             maxpolyphony: self.max_polyphony,
             userdata: {
                 self.user_data.non_block = self.non_block_callback;
@@ -1107,7 +1110,8 @@ impl Sys {
         };
 
         match if music.len() > 0 {
-            unsafe { ffi::FMOD_System_CreateStream(self.system, music.as_ptr() as *const c_char, op, ex, sound::get_fffi(&mut sound)) }
+            let music_cstring = CString::new(music).unwrap();
+            unsafe { ffi::FMOD_System_CreateStream(self.system, music_cstring.as_ptr() as *const c_char, op, ex, sound::get_fffi(&mut sound)) }
         } else {
             unsafe { ffi::FMOD_System_CreateStream(self.system, ::std::ptr::null(), op, ex, sound::get_fffi(&mut sound)) }
         } {
@@ -1118,8 +1122,9 @@ impl Sys {
 
     pub fn create_channel_group(&self, group_name: &str) -> Result<channel_group::ChannelGroup, ::Result> {
         let mut channel_group = ::std::ptr::null_mut();
+            let tmp_group_name = CString::new(group_name).unwrap();
 
-        match unsafe { ffi::FMOD_System_CreateChannelGroup(self.system, group_name.as_ptr() as *const c_char, &mut channel_group) } {
+        match unsafe { ffi::FMOD_System_CreateChannelGroup(self.system, tmp_group_name.as_ptr() as *const c_char, &mut channel_group) } {
             ::Result::Ok => Ok(ffi::FFI::wrap(channel_group)),
             e => Err(e)
         }
@@ -1127,8 +1132,9 @@ impl Sys {
 
     pub fn create_sound_group(&self, group_name: &str) -> Result<sound_group::SoundGroup, ::Result> {
         let mut sound_group = ::std::ptr::null_mut();
+            let tmp_group_name = CString::new(group_name).unwrap();
 
-        match unsafe { ffi::FMOD_System_CreateSoundGroup(self.system, group_name.as_ptr() as *const c_char, &mut sound_group) } {
+        match unsafe { ffi::FMOD_System_CreateSoundGroup(self.system, tmp_group_name.as_ptr() as *const c_char, &mut sound_group) } {
             ::Result::Ok => Ok(ffi::FFI::wrap(sound_group)),
             e => Err(e)
         }
@@ -1299,7 +1305,7 @@ impl Sys {
         let mut converted_c_char : Vec<*const c_char> = (0..settings.ASIO_channel_list.len()).map(|pos| {
             settings.ASIO_channel_list[pos].as_ptr() as *const c_char
         }).collect();
-        let deb_log_filename = settings.debug_log_filename.clone();
+        let deb_log_filename = CString::new(settings.debug_log_filename.clone()).unwrap();
         let mut advanced_settings = ffi::FMOD_ADVANCEDSETTINGS{
             cbsize: mem::size_of::<ffi::FMOD_ADVANCEDSETTINGS>() as i32,
             maxMPEGcodecs: settings.max_MPEG_codecs,
@@ -1453,13 +1459,16 @@ impl Sys {
     }
 
     pub fn set_plugin_path(&self, path: &str) -> ::Result {
-        unsafe { ffi::FMOD_System_SetPluginPath(self.system, path.as_ptr() as *const c_char) }
+        let tmp_path = CString::new(path).unwrap();
+
+        unsafe { ffi::FMOD_System_SetPluginPath(self.system, tmp_path.as_ptr() as *const c_char) }
     }
 
     pub fn load_plugin(&self, filename: &str, priority: u32) -> Result<PluginHandle, ::Result> {
         let mut handle = 0u32;
+        let tmp_filename = CString::new(filename).unwrap();
 
-        match unsafe { ffi::FMOD_System_LoadPlugin(self.system, filename.as_ptr() as *const c_char, &mut handle as *mut c_uint, priority as c_uint) } {
+        match unsafe { ffi::FMOD_System_LoadPlugin(self.system, tmp_filename.as_ptr() as *const c_char, &mut handle as *mut c_uint, priority as c_uint) } {
             ::Result::Ok => Ok(PluginHandle(handle)),
             e => Err(e)
         }
