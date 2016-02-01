@@ -39,6 +39,7 @@ use std::default::Default;
 use byteorder::{WriteBytesExt, LittleEndian};
 use std::io::Write;
 use std::ffi::CString;
+use std::time::Duration;
 
 struct RiffChunk {
     id: [c_char; 4],
@@ -242,7 +243,7 @@ impl Sound {
                     match chan.is_playing() {
                         Ok(b) => {
                             if b == true {
-                                ::std::thread::sleep_ms(30)
+                                ::std::thread::sleep(Duration::from_millis(30))
                             } else {
                                 break;
                             }

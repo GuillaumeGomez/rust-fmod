@@ -26,14 +26,14 @@
 rust-fmod
 =========
 
-This is a rust binding for ___, the library developped by FIRELIGHT TECHNOLOGIES.
+This is a rust binding for __FMOD__, the library developped by FIRELIGHT TECHNOLOGIES.
 
-___ website : www.fmod.org
+__FMOD__ website : www.fmod.org
 
 
 ##Installation
 
-You must install on your computer the ___ library which is used for the binding.
+You must install on your computer the __FMOD__ library which is used for the binding.
 
 To build it, please use :
 
@@ -41,7 +41,7 @@ To build it, please use :
 > make
 ```
 
-This command build __r_, the examples, and the documentation.
+This command build __rfmod__, the examples, and the documentation.
 
 You can build them separatly too.
 
@@ -120,7 +120,6 @@ Here is the list of all modules :
 #![allow(non_snake_case)]
 #![allow(dead_code)]
 #![allow(improper_ctypes)]
-#![allow(raw_pointer_derive)]
 
 extern crate libc;
 extern crate c_vec;
