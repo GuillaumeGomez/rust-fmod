@@ -35,7 +35,9 @@ use sound::Sound;
 use std::mem::transmute;
 use std::default::Default;
 
-/// Structure which contains data for [`Channel::set_speaker_mix`](struct.Channel.html#method.set_speaker_mix) and [`Channel::get_speaker_mix`](struct.Channel.html#method.get_speaker_mix)
+/// Structure which contains data for
+/// [`Channel::set_speaker_mix`](struct.Channel.html#method.set_speaker_mix) and
+/// [`Channel::get_speaker_mix`](struct.Channel.html#method.get_speaker_mix)
 #[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
 pub struct SpeakerMixOptions {
     pub front_left : f32,
@@ -65,13 +67,17 @@ impl Default for SpeakerMixOptions {
 
 /// Structure defining the properties for a reverb source, related to a FMOD channel.
 pub struct ReverbChannelProperties {
-    /// [r/w] MIN: -10000 MAX: 1000 DEFAULT: 0 - Direct path level
+    /// [r/w] MIN: -10000 MAX: 1000 DEFAULT: 0
+    /// Direct path level
     pub direct          : i32,
-    /// [r/w] MIN: -10000 MAX: 1000 DEFAULT: 0 - Room effect level
+    /// [r/w] MIN: -10000 MAX: 1000 DEFAULT: 0
+    /// Room effect level
     pub room            : i32,
-    /// [r/w] FMOD_REVERB_CHANNELFLAGS         - modifies the behavior of properties
+    /// [r/w] FMOD_REVERB_CHANNELFLAGS
+    /// modifies the behavior of properties
     pub flags           : u32,
-    /// [r/w] See remarks.                    - DSP network location to connect reverb for this channel.
+    /// [r/w] See remarks.
+    /// DSP network location to connect reverb for this channel.
     pub connection_point: Dsp
 }
 
@@ -273,57 +279,78 @@ impl Channel {
         }
     }
 
-    pub fn set_delay(&self, delay_type: ::DelayType, delay_hi: usize, delay_lo: usize) -> ::Result {
-        unsafe { ffi::FMOD_Channel_SetDelay(self.channel, delay_type, delay_hi as u32, delay_lo as u32) }
+    pub fn set_delay(&self, delay_type: ::DelayType, delay_hi: usize,
+                     delay_lo: usize) -> ::Result {
+        unsafe { ffi::FMOD_Channel_SetDelay(self.channel, delay_type, delay_hi as u32,
+                                            delay_lo as u32) }
     }
 
-    pub fn get_delay(&self, delay_type: ::DelayType) -> Result<(::DelayType, usize, usize), ::Result> {
+    pub fn get_delay(&self, delay_type: ::DelayType)
+                    -> Result<(::DelayType, usize, usize), ::Result> {
         let mut delaylo = 0u32;
         let mut delayhi = 0u32;
 
-        match unsafe { ffi::FMOD_Channel_GetDelay(self.channel, delay_type, &mut delayhi, &mut delaylo) } {
+        match unsafe { ffi::FMOD_Channel_GetDelay(self.channel, delay_type, &mut delayhi,
+                                                  &mut delaylo) } {
             ::Result::Ok => Ok((delay_type, delayhi as usize, delaylo as usize)),
             e => Err(e),
         }
     }
 
     pub fn set_speaker_mix(&self, smo: &SpeakerMixOptions) -> ::Result {
-        unsafe { ffi::FMOD_Channel_SetSpeakerMix(self.channel, smo.front_left, smo.front_right, smo.center, smo.lfe,
-                                            smo.back_left, smo.back_right, smo.side_left, smo.side_right) }
+        unsafe { ffi::FMOD_Channel_SetSpeakerMix(self.channel, smo.front_left, smo.front_right,
+                                                 smo.center, smo.lfe, smo.back_left, smo.back_right,
+                                                 smo.side_left, smo.side_right) }
     }
 
     pub fn get_speaker_mix(&self) -> Result<SpeakerMixOptions, ::Result> {
-        let mut smo = SpeakerMixOptions{front_left: 0f32, front_right: 0f32, center: 0f32, lfe: 0f32, back_left: 0f32,
-                                    back_right: 0f32, side_left: 0f32, side_right: 0f32};
+        let mut smo = SpeakerMixOptions{
+                          front_left: 0f32,
+                          front_right: 0f32,
+                          center: 0f32,
+                          lfe: 0f32,
+                          back_left: 0f32,
+                          back_right: 0f32,
+                          side_left: 0f32,
+                          side_right: 0f32
+                      };
 
-        match unsafe { ffi::FMOD_Channel_GetSpeakerMix(self.channel, &mut smo.front_left, &mut smo.front_right, &mut smo.center, &mut smo.lfe,
-                                                &mut smo.back_left, &mut smo.back_right, &mut smo.side_left, &mut smo.side_right) } {
+        match unsafe { ffi::FMOD_Channel_GetSpeakerMix(self.channel, &mut smo.front_left,
+                                                       &mut smo.front_right, &mut smo.center,
+                                                       &mut smo.lfe, &mut smo.back_left,
+                                                       &mut smo.back_right, &mut smo.side_left,
+                                                       &mut smo.side_right) } {
             ::Result::Ok => Ok(smo),
             e => Err(e),
         }
     }
 
     pub fn set_speaker_level(&self, speaker: ::Speaker, levels: &mut Vec<f32>) -> ::Result {
-        unsafe { ffi::FMOD_Channel_SetSpeakerLevels(self.channel, speaker, levels.as_mut_ptr(), levels.len() as i32) }
+        unsafe { ffi::FMOD_Channel_SetSpeakerLevels(self.channel, speaker, levels.as_mut_ptr(),
+                                                    levels.len() as i32) }
     }
 
-    pub fn get_speaker_level(&self, speaker: ::Speaker, num_levels: usize) -> Result<Vec<f32>, ::Result> {
+    pub fn get_speaker_level(&self, speaker: ::Speaker,
+                             num_levels: usize) -> Result<Vec<f32>, ::Result> {
         let mut ptr : Vec<f32> = ::std::iter::repeat(0f32).take(num_levels).collect();
 
-        match unsafe { ffi::FMOD_Channel_GetSpeakerLevels(self.channel, speaker, ptr.as_mut_ptr(), num_levels as i32) } {
+        match unsafe { ffi::FMOD_Channel_GetSpeakerLevels(self.channel, speaker, ptr.as_mut_ptr(),
+                                                          num_levels as i32) } {
             ::Result::Ok => Ok(ptr),
             e => Err(e),
         }
     }
 
     pub fn set_input_channel_mix(&self, levels: &mut Vec<f32>) -> ::Result {
-        unsafe { ffi::FMOD_Channel_SetInputChannelMix(self.channel, levels.as_mut_ptr(), levels.len() as i32) }
+        unsafe { ffi::FMOD_Channel_SetInputChannelMix(self.channel, levels.as_mut_ptr(),
+                                                      levels.len() as i32) }
     }
 
     pub fn get_input_channel_mix(&self, num_levels: usize) -> Result<Vec<f32>, ::Result> {
         let mut ptr : Vec<f32> = ::std::iter::repeat(0f32).take(num_levels).collect();
 
-        match unsafe { ffi::FMOD_Channel_GetInputChannelMix(self.channel, ptr.as_mut_ptr(), num_levels as i32) } {
+        match unsafe { ffi::FMOD_Channel_GetInputChannelMix(self.channel, ptr.as_mut_ptr(),
+                                                            num_levels as i32) } {
             ::Result::Ok => Ok(ptr),
             e => Err(e),
         }
@@ -356,13 +383,23 @@ impl Channel {
     }
 
     pub fn set_reverb_properties(&self, prop: &ReverbChannelProperties) -> ::Result {
-        let t = ffi::FMOD_REVERB_CHANNELPROPERTIES{Direct: prop.direct, Room: prop.room, Flags: prop.flags, ConnectionPoint: ::std::ptr::null_mut()};
+        let t = ffi::FMOD_REVERB_CHANNELPROPERTIES{
+                    Direct: prop.direct,
+                    Room: prop.room,
+                    Flags: prop.flags,
+                    ConnectionPoint: ::std::ptr::null_mut()
+                };
 
         unsafe { ffi::FMOD_Channel_SetReverbProperties(self.channel, &t) }
     }
 
     pub fn get_reverb_properties(&self) -> Result<ReverbChannelProperties, ::Result> {
-        let mut t = ffi::FMOD_REVERB_CHANNELPROPERTIES{Direct: 0, Room: 0, Flags: 0, ConnectionPoint: ::std::ptr::null_mut()};
+        let mut t = ffi::FMOD_REVERB_CHANNELPROPERTIES{
+                        Direct: 0,
+                        Room: 0,
+                        Flags: 0,
+                        ConnectionPoint: ::std::ptr::null_mut()
+                    };
 
         match unsafe { ffi::FMOD_Channel_GetReverbProperties(self.channel, &mut t) } {
             ::Result::Ok => Ok(ReverbChannelProperties{
@@ -400,7 +437,8 @@ impl Channel {
         }
     }
 
-    pub fn set_3D_attributes(&self, position: &vector::Vector, velocity: &vector::Vector) -> ::Result {
+    pub fn set_3D_attributes(&self, position: &vector::Vector,
+                             velocity: &vector::Vector) -> ::Result {
         let mut t_position = vector::get_ffi(position);
         let mut t_velocity = vector::get_ffi(velocity);
 
@@ -411,7 +449,8 @@ impl Channel {
         let mut position = vector::get_ffi(&vector::Vector::new());
         let mut velocity = vector::get_ffi(&vector::Vector::new());
 
-        match unsafe { ffi::FMOD_Channel_Get3DAttributes(self.channel, &mut position, &mut velocity) } {
+        match unsafe { ffi::FMOD_Channel_Get3DAttributes(self.channel, &mut position,
+                                                         &mut velocity) } {
             ::Result::Ok => Ok((vector::from_ptr(position), vector::from_ptr(velocity))),
             e => Err(e)
         }
@@ -425,14 +464,17 @@ impl Channel {
         let mut min_distance = 0f32;
         let mut max_distance = 0f32;
 
-        match unsafe { ffi::FMOD_Channel_Get3DMinMaxDistance(self.channel, &mut min_distance, &mut max_distance) } {
+        match unsafe { ffi::FMOD_Channel_Get3DMinMaxDistance(self.channel, &mut min_distance,
+                                                             &mut max_distance) } {
             ::Result::Ok => Ok((min_distance, max_distance)),
             e => Err(e)
         }
     }
 
-    pub fn set_3D_cone_settings(&self, inside_cone_angle: f32, outside_cone_angle: f32, outside_volume: f32) -> ::Result {
-        unsafe { ffi::FMOD_Channel_Set3DConeSettings(self.channel, inside_cone_angle, outside_cone_angle, outside_volume) }
+    pub fn set_3D_cone_settings(&self, inside_cone_angle: f32, outside_cone_angle: f32,
+                                outside_volume: f32) -> ::Result {
+        unsafe { ffi::FMOD_Channel_Set3DConeSettings(self.channel, inside_cone_angle,
+                                                     outside_cone_angle, outside_volume) }
     }
 
     pub fn get_3D_cone_settings(&self) -> Result<(f32, f32, f32), ::Result> {
@@ -440,7 +482,9 @@ impl Channel {
         let mut outside_cone_angle = 0f32;
         let mut outside_volume = 0f32;
 
-        match unsafe { ffi::FMOD_Channel_Get3DConeSettings(self.channel, &mut inside_cone_angle, &mut outside_cone_angle, &mut outside_volume) } {
+        match unsafe { ffi::FMOD_Channel_Get3DConeSettings(self.channel, &mut inside_cone_angle,
+                                                           &mut outside_cone_angle,
+                                                           &mut outside_volume) } {
             ::Result::Ok => Ok((inside_cone_angle, outside_cone_angle, outside_volume)),
             e => Err(e)
         }
@@ -467,7 +511,8 @@ impl Channel {
         for tmp in points.iter() {
             t_points.push(vector::get_ffi(tmp));
         }
-        unsafe { ffi::FMOD_Channel_Set3DCustomRolloff(self.channel, t_points.as_mut_ptr(), points.len() as c_int) }
+        unsafe { ffi::FMOD_Channel_Set3DCustomRolloff(self.channel, t_points.as_mut_ptr(),
+                                                      points.len() as c_int) }
     }
 
     pub fn get_3D_custom_rolloff(&self) -> Result<Vec<vector::Vector>, ::Result> {
@@ -480,7 +525,8 @@ impl Channel {
                     let mut ret_points = Vec::new();
 
                     for it in 0i32..num_points {
-                        ret_points.push(vector::from_ptr(::std::ptr::read(points.offset(it as isize) as *const ffi::FMOD_VECTOR)));
+                        ret_points.push(vector::from_ptr(::std::ptr::read(
+                            points.offset(it as isize) as *const ffi::FMOD_VECTOR)));
                     }
                     Ok(ret_points)
                 }
@@ -490,14 +536,16 @@ impl Channel {
     }
 
     pub fn set_3D_occlusion(&self, direct_occlusion: f32, reverb_occlusion: f32) -> ::Result {
-        unsafe { ffi::FMOD_Channel_Set3DOcclusion(self.channel, direct_occlusion, reverb_occlusion) }
+        unsafe { ffi::FMOD_Channel_Set3DOcclusion(self.channel, direct_occlusion,
+                                                  reverb_occlusion) }
     }
 
     pub fn get_3D_occlusion(&self) -> Result<(f32, f32), ::Result> {
         let mut direct_occlusion = 0f32;
         let mut reverb_occlusion = 0f32;
 
-        match unsafe { ffi::FMOD_Channel_Get3DOcclusion(self.channel, &mut direct_occlusion, &mut reverb_occlusion) } {
+        match unsafe { ffi::FMOD_Channel_Get3DOcclusion(self.channel, &mut direct_occlusion,
+                                                        &mut reverb_occlusion) } {
             ::Result::Ok => Ok((direct_occlusion, reverb_occlusion)),
             e => Err(e)
         }
@@ -542,7 +590,8 @@ impl Channel {
         }
     }
 
-    pub fn set_3D_distance_filter(&self, custom: bool, custom_level: f32, center_freq: f32) -> ::Result {
+    pub fn set_3D_distance_filter(&self, custom: bool, custom_level: f32,
+                                  center_freq: f32) -> ::Result {
         unsafe { ffi::FMOD_Channel_Set3DDistanceFilter(self.channel, if custom {
                 1
             } else {
@@ -555,7 +604,9 @@ impl Channel {
         let mut custom_level = 0f32;
         let mut center_freq = 0f32;
 
-        match unsafe { ffi::FMOD_Channel_Get3DDistanceFilter(self.channel, &mut custom, &mut custom_level, &mut center_freq) } {
+        match unsafe { ffi::FMOD_Channel_Get3DDistanceFilter(self.channel, &mut custom,
+                                                             &mut custom_level,
+                                                             &mut center_freq) } {
             ::Result::Ok => Ok((custom == 1, custom_level, center_freq)),
             e => Err(e)
         }
@@ -573,7 +624,8 @@ impl Channel {
     pub fn add_DSP(&self, dsp: &Dsp) -> Result<DspConnection, ::Result> {
         let mut connection = ::std::ptr::null_mut();
 
-        match unsafe { ffi::FMOD_Channel_AddDSP(self.channel, ffi::FFI::unwrap(dsp), &mut connection) } {
+        match unsafe { ffi::FMOD_Channel_AddDSP(self.channel, ffi::FFI::unwrap(dsp),
+                                                &mut connection) } {
             ::Result::Ok => Ok(ffi::FFI::wrap(connection)),
             e => Err(e)
         }
@@ -607,14 +659,18 @@ impl Channel {
 
     pub fn set_loop_points(&self, loop_start: u32, TimeUnit(loop_start_type): TimeUnit,
         loop_end: u32, TimeUnit(loop_end_type): TimeUnit) -> ::Result {
-            unsafe { ffi::FMOD_Channel_SetLoopPoints(self.channel, loop_start, loop_start_type, loop_end, loop_end_type) }
+            unsafe { ffi::FMOD_Channel_SetLoopPoints(self.channel, loop_start, loop_start_type,
+                                                     loop_end, loop_end_type) }
     }
 
-    pub fn get_loop_points(&self, TimeUnit(loop_start_type): TimeUnit, TimeUnit(loop_end_type): TimeUnit) -> Result<(u32, u32), ::Result> {
+    pub fn get_loop_points(&self, TimeUnit(loop_start_type): TimeUnit,
+                           TimeUnit(loop_end_type): TimeUnit) -> Result<(u32, u32), ::Result> {
         let mut loop_start = 0u32;
         let mut loop_end = 0u32;
 
-        match unsafe { ffi::FMOD_Channel_GetLoopPoints(self.channel, &mut loop_start, loop_start_type, &mut loop_end, loop_end_type) } {
+        match unsafe { ffi::FMOD_Channel_GetLoopPoints(self.channel, &mut loop_start,
+                                                       loop_start_type, &mut loop_end,
+                                                       loop_end_type) } {
             ::Result::Ok => Ok((loop_start, loop_end)),
             e => Err(e)
         }
@@ -640,11 +696,13 @@ impl Channel {
     }
 
     pub fn get_memory_info(&self, MemoryBits(memory_bits): MemoryBits,
-        EventMemoryBits(event_memory_bits): EventMemoryBits) -> Result<(u32, MemoryUsageDetails), ::Result> {
+                           EventMemoryBits(event_memory_bits): EventMemoryBits)
+                           -> Result<(u32, MemoryUsageDetails), ::Result> {
         let mut details = fmod_sys::get_memory_usage_details_ffi(Default::default());
         let mut memory_used = 0u32;
 
-        match unsafe { ffi::FMOD_Channel_GetMemoryInfo(self.channel, memory_bits, event_memory_bits, &mut memory_used, &mut details) } {
+        match unsafe { ffi::FMOD_Channel_GetMemoryInfo(self.channel, memory_bits, event_memory_bits,
+                                                       &mut memory_used, &mut details) } {
             ::Result::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
             e => Err(e)
         }

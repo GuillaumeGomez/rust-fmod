@@ -52,7 +52,7 @@ pub enum SeekStyle {
     SeekCur
 }
 
-/// A little struct to wrap C files. I'll try to improve this or to replace it by File
+/// A little struct to wrap C files. I'll try to improve this or to replace it by File.
 pub struct FmodFile {
     fd: *mut FILE
 }
@@ -61,7 +61,8 @@ impl FmodFile {
     pub fn open(file_name: &str) -> Option<FmodFile> {
         let tmp_file_name = CString::new(file_name).unwrap();
         unsafe {
-            let tmp = fopen(tmp_file_name.as_ptr() as *const c_char, "rb".as_ptr() as *const c_char);
+            let tmp = fopen(tmp_file_name.as_ptr() as *const c_char,
+                            "rb".as_ptr() as *const c_char);
 
             if tmp.is_null() {
                 None
@@ -76,7 +77,8 @@ impl FmodFile {
             if self.fd.is_null() {
                 0usize
             } else {
-                fread(buffer.as_mut_ptr() as *mut c_void, buffer.len() as usize, 1usize, self.fd) as usize
+                fread(buffer.as_mut_ptr() as *mut c_void, buffer.len() as usize, 1usize,
+                      self.fd) as usize
             }
         }
     }

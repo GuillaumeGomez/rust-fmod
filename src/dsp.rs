@@ -45,7 +45,8 @@ extern "C" fn create_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> ::Result {
                 let callbacks : &mut UserData = transmute(tmp);
 
                 match callbacks.callbacks.create_callback {
-                    Some(p) => p(&from_state_ptr(::std::ptr::read(dsp_state as *const ffi::FMOD_DSP_STATE))),
+                    Some(p) => p(&from_state_ptr(::std::ptr::read(
+                        dsp_state as *const ffi::FMOD_DSP_STATE))),
                     None => ::Result::Ok
                 }
             } else {
@@ -67,7 +68,8 @@ extern "C" fn release_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> ::Result 
                 let callbacks : &mut UserData = transmute(tmp);
                 
                 match callbacks.callbacks.release_callback {
-                    Some(p) => p(&from_state_ptr(::std::ptr::read(dsp_state as *const ffi::FMOD_DSP_STATE))),
+                    Some(p) => p(&from_state_ptr(::std::ptr::read(
+                        dsp_state as *const ffi::FMOD_DSP_STATE))),
                     None => ::Result::Ok
                 }
             } else {
@@ -89,7 +91,8 @@ extern "C" fn reset_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> ::Result {
                 let callbacks : &mut UserData = transmute(tmp);
                 
                 match callbacks.callbacks.reset_callback {
-                    Some(p) => p(&from_state_ptr(::std::ptr::read(dsp_state as *const ffi::FMOD_DSP_STATE))),
+                    Some(p) => p(&from_state_ptr(::std::ptr::read(
+                        dsp_state as *const ffi::FMOD_DSP_STATE))),
                     None => ::Result::Ok
                 }
             } else {
@@ -101,8 +104,9 @@ extern "C" fn reset_callback(dsp_state: *mut ffi::FMOD_DSP_STATE) -> ::Result {
     }
 }
 
-extern "C" fn read_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, in_buffer: *mut c_float, out_buffer: *mut c_float, length: c_uint,
-    in_channels: c_int, out_channels: c_int) -> ::Result {
+extern "C" fn read_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, in_buffer: *mut c_float,
+                            out_buffer: *mut c_float, length: c_uint, in_channels: c_int,
+                            out_channels: c_int) -> ::Result {
     unsafe {
         if !dsp_state.is_null() && !(*dsp_state).instance.is_null() {
             let mut tmp = ::std::ptr::null_mut();
@@ -112,11 +116,16 @@ extern "C" fn read_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, in_buffer: *mut
                 let callbacks : &mut UserData = transmute(tmp);
                 match callbacks.callbacks.read_callback {
                     Some(p) => {
-                        let mut v_in_buffer = CVec::new(in_buffer, (((length as i32 - 1i32) * in_channels) + out_channels) as usize);
-                        let mut v_out_buffer = CVec::new(out_buffer, (((length as i32 - 1i32) * out_channels) + out_channels) as usize);
+                        let in_size = ((length as i32 - 1i32) * in_channels) + out_channels;
+                        let out_size = ((length as i32 - 1i32) * out_channels) + out_channels;
+                        let mut v_in_buffer = CVec::new(in_buffer,
+                                                        in_size as usize);
+                        let mut v_out_buffer = CVec::new(out_buffer, out_size as usize);
 
-                        p(&from_state_ptr(::std::ptr::read(dsp_state as *const ffi::FMOD_DSP_STATE)), v_in_buffer.as_mut(), v_out_buffer.as_mut(),
-                            length as u32, in_channels as i32, out_channels as i32)
+                        p(&from_state_ptr(::std::ptr::read(
+                            dsp_state as *const ffi::FMOD_DSP_STATE)), v_in_buffer.as_mut(),
+                            v_out_buffer.as_mut(), length as u32, in_channels as i32,
+                            out_channels as i32)
                     },
                     None => ::Result::Ok
                 }
@@ -139,7 +148,8 @@ extern "C" fn set_position_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, pos: c_
                 let callbacks : &mut UserData = transmute(tmp);
                 
                 match callbacks.callbacks.set_pos_callback {
-                    Some(p) => p(&from_state_ptr(::std::ptr::read(dsp_state as *const ffi::FMOD_DSP_STATE)), pos as u32),
+                    Some(p) => p(&from_state_ptr(::std::ptr::read(
+                        dsp_state as *const ffi::FMOD_DSP_STATE)), pos as u32),
                     None => ::Result::Ok
                 }
             } else {
@@ -151,7 +161,8 @@ extern "C" fn set_position_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, pos: c_
     }
 }
 
-extern "C" fn set_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index: c_int, value: c_float) -> ::Result {
+extern "C" fn set_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index: c_int,
+                                     value: c_float) -> ::Result {
     unsafe {
         if !dsp_state.is_null() && !(*dsp_state).instance.is_null() {
             let mut tmp = ::std::ptr::null_mut();
@@ -161,7 +172,8 @@ extern "C" fn set_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index:
                 let callbacks : &mut UserData = transmute(tmp);
                 
                 match callbacks.callbacks.set_param_callback {
-                    Some(p) => p(&from_state_ptr(::std::ptr::read(dsp_state as *const ffi::FMOD_DSP_STATE)), index as i32, value),
+                    Some(p) => p(&from_state_ptr(::std::ptr::read(
+                        dsp_state as *const ffi::FMOD_DSP_STATE)), index as i32, value),
                     None => ::Result::Ok
                 }
             } else {
@@ -173,7 +185,8 @@ extern "C" fn set_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index:
     }
 }
 
-extern "C" fn get_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index: c_int, value: *mut c_float, value_str: *mut c_char) -> ::Result {
+extern "C" fn get_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index: c_int,
+                                     value: *mut c_float, value_str: *mut c_char) -> ::Result {
     unsafe {
         if !dsp_state.is_null() && !(*dsp_state).instance.is_null() {
             let mut tmp = ::std::ptr::null_mut();
@@ -187,10 +200,9 @@ extern "C" fn get_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index:
                         let l = ffi::strlen(value_str);
                         let tmp = String::from_raw_parts(value_str as *mut u8, l, l);
 
-                        let ret = p(&from_state_ptr(::std::ptr::read(dsp_state as *const ffi::FMOD_DSP_STATE)),
-                            index as i32,
-                            &mut t_value,
-                            &tmp);
+                        let ret = p(&from_state_ptr(::std::ptr::read(
+                            dsp_state as *const ffi::FMOD_DSP_STATE)), index as i32,
+                            &mut t_value, &tmp);
                         *value = t_value;
                         ret
                     },
@@ -206,20 +218,21 @@ extern "C" fn get_parameter_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, index:
 }
 
 #[allow(unused_variables)]
-extern "C" fn config_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, hwnd: *mut c_void, show: c_int) -> ::Result {
+extern "C" fn config_callback(dsp_state: *mut ffi::FMOD_DSP_STATE, hwnd: *mut c_void,
+                              show: c_int) -> ::Result {
    ::Result::Ok
 }
 
 struct UserData {
     callbacks: DspCallbacks,
-    user_data: *mut c_void
+    user_data: *mut c_void,
 }
 
 impl UserData {
     fn new() -> UserData {
         UserData {
             callbacks: DspCallbacks::new(),
-            user_data: ::std::ptr::null_mut()
+            user_data: ::std::ptr::null_mut(),
         }
     }
 }
@@ -231,7 +244,7 @@ struct DspCallbacks {
     read_callback: DspReadCallback,
     set_pos_callback: DspSetPositionCallback,
     set_param_callback: DspSetParamCallback,
-    get_param_callback: DspGetParamCallback
+    get_param_callback: DspGetParamCallback,
 }
 
 impl DspCallbacks {
@@ -243,7 +256,7 @@ impl DspCallbacks {
             read_callback: None,
             set_pos_callback: None,
             set_param_callback: None,
-            get_param_callback: None
+            get_param_callback: None,
         }
     }
 }
@@ -257,15 +270,14 @@ impl Clone for DspCallbacks {
             read_callback: self.read_callback,
             set_pos_callback: self.set_pos_callback,
             set_param_callback: self.set_param_callback,
-            get_param_callback: self.get_param_callback
+            get_param_callback: self.get_param_callback,
         }
     }
 }
 
 #[derive(Debug, PartialEq, Clone)]
 /// Structure to define a parameter for a DSP unit.
-pub struct DspParameterDesc
-{
+pub struct DspParameterDesc {
     /// [w] Minimum value of the parameter (ie 100.0)
     pub min         : f32,
     /// [w] Maximum value of the parameter (ie 22050.0)
@@ -277,7 +289,7 @@ pub struct DspParameterDesc
     /// [w] Short string to be put next to value to denote the unit type (ie "hz")
     pub label       : String,
     /// [w] Description of the parameter to be displayed as a help item / tooltip for this parameter
-    pub description : String
+    pub description : String,
 }
 
 impl Default for DspParameterDesc {
@@ -288,7 +300,7 @@ impl Default for DspParameterDesc {
             default_val: 0f32,
             name: String::new(),
             label: String::new(),
-            description: String::new()
+            description: String::new(),
         }
     }
 }
@@ -313,7 +325,7 @@ pub fn from_parameter_ptr(dsp_parameter: *mut ffi::FMOD_DSP_PARAMETERDESC) -> Ds
                 default_val: (*dsp_parameter).default_val,
                 name: String::from_utf8(v1).unwrap(),
                 label: String::from_utf8(v2).unwrap(),
-                description: description
+                description: description,
             }
         }
     } else {
@@ -354,28 +366,34 @@ pub fn get_parameter_ffi(dsp_parameter: &DspParameterDesc) -> ffi::FMOD_DSP_PARA
             }
             slice
         },
-        description: tmp_description.as_ptr() as *const c_char
+        description: tmp_description.as_ptr() as *const c_char,
     }
 }
 
-/// When creating a DSP unit, declare one of these and provide the relevant callbacks and name for FMOD to use when it creates and uses a DSP unit of this type.
-pub struct DspDescription
-{
+/// When creating a DSP unit, declare one of these and provide the relevant callbacks and name for
+/// FMOD to use when it creates and uses a DSP unit of this type.
+pub struct DspDescription {
     /// [w] Name of the unit to be displayed in the network.
     pub name                : String,
     /// [w] Plugin writer's version number.
     pub version             : u32,
-    /// [w] Number of channels. Use 0 to process whatever number of channels is currently in the network. > 0 would be mostly used if the unit is a unit that only generates sound.
+    /// [w] Number of channels. Use 0 to process whatever number of channels is currently in the
+    /// network. > 0 would be mostly used if the unit is a unit that only generates sound.
     pub channels            : i32,
     /// [w] Create callback. This is called when DSP unit is created. Can be null.
     pub create              : DspCreateCallback,
-    /// [w] Release callback. This is called just before the unit is freed so the user can do any cleanup needed for the unit. Can be null.
+    /// [w] Release callback. This is called just before the unit is freed so the user can do any
+    /// cleanup needed for the unit. Can be null.
     pub release             : DspReleaseCallback,
-    /// [w] Reset callback. This is called by the user to reset any history buffers that may need resetting for a filter, when it is to be used or re-used for the first time to its initial clean state. Use to avoid clicks or artifacts.
+    /// [w] Reset callback. This is called by the user to reset any history buffers that may need
+    /// resetting for a filter, when it is to be used or re-used for the first time to its initial
+    /// clean state. Use to avoid clicks or artifacts.
     pub reset               : DspResetCallback,
     /// [w] Read callback. Processing is done here. Can be null.
     pub read                : DspReadCallback,
-    /// [w] Set position callback. This is called if the unit wants to update its position info but not process data, or reset a cursor position internally if it is reading data from a certain source. Can be null.
+    /// [w] Set position callback. This is called if the unit wants to update its position info but
+    /// not process data, or reset a cursor position internally if it is reading data from a certain
+    /// source. Can be null.
     pub set_position        : DspSetPositionCallback,
     /// [w] Number of parameters used in this filter. The user finds this with DSP::getNumParameters
     pub num_parameters      : i32,
@@ -385,14 +403,16 @@ pub struct DspDescription
     pub set_parameter       : DspSetParamCallback,
     /// [w] This is called when the user calls DSP::getParameter. Can be null.
     pub get_parameter       : DspGetParamCallback,
-    /// [w] This is called when the user calls DSP::showConfigDialog. Can be used to display a dialog to configure the filter. Can be null.
+    /// [w] This is called when the user calls DSP::showConfigDialog. Can be used to display a
+    /// dialog to configure the filter. Can be null.
     config                  : DspDialogCallback,
     /// [w] Width of config dialog graphic if there is one. 0 otherwise.
     pub config_width        : i32,
     /// [w] Height of config dialog graphic if there is one. 0 otherwise.
     pub config_height       : i32,
-    /// [w] Optional. Specify 0 to ignore. This is user data to be attached to the DSP unit during creation. Access via DSP::getUserData.
-    user_data               : Box<UserData>
+    /// [w] Optional. Specify 0 to ignore. This is user data to be attached to the DSP unit during
+    /// creation. Access via DSP::getUserData.
+    user_data               : Box<UserData>,
 }
 
 impl Default for DspDescription {
@@ -413,7 +433,7 @@ impl Default for DspDescription {
             config: None,
             config_width: 0i32,
             config_height: 0i32,
-            user_data: Box::new(UserData::new())
+            user_data: Box::new(UserData::new()),
         }
     }
 }
@@ -425,7 +445,8 @@ pub fn get_description_ffi(dsp_description: &mut DspDescription) -> ffi::FMOD_DS
     tmp_s.reserve_exact(32);
     ffi::FMOD_DSP_DESCRIPTION {
         name: {
-            let mut slice : [i8; 32] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            let mut slice : [i8; 32] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
             let mut it = 0;
 
             for tmp in tmp_s.iter() {
@@ -457,13 +478,15 @@ pub fn get_description_ffi(dsp_description: &mut DspDescription) -> ffi::FMOD_DS
             None => None
         },
         num_parameters: dsp_description.num_parameters,
-        param_desc: &mut get_parameter_ffi(&dsp_description.param_desc) as *mut ffi::FMOD_DSP_PARAMETERDESC,
+        param_desc: &mut get_parameter_ffi(&dsp_description.param_desc)
+                    as *mut ffi::FMOD_DSP_PARAMETERDESC,
         set_parameter: match dsp_description.set_parameter {
             Some(_) => Some(set_parameter_callback as extern "C" fn(*mut _, _, _) -> _),
             None => None
         },
         get_parameter: match dsp_description.get_parameter {
-            Some(_) => Some(get_parameter_callback as extern "C" fn(*mut _, _, *mut _, *mut _) -> _),
+            Some(_) => Some(get_parameter_callback
+                            as extern "C" fn(*mut _, _, *mut _, *mut _) -> _),
             None => None
         },
         config: match dsp_description.config {
@@ -481,7 +504,7 @@ pub fn get_description_ffi(dsp_description: &mut DspDescription) -> ffi::FMOD_DS
             dsp_description.user_data.callbacks.set_param_callback = dsp_description.set_parameter;
             dsp_description.user_data.callbacks.get_param_callback = dsp_description.get_parameter;
             unsafe { transmute::<&mut UserData, *mut c_void>(&mut *dsp_description.user_data) }
-        }
+        },
     }
 }
 
@@ -502,14 +525,14 @@ pub fn from_state_ptr(state: ffi::FMOD_DSP_STATE) -> DspState {
 }
 
 /// DSP plugin structure that is passed into each callback.
-pub struct DspState
-{
-    /// [r] Handle to the DSP hand the user created. Not to be modified. C++ users cast toDSP to use.
+pub struct DspState {
+    /// [r] Handle to the DSP hand the user created. Not to be modified. C++ users cast toDSP to
+    /// use.
     pub instance: Dsp,
     /// [w] Plugin writer created data the output author wants to attach to this object.
     plugin_data: *mut c_void,
     /// [w] Specifies which speakers the DSP effect is active on
-    pub speaker_mask: u16
+    pub speaker_mask: u16,
 }
 
 pub fn from_ptr_first(dsp: *mut ffi::FMOD_DSP) -> Dsp {
@@ -582,7 +605,8 @@ impl Dsp {
 
         match match self.get_system_object() {
             Ok(s) => { 
-                unsafe { ffi::FMOD_System_PlayDSP(ffi::FFI::unwrap(&s), ::ChannelIndex::Free, self.dsp, 0, &mut channel) }
+                unsafe { ffi::FMOD_System_PlayDSP(ffi::FFI::unwrap(&s), ::ChannelIndex::Free,
+                                                  self.dsp, 0, &mut channel) }
             }
             Err(e) => e
         } {
@@ -591,12 +615,14 @@ impl Dsp {
         }
     }
 
-    pub fn play_with_parameters(&self, channel_id: ::ChannelIndex) -> Result<channel::Channel, ::Result> {
+    pub fn play_with_parameters(&self, channel_id: ::ChannelIndex)
+                                -> Result<channel::Channel, ::Result> {
         let mut channel = ::std::ptr::null_mut();
         
         match match self.get_system_object() {
             Ok(s) => { 
-                unsafe { ffi::FMOD_System_PlayDSP(ffi::FFI::unwrap(&s), channel_id, self.dsp, 0, &mut channel) }
+                unsafe { ffi::FMOD_System_PlayDSP(ffi::FFI::unwrap(&s), channel_id, self.dsp, 0,
+                                                  &mut channel) }
             }
             Err(e) => e
         } {
@@ -659,7 +685,8 @@ impl Dsp {
         let mut input = ::std::ptr::null_mut();
         let mut input_connection = ::std::ptr::null_mut();
 
-        match unsafe { ffi::FMOD_DSP_GetInput(self.dsp, index, &mut input, &mut input_connection) } {
+        match unsafe { ffi::FMOD_DSP_GetInput(self.dsp, index, &mut input,
+                                              &mut input_connection) } {
             ::Result::Ok => Ok((ffi::FFI::wrap(input), ffi::FFI::wrap(input_connection))),
             e => Err(e)
         }
@@ -669,7 +696,8 @@ impl Dsp {
         let mut output = ::std::ptr::null_mut();
         let mut output_connection = ::std::ptr::null_mut();
 
-        match unsafe { ffi::FMOD_DSP_GetOutput(self.dsp, index, &mut output, &mut output_connection) } {
+        match unsafe { ffi::FMOD_DSP_GetOutput(self.dsp, index, &mut output,
+                                               &mut output_connection) } {
             ::Result::Ok => Ok((ffi::FFI::wrap(output), ffi::FFI::wrap(output_connection ))),
             e => Err(e)
         }
@@ -763,7 +791,7 @@ impl Dsp {
     }
 
     /// value result depends directly on the index argument,
-    /// index argument depends on your DSP type, it is a value from one of the following enums :
+    /// index argument depends on your DSP type, it is a value from one of the following enums:
     /// 
     /// * [`DspType`](enums/fmod/type.DspType.html)
     /// * [`DspOscillator`](enums/fmod/type.DspOscillator.html)
@@ -784,7 +812,8 @@ impl Dsp {
     /// * [`DspSfxReverb`](enums/fmod/type.DspSfxReverb.html)
     /// * [`DspLowPassSimple`](enums/fmod/type.DspLowPassSimple.html)
     /// * [`DspHighPassSimple`](enums/fmod/type.DspHighPassSimple.html)
-    pub fn get_parameter(&self, index: i32, value_str_len: usize) -> Result<(f32, String), ::Result> {
+    pub fn get_parameter(&self, index: i32, value_str_len: usize)
+                        -> Result<(f32, String), ::Result> {
         let mut value = 0f32;
         let mut c = Vec::with_capacity(value_str_len + 1);
 
@@ -792,7 +821,9 @@ impl Dsp {
             c.push(0);
         }
 
-        match unsafe { ffi::FMOD_DSP_GetParameter(self.dsp, index, &mut value, c.as_mut_ptr() as *mut c_char, value_str_len as i32) } {
+        match unsafe { ffi::FMOD_DSP_GetParameter(self.dsp, index, &mut value,
+                                                  c.as_mut_ptr() as *mut c_char,
+                                                  value_str_len as i32) } {
            ::Result::Ok => Ok((value, String::from_utf8(c).unwrap())),
             e => Err(e)
         }
@@ -807,7 +838,8 @@ impl Dsp {
         }
     }
 
-    pub fn get_parameter_info(&self, index: i32, name: &str, label: &str, description_len: usize) -> Result<(String, f32, f32), ::Result> {
+    pub fn get_parameter_info(&self, index: i32, name: &str, label: &str,
+                              description_len: usize) -> Result<(String, f32, f32), ::Result> {
         let mut min = 0f32;
         let mut max = 0f32;
         let t_name = name.clone();
@@ -818,8 +850,12 @@ impl Dsp {
             description.push(0);
         }
 
-        match unsafe { ffi::FMOD_DSP_GetParameterInfo(self.dsp, index, t_name.as_ptr() as *mut c_char, t_label.as_ptr() as *mut c_char,
-            description.as_mut_ptr() as *mut c_char, description_len as i32, &mut min, &mut max) } {
+        match unsafe { ffi::FMOD_DSP_GetParameterInfo(self.dsp, index,
+                                                      t_name.as_ptr() as *mut c_char,
+                                                      t_label.as_ptr() as *mut c_char,
+                                                      description.as_mut_ptr() as *mut c_char,
+                                                      description_len as i32, &mut min,
+                                                      &mut max) } {
             ::Result::Ok => Ok((String::from_utf8(description).unwrap(), min, max)),
             e => Err(e)
         }
@@ -832,7 +868,8 @@ impl Dsp {
         let mut config_height = 0i32;
         let tmp_n = name.clone();
 
-        match unsafe { ffi::FMOD_DSP_GetInfo(self.dsp, tmp_n.as_ptr() as *mut c_char, &mut version, &mut channels, &mut config_width,
+        match unsafe { ffi::FMOD_DSP_GetInfo(self.dsp, tmp_n.as_ptr() as *mut c_char, &mut version,
+                                             &mut channels, &mut config_width,
             &mut config_height) } {
             ::Result::Ok => Ok((version, channels, config_width, config_height)),
             e => Err(e)
@@ -858,25 +895,28 @@ impl Dsp {
         let mut pan = 0f32;
         let mut priority = 0i32;
 
-        match unsafe { ffi::FMOD_DSP_GetDefaults(self.dsp, &mut frequency, &mut volume, &mut pan, &mut priority) } {
+        match unsafe { ffi::FMOD_DSP_GetDefaults(self.dsp, &mut frequency, &mut volume, &mut pan,
+                                                 &mut priority) } {
             ::Result::Ok => Ok((frequency, volume, pan, priority)),
             e => Err(e)
         }
     }
 
     pub fn get_memory_info(&self, MemoryBits(memory_bits): MemoryBits,
-        EventMemoryBits(event_memory_bits): EventMemoryBits) -> Result<(u32, MemoryUsageDetails), ::Result> {
+                           EventMemoryBits(event_memory_bits): EventMemoryBits)
+                           -> Result<(u32, MemoryUsageDetails), ::Result> {
         let mut details = fmod_sys::get_memory_usage_details_ffi(Default::default());
         let mut memory_used = 0u32;
 
-        match unsafe { ffi::FMOD_DSP_GetMemoryInfo(self.dsp, memory_bits, event_memory_bits, &mut memory_used, &mut details) } {
+        match unsafe { ffi::FMOD_DSP_GetMemoryInfo(self.dsp, memory_bits, event_memory_bits,
+                                                   &mut memory_used, &mut details) } {
             ::Result::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
             e => Err(e)
         }
     }
 
     pub fn set_user_data<T>(&mut self, user_data: &mut T) -> ::Result {
-        let mut data : *mut c_void = ::std::ptr::null_mut();
+        let mut data: *mut c_void = ::std::ptr::null_mut();
 
         unsafe {
             match ffi::FMOD_DSP_GetUserData(self.dsp, &mut data) {
@@ -908,9 +948,9 @@ impl Dsp {
             match ffi::FMOD_DSP_GetUserData(self.dsp, &mut user_data) {
                ::Result::Ok => {
                     if !user_data.is_null() {
-                        let tmp : &mut UserData = transmute::<*mut c_void, &mut UserData>(user_data);
-                        let tmp2 : &mut T = transmute::<*mut c_void, &mut T>(tmp.user_data);
-                        
+                        let tmp: &mut UserData = transmute::<*mut c_void, &mut UserData>(user_data);
+                        let tmp2: &mut T = transmute::<*mut c_void, &mut T>(tmp.user_data);
+
                         Ok(tmp2)
                     } else {
                         Err(::Result::Ok)

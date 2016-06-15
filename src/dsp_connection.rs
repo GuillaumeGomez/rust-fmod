@@ -89,26 +89,32 @@ impl DspConnection {
     }
 
     pub fn set_levels(&self, speaker: ::Speaker, levels: &mut Vec<f32>) -> ::Result {
-        unsafe { ffi::FMOD_DSPConnection_SetLevels(self.dsp_connection, speaker, levels.as_mut_ptr(), levels.len() as c_int) }
+        unsafe { ffi::FMOD_DSPConnection_SetLevels(self.dsp_connection, speaker,
+                                                   levels.as_mut_ptr(), levels.len() as c_int) }
     }
 
     pub fn get_levels(&self, speaker: ::Speaker, num_levels: usize) -> Result<Vec<f32>, ::Result> {
         let mut levels : Vec<f32> = ::std::iter::repeat(0f32).take(num_levels).collect();
 
-        match unsafe { ffi::FMOD_DSPConnection_GetLevels(self.dsp_connection, speaker, levels.as_mut_ptr(), levels.len() as c_int) } {
+        match unsafe { ffi::FMOD_DSPConnection_GetLevels(self.dsp_connection, speaker,
+                                                         levels.as_mut_ptr(),
+                                                         levels.len() as c_int) } {
             ::Result::Ok => Ok(levels),
-            e => Err(e)
+            e => Err(e),
         }
     }
 
     pub fn get_memory_info(&self, MemoryBits(memory_bits): MemoryBits,
-        EventMemoryBits(event_memory_bits): EventMemoryBits) -> Result<(u32, MemoryUsageDetails), ::Result> {
+                           EventMemoryBits(event_memory_bits): EventMemoryBits)
+                           -> Result<(u32, MemoryUsageDetails), ::Result> {
         let mut details = fmod_sys::get_memory_usage_details_ffi(Default::default());
         let mut memory_used = 0u32;
 
-        match unsafe { ffi::FMOD_DSPConnection_GetMemoryInfo(self.dsp_connection, memory_bits, event_memory_bits, &mut memory_used, &mut details) } {
+        match unsafe { ffi::FMOD_DSPConnection_GetMemoryInfo(self.dsp_connection, memory_bits,
+                                                             event_memory_bits, &mut memory_used,
+                                                             &mut details) } {
             ::Result::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
-            e => Err(e)
+            e => Err(e),
         }
     }
 
@@ -125,8 +131,8 @@ impl DspConnection {
                     let tmp : &mut T = transmute::<*mut c_void, &mut T>(user_data);
                     
                     Ok(tmp)
-                },
-                e => Err(e)
+                }
+                e => Err(e),
             }
         }
     }
