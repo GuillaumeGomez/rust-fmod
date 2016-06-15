@@ -1,10 +1,10 @@
 language: rust
 rust:
 - stable
+- nightly
 sudo: true
 env:
   global:
-    - secure: Id4Ztg0rzqPo7Qx8F3L2Y7TZyzqKcqs1/qL/nlVFv1QK4ISpEKprkIcEnxL97NJdIJCBqaqESkqzmMOII+l6a6zfLjHlze/aY3myhRY2DjcWwI5EC8IOq6zuGxkB7sclIX2DZvQOag4gW23d7grpI43tHeJLj4S9yHajxBcY41Q=
     - LD_LIBRARY_PATH=/usr/local/lib
 install:
   - wget http://www.guillaume-gomez.fr/fmodapi44439linux.tar.gz
@@ -17,5 +17,3 @@ script:
   - cargo build
   - cd ..
   - cargo doc
-after_script:
-  - curl http://www.rust-ci.org/artifacts/put?t=$RUSTCI_TOKEN | sh
