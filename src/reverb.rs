@@ -1,5 +1,5 @@
 /*
-* Rust-FMOD - Copyright (c) 2014 Gomez Guillaume.
+* Rust-FMOD - Copyright (c) 2016 Gomez Guillaume.
 *
 * The Original software, FMOD library, is provided by FIRELIGHT TECHNOLOGIES.
 *
@@ -34,7 +34,7 @@ use std::default::Default;
 
 /// Reverb object
 pub struct Reverb {
-    reverb: *mut ffi::FMOD_REVERB
+    reverb: *mut ffi::FMOD_REVERB,
 }
 
 impl Drop for Reverb {
@@ -54,53 +54,58 @@ impl ffi::FFI<ffi::FMOD_REVERB> for Reverb {
 }
 
 impl Reverb {
-    pub fn release(&mut self) -> ::Result {
+    pub fn release(&mut self) -> ::Status {
         if self.reverb !=::std::ptr::null_mut() {
             match unsafe { ffi::FMOD_Reverb_Release(self.reverb) } {
-                ::Result::Ok => {
+                ::Status::Ok => {
                     self.reverb = ::std::ptr::null_mut();
-                    ::Result::Ok
+                    ::Status::Ok
                 }
-                e => e
+                e => e,
             }
         } else {
-            ::Result::Ok
+            ::Status::Ok
         }
     }
 
-    pub fn set_3D_attributes(&self, position: vector::Vector, min_distance: f32, max_distance: f32) -> ::Result {
+    pub fn set_3D_attributes(&self, position: vector::Vector, min_distance: f32,
+                             max_distance: f32) -> ::Status {
         let t_position = vector::get_ffi(&position);
 
-        unsafe { ffi::FMOD_Reverb_Set3DAttributes(self.reverb, &t_position, min_distance, max_distance) }
+        unsafe { ffi::FMOD_Reverb_Set3DAttributes(self.reverb, &t_position, min_distance,
+                                                  max_distance) }
     }
 
-    pub fn get_3D_attributes(&self) -> Result<(vector::Vector, f32, f32), ::Result> {
+    pub fn get_3D_attributes(&self) -> Result<(vector::Vector, f32, f32), ::Status> {
         let mut position = vector::get_ffi(&vector::Vector::new());
         let mut min_distance = 0f32;
         let mut max_distance = 0f32;
 
-        match unsafe { ffi::FMOD_Reverb_Get3DAttributes(self.reverb, &mut position, &mut min_distance, &mut max_distance) } {
-            ::Result::Ok => Ok((vector::from_ptr(position), min_distance, max_distance)),
-            e => Err(e)
+        match unsafe { ffi::FMOD_Reverb_Get3DAttributes(self.reverb, &mut position,
+                                                        &mut min_distance, &mut max_distance) } {
+            ::Status::Ok => Ok((vector::from_ptr(position), min_distance, max_distance)),
+            e => Err(e),
         }
     }
 
-    pub fn set_properties(&self, reverb_properties: reverb_properties::ReverbProperties) -> ::Result {
+    pub fn set_properties(&self,
+                          reverb_properties: reverb_properties::ReverbProperties) -> ::Status {
         let t_reverb_properties = reverb_properties::get_ffi(reverb_properties);
 
         unsafe { ffi::FMOD_Reverb_SetProperties(self.reverb, &t_reverb_properties) }
     }
 
-    pub fn get_properties(&self, reverb_properties: reverb_properties::ReverbProperties) -> Result<reverb_properties::ReverbProperties, ::Result> {
+    pub fn get_properties(&self, reverb_properties: reverb_properties::ReverbProperties)
+                          -> Result<reverb_properties::ReverbProperties, ::Status> {
         let mut t_reverb_properties = reverb_properties::get_ffi(reverb_properties);
 
         match unsafe { ffi::FMOD_Reverb_GetProperties(self.reverb, &mut t_reverb_properties) } {
-            ::Result::Ok => Ok(reverb_properties::from_ptr(t_reverb_properties)),
-            e => Err(e)
+            ::Status::Ok => Ok(reverb_properties::from_ptr(t_reverb_properties)),
+            e => Err(e),
         }
     }
 
-    pub fn set_active(&self, active: bool) -> ::Result {
+    pub fn set_active(&self, active: bool) -> ::Status {
         let t_active = if active == true {
             1
         } else {
@@ -110,36 +115,41 @@ impl Reverb {
         unsafe { ffi::FMOD_Reverb_SetActive(self.reverb, t_active) }
     }
 
-    pub fn get_active(&self) -> Result<bool, ::Result> {
+    pub fn get_active(&self) -> Result<bool, ::Status> {
         let mut active = 0i32;
 
         match unsafe { ffi::FMOD_Reverb_GetActive(self.reverb, &mut active) } {
-            ::Result::Ok => Ok(active == 1),
+            ::Status::Ok => Ok(active == 1),
             e => Err(e)
         }
     }
 
+    /// Returns:
+    ///
+    /// Ok(memory_used, details)
     pub fn get_memory_info(&self, MemoryBits(memory_bits): MemoryBits,
-        EventMemoryBits(event_memory_bits): EventMemoryBits) -> Result<(u32, MemoryUsageDetails), ::Result> {
+                           EventMemoryBits(event_memory_bits): EventMemoryBits)
+                           -> Result<(u32, MemoryUsageDetails), ::Status> {
         let mut details = fmod_sys::get_memory_usage_details_ffi(Default::default());
         let mut memory_used = 0u32;
 
-        match unsafe { ffi::FMOD_Reverb_GetMemoryInfo(self.reverb, memory_bits, event_memory_bits, &mut memory_used, &mut details) } {
-            ::Result::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
+        match unsafe { ffi::FMOD_Reverb_GetMemoryInfo(self.reverb, memory_bits, event_memory_bits,
+                                                      &mut memory_used, &mut details) } {
+            ::Status::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
             e => Err(e)
         }
     }
 
-    pub fn set_user_data<T>(&self, user_data: &mut T) -> ::Result {
+    pub fn set_user_data<'r, T>(&'r self, user_data: &'r mut T) -> ::Status {
         unsafe { ffi::FMOD_Reverb_SetUserData(self.reverb, transmute(user_data)) }
     }
 
-    pub fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, ::Result> {
+    pub fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, ::Status> {
         unsafe {
             let mut user_data : *mut c_void = ::std::ptr::null_mut();
 
             match ffi::FMOD_Reverb_GetUserData(self.reverb, &mut user_data) {
-                ::Result::Ok => {
+                ::Status::Ok => {
                     let tmp : &mut T = transmute::<*mut c_void, &mut T>(user_data);
                     
                     Ok(tmp)

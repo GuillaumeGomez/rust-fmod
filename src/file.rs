@@ -32,13 +32,15 @@ use libc::fileno;
 use libc::{c_void, c_char};
 use std::ffi::CString;
 
+#[doc(hidden)]
 pub fn get_ffi(file: &FmodFile) -> *mut FILE {
     file.fd
 }
 
+#[doc(hidden)]
 pub fn from_ffi(fd: *mut FILE) -> FmodFile {
     FmodFile {
-        fd: fd
+        fd: fd,
     }
 }
 
@@ -49,12 +51,16 @@ pub enum SeekStyle {
     /// Seek from the end of the stream
     SeekEnd,
     /// Seek from the current position
-    SeekCur
+    SeekCur,
 }
 
-/// A little struct to wrap C files. I'll try to improve this or to replace it by File.
+/// A little struct to wrap C files.
+///
+/// IMPORTANT: it doesn't close the file when dropped!
+///
+/// I'll try to improve this or to replace it by File.
 pub struct FmodFile {
-    fd: *mut FILE
+    fd: *mut FILE,
 }
 
 impl FmodFile {

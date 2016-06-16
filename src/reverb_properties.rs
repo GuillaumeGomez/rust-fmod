@@ -1,5 +1,5 @@
 /*
-* Rust-FMOD - Copyright (c) 2014 Gomez Guillaume.
+* Rust-FMOD - Copyright (c) 2016 Gomez Guillaume.
 *
 * The Original software, FMOD library, is provided by FIRELIGHT TECHNOLOGIES.
 *
@@ -46,7 +46,7 @@ pub fn from_ptr(pointer: ffi::FMOD_REVERB_PROPERTIES) -> ReverbProperties {
         LF_reference: pointer.LFReference,
         diffusion: pointer.Diffusion,
         density: pointer.Density,
-        flags: pointer.Flags
+        flags: pointer.Flags,
     }
 }
 
@@ -71,14 +71,13 @@ pub fn get_ffi(reverb: ReverbProperties) -> ffi::FMOD_REVERB_PROPERTIES {
         LFReference: reverb.LF_reference,
         Diffusion: reverb.diffusion,
         Density: reverb.density,
-        Flags: reverb.flags
+        Flags: reverb.flags,
     }
 }
 
 /// Structure defining a reverb environment.
 #[derive(Clone, Copy)]
-pub struct ReverbProperties
-{
+pub struct ReverbProperties {
     /// [w]   Min: 0 - Max: 3 - Default: 0 - Environment Instance. (SUPPORTED:SFX(4 instances) and Wii (3 instances))
     pub instance         : i32,
     /// [r/w] Min: -1 - Max: 25 - Default: -1 - Sets all listener properties. -1 = OFF. (SUPPORTED:SFX(-1 only)/PSP)
@@ -143,7 +142,7 @@ impl Default for ReverbProperties {
             LF_reference: 250f32,
             diffusion: 100f32,
             density: 100f32,
-            flags: 0u32
+            flags: 0u32,
         }
     }
 }
