@@ -26,10 +26,11 @@
 
 extern crate rfmod;
 
-use std::thread::sleep_ms;
 use std::mem;
 use std::default::Default;
 use std::io::{self, Error, BufRead};
+use std::thread::sleep;
+use std::time::Duration;
 
 fn get_key() -> Result<isize, Error> {
     let r = io::stdin();
@@ -137,7 +138,7 @@ fn main() {
     }
 
     match fmod.init() {
-        rfmod::Result::Ok => {}
+        rfmod::Status::Ok => {}
         e => {
             panic!("FmodSys.init failed : {:?}", e);
         }
@@ -172,7 +173,7 @@ fn main() {
                 match match nb {
                     0 => {
                         match fmod.start_record(record_driver, &sound, false) {
-                            rfmod::Result::Ok => {
+                            rfmod::Status::Ok => {
                                 while match fmod.is_recording(record_driver) {
                                     Ok(r) => r,
                                     Err(e) => {
@@ -188,9 +189,9 @@ fn main() {
                                         }
                                     });
                                     fmod.update();
-                                    sleep_ms(15);
+                                    sleep(Duration::from_millis(15))
                                 }
-                                Some(rfmod::Result::Ok)
+                                Some(rfmod::Status::Ok)
                             }
                             e => Some(e)
                         }
@@ -220,9 +221,9 @@ fn main() {
                                         }
                                     });
                                     fmod.update();
-                                    sleep_ms(15);
+                                    sleep(Duration::from_millis(15));
                                 }
-                                Some(rfmod::Result::Ok)
+                                Some(rfmod::Status::Ok)
                             }
                             Err(e) => Some(e)
                         }
@@ -256,7 +257,7 @@ fn main() {
                     -1 => break,
                     _ => None
                 } {
-                    Some(r) if r == rfmod::Result::Ok => {}
+                    Some(r) if r == rfmod::Status::Ok => {}
                     Some(e) => {
                         println!("Error : {:?}", e);
                         break;

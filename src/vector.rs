@@ -1,5 +1,5 @@
 /*
-* Rust-FMOD - Copyright (c) 2014 Gomez Guillaume.
+* Rust-FMOD - Copyright (c) 2016 Gomez Guillaume.
 *
 * The Original software, FmodEx library, is provided by FIRELIGHT TECHNOLOGIES.
 *
@@ -26,23 +26,30 @@ use ffi;
 use std::default::Default;
 
 pub fn from_ptr(vec: ffi::FMOD_VECTOR) -> Vector {
-    Vector {x: vec.x, y: vec.y, z: vec.z}
+    Vector {
+        x: vec.x,
+        y: vec.y,
+        z: vec.z,
+    }
 }
 
 pub fn get_ffi(vec: &Vector) -> ffi::FMOD_VECTOR {
-    ffi::FMOD_VECTOR {x: vec.x, y: vec.y, z: vec.z}
+    ffi::FMOD_VECTOR {
+        x: vec.x,
+        y: vec.y,
+        z: vec.z,
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
 /// Structure describing a point in 3D space.
-pub struct Vector
-{
+pub struct Vector {
     /// X co-ordinate in 3D space.
     pub x: f32,
     /// Y co-ordinate in 3D space.
     pub y: f32,
     /// Z co-ordinate in 3D space.
-    pub z: f32
+    pub z: f32,
 }
 
 impl Default for Vector {
@@ -53,7 +60,11 @@ impl Default for Vector {
 
 impl Vector {
     pub fn new() -> Vector {
-        Vector{x: 0f32, y: 0f32, z: 0f32}
+        Vector {
+            x: 0f32,
+            y: 0f32,
+            z: 0f32,
+        }
     }
 }
 

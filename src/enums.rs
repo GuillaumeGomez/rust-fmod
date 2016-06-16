@@ -25,7 +25,7 @@
 #[derive(Clone, PartialEq, PartialOrd, Debug, Copy)]
 #[repr(C)]
 /// Error codes. Returned from every function.
-pub enum Result {
+pub enum Status {
     /// No errors.
     Ok,
     /// Tried to call lock a second time before unlock was called.
@@ -253,7 +253,7 @@ pub enum Result {
     /// The music callback is required, but it has not been set.
     MusicNoCallback,
     /// Makes sure this enum is signed 32bit.
-    ResultForceInt = 65536,
+    StatusForceInt = 65536,
 }
 
 #[derive(Clone, PartialEq, PartialOrd, Debug, Copy)]
@@ -729,9 +729,9 @@ pub enum SystemCallbackType {
     /// [`Dsp::add_input`](../../struct.Dsp.html#method.add_input). Usually called from mixer thread
     /// because that is where the connections are made.
     BadDSPConnection,
-    /// Called when too many effects were added exceeding the maximum tree depth of 128. This is most
-    /// likely caused by accidentally adding too many DSP effects. Usually called from mixer thread
-    /// because that is where the connections are made.
+    /// Called when too many effects were added exceeding the maximum tree depth of 128. This is
+    /// most likely caused by accidentally adding too many DSP effects. Usually called from mixer
+    /// thread because that is where the connections are made.
     BadDSPLevel,
     /// Called directly when a thread is destroyed.
     ThreadDestroyed,

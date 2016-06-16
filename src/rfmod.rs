@@ -1,5 +1,5 @@
 /*
-* Rust-FMOD - Copyright (c) 2014 Gomez Guillaume.
+* Rust-FMOD - Copyright (c) 2016 Gomez Guillaume.
 *
 * The Original software, FmodEx library, is provided by FIRELIGHT TECHNOLOGIES.
 *
@@ -70,7 +70,7 @@ fn main() {
     };
 
     match fmod.init() {
-        rfmod::Result::Ok => {}
+        rfmod::Status::Ok => {}
         e => {
             panic!("Sys.init failed : {}", e);
         }
@@ -84,7 +84,7 @@ fn main() {
     };
 
     match sound.play_to_the_end() {
-        rfmod::Result::Ok => {
+        rfmod::Status::Ok => {
             println!("Ok !");
         }
         err => {
@@ -165,7 +165,7 @@ pub use file::{
     SeekStyle
 };
 pub use self::enums::{
-    Result,
+    Status,
     SpeakerMapType,
     SoundFormat,
     SoundType,

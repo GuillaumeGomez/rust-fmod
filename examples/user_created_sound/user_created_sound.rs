@@ -27,11 +27,12 @@
 extern crate rfmod;
 
 use std::default::Default;
-use std::thread::sleep_ms;
+use std::thread::sleep;
+use std::time::Duration;
 use std::io::{self, BufRead, Error};
 
 #[allow(unused_variables)]
-fn pcmreadcallback(sound: &rfmod::Sound, data: &mut [i16]) -> rfmod::Result {
+fn pcmreadcallback(sound: &rfmod::Sound, data: &mut [i16]) -> rfmod::Status {
     static mut t1 : f32 = 0f32; // time
     static mut t2 : f32 = 0f32; // time
     static mut v1 : f32 = 0f32; // velocity
@@ -52,7 +53,7 @@ fn pcmreadcallback(sound: &rfmod::Sound, data: &mut [i16]) -> rfmod::Result {
         }
     }
 
-    rfmod::Result::Ok
+    rfmod::Status::Ok
 }
 
 fn get_key() -> Result<isize, Error> {
@@ -86,7 +87,7 @@ fn main() {
     };
 
     match fmod.init_with_parameters(32i32, rfmod::InitFlag(rfmod::INIT_NORMAL)) {
-        rfmod::Result::Ok => {}
+        rfmod::Status::Ok => {}
         e => {
             panic!("Sys::init() failed : {:?}", e);
         }
@@ -157,6 +158,6 @@ fn main() {
         };
 
         print!("{:02}:{:02} / {:02}:{:02}\r", position / 1000 / 60, position / 1000 % 60, length / 1000 / 60, length / 1000 % 60);
-        sleep_ms(30)
+        sleep(Duration::from_millis(30))
     }
 }

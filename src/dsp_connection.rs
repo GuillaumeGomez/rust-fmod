@@ -57,77 +57,77 @@ impl DspConnection {
         self.dsp_connection = ::std::ptr::null_mut();
     }
 
-    pub fn get_input(&self) -> Result<dsp::Dsp, ::Result> {
+    pub fn get_input(&self) -> Result<dsp::Dsp, ::Status> {
         let mut input = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_DSPConnection_GetInput(self.dsp_connection, &mut input) } {
-            ::Result::Ok => Ok(ffi::FFI::wrap(input)),
+            ::Status::Ok => Ok(ffi::FFI::wrap(input)),
             e => Err(e)
         }
     }
 
-    pub fn get_output(&self) -> Result<dsp::Dsp, ::Result> {
+    pub fn get_output(&self) -> Result<dsp::Dsp, ::Status> {
         let mut output = ::std::ptr::null_mut();
 
         match unsafe { ffi::FMOD_DSPConnection_GetOutput(self.dsp_connection, &mut output) } {
-            ::Result::Ok => Ok(ffi::FFI::wrap(output)),
+            ::Status::Ok => Ok(ffi::FFI::wrap(output)),
             e => Err(e)
         }
     }
 
-    pub fn set_mix(&self, volume: f32) -> ::Result {
+    pub fn set_mix(&self, volume: f32) -> ::Status {
         unsafe { ffi::FMOD_DSPConnection_SetMix(self.dsp_connection, volume) }
     }
 
-    pub fn get_mix(&self) -> Result<f32, ::Result> {
+    pub fn get_mix(&self) -> Result<f32, ::Status> {
         let mut volume = 0f32;
 
         match unsafe { ffi::FMOD_DSPConnection_GetMix(self.dsp_connection, &mut volume) } {
-            ::Result::Ok => Ok(volume),
+            ::Status::Ok => Ok(volume),
             e => Err(e)
         }
     }
 
-    pub fn set_levels(&self, speaker: ::Speaker, levels: &mut Vec<f32>) -> ::Result {
+    pub fn set_levels(&self, speaker: ::Speaker, levels: &mut Vec<f32>) -> ::Status {
         unsafe { ffi::FMOD_DSPConnection_SetLevels(self.dsp_connection, speaker,
                                                    levels.as_mut_ptr(), levels.len() as c_int) }
     }
 
-    pub fn get_levels(&self, speaker: ::Speaker, num_levels: usize) -> Result<Vec<f32>, ::Result> {
+    pub fn get_levels(&self, speaker: ::Speaker, num_levels: usize) -> Result<Vec<f32>, ::Status> {
         let mut levels : Vec<f32> = ::std::iter::repeat(0f32).take(num_levels).collect();
 
         match unsafe { ffi::FMOD_DSPConnection_GetLevels(self.dsp_connection, speaker,
                                                          levels.as_mut_ptr(),
                                                          levels.len() as c_int) } {
-            ::Result::Ok => Ok(levels),
+            ::Status::Ok => Ok(levels),
             e => Err(e),
         }
     }
 
     pub fn get_memory_info(&self, MemoryBits(memory_bits): MemoryBits,
                            EventMemoryBits(event_memory_bits): EventMemoryBits)
-                           -> Result<(u32, MemoryUsageDetails), ::Result> {
+                           -> Result<(u32, MemoryUsageDetails), ::Status> {
         let mut details = fmod_sys::get_memory_usage_details_ffi(Default::default());
         let mut memory_used = 0u32;
 
         match unsafe { ffi::FMOD_DSPConnection_GetMemoryInfo(self.dsp_connection, memory_bits,
                                                              event_memory_bits, &mut memory_used,
                                                              &mut details) } {
-            ::Result::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
+            ::Status::Ok => Ok((memory_used, fmod_sys::from_memory_usage_details_ptr(details))),
             e => Err(e),
         }
     }
 
-    pub fn set_user_data<T>(&self, user_data: &mut T) -> ::Result {
+    pub fn set_user_data<'r, T>(&'r self, user_data: &'r mut T) -> ::Status {
         unsafe { ffi::FMOD_DSPConnection_SetUserData(self.dsp_connection, transmute(user_data)) }
     }
 
-    pub fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, ::Result> {
+    pub fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, ::Status> {
         unsafe {
             let mut user_data : *mut c_void = ::std::ptr::null_mut();
 
             match ffi::FMOD_DSPConnection_GetUserData(self.dsp_connection, &mut user_data) {
-               ::Result::Ok => {
+               ::Status::Ok => {
                     let tmp : &mut T = transmute::<*mut c_void, &mut T>(user_data);
                     
                     Ok(tmp)

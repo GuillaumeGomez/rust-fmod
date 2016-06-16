@@ -26,7 +26,8 @@
 
 extern crate rfmod;
 
-use std::thread::sleep_ms;
+use std::thread::sleep;
+use std::time::Duration;
 use std::io::{self, Error, BufRead};
 
 fn get_key() -> Result<isize, Error> {
@@ -96,7 +97,7 @@ fn main() {
     };
 
     match fmod.init_with_parameters(32i32, rfmod::InitFlag(rfmod::INIT_NORMAL)) {
-        rfmod::Result::Ok => {}
+        rfmod::Status::Ok => {}
         e => {
             panic!("Sys::init() failed : {:?}", e);
         }
@@ -175,6 +176,6 @@ fn main() {
             Err(e) => panic!("Entry error: {:?}", e)
         }
         fmod.update();
-        sleep_ms(30); // let time to the system for update
+        sleep(Duration::from_millis(30)); // let time to the system for update
     }
 }

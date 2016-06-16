@@ -1,6 +1,6 @@
 [package]
 name = "fmod"
-version = "0.9.22"
+version = "0.9.23"
 authors = ["Guillaume Gomez <guillaume1.gomez@gmail.com>"]
 
 description = "A rust binding for the FMOD library"

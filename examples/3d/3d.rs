@@ -27,6 +27,8 @@
 extern crate rfmod;
 
 use std::default::Default;
+use std::thread::sleep;
+use std::time::Duration;
 
 fn main() {
     let t_args = std::env::args();
@@ -48,7 +50,7 @@ fn main() {
     };
 
     match fmod.init_with_parameters(10i32, rfmod::InitFlag(rfmod::INIT_NORMAL)) {
-        rfmod::Result::Ok => {}
+        rfmod::Status::Ok => {}
         e => {
             panic!("FmodSys.init failed : {:?}", e);
         }
@@ -102,6 +104,6 @@ fn main() {
         unsafe { (tmp.as_mut_vec().as_mut() as &mut [u8])[(listener_pos.x as isize + 35isize) as usize] = 'L' as u8; }
         print!("{}", tmp);
         fmod.update();
-        ::std::thread::sleep_ms(interface_update_time as u32 - 1u32);
+        sleep(Duration::from_millis(interface_update_time as u64 - 1));
     }
 }
