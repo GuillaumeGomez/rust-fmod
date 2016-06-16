@@ -26,9 +26,10 @@
 
 extern crate rfmod;
 
-use std::thread::sleep_ms;
+use std::thread::sleep;
+use std::time::Duration;
 
-fn play_to_the_end(sound: rfmod::Sound, len: usize) -> rfmod::Result {
+fn play_to_the_end(sound: rfmod::Sound, len: usize) -> rfmod::Status {
     let length = match sound.get_length(rfmod::TIMEUNIT_MS) {
         Ok(l) => l,
         Err(e) => panic!("sound.get_length error: {:?}", e)
@@ -57,7 +58,7 @@ fn play_to_the_end(sound: rfmod::Sound, len: usize) -> rfmod::Result {
                                 print!("\r{} : {:02}:{:02} / {:02}:{:02}", name, position / 1000 / 60, position / 1000 % 60,
                                     length / 1000 / 60, length / 1000 % 60);
                             }
-                            sleep_ms(30)
+                            sleep(Duration::from_millis(5))
                         } else {
                             break;
                         }
@@ -65,7 +66,7 @@ fn play_to_the_end(sound: rfmod::Sound, len: usize) -> rfmod::Result {
                     Err(e) => return e,
                 }
             }
-            rfmod::Result::Ok
+            rfmod::Status::Ok
         }
         Err(err) => err,
     }
@@ -91,7 +92,7 @@ fn main() {
     };
 
     match fmod.init() {
-        rfmod::Result::Ok => {}
+        rfmod::Status::Ok => {}
         e => {
             panic!("Sys::init() failed : {:?}", e);
         }
@@ -107,7 +108,7 @@ fn main() {
     };
 
     match play_to_the_end(sound, arg1.len()) {
-        rfmod::Result::Ok => {
+        rfmod::Status::Ok => {
             println!("Ok !");
         },
         err => {

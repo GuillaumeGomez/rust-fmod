@@ -30,7 +30,7 @@
 extern crate rfmod;
 
 use std::default::Default;
-use std::io::{Read, BufRead, Write};
+use std::io::{BufRead, Write};
 
 #[allow(unused_must_use)]
 fn get_key() -> char {
@@ -56,7 +56,7 @@ fn get_key() -> char {
 }
 
 fn my_DSP_callback(dsp_state: &rfmod::DspState, inbuffer: &mut [f32], outbuffer: &mut [f32], length: u32, in_channels: i32,
-    out_channels: i32) -> rfmod::Result {
+    out_channels: i32) -> rfmod::Status {
     for it in 0usize..(inbuffer.len() - 1usize) {
         outbuffer[it] = inbuffer[it] * 0.2f32;
     }
@@ -70,7 +70,7 @@ fn my_DSP_callback(dsp_state: &rfmod::DspState, inbuffer: &mut [f32], outbuffer:
         }
     } 
 
-    rfmod::Result::Ok
+    rfmod::Status::Ok
 }
 
 fn main() {
@@ -93,7 +93,7 @@ fn main() {
     };
 
     match fmod.init() {
-        rfmod::Result::Ok => {}
+        rfmod::Status::Ok => {}
         e => {
             panic!("FmodSys.init failed : {:?}", e);
         }

@@ -75,7 +75,7 @@ fn main() {
     };
 
     match fmod.init_with_parameters(1i32, rfmod::InitFlag(rfmod::INIT_NORMAL)) {
-        rfmod::Result::Ok => {}
+        rfmod::Status::Ok => {}
         e => {
             panic!("Sys::init() failed : {:?}", e);
         }
@@ -86,7 +86,7 @@ fn main() {
         Some(my_read as fn(&mut _, &mut _, _, Option<&mut _>) -> _),
         Some(my_seek as fn(&mut _, _, Option<&mut _>)),
         2048i32) {
-        rfmod::Result::Ok => {}
+        rfmod::Status::Ok => {}
         e => {
             panic!("FmodSys.set_file_system failed : {:?}", e);
         }
