@@ -17,6 +17,8 @@ Since this project supports cargo, you can build it this way:
 > cargo build
 ```
 
+This isn't a binding to the lastest version. You can find the bound version [here](http://www.guillaume-gomez.fr/fmodapi44439linux.tar.gz).
+
 ##Documentation
 
 You can access the __rfmod__ documentation locally, just build it :
