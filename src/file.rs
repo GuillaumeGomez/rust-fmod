@@ -29,7 +29,7 @@ use libc::stat;
 use std::mem::zeroed;
 use libc::fstat;
 use libc::fileno;
-use libc::{c_void, c_char};
+use libc::{c_void, c_char, c_long};
 use std::ffi::CString;
 
 #[doc(hidden)]
@@ -94,7 +94,7 @@ impl FmodFile {
             if self.fd.is_null() {
                 0usize
             } else {
-                fseek(self.fd, pos, match style {
+                fseek(self.fd, pos as c_long, match style {
                     self::SeekStyle::SeekSet => SEEK_SET,
                     self::SeekStyle::SeekEnd => SEEK_END,
                     self::SeekStyle::SeekCur => SEEK_CUR
@@ -123,7 +123,7 @@ impl FmodFile {
             if self.fd.is_null() {
                 0i64
             } else {
-                ftell(self.fd)
+                ftell(self.fd) as i64
             }
         }
     }
