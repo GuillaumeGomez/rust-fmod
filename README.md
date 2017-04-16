@@ -7,7 +7,7 @@ __FMOD__ website : www.fmod.org
 
 You can also find it on [crates.io](https://crates.io/crates/fmod) !
 
-##Installation
+## Installation
 
 You must install on your computer the __FMOD__ library which is used for the binding.
 
@@ -19,7 +19,7 @@ Since this project supports cargo, you can build it this way:
 
 This isn't a binding to the lastest version. You can find the bound version [here](http://www.guillaume-gomez.fr/fmodapi44439linux.tar.gz).
 
-##Documentation
+## Documentation
 
 You can access the __rfmod__ documentation locally, just build it :
 
@@ -33,7 +33,7 @@ file:///{rfmod_location}/doc/rfmod/index.html
 
 You can also access the latest build of the documentation via the internet from [here](http://rust-ci.org/GuillaumeGomez/rust-fmod/doc/rfmod/).
 
-##Short example
+## Short example
 
 Here is a short example on how to create a file and to play it :
 
@@ -75,7 +75,7 @@ fn main() {
 
 For a more complete example : https://github.com/GuillaumeGomez/rust-music-player
 
-##License
+## License
 
     Please refer to the LICENSE.txt file for more details.
     If you want more information, here is the FMOD website : http://www.fmod.org/
