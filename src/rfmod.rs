@@ -486,3 +486,11 @@ mod platform {
 mod platform {
     #[link(name = "fmodex")] extern{}
 }
+
+#[cfg(target_os = "windows")]
+mod platform {
+    #[cfg(target_arch="x86")]
+    #[link(name = "fmodex_vc")] extern{}
+    #[cfg(target_arch="x86_64")]
+    #[link(name = "fmodex64_vc")] extern{}
+}
