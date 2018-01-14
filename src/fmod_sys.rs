@@ -47,14 +47,14 @@ use c_vec::CVec;
 use std::ffi::CString;
 
 fn get_saved_sys_callback<'r>() -> &'r mut SysCallback {
-    static mut callback : SysCallback = SysCallback {
+    static mut CALLBACK : SysCallback = SysCallback {
             file_open: None,
             file_close: None,
             file_read: None,
             file_seek: None
         };
 
-    unsafe { &mut callback }
+    unsafe { &mut CALLBACK }
 }
 
 struct SysCallback {

@@ -17,4 +17,5 @@ libc = "0.2.6"
 
 [lib]
 name = "rfmod"
+path = "src/rfmod.rs"
 crate-type = ["dylib", "rlib"]

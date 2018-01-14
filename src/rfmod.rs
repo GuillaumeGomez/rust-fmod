@@ -98,10 +98,12 @@ For a more complete example : https://github.com/GuillaumeGomez/rust-music-playe
 
 ##License
 
-    Copyright (c) 2014 Guillaume Gomez
+```text
+Copyright (c) 2014 Guillaume Gomez
 
-    The license of this project is available in the LICENSE.TXT file. Please refer to it.
-    If you want more information, here is the website for FMOD : http://www.fmod.org/
+The license of this project is available in the LICENSE.TXT file. Please refer to it.
+If you want more information, here is the website for FMOD : http://www.fmod.org/
+```
 
 #Notes
 
