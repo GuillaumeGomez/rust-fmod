@@ -550,9 +550,11 @@ pub struct CreateSoundexInfo {
     /// otherwise the MIDI will fail to open. Current DLS support is for level 1 of the
     /// specification.
     pub dls_name               : String,
+    dls_name_c                 : CString,
     /// [w] Optional. Specify 0 to ignore. Key for encrypted FSB file. Without this key an encrypted
     /// FSB file will not load.
     pub encryption_key         : String,
+    encryption_key_c           : CString,
     /// [w] Optional. Specify 0 to ignore. For sequenced formats with dynamic channel allocation
     /// such as .MID and .IT, this specifies the maximum voice count allowed while playing. .IT
     /// defaults to 64. .MID defaults to 32.
@@ -627,7 +629,9 @@ impl Default for CreateSoundexInfo {
             pcm_set_pos_callback: None,
             non_block_callback: None,
             dls_name: String::new(),
+            dls_name_c: CString::new("").unwrap(),
             encryption_key: String::new(),
+            encryption_key_c: CString::new("").unwrap(),
             max_polyphony: 0i32,
             user_data: Box::new(ffi::SoundData::new()),
             suggested_sound_type: ::SoundType::Unknown,
@@ -652,8 +656,8 @@ impl Default for CreateSoundexInfo {
 
 impl CreateSoundexInfo {
     fn convert_to_c(&mut self) -> ffi::FMOD_CREATESOUNDEXINFO {
-        let tmp_dls_name = CString::new(self.dls_name.clone()).unwrap();
-        let tmp_encryption_key = CString::new(self.encryption_key.clone()).unwrap();
+        self.dls_name_c = CString::new(self.dls_name.clone()).unwrap();
+        self.encryption_key_c = CString::new(self.encryption_key.clone()).unwrap();
 
         ffi::FMOD_CREATESOUNDEXINFO{
             cbsize: mem::size_of::<ffi::FMOD_CREATESOUNDEXINFO>() as i32,
@@ -679,8 +683,16 @@ impl CreateSoundexInfo {
                 Some(_) => Some(non_block_callback as extern "C" fn(*mut _, _) -> _),
                 None => None
             },
-            dlsname: tmp_dls_name.as_ptr() as *mut c_char,
-            encryptionkey: tmp_encryption_key.as_ptr() as *mut c_char,
+            dlsname: if !self.dls_name.is_empty() {
+                self.dls_name_c.as_c_str().as_ptr() as *mut c_char
+            } else {
+                ::std::ptr::null_mut()
+            },
+            encryptionkey: if !self.encryption_key.is_empty() {
+                self.encryption_key_c.as_c_str().as_ptr() as *mut c_char
+            } else {
+                ::std::ptr::null_mut()
+            },
             maxpolyphony: self.max_polyphony,
             userdata: {
                 self.user_data.non_block = self.non_block_callback;
