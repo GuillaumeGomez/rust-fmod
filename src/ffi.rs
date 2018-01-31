@@ -555,6 +555,7 @@ extern "C" {
         memory_used_details: *mut FMOD_MEMORY_USAGE_DETAILS) -> ::Status;
 }
 
+#[repr(C)]
 pub struct FMOD_ASYNCREADINFO {
     pub handle     : *mut c_void,   /* [r] The file handle that was filled out in the open callback. */
     pub offset     : c_uint,        /* [r] Seek position, make sure you read from this file offset. */
@@ -567,6 +568,7 @@ pub struct FMOD_ASYNCREADINFO {
     pub userdata   : *mut c_void    /* [r] User data pointer. */
 }
 
+#[repr(C)]
 pub struct FMOD_CREATESOUNDEXINFO
 {
     pub cbsize             : c_int,                        /* [w] Size of this structure. This is used so the structure can be expanded in the future and still work on older versions of FMOD Ex. */
@@ -605,6 +607,7 @@ pub struct FMOD_CREATESOUNDEXINFO
     pub nonblockthreadid   : c_int,                        /* [w] Optional. Specify 0 to ignore. Specifies a thread index to execute non blocking load on. Allows for up to 5 threads to be used for loading at once. This is to avoid one load blocking another. Maximum value = 4. */
 }
 
+#[repr(C)]
 pub struct FMOD_REVERB_CHANNELPROPERTIES { /*       MIN    MAX  DEFAULT  DESCRIPTION */
     pub Direct         : c_int,            /* [r/w] -10000 1000 0        Direct path level                                        (SUPPORTED:SFX) */
     pub Room           : c_int,            /* [r/w] -10000 1000 0        Room effect level                                        (SUPPORTED:SFX) */
@@ -612,6 +615,7 @@ pub struct FMOD_REVERB_CHANNELPROPERTIES { /*       MIN    MAX  DEFAULT  DESCRIP
     pub ConnectionPoint: *mut FMOD_DSP,    /* [r/w] See remarks.        DSP network location to connect reverb for this channel. (SUPPORTED:SFX).*/
 }
 
+#[repr(C)]
 pub struct FMOD_GUID {
     pub Data1: c_uint,              /* Specifies the first 8 hexadecimal digits of the GUID */
     pub Data2: c_ushort,            /* Specifies the first group of 4 hexadecimal digits.  */
@@ -619,6 +623,7 @@ pub struct FMOD_GUID {
     pub Data4: [c_uchar; 8],        /* Array of 8 bytes. The first 2 bytes contain the third group of 4 hexadecimal digits. The remaining 6 bytes contain the final 12 hexadecimal digits. */
 }
 
+#[repr(C)]
 pub struct FMOD_ADVANCEDSETTINGS {
     pub cbsize                     : c_int,              /* [w]   Size of this structure. Use sizeof(FMOD_ADVANCEDSETTINGS)  NOTE: This must be set before calling System::getAdvancedSettings! */
     pub maxMPEGcodecs              : c_int,              /* [r/w] Optional. Specify 0 to ignore. For use with FMOD_CREATECOMPRESSEDSAMPLE only. Mpeg  codecs consume 21,684 bytes per instance and this number will determine how many mpeg channels can be played simultaneously.  Default = 32. */
@@ -649,6 +654,7 @@ pub struct FMOD_ADVANCEDSETTINGS {
     pub stackSizeMixer             : c_uint              /* [r/w] Optional. Specify 0 to ignore. Specify the stack size for the FMOD mixer thread. Useful for custom dsps that use excess stack. Default 49,152 (48kb) */
 }
 
+#[repr(C)]
 pub struct FMOD_CODEC_DESCRIPTION {
     pub name           : *mut c_char,                   /* [in] Name of the codec. */
     pub version        : c_uint,                        /* [in] Plugin writer's version number. */
@@ -664,6 +670,7 @@ pub struct FMOD_CODEC_DESCRIPTION {
     pub getwaveformat  : FMOD_CODEC_GETWAVEFORMAT       /* [in] Callback to tell FMOD about the waveformat of a particular subsound. This is to save memory, rather than saving 1000 FMOD_CODEC_WAVEFORMAT structures in the codec, the codec might have a more optimal way of storing this information. */
 }
 
+#[repr(C)]
 pub struct FMOD_CODEC_WAVEFORMAT
 {
     pub name       : [c_char; 256],    /* [in] Name of sound.*/
@@ -679,6 +686,7 @@ pub struct FMOD_CODEC_WAVEFORMAT
     pub channelmask: c_uint            /* [in] Microsoft speaker channel mask, as defined for WAVEFORMATEXTENSIBLE and is found in ksmedia.h. Leave at 0 to play in natural speaker order. */
 }
 
+#[repr(C)]
 pub struct FMOD_CODEC_STATE
 {
     pub numsubsounds: c_int,                      /* [in] Number of 'subsounds' in this sound. Anything other than 0 makes it a 'container' format (ie CDDA/DLS/FSB etc which contain 1 or more su bsounds). For most normal, single sound codec such as WAV/AIFF/MP3, this should be 0 as they are not a container for subsounds, they are the sound by itself. */
@@ -692,6 +700,7 @@ pub struct FMOD_CODEC_STATE
     pub metadata    : FMOD_CODEC_METADATACALLBACK /* [out] This will return a callable FMOD metadata function to use from codec. */
 }
 
+#[repr(C)]
 pub struct FMOD_REVERB_PROPERTIES
 {                                      /*       MIN    MAX     DEFAULT DESCRIPTION */
     pub Instance        : c_int,       /* [w]   0      3       0       Environment Instance.                                                (SUPPORTED:SFX(4 instances) and Wii (3 instances)) */
@@ -716,6 +725,7 @@ pub struct FMOD_REVERB_PROPERTIES
     pub Flags           : c_uint       /* [r/w] *mut FMOD_REVERB_FLAGS - modifies the behavior of above properties                                (SUPPORTED:WII) */
 }
 
+#[repr(C)]
 pub struct FMOD_TAG
 {
     pub _type   : ::TagType,      /* [r] The type of this tag. */
@@ -726,6 +736,7 @@ pub struct FMOD_TAG
     pub updated : FMOD_BOOL            /* [r] True if this tag has been updated since last being accessed with Sound::getTag */
 }
 
+#[repr(C)]
 pub struct FMOD_VECTOR
 {
     pub x: c_float, /* X co-ordinate in 3D space. */
@@ -733,6 +744,7 @@ pub struct FMOD_VECTOR
     pub z: c_float  /* Z co-ordinate in 3D space. */
 }
 
+#[repr(C)]
 pub struct FMOD_MEMORY_USAGE_DETAILS
 {
     pub other                  : c_uint, /* [out] Memory not accounted for by other types */
@@ -785,6 +797,7 @@ pub struct FMOD_MEMORY_USAGE_DETAILS
     pub event_instance_pool    : c_uint  /* [out] Event instance pool memory */
 }
 
+#[repr(C)]
 pub struct FMOD_DSP_PARAMETERDESC
 {
     pub min         : c_float,      /* [w] Minimum value of the parameter (ie 100.0). */
@@ -795,6 +808,7 @@ pub struct FMOD_DSP_PARAMETERDESC
     pub description : *const c_char /* [w] Description of the parameter to be displayed as a help item / tooltip for this parameter. */
 }
 
+#[repr(C)]
 pub struct FMOD_DSP_DESCRIPTION
 {
     pub name                    : [c_char; 32],                 /* [w] Name of the unit to be displayed in the network. */
@@ -815,6 +829,7 @@ pub struct FMOD_DSP_DESCRIPTION
     pub user_data               : *mut c_void                   /* [w] Optional. Specify 0 to ignore. This is user data to be attached to the DSP unit during creation. Access via DSP::getUserData. */
 }
 
+#[repr(C)]
 pub struct FMOD_DSP_STATE
 {
     pub instance: *mut FMOD_DSP,    /* [r] Handle to the DSP hand the user created. Not to be modified. C++ users cast to DSP to use. */
