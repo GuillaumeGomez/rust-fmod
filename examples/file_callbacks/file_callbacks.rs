@@ -32,8 +32,8 @@ use rfmod::SeekStyle;
 fn my_open(music_name: &str, unicode: i32) -> Option<(rfmod::FmodFile, Option<rfmod::UserData>)> {
     println!("Let's start by opening {} !", music_name);
     let file = match rfmod::FmodFile::open(music_name) {
-        Some(f) => f,
-        None => panic!("Couldn't open: {}", music_name)
+        Ok(f) => f,
+        Err(e) => panic!("Couldn't open \"{}\": {}", music_name, e)
     };
 
     Some((file, None))

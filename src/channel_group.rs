@@ -251,7 +251,7 @@ impl ChannelGroup {
         }
     }
 
-    pub fn get_name(&self, name_len: usize) -> Result<String, ::Status> {
+    pub fn get_name(&self, name_len: usize) -> Result<String, ::RStatus> {
         let mut c = Vec::with_capacity(name_len + 1);
 
         for _ in 0..(name_len + 1) {
@@ -261,8 +261,8 @@ impl ChannelGroup {
         match unsafe { ffi::FMOD_ChannelGroup_GetName(self.channel_group,
                                                       c.as_mut_ptr() as *mut c_char,
                                                       name_len as i32) } {
-            ::Status::Ok => Ok(String::from_utf8(c).unwrap()),
-            e => Err(e)
+            ::Status::Ok => Ok(from_utf8!(c)),
+            e => Err(::RStatus::FMOD(e)),
         }
     }
 

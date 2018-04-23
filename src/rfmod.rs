@@ -168,6 +168,7 @@ pub use file::{
 };
 pub use self::enums::{
     Status,
+    RStatus,
     SpeakerMapType,
     SoundFormat,
     SoundType,
@@ -213,6 +214,9 @@ pub use self::types::{
     MemoryBits,
     EventMemoryBits,
 };
+
+#[macro_use]
+mod utils;
 
 mod ffi;
 mod sound;

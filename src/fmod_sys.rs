@@ -629,9 +629,9 @@ impl Default for CreateSoundexInfo {
             pcm_set_pos_callback: None,
             non_block_callback: None,
             dls_name: String::new(),
-            dls_name_c: CString::new("").unwrap(),
+            dls_name_c: CString::new("").expect("CString failed on empty string..."),
             encryption_key: String::new(),
-            encryption_key_c: CString::new("").unwrap(),
+            encryption_key_c: CString::new("").expect("CString failed on empty string..."),
             max_polyphony: 0i32,
             user_data: Box::new(ffi::SoundData::new()),
             suggested_sound_type: ::SoundType::Unknown,
@@ -656,8 +656,8 @@ impl Default for CreateSoundexInfo {
 
 impl CreateSoundexInfo {
     fn convert_to_c(&mut self) -> ffi::FMOD_CREATESOUNDEXINFO {
-        self.dls_name_c = CString::new(self.dls_name.clone()).unwrap();
-        self.encryption_key_c = CString::new(self.encryption_key.clone()).unwrap();
+        self.dls_name_c = CString::new(self.dls_name.clone()).expect("CString failed");
+        self.encryption_key_c = CString::new(self.encryption_key.clone()).expect("CString failed");
 
         ffi::FMOD_CREATESOUNDEXINFO{
             cbsize: mem::size_of::<ffi::FMOD_CREATESOUNDEXINFO>() as i32,
@@ -1149,7 +1149,7 @@ impl Sys {
         };
 
         match if music.len() > 0 {
-            let music_cstring = CString::new(music).unwrap();
+            let music_cstring = CString::new(music).expect("CString failed");
             unsafe { ffi::FMOD_System_CreateSound(self.system,
                                                   music_cstring.as_ptr() as *const c_char, op, ex,
                                                   sound::get_fffi(&mut sound)) }
@@ -1188,7 +1188,7 @@ impl Sys {
         };
 
         match if music.len() > 0 {
-            let music_cstring = CString::new(music).unwrap();
+            let music_cstring = CString::new(music).expect("CString failed");
             unsafe { ffi::FMOD_System_CreateStream(self.system,
                                                    music_cstring.as_ptr() as *const c_char, op, ex,
                                                    sound::get_fffi(&mut sound)) }
@@ -1204,7 +1204,7 @@ impl Sys {
     pub fn create_channel_group(&self, group_name: &str)
                                 -> Result<channel_group::ChannelGroup, ::Status> {
         let mut channel_group = ::std::ptr::null_mut();
-            let tmp_group_name = CString::new(group_name).unwrap();
+            let tmp_group_name = CString::new(group_name).expect("CString failed");
 
         match unsafe { ffi::FMOD_System_CreateChannelGroup(self.system,
                                                           tmp_group_name.as_ptr() as *const c_char,
@@ -1217,7 +1217,7 @@ impl Sys {
     pub fn create_sound_group(&self, group_name: &str)
                               -> Result<sound_group::SoundGroup, ::Status> {
         let mut sound_group = ::std::ptr::null_mut();
-            let tmp_group_name = CString::new(group_name).unwrap();
+            let tmp_group_name = CString::new(group_name).expect("CString failed");
 
         match unsafe { ffi::FMOD_System_CreateSoundGroup(self.system,
                                                          tmp_group_name.as_ptr() as *const c_char,
@@ -1289,7 +1289,7 @@ impl Sys {
         }
     }
 
-    pub fn get_driver_info(&self, id: i32, name_len: usize) -> Result<(Guid, String), ::Status> {
+    pub fn get_driver_info(&self, id: i32, name_len: usize) -> Result<(Guid, String), ::RStatus> {
         let mut c = Vec::with_capacity(name_len + 1);
         let mut guid = ffi::FMOD_GUID {
                            Data1: 0,
@@ -1310,8 +1310,8 @@ impl Sys {
                                     data2: guid.Data2,
                                     data3: guid.Data3,
                                     data4: guid.Data4,
-                                }, String::from_utf8(c).unwrap())),
-            e => Err(e),
+                                 }, from_utf8!(c))),
+            e => Err(::RStatus::FMOD(e)),
         }
     }
 
@@ -1428,7 +1428,7 @@ impl Sys {
             (0..settings.ASIO_channel_list.len()).map(|pos| {
             settings.ASIO_channel_list[pos].as_ptr() as *const c_char
         }).collect();
-        let deb_log_filename = CString::new(settings.debug_log_filename.clone()).unwrap();
+        let deb_log_filename = CString::new(settings.debug_log_filename.clone()).expect("cstring failed");
         let mut advanced_settings = ffi::FMOD_ADVANCEDSETTINGS{
             cbsize: mem::size_of::<ffi::FMOD_ADVANCEDSETTINGS>() as i32,
             maxMPEGcodecs: settings.max_MPEG_codecs,
@@ -1584,7 +1584,7 @@ impl Sys {
     }
 
     pub fn set_plugin_path(&self, path: &str) -> ::Status {
-        let tmp_path = CString::new(path).unwrap();
+        let tmp_path = CString::new(path).expect("CString failed");
 
         unsafe { ffi::FMOD_System_SetPluginPath(self.system, tmp_path.as_ptr() as *const c_char) }
     }
@@ -1627,7 +1627,7 @@ impl Sys {
     }
 
     pub fn get_plugin_info(&self, PluginHandle(handle): PluginHandle,
-                           name_len: usize) -> Result<(String, ::PluginType, u32), ::Status> {
+                           name_len: usize) -> Result<(String, ::PluginType, u32), ::RStatus> {
         let mut plugin_type = ::PluginType::Output;
         let mut version = 0u32;
         let mut c = Vec::with_capacity(name_len + 1);
@@ -1640,8 +1640,8 @@ impl Sys {
                                                       c.as_mut_ptr() as *mut c_char,
                                                       name_len as c_int,
                                                       &mut version as *mut c_uint) } {
-            ::Status::Ok => Ok((String::from_utf8(c).unwrap(), plugin_type, version)),
-            e => Err(e),
+            ::Status::Ok => Ok((from_utf8!(c), plugin_type, version)),
+            e => Err(::RStatus::FMOD(e)),
         }
     }
 
@@ -1856,7 +1856,7 @@ impl Sys {
     /// Ok(drive_name, scsi_name, device_name)
     pub fn get_CDROM_drive_name(&self, drive: i32, drive_name_len: usize, scsi_name_len: usize,
                                 device_name_len: usize)
-                                -> Result<(String, String, String), ::Status> {
+                                -> Result<(String, String, String), ::RStatus> {
         let mut drive_name = Vec::with_capacity(drive_name_len + 1);
         let mut scsi_name = Vec::with_capacity(scsi_name_len + 1);
         let mut device_name = Vec::with_capacity(device_name_len + 1);
@@ -1878,10 +1878,13 @@ impl Sys {
                                                           scsi_name_len as c_int,
                                                           device_name.as_mut_ptr() as *mut c_char,
                                                           device_name_len as c_int) } {
-            ::Status::Ok => Ok((String::from_utf8(drive_name).unwrap(),
-                                String::from_utf8(scsi_name).unwrap(),
-                                String::from_utf8(device_name).unwrap())),
-            e => Err(e),
+            ::Status::Ok => {
+                let drive_name = from_utf8!(drive_name);
+                let scsi_name = from_utf8!(scsi_name);
+                let device_name = from_utf8!(device_name);
+                Ok((drive_name, scsi_name, device_name))
+            }
+            e => Err(::RStatus::FMOD(e)),
         }
     }
 
@@ -2027,7 +2030,7 @@ impl Sys {
     }
 
     pub fn get_record_driver_info(&self, id: i32,
-                                  name_len: usize) -> Result<(Guid, String), ::Status> {
+                                  name_len: usize) -> Result<(Guid, String), ::RStatus> {
         let mut guid = ffi::FMOD_GUID{
             Data1: 0,
             Data2: 0,
@@ -2048,8 +2051,8 @@ impl Sys {
                                     data2: guid.Data2,
                                     data3: guid.Data3,
                                     data4: guid.Data4
-                                }, String::from_utf8(c).unwrap())),
-            e => Err(e),
+                                }, from_utf8!(c))),
+            e => Err(::RStatus::FMOD(e)),
         }
     }
 

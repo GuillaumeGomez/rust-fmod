@@ -22,6 +22,23 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
+use std::fmt;
+
+#[derive(Clone, PartialEq, PartialOrd, Debug)]
+pub enum RStatus {
+    Other(String),
+    FMOD(Status),
+}
+
+impl fmt::Display for RStatus {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            RStatus::Other(ref s) => write!(f, "Other: {}", s),
+            RStatus::FMOD(ref s) => write!(f, "FMOD: {:?}", s),
+        }
+    }
+}
+
 #[derive(Clone, PartialEq, PartialOrd, Debug, Copy)]
 #[repr(C)]
 /// Error codes. Returned from every function.
