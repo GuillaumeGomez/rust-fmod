@@ -64,16 +64,19 @@ pub struct FmodFile {
 }
 
 impl FmodFile {
-    pub fn open(file_name: &str) -> Option<FmodFile> {
-        let tmp_file_name = CString::new(file_name).unwrap();
+    pub fn open(file_name: &str) -> Result<FmodFile, ::RStatus> {
+        let tmp_file_name = match CString::new(file_name) {
+            Ok(s) => s,
+            Err(e) => return Err(::RStatus::Other(format!("invalid file name: {}", e))),
+        };
         unsafe {
             let tmp = fopen(tmp_file_name.as_ptr() as *const c_char,
                             "rb".as_ptr() as *const c_char);
 
             if tmp.is_null() {
-                None
+                Err(::RStatus::Other(format!("fopen call failed")))
             } else {
-                Some(FmodFile{fd: tmp})
+                Ok(FmodFile{fd: tmp})
             }
         }
     }

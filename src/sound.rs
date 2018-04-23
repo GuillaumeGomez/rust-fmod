@@ -132,7 +132,7 @@ impl FmodTag {
     }
 
     fn convert_to_c(&self) -> ffi::FMOD_TAG {
-        let tmp = CString::new(self.name.clone()).unwrap();
+        let tmp = CString::new(self.name.clone()).expect("CString failed");
 
         ffi::FMOD_TAG {
             _type: self._type,
@@ -377,7 +377,7 @@ impl Sound {
         }
     }
 
-    pub fn get_name(&self, name_len: usize) -> Result<String, ::Status> {
+    pub fn get_name(&self, name_len: usize) -> Result<String, ::RStatus> {
         let mut c = Vec::with_capacity(name_len + 1);
 
         for _ in 0..(name_len + 1) {
@@ -386,8 +386,8 @@ impl Sound {
 
         match unsafe { ffi::FMOD_Sound_GetName(self.sound, c.as_mut_ptr() as *mut c_char,
                                                name_len as i32) } {
-            ::Status::Ok => Ok(String::from_utf8(c).unwrap()),
-            e => Err(e),
+            ::Status::Ok => Ok(from_utf8!(c)),
+            e => Err(::RStatus::FMOD(e)),
         }
     }
 
@@ -512,7 +512,7 @@ impl Sound {
     }
 
     pub fn get_sync_point_info(&self, sync_point: FmodSyncPoint, name_len: usize,
-                               TimeUnit(offset_type): TimeUnit) -> Result<(String, u32), ::Status> {
+                               TimeUnit(offset_type): TimeUnit) -> Result<(String, u32), ::RStatus> {
         let mut offset = 0u32;
         let mut c = Vec::with_capacity(name_len + 1);
 
@@ -524,8 +524,8 @@ impl Sound {
                                                         c.as_mut_ptr() as *mut c_char,
                                                         name_len as i32, &mut offset,
                                                         offset_type) } {
-            ::Status::Ok => Ok((String::from_utf8(c).unwrap(), offset)),
-            e => Err(e),
+            ::Status::Ok => Ok((from_utf8!(c), offset)),
+            e => Err(::RStatus::FMOD(e)),
         }
     }
 
@@ -794,34 +794,62 @@ impl Sound {
 
             /* wav header */
             for it in 0usize..4usize {
-                wtr.write_i8(wav_header.chunk.id[it]).unwrap();
+                if let Err(e) = wtr.write_i8(wav_header.chunk.id[it]) {
+                    return Err(format!("write_i8 failed: {}", e));
+                }
             }
-            wtr.write_i32::<LittleEndian>(wav_header.chunk.size).unwrap();
+            if let Err(e) = wtr.write_i32::<LittleEndian>(wav_header.chunk.size) {
+                return Err(format!("write_i32 failed: {}", e));
+            }
             for it in 0usize..4usize {
-                wtr.write_i8(wav_header.riff_type[it]).unwrap();
+                if let Err(e) = wtr.write_i8(wav_header.riff_type[it]) {
+                    return Err(format!("write_i8 failed: {}", e));
+                }
             }
 
             /* wav chunk */
             for it in 0usize..4usize {
-                wtr.write_i8(fmt_chunk.chunk.id[it]).unwrap();
+                if let Err(e) = wtr.write_i8(fmt_chunk.chunk.id[it]) {
+                    return Err(format!("write_i8 failed: {}", e));
+                }
             }
-            wtr.write_i32::<LittleEndian>(fmt_chunk.chunk.size).unwrap();
-            wtr.write_u16::<LittleEndian>(fmt_chunk.w_format_tag).unwrap();
-            wtr.write_u16::<LittleEndian>(fmt_chunk.n_channels).unwrap();
-            wtr.write_u32::<LittleEndian>(fmt_chunk.n_samples_per_sec).unwrap();
-            wtr.write_u32::<LittleEndian>(fmt_chunk.n_avg_bytes_per_sec).unwrap();
-            wtr.write_u16::<LittleEndian>(fmt_chunk.n_block_align).unwrap();
-            wtr.write_u16::<LittleEndian>(fmt_chunk.w_bits_per_sample).unwrap();
+            if let Err(e) = wtr.write_i32::<LittleEndian>(fmt_chunk.chunk.size) {
+                return Err(format!("write_i32 failed: {}", e));
+            }
+            if let Err(e) = wtr.write_u16::<LittleEndian>(fmt_chunk.w_format_tag) {
+                return Err(format!("write_u16 failed: {}", e));
+            }
+            if let Err(e) = wtr.write_u16::<LittleEndian>(fmt_chunk.n_channels) {
+                return Err(format!("write_u16 failed: {}", e));
+            }
+            if let Err(e) = wtr.write_u32::<LittleEndian>(fmt_chunk.n_samples_per_sec) {
+                return Err(format!("write_u32 failed: {}", e));
+            }
+            if let Err(e) = wtr.write_u32::<LittleEndian>(fmt_chunk.n_avg_bytes_per_sec) {
+                return Err(format!("write_u32 failed: {}", e));
+            }
+            if let Err(e) = wtr.write_u16::<LittleEndian>(fmt_chunk.n_block_align) {
+                return Err(format!("write_u16 failed: {}", e));
+            }
+            if let Err(e) = wtr.write_u16::<LittleEndian>(fmt_chunk.w_bits_per_sample) {
+                return Err(format!("write_u16 failed: {}", e));
+            }
 
             /* wav data chunk */
             for it in 0usize..4usize {
-                wtr.write_i8(data_chunk.chunk.id[it]).unwrap();
+                if let Err(e) = wtr.write_i8(data_chunk.chunk.id[it]) {
+                    return Err(format!("write_i8 failed: {}", e));
+                }
             }
-            wtr.write_i32::<LittleEndian>(data_chunk.chunk.size).unwrap();
+            if let Err(e) = wtr.write_i32::<LittleEndian>(data_chunk.chunk.size) {
+                return Err(format!("write_i32 failed: {}", e));
+            }
 
             ffi::FMOD_Sound_Lock(self.sound, 0, len_bytes, &mut ptr1, &mut ptr2, &mut len1, &mut len2);
 
-            file.write_all(&wtr).unwrap();
+            if let Err(e) = file.write_all(&wtr) {
+                return Err(format!("write_all failed: {}", e));
+            }
 
             ffi::FMOD_Sound_Unlock(self.sound, ptr1, ptr2, len1, len2);
         }

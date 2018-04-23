@@ -305,44 +305,61 @@ impl Default for DspParameterDesc {
     }
 }
 
-pub fn from_parameter_ptr(dsp_parameter: *mut ffi::FMOD_DSP_PARAMETERDESC) -> DspParameterDesc {
+pub fn from_parameter_ptr(dsp_parameter: *mut ffi::FMOD_DSP_PARAMETERDESC) -> Result<DspParameterDesc, ::RStatus> {
     if !dsp_parameter.is_null() {
-        unsafe {
+        let description = unsafe {
             let l = ffi::strlen((*dsp_parameter).description);
-            let description = String::from_raw_parts((*dsp_parameter).description as *mut u8, l, l);
-            let mut v1 : Vec<u8> = Vec::with_capacity((*dsp_parameter).name.len());
-            let mut v2 : Vec<u8> = Vec::with_capacity((*dsp_parameter).label.len());
+            String::from_raw_parts((*dsp_parameter).description as *mut u8, l, l)
+        };
+        let mut v1 : Vec<u8> = unsafe { Vec::with_capacity((*dsp_parameter).name.len()) };
+        let mut v2 : Vec<u8> = unsafe { Vec::with_capacity((*dsp_parameter).label.len()) };
 
+        unsafe {
             for i in (*dsp_parameter).name.iter() {
+                if *i == 0 {
+                    break
+                }
                 v1.push(*i as u8);
             }
+        }
+        let name = from_utf8!(v1);
+        unsafe {
             for i in (*dsp_parameter).label.iter() {
+                if *i == 0 {
+                    break
+                }
                 v2.push(*i as u8);
             }
-            DspParameterDesc {
+        }
+        let label = from_utf8!(v2);
+        unsafe {
+            Ok(DspParameterDesc {
                 min: (*dsp_parameter).min,
                 max: (*dsp_parameter).max,
                 default_val: (*dsp_parameter).default_val,
-                name: String::from_utf8(v1).unwrap(),
-                label: String::from_utf8(v2).unwrap(),
-                description: description,
-            }
+                name,
+                label,
+                description,
+            })
         }
     } else {
-        Default::default()
+        Ok(Default::default())
     }
 }
 
-pub fn get_parameter_ffi(dsp_parameter: &DspParameterDesc) -> ffi::FMOD_DSP_PARAMETERDESC {
+pub fn get_parameter_ffi(dsp_parameter: &DspParameterDesc) -> Result<ffi::FMOD_DSP_PARAMETERDESC, ::RStatus> {
     let mut tmp_name = dsp_parameter.name.as_bytes().to_vec();
     let mut tmp_label = dsp_parameter.label.as_bytes().to_vec();
-    let tmp_description = CString::new(dsp_parameter.description.clone()).unwrap();
+    let tmp_description = match CString::new(dsp_parameter.description.clone()) {
+        Ok(s) => s,
+        Err(e) => return Err(::RStatus::Other(format!("Issue with dsp_parameter: {}", e))),
+    };
 
     tmp_name.truncate(16);
     tmp_label.truncate(16);
     tmp_name.reserve_exact(16);
     tmp_label.reserve_exact(16);
-    ffi::FMOD_DSP_PARAMETERDESC {
+    Ok(ffi::FMOD_DSP_PARAMETERDESC {
         min: dsp_parameter.min,
         max: dsp_parameter.max,
         default_val: dsp_parameter.default_val,
@@ -367,7 +384,7 @@ pub fn get_parameter_ffi(dsp_parameter: &DspParameterDesc) -> ffi::FMOD_DSP_PARA
             slice
         },
         description: tmp_description.as_ptr() as *const c_char,
-    }
+    })
 }
 
 /// When creating a DSP unit, declare one of these and provide the relevant callbacks and name for
@@ -478,7 +495,7 @@ pub fn get_description_ffi(dsp_description: &mut DspDescription) -> ffi::FMOD_DS
             None => None
         },
         num_parameters: dsp_description.num_parameters,
-        param_desc: &mut get_parameter_ffi(&dsp_description.param_desc)
+        param_desc: &mut get_parameter_ffi(&dsp_description.param_desc).expect("get_parameter_ffi failed")
                     as *mut ffi::FMOD_DSP_PARAMETERDESC,
         set_parameter: match dsp_description.set_parameter {
             Some(_) => Some(set_parameter_callback as extern "C" fn(*mut _, _, _) -> _),
@@ -813,7 +830,7 @@ impl Dsp {
     /// * [`DspLowPassSimple`](enums/fmod/type.DspLowPassSimple.html)
     /// * [`DspHighPassSimple`](enums/fmod/type.DspHighPassSimple.html)
     pub fn get_parameter(&self, index: i32, value_str_len: usize)
-                        -> Result<(f32, String), ::Status> {
+                        -> Result<(f32, String), ::RStatus> {
         let mut value = 0f32;
         let mut c = Vec::with_capacity(value_str_len + 1);
 
@@ -824,8 +841,11 @@ impl Dsp {
         match unsafe { ffi::FMOD_DSP_GetParameter(self.dsp, index, &mut value,
                                                   c.as_mut_ptr() as *mut c_char,
                                                   value_str_len as i32) } {
-           ::Status::Ok => Ok((value, String::from_utf8(c).unwrap())),
-            e => Err(e)
+           ::Status::Ok => {
+                let c = from_utf8!(c);
+                Ok((value, c))
+            }
+            e => Err(::RStatus::FMOD(e))
         }
     }
 
@@ -839,7 +859,7 @@ impl Dsp {
     }
 
     pub fn get_parameter_info(&self, index: i32, name: &str, label: &str,
-                              description_len: usize) -> Result<(String, f32, f32), ::Status> {
+                              description_len: usize) -> Result<(String, f32, f32), ::RStatus> {
         let mut min = 0f32;
         let mut max = 0f32;
         let t_name = name.clone();
@@ -856,8 +876,8 @@ impl Dsp {
                                                       description.as_mut_ptr() as *mut c_char,
                                                       description_len as i32, &mut min,
                                                       &mut max) } {
-            ::Status::Ok => Ok((String::from_utf8(description).unwrap(), min, max)),
-            e => Err(e)
+            ::Status::Ok => Ok((from_utf8!(description), min, max)),
+            e => Err(::RStatus::FMOD(e)),
         }
     }
 
