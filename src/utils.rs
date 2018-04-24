@@ -34,9 +34,6 @@ macro_rules! from_utf8 {
             }
         }
         unsafe { $vec.set_len(pos); }
-        match String::from_utf8($vec) {
-            Ok(s) => s,
-            Err(e) => return Err(::RStatus::Other(format!("Invalid utf8: {}", e))),
-        }
+        String::from_utf8_lossy(&$vec).into()
     }}
 }
