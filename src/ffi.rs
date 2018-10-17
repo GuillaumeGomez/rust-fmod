@@ -837,6 +837,7 @@ pub struct FMOD_DSP_STATE
     pub speaker_mask: c_ushort      /* [w] Specifies which speakers the DSP effect is active on */
 }
 
+#[repr(C)]
 pub struct SoundData {
     pub non_block: SoundNonBlockCallback,
     pub pcm_read: SoundPcmReadCallback,

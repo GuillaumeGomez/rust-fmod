@@ -1132,29 +1132,28 @@ impl Sys {
             Some(Mode(t)) => t,
             None => ::SOFTWARE | ::LOOP_OFF | ::_2D | ::CREATESTREAM
         };
-        let ex = match exinfo {
-            Some(e) => {
-                let user_data = sound::get_user_data(&mut sound);
-                user_data.non_block = e.non_block_callback;
-                user_data.pcm_read = e.pcm_read_callback;
-                user_data.pcm_set_pos = e.pcm_set_pos_callback;
-                unsafe {
-                    user_data.user_data =
-                        ::std::mem::transmute::<&mut ffi::SoundData, *mut c_void>(
-                            &mut *e.user_data);
-                }
-                &mut e.convert_to_c() as *mut ffi::FMOD_CREATESOUNDEXINFO
-            },
-            None => ::std::ptr::null_mut()
-        };
+        let mut ex = exinfo.map(|e| {
+            let user_data = sound::get_user_data(&mut sound);
+            user_data.non_block = e.non_block_callback;
+            user_data.pcm_read = e.pcm_read_callback;
+            user_data.pcm_set_pos = e.pcm_set_pos_callback;
+            unsafe {
+                user_data.user_data =
+                    ::std::mem::transmute::<&mut ffi::SoundData, *mut c_void>(
+                        &mut *e.user_data);
+            }
+            e.convert_to_c()
+        });
+        let exptr = ex.as_mut().map(|ex| ex as *mut ffi::FMOD_CREATESOUNDEXINFO)
+            .unwrap_or (std::ptr::null_mut());
 
         match if music.len() > 0 {
             let music_cstring = CString::new(music).expect("CString failed");
             unsafe { ffi::FMOD_System_CreateSound(self.system,
-                                                  music_cstring.as_ptr() as *const c_char, op, ex,
+                                                  music_cstring.as_ptr() as *const c_char, op, exptr,
                                                   sound::get_fffi(&mut sound)) }
         } else {
-            unsafe { ffi::FMOD_System_CreateSound(self.system, ::std::ptr::null(), op, ex,
+            unsafe { ffi::FMOD_System_CreateSound(self.system, ::std::ptr::null(), op, exptr,
                                                   sound::get_fffi(&mut sound)) }
         } {
             ::Status::Ok => {
