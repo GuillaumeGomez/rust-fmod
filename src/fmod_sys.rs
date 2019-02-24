@@ -1163,6 +1163,56 @@ impl Sys {
         }
     }
 
+    /// Create sound from a file contained in a byte slice.
+    ///
+    /// Automatically adds the `OPENMEMORY` mode flag and uses the length of the
+    /// slice as the exinfo length parameter. Ignores the `CREATESTREAM` mode
+    /// flag since this would keep a pointer to the passed in buffer.
+    pub fn create_sound_openmemory(&self, music: &[u8], options: Option<Mode>,
+                        exinfo: Option<&mut CreateSoundexInfo>) -> Result<Sound, ::Status> {
+        let mut sound = sound::from_ptr_first(::std::ptr::null_mut());
+        let op = {
+            let mut op = match options {
+                Some(Mode(t)) => t,
+                None => ::SOFTWARE | ::LOOP_OFF | ::_2D | ::CREATESTREAM
+            };
+            op |= ::OPENMEMORY;
+            op &= !::CREATESTREAM;
+            op
+        };
+        let mut ex = exinfo.map(|e| {
+            let user_data = sound::get_user_data(&mut sound);
+            user_data.non_block = e.non_block_callback;
+            user_data.pcm_read = e.pcm_read_callback;
+            user_data.pcm_set_pos = e.pcm_set_pos_callback;
+            unsafe {
+                user_data.user_data =
+                    ::std::mem::transmute::<&mut ffi::SoundData, *mut c_void>(
+                        &mut *e.user_data);
+            }
+            e.length = music.len() as u32;
+            e.convert_to_c()
+        });
+        let mut exinfo_default = CreateSoundexInfo {
+            length: music.len() as u32, .. Default::default()
+        }.convert_to_c();
+        let exptr = ex.as_mut().unwrap_or(&mut exinfo_default) as *mut ffi::FMOD_CREATESOUNDEXINFO;
+
+        match if music.len() > 0 {
+            unsafe { ffi::FMOD_System_CreateSound(self.system,
+                                                  music.as_ptr() as *const c_char, op, exptr,
+                                                  sound::get_fffi(&mut sound)) }
+        } else {
+            unsafe { ffi::FMOD_System_CreateSound(self.system, ::std::ptr::null(), op, exptr,
+                                                  sound::get_fffi(&mut sound)) }
+        } {
+            ::Status::Ok => {
+                Ok(sound)
+            },
+            e => Err(e)
+        }
+    }
+
     pub fn create_stream(&self, music: &str, options: Option<Mode>,
                          exinfo: Option<&mut CreateSoundexInfo>) -> Result<Sound, ::Status> {
         let mut sound = sound::from_ptr_first(::std::ptr::null_mut());
