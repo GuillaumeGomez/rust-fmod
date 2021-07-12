@@ -1,0 +1,45 @@
+name: "rustdoc-stripper"
+
+on:
+  pull_request:
+    branches:
+      - "*"
+  push:
+    branches:
+      - "*"
+
+jobs:
+  build:
+    name: "Build/Test"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        toolchain: [nightly, stable]
+    env:
+      LD_LIBRARY_PATH=/usr/local/lib
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Acquire source code
+        uses: actions/checkout@v2
+      - name: Acquire Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          override: true
+          profile: minimal
+        id: toolchain
+      - name: "install fmod"
+        run: |
+          wget http://www.guillaume-gomez.fr/fmodapi44439linux.tar.gz
+          tar xvf fmodapi44439linux.tar.gz
+          sudo cp -r fmodapi44439linux/api/lib/* /usr/local/lib/.
+      - name: "Run build"
+        run: RUST_BACKTRACE=1 cargo build
+      - name: "Build examples"
+        run: RUST_BACKTRACE=1 cd examples && cargo build
