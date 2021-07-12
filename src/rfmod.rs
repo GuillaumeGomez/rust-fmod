@@ -23,37 +23,19 @@
 */
 
 /*!
-rust-fmod
-=========
+# rust-fmod
 
 This is a rust binding for __FMOD__, the library developped by FIRELIGHT TECHNOLOGIES.
 
-__FMOD__ website : www.fmod.org
+__FMOD__ website: <www.fmod.org>
 
-
-##Installation
+## Installation
 
 You must install on your computer the __FMOD__ library which is used for the binding.
 
-To build it, please use :
+## Short example
 
-```Shell
-> make
-```
-
-This command build __rfmod__, the examples, and the documentation.
-
-You can build them separatly too.
-
-```Shell
-> make rfmod
-> make examples
-> make doc
-```
-
-##Short example
-
-Here is a short example on how to create a file and to play it :
+Here is a short example on how to create a file and to play it:
 
 ```Rust
 extern crate libc;
@@ -94,9 +76,9 @@ fn main() {
 }
 ```
 
-For a more complete example : https://github.com/GuillaumeGomez/rust-music-player
+For a more complete example: https://github.com/GuillaumeGomez/rust-music-player
 
-##License
+## License
 
 ```text
 Copyright (c) 2014 Guillaume Gomez
@@ -105,7 +87,7 @@ The license of this project is available in the LICENSE.TXT file. Please refer t
 If you want more information, here is the website for FMOD : http://www.fmod.org/
 ```
 
-#Notes
+### Notes
 
  * Members marked with [r] mean the variable is modified by FMOD and is for reading purposes only. Do not change this value.
  * Members marked with [w] mean the variable can be written to. The user can set the value.
