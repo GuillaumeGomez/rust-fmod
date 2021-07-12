@@ -21,17 +21,13 @@ This isn't a binding to the lastest version. You can find the bound version [her
 
 ## Documentation
 
-You can access the __rfmod__ documentation locally, just build it :
+You can access the __rfmod__ documentation locally, just build it:
 
 ```Shell
-> cargo doc
+> cargo doc --open
 ```
 
-Then open this file with an internet browser :
-file:///{rfmod_location}/doc/rfmod/index.html
-
-
-You can also access the latest build of the documentation via the internet from [here](http://rust-ci.org/GuillaumeGomez/rust-fmod/doc/rfmod/).
+You can also access the latest build of the documentation directly on [docs.rs](https://docs.rs/fmod/0.10.1/rfmod/).
 
 ## Short example
 
