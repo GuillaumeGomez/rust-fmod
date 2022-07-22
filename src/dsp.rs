@@ -962,14 +962,14 @@ impl Dsp {
     }
 
     pub fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, ::Status> {
-        unsafe {
+        
             let mut user_data : *mut c_void = ::std::ptr::null_mut();
 
-            match ffi::FMOD_DSP_GetUserData(self.dsp, &mut user_data) {
+            match unsafe { ffi::FMOD_DSP_GetUserData(self.dsp, &mut user_data) } {
                ::Status::Ok => {
                     if !user_data.is_null() {
-                        let tmp: &mut UserData = transmute::<*mut c_void, &mut UserData>(user_data);
-                        let tmp2: &mut T = transmute::<*mut c_void, &mut T>(tmp.user_data);
+                        let tmp: &mut UserData = unsafe { transmute::<*mut c_void, &mut UserData>(user_data) };
+                        let tmp2: &mut T = unsafe { transmute::<*mut c_void, &mut T>(tmp.user_data) };
 
                         Ok(tmp2)
                     } else {
@@ -978,6 +978,6 @@ impl Dsp {
                 },
                 e => Err(e)
             }
-        }
+        
     }
 }

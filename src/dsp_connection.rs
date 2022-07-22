@@ -123,17 +123,17 @@ impl DspConnection {
     }
 
     pub fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, ::Status> {
-        unsafe {
+        
             let mut user_data : *mut c_void = ::std::ptr::null_mut();
 
-            match ffi::FMOD_DSPConnection_GetUserData(self.dsp_connection, &mut user_data) {
+            match unsafe { ffi::FMOD_DSPConnection_GetUserData(self.dsp_connection, &mut user_data) } {
                ::Status::Ok => {
-                    let tmp : &mut T = transmute::<*mut c_void, &mut T>(user_data);
+                    let tmp : &mut T = unsafe { transmute::<*mut c_void, &mut T>(user_data) };
                     
                     Ok(tmp)
                 }
                 e => Err(e),
             }
-        }
+        
     }
 }

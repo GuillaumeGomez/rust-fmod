@@ -1106,9 +1106,9 @@ impl Sys {
 
     pub fn release(&mut self) -> ::Status {
         if self.is_first && !self.system.is_null() {
-            unsafe {
-                match match ffi::FMOD_System_Close(self.system) {
-                    ::Status::Ok => ffi::FMOD_System_Release(self.system),
+            
+                match match unsafe { ffi::FMOD_System_Close(self.system) } {
+                    ::Status::Ok => unsafe { ffi::FMOD_System_Release(self.system) },
                     e => e
                 } {
                     ::Status::Ok => {
@@ -1118,7 +1118,7 @@ impl Sys {
                     e => e
                 }
                 
-            }
+            
         } else {
             ::Status::Ok
         }

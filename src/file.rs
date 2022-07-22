@@ -69,16 +69,16 @@ impl FmodFile {
             Ok(s) => s,
             Err(e) => return Err(::RStatus::Other(format!("invalid file name: {}", e))),
         };
-        unsafe {
-            let tmp = fopen(tmp_file_name.as_ptr() as *const c_char,
-                            "rb".as_ptr() as *const c_char);
+        
+            let tmp = unsafe { fopen(tmp_file_name.as_ptr() as *const c_char,
+                            "rb".as_ptr() as *const c_char) };
 
             if tmp.is_null() {
                 Err(::RStatus::Other(format!("fopen call failed")))
             } else {
                 Ok(FmodFile{fd: tmp})
             }
-        }
+        
     }
 
     pub fn read(&self, buffer: &mut [u8]) -> usize {

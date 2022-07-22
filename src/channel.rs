@@ -519,20 +519,20 @@ impl Channel {
         let mut points = ::std::ptr::null_mut();
         let mut num_points = 0i32;
 
-        unsafe {
-            match ffi::FMOD_Channel_Get3DCustomRolloff(self.channel, &mut points, &mut num_points) {
+        
+            match unsafe { ffi::FMOD_Channel_Get3DCustomRolloff(self.channel, &mut points, &mut num_points) } {
                ::Status::Ok => {
                     let mut ret_points = Vec::new();
 
                     for it in 0i32..num_points {
-                        ret_points.push(vector::from_ptr(::std::ptr::read(
-                            points.offset(it as isize) as *const ffi::FMOD_VECTOR)));
+                        ret_points.push(vector::from_ptr(unsafe { ::std::ptr::read(
+                            points.offset(it as isize) as *const ffi::FMOD_VECTOR) }));
                     }
                     Ok(ret_points)
                 }
                 e => Err(e)
             }
-        }
+        
     }
 
     pub fn set_3D_occlusion(&self, direct_occlusion: f32, reverb_occlusion: f32) -> ::Status {
@@ -681,18 +681,18 @@ impl Channel {
     }
 
     pub fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, ::Status> {
-        unsafe {
+        
             let mut user_data : *mut c_void = ::std::ptr::null_mut();
 
-            match ffi::FMOD_Channel_GetUserData(self.channel, &mut user_data) {
+            match unsafe { ffi::FMOD_Channel_GetUserData(self.channel, &mut user_data) } {
                ::Status::Ok => {
-                    let tmp : &mut T = transmute::<*mut c_void, &mut T>(user_data);
+                    let tmp : &mut T = unsafe { transmute::<*mut c_void, &mut T>(user_data) };
                     
                     Ok(tmp)
                 },
                 e => Err(e)
             }
-        }
+        
     }
 
     pub fn get_memory_info(&self, MemoryBits(memory_bits): MemoryBits,

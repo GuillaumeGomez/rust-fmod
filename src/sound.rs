@@ -714,15 +714,15 @@ impl Sound {
     }
 
     pub fn get_user_data<'r, T>(&'r self) -> Result<&'r mut T, ::Status> {
-        unsafe {
+        
             let mut user_data : *mut c_void = ::std::ptr::null_mut();
 
-            match ffi::FMOD_Sound_GetUserData(self.sound, &mut user_data) {
+            match unsafe { ffi::FMOD_Sound_GetUserData(self.sound, &mut user_data) } {
                ::Status::Ok => {
                     if !user_data.is_null() {
                         let tmp: &mut ffi::SoundData =
-                            transmute::<*mut c_void, &mut ffi::SoundData>(user_data);
-                        let tmp2: &mut T = transmute::<*mut c_void, &mut T>(tmp.user_data);
+                            unsafe { transmute::<*mut c_void, &mut ffi::SoundData>(user_data) };
+                        let tmp2: &mut T = unsafe { transmute::<*mut c_void, &mut T>(tmp.user_data) };
                         
                         Ok(tmp2)
                     } else {
@@ -732,11 +732,11 @@ impl Sound {
                 },
                 e => Err(e)
             }
-        }
+        
     }
 
     pub fn save_to_wav(&self, file_name: &str) -> Result<bool, String> {
-        unsafe {
+        
             let mut channels = 0i32;
             let mut bits = 0i32;
             let mut rate = 0f32;
@@ -749,12 +749,12 @@ impl Sound {
             let mut ptr1: *mut c_void =::std::ptr::null_mut();
             let mut ptr2: *mut c_void =::std::ptr::null_mut();
 
-            match ffi::FMOD_Sound_GetFormat(self.sound, ::std::ptr::null_mut(),
-                                            ::std::ptr::null_mut(), &mut channels, &mut bits) {
-               ::Status::Ok => match ffi::FMOD_Sound_GetDefaults(self.sound, &mut rate,
+            match unsafe { ffi::FMOD_Sound_GetFormat(self.sound, ::std::ptr::null_mut(),
+                                            ::std::ptr::null_mut(), &mut channels, &mut bits) } {
+               ::Status::Ok => match unsafe { ffi::FMOD_Sound_GetDefaults(self.sound, &mut rate,
                                                                  ::std::ptr::null_mut(),
                                                                  ::std::ptr::null_mut(),
-                                                                 ::std::ptr::null_mut()) {
+                                                                 ::std::ptr::null_mut()) } {
                    ::Status::Ok => {}
                     e => return Err(format!("{:?}", e))
                 },
@@ -845,14 +845,14 @@ impl Sound {
                 return Err(format!("write_i32 failed: {}", e));
             }
 
-            ffi::FMOD_Sound_Lock(self.sound, 0, len_bytes, &mut ptr1, &mut ptr2, &mut len1, &mut len2);
+            unsafe { ffi::FMOD_Sound_Lock(self.sound, 0, len_bytes, &mut ptr1, &mut ptr2, &mut len1, &mut len2) };
 
             if let Err(e) = file.write_all(&wtr) {
                 return Err(format!("write_all failed: {}", e));
             }
 
-            ffi::FMOD_Sound_Unlock(self.sound, ptr1, ptr2, len1, len2);
-        }
+            unsafe { ffi::FMOD_Sound_Unlock(self.sound, ptr1, ptr2, len1, len2) };
+        
         Ok(true)
     }
 }
